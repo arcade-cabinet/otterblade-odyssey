@@ -1,33 +1,44 @@
 /**
- * @fileoverview Brand-aligned prompts for AI image generation.
+ * @fileoverview Brand-aligned prompts for AI image and video generation.
  * All prompts enforce the Willowmere Hearthhold aesthetic from BRAND.md.
  */
 
 /**
- * Core style directive included in all generation prompts.
+ * Core style directive for all visual content.
  * Enforces the woodland-epic storybook aesthetic.
  */
 export const STYLE_DIRECTIVE = `
-Style: Storybook pixel art, painterly, warm lighting, Redwall-inspired woodland-epic.
+Style: Storybook art, painterly, warm lighting, Redwall-inspired woodland-epic.
 Aesthetic: Cozy-but-heroic, grounded materials (fur, cloth, leather, iron, stone).
 Palette: Warm greens, honey gold, cool misty blues. Natural muted tones.
-Magic: Subtle only - firefly motes, faint shimmer. NEVER laser beams or energy effects.
+Magic: Subtle only - firefly motes, faint shimmer. NEVER laser beams or energy.
 
-CRITICAL NEGATIVE PROMPTS (absolutely avoid):
+CRITICAL - MUST AVOID:
 - Neon colors, glowing energy, electric blues/purples
 - Sci-fi elements, robots, futuristic technology
 - Anime style, JRPG effects, over-stylized poses
 - Grimdark, horror, demons, gore, skulls
 - Glossy plastic, sterile minimalism
 - Modern clothing, sunglasses, contemporary items
+- HUMAN characters - ALL characters must be ANTHROPOMORPHIC WOODLAND ANIMALS
+`.trim();
+
+/**
+ * Character description for the otter protagonist.
+ */
+export const FINN_DESCRIPTION = `
+PROTAGONIST - FINN RIVERSTONE:
+- Species: River otter standing upright on hind legs
+- Build: Athletic but not bulky, agile adventurer physique
+- Fur: Rich brown with lighter cream chest and muzzle
+- Face: Determined expression, friendly but brave, whiskers visible
+- Outfit: Simple leather vest over cloth tunic, cloth belt with pouch
+- Weapon: The Otterblade - an iron sword (NOT glowing), worn on back or held
+- NO helmet, NO heavy armor - light and agile appearance
 `.trim();
 
 /**
  * Generates the prompt for player character sprite sheet.
- * @param frameWidth - Width of each frame in pixels
- * @param frameHeight - Height of each frame in pixels
- * @param columns - Number of columns in sheet
- * @param rows - Number of rows in sheet
  */
 export function getPlayerSpritePrompt(
   frameWidth: number,
@@ -41,14 +52,7 @@ export function getPlayerSpritePrompt(
   return `
 Create a pixel art sprite sheet for an otter warrior character.
 
-CHARACTER DESIGN:
-- Species: River otter standing upright on hind legs
-- Build: Athletic but not bulky, agile adventurer physique
-- Fur: Rich brown with lighter cream chest/muzzle
-- Face: Determined expression, friendly but brave
-- Outfit: Simple leather vest, cloth belt, no armor
-- Weapon: Iron sword (NOT glowing, NOT magical) held in right paw
-- Accessories: Small travel pouch on belt
+${FINN_DESCRIPTION}
 
 SPRITE SHEET LAYOUT:
 - Total size: ${totalWidth}x${totalHeight} pixels
@@ -67,7 +71,7 @@ TECHNICAL REQUIREMENTS:
 - Consistent proportions across all frames
 - Side-view profile (facing right)
 - Readable silhouette at small sizes
-- Smooth animation transitions between frames
+- Smooth animation transitions
 
 ${STYLE_DIRECTIVE}
 `.trim();
@@ -75,12 +79,6 @@ ${STYLE_DIRECTIVE}
 
 /**
  * Generates the prompt for enemy sprite sheets.
- * @param enemyType - Type of enemy (skirmisher, shielded, etc.)
- * @param description - Enemy description from config
- * @param frameWidth - Width of each frame
- * @param frameHeight - Height of each frame
- * @param columns - Number of columns
- * @param rows - Number of rows
  */
 export function getEnemySpritePrompt(
   enemyType: string,
@@ -98,17 +96,17 @@ Create a pixel art sprite sheet for a "${enemyType}" enemy character.
 
 CHARACTER DESIGN:
 - Type: ${description}
-- Faction: Galeborn (followers of Zephyros, the cold wind spirit)
-- Appearance: Weathered, cold-adapted, wearing practical gear
-- Expression: Menacing but not demonic or horrific
-- Equipment: Period-appropriate weapons (no guns, no energy weapons)
-- Colors: Cool grays, dark blues, muted browns
+- Faction: Galeborn (followers of Zephyros the storm hawk)
+- Species: MUST be an anthropomorphic woodland animal (NOT human)
+- Appearance: Weathered, cold-adapted, practical worn gear
+- Expression: Menacing but not demonic
+- Equipment: Period-appropriate (leather, iron, bone) - NO guns
 
 SPRITE SHEET LAYOUT:
 - Total size: ${totalWidth}x${totalHeight} pixels
 - Grid: ${columns} columns x ${rows} rows
 - Each frame: ${frameWidth}x${frameHeight} pixels
-- Transparent background (PNG with alpha)
+- Transparent background
 
 ANIMATION FRAMES:
 Row 1: Idle (4 frames)
@@ -116,54 +114,129 @@ Row 2: Walk/Move (4 frames)
 Row 3: Attack (4 frames)
 Row 4: Hurt (2 frames) + Death (2 frames)
 
-TECHNICAL REQUIREMENTS:
-- Clean pixel art with defined outlines
-- Consistent proportions across all frames
-- Side-view profile (facing left - opposite to player)
-- Clear attack telegraph poses
-- Readable silhouette for gameplay clarity
-
 ${STYLE_DIRECTIVE}
 `.trim();
 }
 
 /**
  * Generates prompt for sprite analysis.
- * @param context - Additional context about the sprite
  */
 export function getSpriteAnalysisPrompt(context: string): string {
   return `
-Analyze this sprite sheet for a 2D platformer game set in a woodland-epic world.
+Analyze this sprite sheet for a 2D platformer game.
 
 CONTEXT: ${context}
 
-Please evaluate the following criteria and provide a detailed assessment:
+Evaluate:
+1. STYLE - Does it match storybook/painterly pixel art? No neon/sci-fi?
+2. ANIMATION - Frames aligned? Smooth flow? Readable silhouette?
+3. TECHNICAL - Transparent background? Consistent proportions?
+4. BRAND - Cozy-but-heroic tone? NO humans, only woodland animals?
+5. SCORE - Overall viability (1-10) with specific recommendations.
+`.trim();
+}
 
-1. STYLE CONSISTENCY
-   - Does it match storybook/painterly pixel art aesthetic?
-   - Are colors warm and natural (no neon or sci-fi elements)?
-   - Is the design grounded (fur, cloth, leather, iron)?
+/**
+ * Generates prompt for cinematic video generation using Veo 3.1.
+ */
+export function getCinematicPrompt(
+  cinematicName: string,
+  description: string,
+  duration: number
+): string {
+  return `
+Create a ${duration}-second cinematic for "${cinematicName}".
 
-2. ANIMATION QUALITY
-   - Are frames properly aligned in the grid?
-   - Do animations flow smoothly between frames?
-   - Is the silhouette readable at small sizes?
+SCENE: ${description}
 
-3. TECHNICAL REQUIREMENTS
-   - Is the background transparent?
-   - Are proportions consistent across frames?
-   - Are attack poses clearly telegraphed?
+WORLD: Willowmere Hearthhold - an ancient riverside sanctuary built into 
+moss-covered cliffs. Stone walls, warm lanterns, winding paths, the great 
+Everember fire at its heart.
 
-4. BRAND ALIGNMENT
-   - Does it fit the "cozy-but-heroic" tone?
-   - Are there any forbidden elements (neon, sci-fi, horror)?
-   - Would it fit in a Redwall-inspired world?
+CHARACTERS:
+${FINN_DESCRIPTION}
 
-5. RECOMMENDATIONS
-   - What improvements would enhance quality?
-   - Are any frames problematic?
-   - Overall viability score (1-10)
+CRITICAL CHARACTER REQUIREMENTS:
+- ALL characters MUST be ANTHROPOMORPHIC WOODLAND ANIMALS
+- The protagonist is an OTTER named Finn
+- Enemies are Galeborn - rats, weasels, stoats, crows (all anthropomorphic)
+- NO HUMANS whatsoever - not even in the background
+- NO human knights, soldiers, or villagers
 
-Provide specific, actionable feedback.
+VISUAL STYLE:
+- Storybook illustration come to life
+- Warm, inviting color palette (greens, golds, warm browns)
+- Soft volumetric lighting, lantern glow, firefly motes
+- Hand-painted texture quality
+- Dawn/dusk atmospheric lighting
+
+CAMERA:
+- Cinematic compositions, slow deliberate movements
+- Parallax depth with foreground elements
+- Focus on character emotion and environment mood
+
+AUDIO:
+- Warm orchestral undertones
+- Environmental sounds (crackling fire, flowing water, birdsong)
+- NO dialogue, purely atmospheric
+
+${STYLE_DIRECTIVE}
+`.trim();
+}
+
+/**
+ * Generates prompt for scene/background image generation.
+ */
+export function getScenePrompt(sceneName: string, description: string): string {
+  return `
+Create a parallax background scene for "${sceneName}".
+
+SCENE: ${description}
+
+WORLD: Willowmere Hearthhold aesthetic - warm, cozy, lived-in spaces with 
+ancient stone, moss, lanterns, and natural materials.
+
+COMPOSITION:
+- Wide horizontal format suitable for parallax scrolling
+- Clear depth layers (foreground, midground, background)
+- Platform-friendly - clear ground/floor areas
+- Atmospheric perspective (more haze in distance)
+
+LIGHTING:
+- Warm lantern/hearth light sources
+- Soft god rays through windows/canopy
+- Subtle ambient glow
+- Time of day appropriate to scene
+
+NO characters in the scene - environment only.
+
+${STYLE_DIRECTIVE}
+`.trim();
+}
+
+/**
+ * Generates prompt for video analysis.
+ */
+export function getVideoAnalysisPrompt(context: string): string {
+  return `
+Analyze this cinematic video for a woodland-epic game.
+
+CONTEXT: ${context}
+
+Check for these CRITICAL issues:
+1. Are ALL characters anthropomorphic woodland animals? (NO humans)
+2. Does the protagonist match Finn the otter warrior?
+3. Is the visual style warm/storybook (not neon/sci-fi)?
+4. Are there any modern/contemporary elements?
+5. Does the audio match the cozy-heroic tone?
+
+BRAND VIOLATIONS to flag:
+- Any human characters (knights, villagers, etc.)
+- Glowing energy weapons or magic effects
+- Neon or sci-fi lighting
+- Horror or grimdark elements
+- Modern objects or clothing
+
+Provide a detailed report with timestamps for any issues.
 `.trim();
 }

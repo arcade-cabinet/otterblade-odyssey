@@ -1,22 +1,26 @@
 # @otterblade/dev-tools
 
-Development tools for Otterblade Odyssey - AI-powered asset generation and validation.
+AI-powered development tools for Otterblade Odyssey asset generation and validation.
 
 ## Overview
 
-This package provides command-line tools for generating and validating game assets using OpenAI's GPT-Image-1 API. It's designed to work within the pnpm workspace and follows all project quality standards.
+This package provides command-line tools for generating and validating game assets using:
 
-## Features
+- **OpenAI GPT-Image-1** - Sprite sheets with transparency, masking, and precise control
+- **Google Veo 3.1** - High-fidelity cinematic videos with native audio
+- **Google Imagen 3** - Scene backgrounds and chapter plates
+- **Google Gemini 2.0** - Vision analysis for quality validation
 
-- **Sprite Sheet Generation**: Generate animated sprite sheets for player and enemy characters
-- **Sprite Analysis**: Validate sprite sheets using AI vision for consistency and quality
-- **Asset Validation**: Verify all required assets exist and meet specifications
+## Use Case Matrix
 
-## Requirements
-
-- Node.js 20+
-- pnpm 10+
-- OpenAI API key with GPT-Image-1 access
+| Asset Type | Best Provider | Reason |
+|------------|--------------|--------|
+| Sprite sheets | OpenAI GPT-Image-1 | Transparency, precise grid layout, masking |
+| Player animations | OpenAI GPT-Image-1 | Consistent character design across frames |
+| Cinematics | Google Veo 3.1 | Native audio, longer duration, cinematic quality |
+| Chapter plates | Google Imagen 3 | Painterly style, wide aspect ratio |
+| Parallax backgrounds | Google Imagen 3 | Scene composition, atmospheric depth |
+| Asset validation | Google Gemini 2.0 | Fast multimodal analysis |
 
 ## Setup
 
@@ -24,99 +28,106 @@ This package provides command-line tools for generating and validating game asse
 # From workspace root
 pnpm install
 
-# Set your OpenAI API key
+# Set API keys (both or either depending on what you're generating)
 export OPENAI_API_KEY="sk-..."
+export GEMINI_API_KEY="..."
 ```
 
-## Usage
+## Commands
 
-### Generate Player Sprite Sheet
+### OpenAI (Sprites)
 
 ```bash
-pnpm --filter @otterblade/dev-tools generate:sprites
+# Generate player sprite sheet
+pnpm generate:sprites
+
+# Generate enemy sprite sheets
+pnpm generate:enemy-sprites
+pnpm generate:enemy-sprites -- --type skirmisher
+
+# Analyze sprite quality
+pnpm analyze:sprite path/to/sprite.png
 ```
 
-Generates a complete player sprite sheet with:
-- Idle animation (4 frames)
-- Run cycle (6 frames)
-- Jump/Fall (5 frames)
-- Attack (4 frames)
-- Hurt (2 frames)
-- Crouch (2 frames)
-
-### Generate Enemy Sprites
+### Google (Videos & Scenes)
 
 ```bash
-pnpm --filter @otterblade/dev-tools generate:enemy-sprites
+# Generate cinematics with Veo 3.1
+pnpm generate:cinematic -- --name intro
+pnpm generate:cinematic -- --all
+
+# Generate scenes with Imagen 3
+pnpm generate:scene -- --type parallax --biome village
+pnpm generate:scene -- --type chapter-plate --chapter 0
+
+# Analyze video for brand compliance
+pnpm analyze:video path/to/video.mp4
+
+# Audit all cinematics for violations
+pnpm audit:cinematics
 ```
 
-Generates sprite sheets for all enemy archetypes defined in BRAND.md.
-
-### Analyze Sprite Quality
+### Validation
 
 ```bash
-pnpm --filter @otterblade/dev-tools analyze:sprite <path-to-sprite>
+# Validate all required assets exist
+pnpm validate:assets
 ```
-
-Uses GPT-4 Vision to analyze sprite consistency, style alignment, and animation quality.
-
-### Validate All Assets
-
-```bash
-pnpm --filter @otterblade/dev-tools validate:assets
-```
-
-Checks that all required assets exist and match specifications in `assets.json`.
-
-## Generated Assets
-
-All generated assets are saved to:
-- `attached_assets/generated_images/sprites/` - Sprite sheets
-- `attached_assets/generated_images/` - Other images
 
 ## Brand Compliance
 
-All generation prompts include brand guidelines from:
-- `BRAND.md` - Visual style guide
-- `WORLD.md` - World-building and lore
+All generation prompts enforce:
 
-Generated assets automatically include:
-- Warm, cozy woodland-epic aesthetic
-- Consistent otter warrior design
-- Storybook-style painterly textures
-- No neon, sci-fi, or grimdark elements
+- **Anthropomorphic woodland animals ONLY** - NO humans
+- **Warm storybook aesthetic** - NO neon, sci-fi, horror
+- **Consistent otter protagonist** (Finn Riverstone)
+- **Willowmere Hearthhold setting**
+
+The `audit:cinematics` command specifically checks for:
+- Human characters (knights, villagers, etc.)
+- Wrong protagonist (not an otter)
+- Sci-fi or horror elements
+- Visual style violations
 
 ## File Structure
 
 ```
 packages/dev-tools/
 ├── src/
-│   ├── config.ts           # OpenAI client and shared config
-│   ├── prompts.ts          # Brand-aligned generation prompts
-│   ├── generate-sprites.ts # Player sprite generation
-│   ├── generate-enemy-sprites.ts # Enemy sprite generation
-│   ├── analyze-sprite.ts   # AI-powered sprite analysis
-│   └── validate-assets.ts  # Asset validation
+│   ├── shared/
+│   │   ├── config.ts       # API clients, model configs
+│   │   └── prompts.ts      # Brand-aligned prompts
+│   ├── openai/
+│   │   ├── generate-sprites.ts
+│   │   ├── generate-enemy-sprites.ts
+│   │   └── analyze-sprite.ts
+│   ├── google/
+│   │   ├── generate-cinematic.ts  # Veo 3.1
+│   │   ├── generate-scene.ts      # Imagen 3
+│   │   └── analyze-video.ts       # Gemini 2.0
+│   ├── validate-assets.ts
+│   ├── audit-cinematics.ts
+│   └── index.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-## Code Quality
+## Environment Variables
+
+| Variable | Required For | Description |
+|----------|--------------|-------------|
+| `OPENAI_API_KEY` | Sprites | OpenAI API key |
+| `GEMINI_API_KEY` | Videos/Scenes | Google AI API key |
+
+## Quality Standards
 
 This package follows all project standards:
 - Biome strict linting
 - JSDoc on all exports
 - TypeScript ES2022 target
 - Max 300 lines per file
-- Zod validation for all inputs
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENAI_API_KEY` | Yes | OpenAI API key with GPT-Image-1 access |
-| `OPENAI_ORG_ID` | No | OpenAI organization ID (optional) |
+- Zod validation for inputs
 
 ## See Also
 
