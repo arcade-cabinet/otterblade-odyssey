@@ -44,7 +44,7 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom'],
           'vendor-mui': ['@mui/material', '@mui/icons-material'],
           'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
-          'vendor-physics': ['@dimforge/rapier2d-compat', '@react-three/rapier'],
+          'vendor-physics': ['@dimforge/rapier2d-compat'],
           'vendor-capacitor': [
             '@capacitor/core',
             '@capacitor/haptics',
