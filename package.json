@@ -9,7 +9,7 @@
     "dev": "NODE_ENV=development tsx server/index.ts",
     "dev:client": "vite dev --port 5000",
     "build": "tsx script/build.ts",
-    "build:client": "vite build --outDir dist/public",
+    "build:client": "vite build",
     "preview": "vite preview --port 4173",
     "start": "NODE_ENV=production node dist/index.cjs",
     "lint": "biome lint .",
