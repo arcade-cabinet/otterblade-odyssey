@@ -216,6 +216,35 @@ All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
 | `pending` | Not yet generated |
 | `complete` | Valid and ready to use |
 | `needs_regeneration` | Has issues, will be regenerated |
+| `approved` | Reviewed and locked (IDEMPOTENT) |
+| `rejected` | Reviewed and marked for regeneration |
+
+### Asset Approval Workflow (CRITICAL)
+
+**Approved assets are NEVER regenerated.** This is how we achieve idempotency.
+
+**Review Gallery URL:** `https://jbdevprimary.github.io/otterblade-odyssey/assets`
+
+**Workflow:**
+```
+1. Generate assets → pnpm --filter @otterblade/dev-tools cli
+2. Push to main → CD deploys to GitHub Pages
+3. Visit /assets → Review in gallery
+4. Select + Approve assets
+5. Click "🚀 Create PR on GitHub" → Opens GitHub with content pre-filled
+6. Commit on new branch → PR created automatically
+7. Merge → Assets locked as idempotent
+```
+
+**Approval Storage:** `client/src/data/approvals.json`
+
+**Before generating, respect approvals:**
+```typescript
+// Skip approved assets
+if (approvalsJson.approvals.find(a => a.id === asset.id)) {
+  continue; // Don't regenerate
+}
+```
 
 ## Testing Commands
 

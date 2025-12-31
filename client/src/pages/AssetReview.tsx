@@ -443,7 +443,7 @@ export default function AssetReview() {
     URL.revokeObjectURL(url);
   }, [buildExportData]);
 
-  // Create GitHub PR with approvals
+  // Create GitHub PR with approvals - opens GitHub directly with content pre-filled
   const handleCreatePR = useCallback(() => {
     const exportData = buildExportData();
     const approvalCount = exportData.approvals.length;
@@ -453,31 +453,32 @@ export default function AssetReview() {
       return;
     }
 
-    // GitHub repo info (extract from current URL or use defaults)
+    // GitHub repo info
     const repoOwner = 'jbdevprimary';
     const repoName = 'otterblade-odyssey';
-    const branch = 'main';
     const filePath = 'client/src/data/approvals.json';
     
     // Create commit message
-    const commitMessage = `chore(assets): approve ${approvalCount} asset${approvalCount > 1 ? 's' : ''}
+    const commitTitle = `chore(assets): approve ${approvalCount} asset${approvalCount > 1 ? 's' : ''}`;
+    const commitDesc = `Approved assets:\n${exportData.approvals.map(a => `- ${a.id}`).join('\n')}\n\nExported from Asset Review Gallery`;
 
-Approved assets:
-${exportData.approvals.map(a => `- ${a.id}`).join('\n')}
-
-Exported from Asset Review Gallery on ${new Date().toLocaleDateString()}`;
-
-    // Encode the file content
+    // Encode the file content for URL
     const fileContent = JSON.stringify(exportData, null, 2);
-    const encodedContent = encodeURIComponent(fileContent);
-    const encodedMessage = encodeURIComponent(commitMessage);
-    const encodedFilename = encodeURIComponent(filePath);
-
-    // GitHub edit file URL (opens editor with content)
-    // This URL pattern opens the file editor with pre-filled content
-    const githubUrl = `https://github.com/${repoOwner}/${repoName}/edit/${branch}/${filePath}?value=${encodedContent}&message=${encodedMessage}`;
     
-    // Open in new tab
+    // Use GitHub's new file URL which allows creating on a new branch (triggers PR flow)
+    // Format: https://github.com/{owner}/{repo}/new/{branch}?filename={path}&value={content}
+    const params = new URLSearchParams({
+      filename: filePath,
+      value: fileContent,
+      message: commitTitle,
+      description: commitDesc,
+    });
+    
+    const githubUrl = `https://github.com/${repoOwner}/${repoName}/new/main?${params.toString()}`;
+    
+    // Open in new tab - user just needs to:
+    // 1. Change branch name (GitHub prompts for new branch)
+    // 2. Click "Propose changes" -> Creates PR automatically
     window.open(githubUrl, '_blank');
   }, [buildExportData]);
 
@@ -538,10 +539,31 @@ Exported from Asset Review Gallery on ${new Date().toLocaleDateString()}`;
           <Typography variant="h3" gutterBottom>
             🦦 Asset Review Gallery
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             Review, approve, and manage generated assets for Otterblade Odyssey.
-            Select assets and approve them for production use.
           </Typography>
+          
+          {/* Workflow Instructions */}
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: 'rgba(212, 168, 75, 0.1)', 
+            border: '1px solid rgba(212, 168, 75, 0.3)',
+            borderRadius: 2,
+            mb: 2
+          }}>
+            <Typography variant="subtitle2" sx={{ color: '#d4a84b', mb: 1 }}>
+              📋 How Asset Approval Works
+            </Typography>
+            <Typography variant="body2" color="text.secondary" component="div">
+              <ol style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                <li><strong>Select</strong> assets using checkboxes (or "Select All")</li>
+                <li><strong>Approve</strong> selected assets with the green button</li>
+                <li><strong>Create PR</strong> → Opens GitHub with your approvals pre-filled</li>
+                <li><strong>Commit</strong> on a new branch → GitHub creates the PR automatically</li>
+                <li><strong>Merge</strong> → Approved assets become idempotent (won't regenerate)</li>
+              </ol>
+            </Typography>
+          </Box>
         </Box>
 
         {/* Category Tabs */}
@@ -564,8 +586,39 @@ Exported from Asset Review Gallery on ${new Date().toLocaleDateString()}`;
           <Chip label={`Selected: ${selectedAssets.size}`} color="primary" />
         </Box>
 
+        {/* Primary Action - Create PR */}
+        {Object.values(approvals).some(a => a.approved) && (
+          <Box sx={{ 
+            mb: 3, 
+            p: 2, 
+            bgcolor: 'rgba(74, 103, 65, 0.2)', 
+            border: '2px solid #4a6741',
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            flexWrap: 'wrap'
+          }}>
+            <Typography variant="body1" sx={{ flex: 1 }}>
+              <strong>{Object.values(approvals).filter(a => a.approved).length}</strong> assets approved and ready to commit
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleCreatePR}
+              sx={{ 
+                bgcolor: '#4a6741', 
+                '&:hover': { bgcolor: '#6b8a5f' },
+                px: 4
+              }}
+            >
+              🚀 Create PR on GitHub
+            </Button>
+          </Box>
+        )}
+
         {/* Action Bar */}
-        <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <Button variant="outlined" onClick={handleSelectAll}>
             Select All / None
           </Button>
@@ -586,13 +639,13 @@ Exported from Asset Review Gallery on ${new Date().toLocaleDateString()}`;
             ✕ Reject Selected
           </Button>
           <Divider orientation="vertical" flexItem />
-          <Button variant="outlined" onClick={handleExportApprovals}>
-            📥 Export Approvals
+          <Button variant="outlined" size="small" onClick={handleExportApprovals}>
+            📥 Download JSON
           </Button>
-          <Button variant="outlined" onClick={handleImportApprovals}>
-            📤 Import Approvals
+          <Button variant="outlined" size="small" onClick={handleImportApprovals}>
+            📤 Upload JSON
           </Button>
-          <Button variant="text" color="warning" onClick={handleClearApprovals}>
+          <Button variant="text" size="small" color="warning" onClick={handleClearApprovals}>
             Clear All
           </Button>
         </Box>
