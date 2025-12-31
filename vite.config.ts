@@ -36,6 +36,28 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
+    // Optimize chunking for better caching and smaller initial load
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material'],
+          'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+          'vendor-physics': ['@dimforge/rapier2d-compat', '@react-three/rapier'],
+          'vendor-capacitor': [
+            '@capacitor/core',
+            '@capacitor/haptics',
+            '@capacitor/preferences',
+            '@capacitor/screen-orientation',
+            '@capacitor/splash-screen',
+            '@capacitor/status-bar',
+          ],
+        },
+      },
+    },
+    // Increase chunk size warning limit (game assets are legitimately large)
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     host: '0.0.0.0',
