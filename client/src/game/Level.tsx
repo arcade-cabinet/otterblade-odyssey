@@ -114,9 +114,11 @@ export function Level() {
 
   useFrame(() => {
     const segmentProgress = playerX / SEGMENT_LEN;
-    const idx = Math.floor(segmentProgress) % BIOMES.length;
+    const idx = Math.abs(Math.floor(segmentProgress)) % BIOMES.length;
     const biome = BIOMES[idx];
-    setBiomeMeta(idx, biome.accent);
+    if (biome) {
+      setBiomeMeta(idx, biome.accent);
+    }
   });
 
   return (
