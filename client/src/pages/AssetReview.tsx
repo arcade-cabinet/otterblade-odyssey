@@ -417,9 +417,9 @@ export default function AssetReview() {
     setSelectedAssets(new Set());
   }, []);
 
-  // Export approval JSON
-  const handleExportApprovals = useCallback(() => {
-    const exportData = {
+  // Build approval export data
+  const buildExportData = useCallback(() => {
+    return {
       version: '1.0',
       exportedAt: new Date().toISOString(),
       approvals: Object.entries(approvals)
@@ -429,7 +429,11 @@ export default function AssetReview() {
           ...data,
         })),
     };
+  }, [approvals]);
 
+  // Export approval JSON (download file)
+  const handleExportApprovals = useCallback(() => {
+    const exportData = buildExportData();
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -437,7 +441,45 @@ export default function AssetReview() {
     a.download = `otterblade-asset-approvals-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [approvals]);
+  }, [buildExportData]);
+
+  // Create GitHub PR with approvals
+  const handleCreatePR = useCallback(() => {
+    const exportData = buildExportData();
+    const approvalCount = exportData.approvals.length;
+    
+    if (approvalCount === 0) {
+      alert('No assets approved yet. Select and approve assets first.');
+      return;
+    }
+
+    // GitHub repo info (extract from current URL or use defaults)
+    const repoOwner = 'jbdevprimary';
+    const repoName = 'otterblade-odyssey';
+    const branch = 'main';
+    const filePath = 'client/src/data/approvals.json';
+    
+    // Create commit message
+    const commitMessage = `chore(assets): approve ${approvalCount} asset${approvalCount > 1 ? 's' : ''}
+
+Approved assets:
+${exportData.approvals.map(a => `- ${a.id}`).join('\n')}
+
+Exported from Asset Review Gallery on ${new Date().toLocaleDateString()}`;
+
+    // Encode the file content
+    const fileContent = JSON.stringify(exportData, null, 2);
+    const encodedContent = encodeURIComponent(fileContent);
+    const encodedMessage = encodeURIComponent(commitMessage);
+    const encodedFilename = encodeURIComponent(filePath);
+
+    // GitHub edit file URL (opens editor with content)
+    // This URL pattern opens the file editor with pre-filled content
+    const githubUrl = `https://github.com/${repoOwner}/${repoName}/edit/${branch}/${filePath}?value=${encodedContent}&message=${encodedMessage}`;
+    
+    // Open in new tab
+    window.open(githubUrl, '_blank');
+  }, [buildExportData]);
 
   // Import approval JSON
   const handleImportApprovals = useCallback(() => {
