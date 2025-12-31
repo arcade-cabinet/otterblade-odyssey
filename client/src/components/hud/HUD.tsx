@@ -1,36 +1,49 @@
 import { useStore } from "@/game/store";
 import { Heart, Coins } from "lucide-react";
+import Toast from "./Toast";
+import BossBar from "./BossBar";
+import { BIOMES } from "@/game/constants";
 
 export default function HUD() {
-  const { health, score } = useStore();
+  const gameStarted = useStore((s) => s.gameStarted);
+  const health = useStore((s) => s.health);
+  const score = useStore((s) => s.score);
+  const shards = useStore((s) => s.shards);
+  const bankedShards = useStore((s) => s.bankedShards);
+  const distance = useStore((s) => s.distance);
+  const biomeIndex = useStore((s) => s.biomeIndex);
+  const biome = BIOMES[biomeIndex % BIOMES.length];
+
+  if (!gameStarted) return null;
 
   return (
-    <div className="absolute top-0 left-0 w-full p-4 pointer-events-none select-none z-10">
-      <div className="flex justify-between items-start max-w-4xl mx-auto">
-        <div className="flex gap-4">
-          <div className="flex items-center gap-2 bg-slate-900/50 backdrop-blur-md p-2 rounded-lg border border-slate-700">
-            <Heart className="text-red-500 fill-red-500 w-6 h-6" />
-            <div className="w-32 h-4 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-red-500 transition-all duration-300"
-                style={{ width: `${health}%` }}
-              />
-            </div>
-            <span className="font-mono font-bold text-white">{health}</span>
+    <>
+      <div className="absolute top-0 left-0 w-full p-4 pointer-events-none select-none z-10">
+        <div
+          className="flex justify-between font-bold uppercase tracking-widest"
+          style={{ textShadow: "0 2px 0 rgba(0,0,0,1)" }}
+        >
+          <div className="text-amber-400 text-base">
+            <Coins className="inline w-4 h-4 mr-1" />
+            Score: {score.toLocaleString()}
+          </div>
+          <div className="text-rose-500 text-base text-right">
+            <Heart className="inline w-4 h-4 mr-1 fill-rose-500" />
+            HP: {health}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-amber-900/50 backdrop-blur-md p-2 rounded-lg border border-amber-700">
-          <Coins className="text-yellow-400 w-6 h-6" />
-          <span className="font-mono font-bold text-xl text-yellow-400">
-            {score.toString().padStart(6, "0")}
+        <div className="flex justify-between text-white/60 text-xs tracking-widest uppercase mt-1.5 flex-wrap gap-2">
+          <span className="opacity-90">
+            Shards: {shards} (+{bankedShards} banked)
           </span>
+          <span className="opacity-90">Distance: {Math.floor(distance)}m</span>
+          <span className="opacity-90">Biome: {biome.name}</span>
         </div>
+
+        <BossBar />
       </div>
-      
-      <div className="absolute bottom-8 left-8 text-white/50 text-sm font-mono">
-        Controls: WASD to Move, SPACE to Jump
-      </div>
-    </div>
+      <Toast />
+    </>
   );
 }

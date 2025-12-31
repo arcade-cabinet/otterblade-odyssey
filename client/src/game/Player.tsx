@@ -1,90 +1,127 @@
 import { useSphere } from "@react-three/cannon";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import { useTexture, SpriteAnimator } from "@react-three/drei";
-import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
 import { useStore } from "./store";
-import otterTextureUrl from "@assets/generated_images/pixel_art_otter_warrior_holding_a_glowing_sword.png";
+import "./materials/OtterFurMaterial";
+import * as THREE from "three";
 
 const SPEED = 10;
 const JUMP_FORCE = 12;
+const COYOTE_TIME = 0.15;
+const JUMP_BUFFER = 0.1;
 
 export function Player() {
+  const runId = useStore((s) => s.runId);
+  const checkpointX = useStore((s) => s.checkpointX);
+  const checkpointY = useStore((s) => s.checkpointY);
+  const gameOver = useStore((s) => s.gameOver);
+  const controls = useStore((s) => s.controls);
+  const setPlayerPos = useStore((s) => s.setPlayerPos);
+  const setPlayerFacing = useStore((s) => s.setPlayerFacing);
+  const advanceScore = useStore((s) => s.advanceScore);
+  const hitPlayer = useStore((s) => s.hitPlayer);
+
   const [ref, api] = useSphere(() => ({
     mass: 1,
-    position: [0, 5, 0],
+    position: [checkpointX, checkpointY, 0],
     fixedRotation: true,
     linearDamping: 0.5,
     args: [0.5],
   }));
 
-  const { camera } = useThree();
   const velocity = useRef([0, 0, 0]);
-  const position = useRef([0, 0, 0]);
-  const [grounded, setGrounded] = useState(false);
-  const otterTexture = useTexture(otterTextureUrl);
+  const position = useRef([checkpointX, checkpointY, 0]);
+  const grounded = useRef(false);
+  const coyoteTimer = useRef(0);
+  const jumpBufferTimer = useRef(0);
+  const materialRef = useRef<any>();
 
-  // Input state
-  const keys = useRef<{ [key: string]: boolean }>({});
+  // Reset position when respawning
+  useEffect(() => {
+    api.position.set(checkpointX, checkpointY, 0);
+    api.velocity.set(0, 0, 0);
+    position.current = [checkpointX, checkpointY, 0];
+  }, [runId, checkpointX, checkpointY, api]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      keys.current[e.code] = true;
-      if (e.code === "Space" && grounded) {
-        api.velocity.set(velocity.current[0], JUMP_FORCE, 0);
-        setGrounded(false);
-      }
-    };
-    const handleKeyUp = (e: KeyboardEvent) => (keys.current[e.code] = false);
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    // Subscribe to cannon api
     const unsubV = api.velocity.subscribe((v) => (velocity.current = v));
-    const unsubP = api.position.subscribe((p) => (position.current = p));
+    const unsubP = api.position.subscribe((p) => {
+      position.current = p;
+      setPlayerPos(p[0], p[1]);
+      advanceScore(p[0]);
+    });
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
       unsubV();
       unsubP();
     };
-  }, [grounded, api]);
+  }, [api, setPlayerPos, advanceScore]);
 
-  // Ground check raycast (simple version using velocity check or contact)
-  // For now, let's assume if vertical velocity is near 0 and we are low, we are grounded.
-  // Better: useCollision events on the body.
-  // Re-subscribing to collision events inside useEffect if possible.
+  useFrame((state, delta) => {
+    if (gameOver) return;
 
-  useFrame(() => {
-    const { KeyW, KeyA, KeyS, KeyD, ArrowLeft, ArrowRight } = keys.current;
+    const time = state.clock.elapsedTime;
 
+    // Update shader time
+    if (materialRef.current) {
+      materialRef.current.uTime = time;
+    }
+
+    // Simple ground check
+    const wasGrounded = grounded.current;
+    grounded.current = Math.abs(velocity.current[1]) < 0.5 && position.current[1] > -10;
+
+    // Coyote time
+    if (grounded.current) {
+      coyoteTimer.current = COYOTE_TIME;
+    } else if (wasGrounded) {
+      coyoteTimer.current = COYOTE_TIME;
+    } else {
+      coyoteTimer.current = Math.max(0, coyoteTimer.current - delta);
+    }
+
+    // Jump buffering
+    if (controls.jump) {
+      jumpBufferTimer.current = JUMP_BUFFER;
+    } else {
+      jumpBufferTimer.current = Math.max(0, jumpBufferTimer.current - delta);
+    }
+
+    // Execute jump
+    if (jumpBufferTimer.current > 0 && coyoteTimer.current > 0) {
+      api.velocity.set(velocity.current[0], JUMP_FORCE, 0);
+      coyoteTimer.current = 0;
+      jumpBufferTimer.current = 0;
+    }
+
+    // Horizontal movement
     let x = 0;
-    if (KeyA || ArrowLeft) x = -1;
-    if (KeyD || ArrowRight) x = 1;
+    if (controls.left) x = -1;
+    if (controls.right) x = 1;
+
+    if (x !== 0) {
+      setPlayerFacing(x > 0);
+    }
 
     api.velocity.set(x * SPEED, velocity.current[1], 0);
 
-    // Camera follow
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, position.current[0], 0.1);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, position.current[1] + 2, 0.1);
-    camera.lookAt(position.current[0], position.current[1], 0);
-
-    // Simple ground check approximation
-    if (Math.abs(velocity.current[1]) < 0.1) {
-      setGrounded(true);
-    } else {
-      setGrounded(false);
+    // Fall death
+    if (position.current[1] < -20) {
+      hitPlayer(5);
     }
   });
 
   return (
-    <group ref={ref as any}>
-       <mesh>
-        <planeGeometry args={[2, 2]} />
-        <meshStandardMaterial map={otterTexture} transparent side={THREE.DoubleSide} />
-       </mesh>
+    <group ref={ref as any} position={[0, 0, 0]}>
+      <mesh castShadow>
+        <sphereGeometry args={[0.6, 16, 16]} />
+        {/* @ts-ignore */}
+        <otterFurMaterial
+          ref={materialRef}
+          uColor={new THREE.Color("#38bdf8")}
+          uRimColor={new THREE.Color("#e0f2fe")}
+        />
+      </mesh>
     </group>
   );
 }

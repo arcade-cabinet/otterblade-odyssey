@@ -1,21 +1,24 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import NotFound from "@/pages/not-found";
+import { queryClient } from "./lib/queryClient";
 import Game from "@/game/Game";
 import HUD from "@/components/hud/HUD";
+import StartMenu from "@/components/hud/StartMenu";
+import GameOverMenu from "@/components/hud/GameOver";
+import TouchControls from "@/components/hud/TouchControls";
+import DamageFlash from "@/components/hud/DamageFlash";
+import PostFX from "@/components/hud/PostFX";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative w-full h-screen overflow-hidden">
+      <div className="relative w-full h-screen overflow-hidden bg-black">
+        <Game />
+        <PostFX />
+        <DamageFlash />
         <HUD />
-        <Switch>
-          <Route path="/" component={Game} />
-          <Route component={NotFound} />
-        </Switch>
-        <Toaster />
+        <StartMenu />
+        <GameOverMenu />
+        <TouchControls />
       </div>
     </QueryClientProvider>
   );
