@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { PhysicsWrapper } from "./Physics";
 import { Level } from "./Level";
 import { Player } from "./Player";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState, Component, type ReactNode } from "react";
 import { useStore } from "./store";
 
 function KeyboardControls() {
@@ -47,19 +47,82 @@ function KeyboardControls() {
   return null;
 }
 
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class WebGLErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+function WebGLFallback() {
+  return (
+    <div className="w-full h-screen bg-black flex items-center justify-center">
+      <div className="text-center p-8">
+        <h1 className="text-3xl font-bold text-sky-400 mb-4">WebGL Required</h1>
+        <p className="text-slate-400 max-w-md">
+          Otterblade Odyssey requires WebGL to run. Please use a browser with WebGL support
+          (Chrome, Firefox, Safari, or Edge).
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function checkWebGLSupport(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    return !!gl;
+  } catch {
+    return false;
+  }
+}
+
 export default function Game() {
+  const [hasWebGL, setHasWebGL] = useState(true);
+
+  useEffect(() => {
+    setHasWebGL(checkWebGLSupport());
+  }, []);
+
+  if (!hasWebGL) {
+    return <WebGLFallback />;
+  }
+
   return (
     <div className="w-full h-screen bg-black" data-testid="game-container">
       <KeyboardControls />
-      <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
-        <color attach="background" args={["#1a1a2e"]} />
-        <Suspense fallback={null}>
-          <PhysicsWrapper>
-            <Player />
-            <Level />
-          </PhysicsWrapper>
-        </Suspense>
-      </Canvas>
+      <WebGLErrorBoundary fallback={<WebGLFallback />}>
+        <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
+          <color attach="background" args={["#1a1a2e"]} />
+          <Suspense fallback={null}>
+            <PhysicsWrapper>
+              <Player />
+              <Level />
+            </PhysicsWrapper>
+          </Suspense>
+        </Canvas>
+      </WebGLErrorBoundary>
     </div>
   );
 }
