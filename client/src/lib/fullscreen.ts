@@ -145,8 +145,9 @@ export async function enterImmersiveMode(): Promise<boolean> {
   // Try to lock to landscape for better gameplay on mobile
   try {
     // Use Screen Orientation API if available
-    if ('orientation' in screen && 'lock' in (screen.orientation as ScreenOrientation)) {
-      await (screen.orientation as ScreenOrientation).lock('landscape');
+    const orientation = screen.orientation as ScreenOrientation & { lock?: (orientation: string) => Promise<void> };
+    if (orientation?.lock) {
+      await orientation.lock('landscape');
     } else if (isNative) {
       await lockOrientation('landscape');
     }

@@ -6,9 +6,12 @@
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Preferences } from '@capacitor/preferences';
-import { ScreenOrientation, type OrientationType } from '@capacitor/screen-orientation';
+import { ScreenOrientation, type OrientationLockType } from '@capacitor/screen-orientation';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
+
+/** Orientation type alias for compatibility */
+type OrientationType = OrientationLockType;
 
 /** Check if running as native app */
 export const isNative = Capacitor.isNativePlatform();
