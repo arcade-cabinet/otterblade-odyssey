@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Otterblade Odyssey: Zephyros Rising - Chapter 2: The Gatehouse</title>
+    <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
+            background: #1A1A24;
+            font-family: 'Georgia', 'Palatino', serif;
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: #0a0a15;
+            touch-action: none;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            z-index: 1000;
+            touch-action: none;
+        }
+        
+        .left-controls {
+            left: 20px;
+        }
+        
+        .right-controls {
+            right: 20px;
+        }
+        
+        .control-btn {
+            width: 75px;
+            height: 75px;
+            margin: 5px;
+            border: 3px solid #F4D03F;
+            border-radius: 12px;
+            background: rgba(230, 126, 34, 0.85);
+            color: #F4D03F;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.6), inset 0 -2px 8px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            font-family: 'Georgia', serif;
+        }
+        
+        .control-btn:active {
+            transform: scale(0.93);
+            box-shadow: 0 2px 6px rgba(192, 57, 43, 0.8), inset 0 -1px 4px rgba(0,0,0,0.4);
+            background: rgba(192, 57, 43, 0.95);
+        }
+        
+        .left-controls {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .right-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #F4D03F;
+            font-size: 16px;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+            background: rgba(93, 78, 55, 0.85);
+            padding: 18px;
+            border-radius: 12px;
+            border: 3px solid #D4A574;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.1);
+        }
+        
+        .chapter-title {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: #F4D03F;
+            font-size: 14px;
+            text-align: right;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+            background: rgba(93, 78, 55, 0.85);
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: 3px solid #D4A574;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            font-style: italic;
+        }
+        
+        .chapter-subtitle {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        
+        .hud-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hearthstone-display {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .hearthstone-slot {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(93, 78, 55, 0.5);
+            border-radius: 50%;
+            background: rgba(26, 26, 36, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .hearthstone-slot.filled {
+            background: radial-gradient(circle, #E67E22, #C0392B);
+            border-color: #F4D03F;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.8), inset 0 1px 3px rgba(255,255,255,0.3);
+            animation: hearthPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes hearthPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(230, 126, 34, 0.6); }
+            50% { box-shadow: 0 0 15px rgba(230, 126, 34, 1); }
+        }
+        
+        .stat-bar {
+            width: 140px;
+            height: 18px;
+            background: rgba(26, 26, 36, 0.8);
+            border: 2px solid #5D4E37;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #E67E22, #C0392B);
+            transition: width 0.3s;
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.6);
+        }
+        
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2C3E50 0%, #1A1A24 100%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #F4D03F;
+            font-family: 'Georgia', serif;
+            text-align: center;
+            padding: 30px;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .intro-title {
+            font-size: 38px;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 8px rgba(0,0,0,0.8);
+            color: #F4D03F;
+        }
+        
+        .intro-subtitle {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #8FBC8F;
+            font-style: italic;
+        }
+        
+        .intro-text {
+            max-width: 600px;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 35px;
+            color: #D4A574;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        .start-button {
+            padding: 18px 45px;
+            font-size: 22px;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #E67E22, #C0392B);
+            color: #F4D03F;
+            border: 3px solid #F4D03F;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6);
+        }
+        
+        .start-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(230, 126, 34, 0.9);
+        }
+        
+        .start-button:active {
+            transform: scale(0.98);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-title">Otterblade Odyssey</div>
+        <div class="intro-subtitle">Zephyros Rising</div>
+        <div class="intro-text">
+            Chapter 2: The Gatehouse<br><br>
+            The cold wind of Zephyros howls at the gates of Willowmere Hearthhold. 
+            As Finn Riverstone, bearer of the legendary Otterblade, you must traverse 
+            the ancient gatehouse and defend the warmth of home against the Galeborn invaders.
+            <br><br>
+            <em>"The Everember never dies, so long as one heart remains to tend it."</em>
+        </div>
+        <button class="start-button" id="startButton">Begin Your Odyssey</button>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="hud">
+        <div class="hud-item">
+            <span>🔥 Warmth:</span>
+            <div class="stat-bar">
+                <div class="stat-fill" id="warmthBar" style="width: 100%"></div>
+            </div>
+        </div>
+        <div class="hud-item">
+            <span>💎 Ember Shards: <span id="emberCount">0</span></span>
+        </div>
+        <div class="hud-item">
+            <span>🔥 Hearthstones:</span>
+            <div class="hearthstone-display" id="hearthstoneDisplay"></div>
+        </div>
+        <div class="hud-item">
+            <span>⚔️ Blade: Lv.<span id="bladeLevel">1</span></span>
+        </div>
+    </div>
+    
+    <div class="chapter-title">
+        <div>Chapter 2</div>
+        <div class="chapter-subtitle">The Gatehouse</div>
+    </div>
+    
+    <div class="controls left-controls">
+        <button class="control-btn" id="btnLeft">◀<br>LEFT</button>
+        <button class="control-btn" id="btnRight">▶<br>RIGHT</button>
+    </div>
+    
+    <div class="controls right-controls">
+        <button class="control-btn" id="btnJump">⬆<br>JUMP</button>
+        <button class="control-btn" id="btnAttack">⚔<br>SLASH</button>
+        <button class="control-btn" id="btnRoll">🌀<br>ROLL</button>
+        <button class="control-btn" id="btnInteract">🔥<br>LIGHT</button>
+    </div>
+
+    <script>
+        const { Engine, Render, World, Bodies, Body, Events, Composite, Query } = Matter;
+        
+        // Game state
+        const gameState = {
+            emberShards: 0,
+            hearthstones: 0,
+            maxHearthstones: 5,
+            warmth: 100,
+            maxWarmth: 100,
+            bladeLevel: 1,
+            isDefending: false,
+            isRolling: false,
+            isAttacking: false,
+            canJump: true,
+            worldOffset: 0,
+            currentBiome: 0,
+            gatehouseProgress: 0,
+            playerFacing: 1,
+            animationFrame: 0,
+            time: 0,
+            lastWarmth: 100,
+            invulnerable: false,
+            gameStarted: false
+        };
+        
+        let animFrame = 0;
+        
+        // Simplex noise implementation
+        class SimplexNoise {
+            constructor() {
+                this.grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+                this.p = [];
+                for(let i=0; i<256; i++) this.p[i] = Math.floor(Math.random()*256);
+                this.perm = [];
+                for(let i=0; i<512; i++) this.perm[i]=this.p[i & 255];
+            }
+            
+            dot(g, x, y) {
+                return g[0]*x + g[1]*y;
+            }
+            
+            noise(xin, yin) {
+                const F2 = 0.5*(Math.sqrt(3.0)-1.0);
+                const G2 = (3.0-Math.sqrt(3.0))/6.0;
+                let n0, n1, n2;
+                const s = (xin+yin)*F2;
+                const i = Math.floor(xin+s);
+                const j = Math.floor(yin+s);
+                const t = (i+j)*G2;
+                const X0 = i-t;
+                const Y0 = j-t;
+                const x0 = xin-X0;
+                const y0 = yin-Y0;
+                let i1, j1;
+                if(x0>y0) {i1=1; j1=0;}
+                else {i1=0; j1=1;}
+                const x1 = x0 - i1 + G2;
+                const y1 = y0 - j1 + G2;
+                const x2 = x0 - 1.0 + 2.0 * G2;
+                const y2 = y0 - 1.0 + 2.0 * G2;
+                const ii = i & 255;
+                const jj = j & 255;
+                const gi0 = this.perm[ii+this.perm[jj]] % 12;
+                const gi1 = this.perm[ii+i1+this.perm[jj+j1]] % 12;
+                const gi2 = this.perm[ii+1+this.perm[jj+1]] % 12;
+                let t0 = 0.5 - x0*x0-y0*y0;
+                if(t0<0) n0 = 0.0;
+                else {
+                    t0 *= t0;
+                    n0 = t0 * t0 * this.dot(this.grad3[gi0], x0, y0);
+                }
+                let t1 = 0.5 - x1*x1-y1*y1;
+                if(t1<0) n1 = 0.0;
+                else {
+                    t1 *= t1;
+                    n1 = t1 * t1 * this.dot(this.grad3[gi1], x1, y1);
+                }
+                let t2 = 0.5 - x2*x2-y2*y2;
+                if(t2<0) n2 = 0.0;
+                else {
+                    t2 *= t2;
+                    n2 = t2 * t2 * this.dot(this.grad3[gi2], x2, y2);
+                }
+                return 70.0 * (n0 + n1 + n2);
+            }
+        }
+        
+        const noise = new SimplexNoise();
+        
+        // Setup canvas and engine
+        const canvas = document.getElementById('gameCanvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const engine = Engine.create();
+        engine.gravity.y = 1.5;
+        
+        const render = Render.create({
+            canvas: canvas,
+            engine: engine,
+            options: {
+                width: canvas.width,
+                height: canvas.height,
+                wireframes: false,
+                background: 'transparent'
+            }
+        });
+        
+        // Finn Riverstone (Otter protagonist)
+        const player = Bodies.rectangle(400, canvas.height - 200, 35, 55, {
+            label: 'player',
+            restitution: 0,
+            friction: 0.1,
+            frictionAir: 0.01,
+            render: {
+                fillStyle: '#5DADE2'
+            }
+        });
+        
+        // Ground
+        const ground = Bodies.rectangle(canvas.width / 2, canvas.height - 50, canvas.width * 3, 100, {
+            isStatic: true,
+            label: 'ground',
+            render: {
+                fillStyle: '#5D4E37'
+            }
+        });
+        
+        // Game objects
+        const platforms = [];
+        const enemies = [];
+        const items = [];
+        const particles = [];
+        
+        World.add(engine.world, [player, ground]);
+        
+        // Biome colors (warm abbey stone to cold outer ramparts)
+        const biomes = [
+            { name: 'gatehouse', colors: ['#D4A574', '#8B7355', '#6B5D4F'], warmth: 0.8 },
+            { name: 'ramparts', colors: ['#7F8C8D', '#5D6D7E', '#455A64'], warmth: 0.5 },
+            { name: 'frozen', colors: ['#5DADE2', '#3498DB', '#2C3E50'], warmth: 0.2 }
+        ];
+        
+        // Generate abbey platform
+        function generateAbbeyPlatform(x, minY, maxY) {
+            const y = minY + Math.random() * (maxY - minY);
+            const width = 120 + Math.random() * 180;
+            const height = 25;
+            
+            const platform = Bodies.rectangle(x, y, width, height, {
+                isStatic: true,
+                label: 'platform',
+                render: {
+                    fillStyle: biomes[gameState.currentBiome].colors[0]
+                }
+            });
+            
+            platform.biomeIndex = gameState.currentBiome;
+            platforms.push(platform);
+            World.add(engine.world, platform);
+            return platform;
+        }
+        
+        // Generate Galeborn enemy
+        function generateGaleborn(x, y, type) {
+            const galebornTypes = {
+                scout: { width: 28, height: 45, color: '#7F8C8D', hp: 25, damage: 8, speed: 1.2 },
+                frostwolf: { width: 40, height: 30, color: '#5DADE2', hp: 30, damage: 12, speed: 2 },
+                icebat: { width: 25, height: 20, color: '#2C3E50', hp: 18, damage: 6, speed: 2.5 },
+                zephyr_champion: { width: 55, height: 75, color: '#34495e', hp: 120, damage: 25, speed: 0.6 }
+            };
+            
+            const config = galebornTypes[type] || galebornTypes.scout;
+            
+            const enemy = Bodies.rectangle(x, y, config.width, config.height, {
+                label: 'enemy',
+                friction: 0.1,
+                render: {
+                    fillStyle: config.color
+                }
+            });
+            
+            enemy.enemyType = type;
+            enemy.hp = config.hp;
+            enemy.maxHp = config.hp;
+            enemy.damage = config.damage;
+            enemy.speed = config.speed;
+            enemy.direction = Math.random() > 0.5 ? 1 : -1;
+            enemy.aiTimer = 0;
+            
+            enemies.push(enemy);
+            World.add(engine.world, enemy);
+            return enemy;
+        }
+        
+        // Generate collectibles
+        function generateItem(x, y, type) {
+            const itemTypes = {
+                embershard: { size: 16, color: '#E67E22', value: 5 },
+                hearthstone: { size: 14, color: '#C0392B', value: 1 },
+                lantern: { size: 20, color: '#F4D03F', value: 0, interactive: true },
+                frosttrap: { size: 22, color: '#5DADE2', value: 0, damage: 15 }
+            };
+            
+            const config = itemTypes[type] || itemTypes.embershard;
+            
+            const item = Bodies.rectangle(x, y, config.size, config.size, {
+                isStatic: type === 'frosttrap' || type === 'lantern',
+                isSensor: type !== 'frosttrap',
+                label: 'item',
+                render: {
+                    fillStyle: config.color
+                }
+            });
+            
+            item.itemType = type;
+            item.value = config.value;
+            item.interactive = config.interactive || false;
+            item.lit = false;
+            
+            items.push(item);
+            World.add(engine.world, item);
+            return item;
+        }
+        
+        // Generate initial world
+        function generateWorldSegment(startX) {
+            const biomeTransition = Math.floor(startX / 2000);
+            gameState.currentBiome = Math.min(biomeTransition, biomes.length - 1);
+            
+            // Abbey platforms
+            for (let i = 0; i < 6; i++) {
+                const x = startX + 250 + i * 320;
+                generateAbbeyPlatform(x, canvas.height - 450, canvas.height - 180);
+            }
+            
+            // Galeborn enemies
+            for (let i = 0; i < 4; i++) {
+                const x = startX + 350 + i * 450;
+                const types = ['scout', 'frostwolf', 'icebat'];
+                generateGaleborn(x, canvas.height - 320, types[Math.floor(Math.random() * types.length)]);
+            }
+            
+            // Collectibles
+            for (let i = 0; i < 10; i++) {
+                const x = startX + 250 + i * 280;
+                const y = canvas.height - 280 - Math.random() * 200;
+                const rand = Math.random();
+                if (rand < 0.6) generateItem(x, y, 'embershard');
+                else if (rand < 0.85) generateItem(x, y, 'hearthstone');
+                else generateItem(x, y, 'lantern');
+            }
+            
+            // Frost traps
+            for (let i = 0; i < 3; i++) {
+                const x = startX + 500 + i * 400;
+                generateItem(x, canvas.height - 95, 'frosttrap');
+            }
+            
+            // Boss every 3000 units
+            if (Math.floor(startX / 3000) > gameState.gatehouseProgress) {
+                generateGaleborn(startX + 1500, canvas.height - 250, 'zephyr_champion');
+                gameState.gatehouseProgress = Math.floor(startX / 3000);
+            }
+        }
+        
+        generateWorldSegment(800);
+        
+        // Enhanced player drawing - Finn the Otter
+        function drawFinn(ctx, x, y, facing, state) {
+            ctx.save();
+            ctx.translate(x, y);
+            if (facing < 0) ctx.scale(-1, 1);
+            
+            const frame = Math.floor(animFrame / 10) % 4;
+            const breathe = Math.sin(animFrame * 0.05) * 2;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.ellipse(0, 28, 20, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Glow aura (warmth indicator)
+            const warmthGlow = gameState.warmth / gameState.maxWarmth;
+            const glowGradient = ctx.createRadialGradient(0, -10, 5, 0, -10, 40);
+            glowGradient.addColorStop(0, `rgba(230, 126, 34, ${warmthGlow * 0.3})`);
+            glowGradient.addColorStop(1, 'rgba(230, 126, 34, 0)');
+            ctx.fillStyle = glowGradient;
+            ctx.beginPath();
+            ctx.arc(0, -10, 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Tail
+            ctx.fillStyle = '#8B6F47';
+            ctx.strokeStyle = '#6B5D4F';
+            ctx.lineWidth = 2;
+            const tailWag = Math.sin(frame * Math.PI / 2) * 8;
+            ctx.beginPath();
+            ctx.moveTo(-8, 10);
+            ctx.quadraticCurveTo(-20 + tailWag, 15, -25, 20);
+            ctx.quadraticCurveTo(-28 + tailWag, 22, -25, 25);
+            ctx.quadraticCurveTo(-15 + tailWag, 20, -8, 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Back leg
+            ctx.fillStyle = '#8B6F47';
+            if (state === 'walking') {
+                const legSwing = Math.sin(frame * Math.PI / 2 + Math.PI) * 8;
+                ctx.fillRect(-12 - legSwing, 12, 7, 16);
+                ctx.beginPath();
+                ctx.arc(-8 - legSwing, 28, 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillRect(-12, 12, 7, 16);
+                ctx.beginPath();
+                ctx.arc(-8, 28, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Body (otter torso)
+            ctx.fillStyle = '#8B6F47';
+            ctx.strokeStyle = '#6B5D4F';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(0, 0 + breathe, 16, 22, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Chest fur (lighter)
+            ctx.fillStyle = '#D4A574';
+            ctx.beginPath();
+            ctx.ellipse(2, 2 + breathe, 10, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Leather vest
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.moveTo(-10, -8 + breathe);
+            ctx.lineTo(-8, 8 + breathe);
+            ctx.lineTo(8, 8 + breathe);
+            ctx.lineTo(10, -8 + breathe);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Belt
+            ctx.fillStyle = '#5D4E37';
+            ctx.fillRect(-10, 8 + breathe, 20, 4);
+            ctx.fillStyle = '#F4D03F';
+            ctx.fillRect(-2, 8 + breathe, 4, 4);
+            
+            // Front leg
+            ctx.fillStyle = '#8B6F47';
+            if (state === 'walking') {
+                const legSwing = Math.sin(frame * Math.PI / 2) * 8;
+                ctx.fillRect(5 + legSwing, 12, 7, 16);
+                ctx.beginPath();
+                ctx.arc(8 + legSwing, 28, 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillRect(5, 12, 7, 16);
+                ctx.beginPath();
+                ctx.arc(8, 28, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Head
+            ctx.fillStyle = '#8B6F47';
+            ctx.strokeStyle = '#6B5D4F';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, -18 + breathe, 11, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Snout
+            ctx.fillStyle = '#D4A574';
+            ctx.beginPath();
+            ctx.ellipse(8, -16 + breathe, 6, 5, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Nose
+            ctx.fillStyle = '#2C3E50';
+            ctx.beginPath();
+            ctx.arc(12, -16 + breathe, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Whiskers
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(8, -16 + i * 2 + breathe);
+                ctx.lineTo(18, -15 + i * 2 + breathe);
+                ctx.stroke();
+            }
+            
+            // Eyes
+            ctx.fillStyle = '#2C3E50';
+            ctx.beginPath();
+            ctx.arc(-3, -20 + breathe, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(3, -20 + breathe, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye gleam
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillRect(-4, -21 + breathe, 1, 1);
+            ctx.fillRect(2, -21 + breathe, 1, 1);
+            
+            // Ears
+            ctx.fillStyle = '#8B6F47';
+            ctx.beginPath();
+            ctx.arc(-7, -24 + breathe, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(7, -24 + breathe, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Back arm
+            ctx.fillStyle = '#8B6F47';
+            const armAngle = state === 'walking' ? Math.sin(frame * Math.PI / 2 + Math.PI) * 0.3 : 0;
+            ctx.save();
+            ctx.translate(-10, -5 + breathe);
+            ctx.rotate(armAngle);
+            ctx.fillRect(-3, 0, 6, 15);
+            ctx.beginPath();
+            ctx.arc(0, 15, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            // The Otterblade
+            if (state === 'attacking') {
+                ctx.save();
+                ctx.translate(18, -8 + breathe);
+                ctx.rotate(-Math.PI / 3);
+                
+                // Blade glow
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#E67E22';
+                
+                // Blade
+                const bladeGradient = ctx.createLinearGradient(0, -30, 0, 0);
+                bladeGradient.addColorStop(0, '#ECF0F1');
+                bladeGradient.addColorStop(0.5, '#BDC3C7');
+                bladeGradient.addColorStop(1, '#95A5A6');
+                ctx.fillStyle = bladeGradient;
+                ctx.fillRect(-3, -30, 6, 30);
+                
+                // Blade edge gleam
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillRect(-1, -30, 2, 30);
+                
+                // Everember glow on blade
+                ctx.fillStyle = 'rgba(230, 126, 34, 0.5)';
+                ctx.fillRect(-2, -30, 4, 15);
+                
+                // Guard
+                ctx.fillStyle = '#5D4E37';
+                ctx.fillRect(-6, 0, 12, 3);
+                
+                // Handle
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(-2, 3, 4, 10);
+                
+                // Pommel
+                ctx.fillStyle = '#F4D03F';
+                ctx.beginPath();
+                ctx.arc(0, 13, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Legacy marks
+                ctx.strokeStyle = '#2C3E50';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(-1, 5 + i * 2);
+                    ctx.lineTo(1, 5 + i * 2);
+                    ctx.stroke();
+                }
+                
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            }
+            
+            // Front arm
+            ctx.fillStyle = '#8B6F47';
+            const frontArmAngle = state === 'walking' ? Math.sin(frame * Math.PI / 2) * 0.3 : 
+                                  state === 'attacking' ? -Math.PI / 4 : 0;
+            ctx.save();
+            ctx.translate(10, -5 + breathe);
+            ctx.rotate(frontArmAngle);
+            ctx.fillRect(-3, 0, 6, 15);
+            ctx.beginPath();
+            ctx.arc(0, 15, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            // Roll indicator
+            if (state === 'rolling') {
+                ctx.globalAlpha = 0.7;
+                ctx.strokeStyle = '#5DADE2';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            ctx.restore();
+        }
+        
+        // Draw Galeborn enemy
+        function drawGaleborn(ctx, enemy) {
+            ctx.save();
+            ctx.translate(enemy.position.x, enemy.position.y);
+            
+            const frame = Math.floor(animFrame / 15) % 3;
+            
+            // Cold aura
+            const coldGradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 30);
+            coldGradient.addColorStop(0, 'rgba(93, 173, 226, 0.3)');
+            coldGradient.addColorStop(1, 'rgba(93, 173, 226, 0)');
+            ctx.fillStyle = coldGradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.ellipse(0, 20, 18, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            if (enemy.enemyType === 'scout') {
+                // Galeborn Scout (Stoat/Weasel)
+                ctx.fillStyle = '#7F8C8D';
+                ctx.strokeStyle = '#5D6D7E';
+                ctx.lineWidth = 2;
+                
+                // Body
+                ctx.beginPath();
+                ctx.ellipse(0, -5, 12, 18, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Head
+                ctx.beginPath();
+                ctx.ellipse(0, -20, 8, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Ears
+                ctx.beginPath();
+                ctx.arc(-5, -26, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(5, -26, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Cold eyes
+                ctx.fillStyle = '#5DADE2';
+                ctx.fillRect(-3, -21, 2, 3);
+                ctx.fillRect(1, -21, 2, 3);
+                
+                // Frost breath
+                ctx.fillStyle = 'rgba(236, 240, 241, 0.5)';
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.arc(8 + i * 4, -18 + Math.random() * 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Arms with spear
+                ctx.strokeStyle = '#5D6D7E';
+                ctx.lineWidth = 3;
+                const armSwing = Math.sin(frame * Math.PI) * 0.2;
+                ctx.save();
+                ctx.rotate(armSwing);
+                ctx.strokeStyle = '#5D4E37';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(8, -10);
+                ctx.lineTo(20, -15);
+                ctx.stroke();
+                // Spear tip
+                ctx.fillStyle = '#7F8C8D';
+                ctx.beginPath();
+                ctx.moveTo(20, -15);
+                ctx.lineTo(25, -17);
+                ctx.lineTo(23, -13);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+                
+            } else if (enemy.enemyType === 'frostwolf') {
+                // Frostwolf
+                ctx.fillStyle = '#5DADE2';
+                ctx.strokeStyle = '#3498DB';
+                ctx.lineWidth = 2;
+                
+                // Body
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 20, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Head
+                ctx.beginPath();
+                ctx.ellipse(18, -5, 10, 8, -0.3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Ears
+                ctx.beginPath();
+                ctx.moveTo(20, -12);
+                ctx.lineTo(18, -18);
+                ctx.lineTo(16, -12);
+                ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(26, -12);
+                ctx.lineTo(28, -18);
+                ctx.lineTo(24, -12);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = '#E74C3C';
+                ctx.fillRect(17, -7, 3, 2);
+                ctx.fillRect(22, -7, 3, 2);
+                
+                // Fangs
+                ctx.fillStyle = '#ECF0F1';
+                ctx.beginPath();
+                ctx.moveTo(22, -2);
+                ctx.lineTo(20, 2);
+                ctx.lineTo(24, 2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Tail
+                ctx.strokeStyle = '#3498DB';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(-20, 0);
+                ctx.quadraticCurveTo(-28, -5, -30, 5);
+                ctx.stroke();
+                
+                // Legs
+                ctx.fillStyle = '#5DADE2';
+                const legMove = Math.sin(frame * Math.PI) * 5;
+                ctx.fillRect(-12 + legMove, 8, 5, 12);
+                ctx.fillRect(-2 - legMove, 8, 5, 12);
+                ctx.fillRect(8 + legMove, 8, 5, 12);
+                ctx.fillRect(18 - legMove, 8, 5, 12);
+                
+            } else if (enemy.enemyType === 'icebat') {
+                // Ice Bat
+                ctx.fillStyle = '#2C3E50';
+                
+                // Body
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 8, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Head
+                ctx.beginPath();
+                ctx.arc(0, -8, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Ears
+                ctx.beginPath();
+                ctx.moveTo(-4, -12);
+                ctx.lineTo(-6, -16);
+                ctx.lineTo(-2, -13);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(4, -12);
+                ctx.lineTo(6, -16);
+                ctx.lineTo(2, -13);
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = '#5DADE2';
+                ctx.fillRect(-3, -9, 2, 2);
+                ctx.fillRect(1, -9, 2, 2);
+                
+                // Wings with frost
+                const wingFlap = Math.sin(frame * Math.PI * 2) * 0.5 + 0.5;
+                ctx.fillStyle = 'rgba(44, 62, 80, 0.8)';
+                
+                ctx.beginPath();
+                ctx.moveTo(-8, 0);
+                ctx.quadraticCurveTo(-18, -8 * wingFlap, -22, 0);
+                ctx.quadraticCurveTo(-18, 4, -8, 3);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(8, 0);
+                ctx.quadraticCurveTo(18, -8 * wingFlap, 22, 0);
+                ctx.quadraticCurveTo(18, 4, 8, 3);
+                ctx.fill();
+                
+                // Frost trail
+                ctx.fillStyle = 'rgba(93, 173, 226, 0.3)';
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.arc(-5 + Math.random() * 10, 8 + i * 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+            } else if (enemy.enemyType === 'zephyr_champion') {
+                // Zephyr Champion (Boss)
+                ctx.fillStyle = '#34495E';
+                ctx.strokeStyle = '#2C3E50';
+                ctx.lineWidth = 3;
+                
+                // Large armored body
+                ctx.beginPath();
+                ctx.roundRect(-22, -25, 44, 50, 6);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Shoulder plates
+                ctx.fillStyle = '#5D6D7E';
+                ctx.beginPath();
+                ctx.arc(-22, -18, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(22, -18, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Helmet
+                ctx.fillStyle = '#2C3E50';
+                ctx.beginPath();
+                ctx.arc(0, -32, 16, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Visor
+                ctx.fillStyle = '#5DADE2';
+                ctx.fillRect(-12, -34, 24, 6);
+                
+                // Horns
+                ctx.strokeStyle = '#7F8C8D';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(-14, -38);
+                ctx.quadraticCurveTo(-18, -48, -16, -52);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(14, -38);
+                ctx.quadraticCurveTo(18, -48, 16, -52);
+                ctx.stroke();
+                
+                // Frost cloak
+                ctx.fillStyle = 'rgba(93, 173, 226, 0.6)';
+                const cloakSway = Math.sin(animFrame * 0.05) * 5;
+                ctx.beginPath();
+                ctx.moveTo(-18, -10);
+                ctx.quadraticCurveTo(-22 + cloakSway, 10, -20, 30);
+                ctx.lineTo(-15, 30);
+                ctx.quadraticCurveTo(-18 + cloakSway, 10, -15, -10);
+                ctx.fill();
+                
+                // Emblem (Zephyros mark)
+                ctx.fillStyle = '#5DADE2';
+                ctx.beginPath();
+                ctx.moveTo(0, -12);
+                ctx.lineTo(-6, -2);
+                ctx.lineTo(0, 2);
+                ctx.lineTo(6, -2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Large ice blade
+                ctx.save();
+                ctx.translate(26, -8);
+                ctx.rotate(Math.PI / 8);
+                
+                const iceGradient = ctx.createLinearGradient(0, -35, 0, 5);
+                iceGradient.addColorStop(0, '#5DADE2');
+                iceGradient.addColorStop(0.5, '#3498DB');
+                iceGradient.addColorStop(1, '#2C3E50');
+                ctx.fillStyle = iceGradient;
+                ctx.fillRect(-4, -35, 8, 40);
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fillRect(-2, -35, 4, 40);
+                
+                ctx.fillStyle = '#2C3E50';
+                ctx.fillRect(-6, 5, 12, 4);
+                
+                ctx.restore();
+            }
+            
+            ctx.restore();
+        }
+        
+        // Draw collectible items
+        function drawItem(ctx, item) {
+            ctx.save();
+            ctx.translate(item.position.x, item.position.y);
+            
+            const pulse = Math.sin(animFrame * 0.08) * 0.15 + 1;
+            
+            if (item.itemType === 'embershard') {
+                ctx.save();
+                ctx.scale(pulse, pulse);
+                
+                // Ember glow
+                const emberGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 18);
+                emberGlow.addColorStop(0, 'rgba(230, 126, 34, 0.8)');
+                emberGlow.addColorStop(1, 'rgba(230, 126, 34, 0)');
+                ctx.fillStyle = emberGlow;
+                ctx.beginPath();
+                ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Crystal shape
+                const shardGradient = ctx.createLinearGradient(-8, -8, 8, 8);
+                shardGradient.addColorStop(0, '#E67E22');
+                shardGradient.addColorStop(0.5, '#C0392B');
+                shardGradient.addColorStop(1, '#E74C3C');
+                ctx.fillStyle = shardGradient;
+                
+                ctx.beginPath();
+                ctx.moveTo(0, -10);
+                ctx.lineTo(8, -2);
+                ctx.lineTo(6, 10);
+                ctx.lineTo(-6, 10);
+                ctx.lineTo(-8, -2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Inner facets
+                ctx.fillStyle = 'rgba(255, 200, 100, 0.6)';
+                ctx.beginPath();
+                ctx.moveTo(0, -10);
+                ctx.lineTo(0, 0);
+                ctx.lineTo(-8, -2);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Sparkle
+                ctx.fillStyle = '#FFF';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#F4D03F';
+                ctx.fillRect(-2, -2, 4, 4);
+                ctx.shadowBlur = 0;
+                
+                ctx.restore();
+                
+            } else if (item.itemType === 'hearthstone') {
+                ctx.save();
+                ctx.scale(pulse, pulse);
+                
+                // Hearthstone glow
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#C0392B';
+                
+                // Stone base
+                ctx.fillStyle = '#5D4E37';
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Burning core
+                const coreGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 6);
+                coreGradient.addColorStop(0, '#F4D03F');
+                coreGradient.addColorStop(0.5, '#E67E22');
+                coreGradient.addColorStop(1, '#C0392B');
+                ctx.fillStyle = coreGradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Flame wisps
+                for (let i = 0; i < 3; i++) {
+                    const angle = (animFrame * 0.1 + i * Math.PI * 2 / 3);
+                    const x = Math.cos(angle) * 10;
+                    const y = Math.sin(angle) * 10 - 3;
+                    ctx.fillStyle = 'rgba(244, 212, 63, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.shadowBlur = 0;
+                ctx.restore();
+                
+            } else if (item.itemType === 'lantern') {
+                // Abbey lantern
+                const lanternGlow = item.lit ? 0.8 : 0.3;
+                
+                if (item.lit) {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#F4D03F';
+                }
+                
+                // Hanging chain
+                ctx.strokeStyle = '#5D4E37';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, -15);
+                ctx.lineTo(0, -8);
+                ctx.stroke();
+                
+                // Lantern frame
+                ctx.strokeStyle = '#8B7355';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-8, -8, 16, 16);
+                
+                // Glass panes
+                ctx.fillStyle = `rgba(244, 212, 63, ${lanternGlow * 0.3})`;
+                ctx.fillRect(-7, -7, 14, 14);
+                
+                // Flame
+                if (item.lit) {
+                    const flameFlicker = Math.sin(animFrame * 0.2) * 2;
+                    const flameGradient = ctx.createRadialGradient(0, 0, 0, 0, -3 + flameFlicker, 8);
+                    flameGradient.addColorStop(0, '#F4D03F');
+                    flameGradient.addColorStop(0.5, '#E67E22');
+                    flameGradient.addColorStop(1, '#C0392B');
+                    ctx.fillStyle = flameGradient;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 4);
+                    ctx.quadraticCurveTo(-4, 0, -2, -6 + flameFlicker);
+                    ctx.quadraticCurveTo(0, -8 + flameFlicker, 2, -6 + flameFlicker);
+                    ctx.quadraticCurveTo(4, 0, 0, 4);
+                    ctx.fill();
+                }
+                
+                // Interact indicator
+                if (!item.lit && Math.abs(item.position.x - player.position.x) < 60) {
+                    ctx.fillStyle = '#F4D03F';
+                    ctx.font = '12px Georgia';
+                    ctx.fillText('Press 🔥', -15, -25);
+                }
+                
+                ctx.shadowBlur = 0;
+                
+            } else if (item.itemType === 'frosttrap') {
+                // Frost trap
+                ctx.fillStyle = '#7F8C8D';
+                ctx.fillRect(-12, 8, 24, 6);
+                
+                // Ice spikes
+                const spikeGradient = ctx.createLinearGradient(0, -12, 0, 8);
+                spikeGradient.addColorStop(0, '#5DADE2');
+                spikeGradient.addColorStop(0.5, '#3498DB');
+                spikeGradient.addColorStop(1, '#2C3E50');
+                ctx.fillStyle = spikeGradient;
+                
+                for (let i = -1; i <= 1; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * 8 - 4, 8);
+                    ctx.lineTo(i * 8, -12);
+                    ctx.lineTo(i * 8 + 4, 8);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Frost on tips
+                    ctx.fillStyle = '#ECF0F1';
+                    ctx.beginPath();
+                    ctx.arc(i * 8, -10, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Cold mist
+                ctx.fillStyle = 'rgba(236, 240, 241, 0.4)';
+                for (let i = 0; i < 5; i++) {
+                    const x = -10 + i * 5;
+                    const y = 10 + Math.sin(animFrame * 0.05 + i) * 3;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            ctx.restore();
+        }
+        
+        // Draw abbey platform with detail
+        function drawAbbeyPlatform(ctx, platform) {
+            const width = platform.bounds.max.x - platform.bounds.min.x;
+            const height = platform.bounds.max.y - platform.bounds.min.y;
+            const x = platform.position.x - width / 2;
+            const y = platform.position.y - height / 2;
+            
+            const biome = biomes[platform.biomeIndex || 0];
+            
+            // Stone gradient
+            const stoneGradient = ctx.createLinearGradient(x, y, x, y + height);
+            stoneGradient.addColorStop(0, biome.colors[1]);
+            stoneGradient.addColorStop(0.5, biome.colors[0]);
+            stoneGradient.addColorStop(1, biome.colors[2]);
+            ctx.fillStyle = stoneGradient;
+            ctx.fillRect(x, y, width, height);
+            
+            // Stone blocks
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 2;
+            for (let bx = 0; bx < width; bx += 35) {
+                for (let by = 0; by < height; by += 18) {
+                    ctx.strokeRect(x + bx, y + by, 35, 18);
+                }
+            }
+            
+            // Carvings and details
+            if (Math.random() > 0.7) {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 1;
+                const carveX = x + width * 0.5;
+                ctx.beginPath();
+                ctx.arc(carveX, y + 8, 4, 0, Math.PI);
+                ctx.stroke();
+            }
+            
+            // Moss
+            if (biome.warmth > 0.6) {
+                ctx.fillStyle = 'rgba(143, 188, 143, 0.4)';
+                for (let i = 0; i < width; i += 15) {
+                    if (Math.random() > 0.6) {
+                        const mossLength = 5 + Math.random() * 8;
+                        ctx.fillRect(x + i, y - mossLength, 3, mossLength);
+                    }
+                }
+            }
+            
+            // Top highlight
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + width, y);
+            ctx.stroke();
+        }
+        
+        // Create warmth particles
+        function createParticles(x, y, color, count, type = 'default') {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5 - 2,
+                    life: 1,
+                    color: color,
+                    type: type,
+                    size: type === 'ember' ? 3 + Math.random() * 3 : 2
+                });
+            }
+        }
+        
+        // Update HUD
+        function updateHUD() {
+            document.getElementById('emberCount').textContent = gameState.emberShards;
+            document.getElementById('bladeLevel').textContent = gameState.bladeLevel;
+            document.getElementById('warmthBar').style.width = (gameState.warmth / gameState.maxWarmth * 100) + '%';
+            
+            const hearthDisplay = document.getElementById('hearthstoneDisplay');
+            hearthDisplay.innerHTML = '';
+            for (let i = 0; i < gameState.maxHearthstones; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'hearthstone-slot' + (i < gameState.hearthstones ? ' filled' : '');
+                slot.textContent = i < gameState.hearthstones ? '🔥' : '';
+                hearthDisplay.appendChild(slot);
+            }
+        }
+        
+        updateHUD();
+        
+        // Input handling
+        const keys = {};
+        
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'a') gameState.playerFacing = -1;
+            if (e.key === 'ArrowRight' || e.key === 'd') gameState.playerFacing = 1;
+            
+            if ((e.key === ' ' || e.key === 'w') && gameState.canJump && !gameState.isRolling) {
+                Body.applyForce(player, player.position, { x: 0, y: -0.16 });
+                gameState.canJump = false;
+            }
+            if (e.key === 'z' || e.key === 'Z') {
+                performAttack();
+            }
+            if ((e.key === 'x' || e.key === 'X' || e.key === 's') && !gameState.isRolling) {
+                performRoll();
+            }
+            if (e.key === 'f' || e.key === 'F' || e.key === 'e') {
+                interactWithLantern();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        // Touch controls
+        function setupTouchControl(btnId, keyEquivalent) {
+            const btn = document.getElementById(btnId);
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[keyEquivalent] = true;
+                if (keyEquivalent === 'ArrowLeft') gameState.playerFacing = -1;
+                if (keyEquivalent === 'ArrowRight') gameState.playerFacing = 1;
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[keyEquivalent] = false;
+            });
+        }
+        
+        setupTouchControl('btnLeft', 'ArrowLeft');
+        setupTouchControl('btnRight', 'ArrowRight');
+        
+        document.getElementById('btnJump').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameState.canJump && !gameState.isRolling) {
+                Body.applyForce(player, player.position, { x: 0, y: -0.16 });
+                gameState.canJump = false;
+            }
+        });
+        
+        document.getElementById('btnAttack').addEventListener('click', (e) => {
+            e.preventDefault();
+            performAttack();
+        });
+        
+        document.getElementById('btnRoll').addEventListener('click', (e) => {
+            e.preventDefault();
+            performRoll();
+        });
+        
+        document.getElementById('btnInteract').addEventListener('click', (e) => {
+            e.preventDefault();
+            interactWithLantern();
+        });
+        
+        // Attack with Otterblade
+        function performAttack() {
+            if (gameState.isAttacking || gameState.isRolling) return;
+            
+            gameState.isAttacking = true;
+            const attackRange = 70;
+            const attackDamage = 12 * gameState.bladeLevel;
+            
+            const attackArea = Bodies.rectangle(
+                player.position.x + (gameState.playerFacing * attackRange/2),
+                player.position.y - 10,
+                attackRange,
+                50,
+                { isSensor: true, label: 'attack' }
+            );
+            
+            World.add(engine.world, attackArea);
+            
+            enemies.forEach(enemy => {
+                const collision = Query.collides(attackArea, [enemy]);
+                if (collision.length > 0) {
+                    enemy.hp -= attackDamage;
+                    createParticles(enemy.position.x, enemy.position.y, '#5DADE2', 8, 'cold');
+                    
+                    // Knockback
+                    Body.setVelocity(enemy, {
+                        x: gameState.playerFacing * 8,
+                        y: enemy.velocity.y - 3
+                    });
+                    
+                    if (enemy.hp <= 0) {
+                        World.remove(engine.world, enemy);
+                        enemies.splice(enemies.indexOf(enemy), 1);
+                        gameState.emberShards += enemy.enemyType === 'zephyr_champion' ? 50 : 8;
+                        createParticles(enemy.position.x, enemy.position.y, '#E67E22', 15, 'ember');
+                        updateHUD();
+                    }
+                }
+            });
+            
+            setTimeout(() => {
+                World.remove(engine.world, attackArea);
+                gameState.isAttacking = false;
+            }, 250);
+        }
+        
+        // Roll dodge
+        function performRoll() {
+            if (gameState.isRolling) return;
+            
+            gameState.isRolling = true;
+            gameState.invulnerable = true;
+            
+            const rollForce = gameState.playerFacing * 12;
+            Body.setVelocity(player, { x: rollForce, y: player.velocity.y });
+            
+            createParticles(player.position.x, player.position.y, '#5DADE2', 10, 'roll');
+            
+            setTimeout(() => {
+                gameState.isRolling = false;
+                setTimeout(() => {
+                    gameState.invulnerable = false;
+                }, 100);
+            }, 400);
+        }
+        
+        // Interact with lanterns
+        function interactWithLantern() {
+            items.forEach(item => {
+                if (item.itemType === 'lantern' && !item.lit) {
+                    const dist = Math.abs(item.position.x - player.position.x);
+                    if (dist < 60) {
+                        item.lit = true;
+                        gameState.warmth = Math.min(gameState.warmth + 15, gameState.maxWarmth);
+                        createParticles(item.position.x, item.position.y, '#F4D03F', 20, 'ember');
+                        updateHUD();
+                    }
+                }
+            });
+        }
+        
+        // Collision detection
+        Events.on(engine, 'collisionStart', (event) => {
+            event.pairs.forEach(pair => {
+                const { bodyA, bodyB } = pair;
+                
+                // Ground/platform collision
+                if ((bodyA === player && (bodyB.label === 'ground' || bodyB.label === 'platform')) ||
+                    (bodyB === player && (bodyA.label === 'ground' || bodyA.label === 'platform'))) {
+                    gameState.canJump = true;
+                }
+                
+                // Item collection
+                if ((bodyA === player && bodyB.label === 'item') || (bodyB === player && bodyA.label === 'item')) {
+                    const item = bodyA === player ? bodyB : bodyA;
+                    
+                    if (item.itemType === 'embershard') {
+                        gameState.emberShards += item.value;
+                        World.remove(engine.world, item);
+                        items.splice(items.indexOf(item), 1);
+                        createParticles(item.position.x, item.position.y, '#E67E22', 10, 'ember');
+                        updateHUD();
+                    } else if (item.itemType === 'hearthstone') {
+                        if (gameState.hearthstones < gameState.maxHearthstones) {
+                            gameState.hearthstones++;
+                            World.remove(engine.world, item);
+                            items.splice(items.indexOf(item), 1);
+                            createParticles(item.position.x, item.position.y, '#C0392B', 12, 'ember');
+                            
+                            // Upgrade blade every 2 hearthstones
+                            if (gameState.hearthstones % 2 === 0) {
+                                gameState.bladeLevel++;
+                            }
+                            
+                            updateHUD();
+                        }
+                    } else if (item.itemType === 'frosttrap' && !gameState.invulnerable) {
+                        gameState.warmth -= item.damage;
+                        if (gameState.warmth < 0) gameState.warmth = 0;
+                        updateHUD();
+                        createParticles(player.position.x, player.position.y, '#5DADE2', 8, 'cold');
+                    }
+                }
+                
+                // Enemy collision
+                if ((bodyA === player && bodyB.label === 'enemy') || (bodyB === player && bodyA.label === 'enemy')) {
+                    if (!gameState.invulnerable) {
+                        const enemy = bodyA === player ? bodyB : bodyA;
+                        gameState.warmth -= enemy.damage / 2;
+                        if (gameState.warmth < 0) gameState.warmth = 0;
+                        updateHUD();
+                        createParticles(player.position.x, player.position.y, '#5DADE2', 6, 'cold');
+                        
+                        // Brief invulnerability after hit
+                        gameState.invulnerable = true;
+                        setTimeout(() => {
+                            gameState.invulnerable = false;
+                        }, 800);
+                    }
+                }
+            });
+        });
+        
+        // Rendering with atmosphere
+        Events.on(render, 'afterRender', () => {
+            const ctx = render.context;
+            const canvas = render.canvas;
+            
+            if (!gameState.gameStarted) return;
+            
+            animFrame++;
+            gameState.time += 0.016;
+            
+            const cameraX = player.position.x - canvas.width / 2;
+            gameState.worldOffset = cameraX;
+            
+            // Clear
+            ctx.fillStyle = '#0a0a15';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // ===== BACKGROUND - Deep dungeon atmosphere =====
+            const bgOffset = cameraX * 0.15;
+            const biome = biomes[gameState.currentBiome];
+            
+            // Sky gradient with warmth
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            const warmthFactor = gameState.warmth / gameState.maxWarmth;
+            skyGradient.addColorStop(0, biome.colors[2]);
+            skyGradient.addColorStop(0.5, biome.colors[1]);
+            skyGradient.addColorStop(1, `rgba(${230 * warmthFactor}, ${126 * warmthFactor}, 34, 0.2)`);
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Distant abbey walls
+            for (let x = 0; x < canvas.width; x += 20) {
+                const worldX = x + bgOffset;
+                const noiseValue = noise.noise(worldX * 0.0008, gameState.currentBiome * 5);
+                const colorIndex = Math.floor((noiseValue + 1) * 0.5 * 3);
+                const baseColor = biome.colors[Math.min(Math.max(colorIndex, 0), 2)];
+                
+                ctx.fillStyle = baseColor;
+                ctx.globalAlpha = 0.5;
+                ctx.fillRect(x, 0, 20, canvas.height);
+                
+                // Stone texture
+                if (Math.floor(worldX / 50) % 2 === 0) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                    const brickY = (Math.floor(worldX / 50) * 30) % canvas.height;
+                    ctx.fillRect(x, brickY, 20, 4);
+                }
+            }
+            ctx.globalAlpha = 1;
+            
+            // Abbey features (arches, windows)
+            const archOffset = cameraX * 0.35;
+            for (let i = 0; i < 6; i++) {
+                const wx = (i * 500 - archOffset) % (canvas.width + 500) - 250;
+                const wy = 100 + (i * 127) % (canvas.height - 350);
+                
+                // Gothic arches
+                if (i % 2 === 0) {
+                    ctx.strokeStyle = 'rgba(93, 78, 55, 0.6)';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(wx - 30, wy + 60, 30, 0, Math.PI);
+                    ctx.arc(wx + 30, wy + 60, 30, 0, Math.PI);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    ctx.fillRect(wx - 40, wy + 60, 80, 80);
+                } else {
+                    // Window with glow
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.fillRect(wx - 25, wy, 50, 70);
+                    
+                    // Warm light
+                    if (warmthFactor > 0.5) {
+                        const lightGradient = ctx.createRadialGradient(wx, wy + 35, 10, wx, wy + 35, 60);
+                        lightGradient.addColorStop(0, `rgba(244, 212, 63, ${warmthFactor * 0.3})`);
+                        lightGradient.addColorStop(1, 'rgba(244, 212, 63, 0)');
+                        ctx.fillStyle = lightGradient;
+                        ctx.fillRect(wx - 60, wy - 30, 120, 130);
+                    }
+                }
+            }
+            
+            // ===== GAME WORLD =====
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+            
+            // Platforms
+            platforms.forEach(platform => {
+                drawAbbeyPlatform(ctx, platform);
+            });
+            
+            // Ground
+            const groundWidth = ground.bounds.max.x - ground.bounds.min.x;
+            const groundHeight = ground.bounds.max.y - ground.bounds.min.y;
+            const groundX = ground.position.x - groundWidth / 2;
+            const groundY = ground.position.y - groundHeight / 2;
+            
+            const groundGradient = ctx.createLinearGradient(0, groundY, 0, groundY + groundHeight);
+            groundGradient.addColorStop(0, biome.colors[0]);
+            groundGradient.addColorStop(1, biome.colors[2]);
+            ctx.fillStyle = groundGradient;
+            ctx.fillRect(groundX, groundY, groundWidth, groundHeight);
+            
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 2;
+            for (let x = groundX; x < groundX + groundWidth; x += 50) {
+                for (let y = groundY; y < groundY + groundHeight; y += 25) {
+                    ctx.strokeRect(x, y, 50, 25);
+                }
+            }
+            
+            // Items
+            items.forEach(item => {
+                drawItem(ctx, item);
+            });
+            
+            // Enemies
+            enemies.forEach(enemy => {
+                drawGaleborn(ctx, enemy);
+                
+                // Health bar
+                const healthPercent = enemy.hp / enemy.maxHp;
+                const barWidth = 45;
+                const barHeight = 5;
+                const barX = enemy.position.x - barWidth / 2;
+                const barY = enemy.position.y - 45;
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 4);
+                
+                const healthGradient = ctx.createLinearGradient(barX, barY, barX + barWidth * healthPercent, barY);
+                if (healthPercent > 0.6) {
+                    healthGradient.addColorStop(0, '#5DADE2');
+                    healthGradient.addColorStop(1, '#3498DB');
+                } else if (healthPercent > 0.3) {
+                    healthGradient.addColorStop(0, '#7F8C8D');
+                    healthGradient.addColorStop(1, '#5D6D7E');
+                } else {
+                    healthGradient.addColorStop(0, '#E74C3C');
+                    healthGradient.addColorStop(1, '#C0392B');
+                }
+                ctx.fillStyle = healthGradient;
+                ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(barX, barY, barWidth, barHeight);
+            });
+            
+            // Finn
+            const playerState = gameState.isRolling ? 'rolling' :
+                               gameState.isAttacking ? 'attacking' :
+                               (keys['ArrowLeft'] || keys['ArrowRight'] || keys['a'] || keys['d']) ? 'walking' : 'idle';
+            
+            drawFinn(ctx, player.position.x, player.position.y, gameState.playerFacing, playerState);
+            
+            // Invulnerability flicker
+            if (gameState.invulnerable && Math.floor(animFrame / 5) % 2 === 0) {
+                ctx.globalAlpha = 0.5;
+                drawFinn(ctx, player.position.x, player.position.y, gameState.playerFacing, playerState);
+                ctx.globalAlpha = 1;
+            }
+            
+            // Particles
+            particles.forEach((particle, index) => {
+                ctx.globalAlpha = particle.life;
+                
+                if (particle.type === 'ember') {
+                    const particleGradient = ctx.createRadialGradient(
+                        particle.x, particle.y, 0,
+                        particle.x, particle.y, particle.size + 3
+                    );
+                    particleGradient.addColorStop(0, particle.color);
+                    particleGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = particleGradient;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size + 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = particle.color;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = particle.color;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += 0.15;
+                particle.life -= 0.012;
+                
+                if (particle.life <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+            ctx.globalAlpha = 1;
+            
+            ctx.restore();
+            
+            // ===== LIGHTING & ATMOSPHERE =====
+            // Lantern light zones
+            items.forEach(item => {
+                if (item.itemType === 'lantern' && item.lit) {
+                    const lightX = item.position.x - cameraX;
+                    const lightY = item.position.y;
+                    
+                    const lightGradient = ctx.createRadialGradient(lightX, lightY, 20, lightX, lightY, 120);
+                    lightGradient.addColorStop(0, 'rgba(244, 212, 63, 0.3)');
+                    lightGradient.addColorStop(0.5, 'rgba(230, 126, 34, 0.15)');
+                    lightGradient.addColorStop(1, 'rgba(230, 126, 34, 0)');
+                    ctx.fillStyle = lightGradient;
+                    ctx.fillRect(lightX - 120, lightY - 120, 240, 240);
+                }
+            });
+            
+            // Vignette
+            const vignette = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, canvas.height * 0.2,
+                canvas.width / 2, canvas.height / 2, canvas.height * 0.7
+            );
+            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignette.addColorStop(1, 'rgba(26, 26, 36, 0.5)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Low warmth warning
+            if (gameState.warmth < 30) {
+                ctx.fillStyle = `rgba(93, 173, 226, ${0.15 + Math.sin(gameState.time * 4) * 0.1})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Warmth loss indicator
+            if (gameState.warmth < gameState.lastWarmth) {
+                ctx.save();
+                ctx.translate(
+                    (Math.random() - 0.5) * 8,
+                    (Math.random() - 0.5) * 8
+                );
+                ctx.restore();
+            }
+            gameState.lastWarmth = gameState.warmth;
+        });
+        
+        // Game loop
+        let lastTime = 0;
+        function gameLoop(time) {
+            if (!gameState.gameStarted) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            const delta = time - lastTime;
+            lastTime = time;
+            
+            // Movement
+            if (keys['ArrowLeft'] || keys['a']) {
+                Body.setVelocity(player, { x: -5.5, y: player.velocity.y });
+                gameState.playerFacing = -1;
+            }
+            if (keys['ArrowRight'] || keys['d']) {
+                Body.setVelocity(player, { x: 5.5, y: player.velocity.y });
+                gameState.playerFacing = 1;
+            }
+            
+            // Enemy AI
+            enemies.forEach(enemy => {
+                enemy.aiTimer += delta;
+                
+                if (enemy.enemyType === 'icebat') {
+                    const swoopX = Math.sin(enemy.aiTimer * 0.003) * enemy.speed;
+                    const swoopY = Math.cos(enemy.aiTimer * 0.002) * 2;
+                    Body.setVelocity(enemy, { x: swoopX, y: swoopY });
+                } else if (enemy.enemyType === 'frostwolf') {
+                    if (enemy.aiTimer > 2000) {
+                        enemy.direction *= -1;
+                        enemy.aiTimer = 0;
+                    }
+                    Body.setVelocity(enemy, { x: enemy.speed * enemy.direction, y: enemy.velocity.y });
+                } else {
+                    const distToPlayer = player.position.x - enemy.position.x;
+                    if (Math.abs(distToPlayer) < 250) {
+                        Body.setVelocity(enemy, { 
+                            x: Math.sign(distToPlayer) * enemy.speed, 
+                            y: enemy.velocity.y 
+                        });
+                    }
+                }
+            });
+            
+            // Generate more world
+            if (player.position.x > gameState.worldOffset + 1400) {
+                generateWorldSegment(player.position.x + 1000);
+            }
+            
+            // Warmth drain over time (cold encroaches)
+            if (animFrame % 120 === 0) {
+                gameState.warmth -= 0.5;
+                if (gameState.warmth < 0) gameState.warmth = 0;
+                updateHUD();
+            }
+            
+            // Cleanup distant objects
+            platforms.forEach((platform, index) => {
+                if (Math.abs(platform.position.x - player.position.x) > 2500) {
+                    World.remove(engine.world, platform);
+                    platforms.splice(index, 1);
+                }
+            });
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start game
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.getElementById('introOverlay').classList.add('hidden');
+            gameState.gameStarted = true;
+        });
+        
+        Engine.run(engine);
+        Render.run(render);
+        requestAnimationFrame(gameLoop);
+        
+        // Resize handling
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            render.canvas.width = canvas.width;
+            render.canvas.height = canvas.height;
+        });
+        
+        // Prevent default touch behaviors
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
