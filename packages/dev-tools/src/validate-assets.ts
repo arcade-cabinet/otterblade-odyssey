@@ -11,7 +11,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { log, logError } from './config.js';
+import { log, logError } from './shared/config.js';
 
 /** Asset category with required files */
 interface AssetCategory {

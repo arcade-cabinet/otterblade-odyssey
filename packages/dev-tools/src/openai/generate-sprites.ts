@@ -17,8 +17,8 @@ import {
   createOpenAIClient,
   log,
   logError,
-} from './config.js';
-import { getPlayerSpritePrompt } from './prompts.js';
+} from '../shared/config.js';
+import { getPlayerSpritePrompt } from '../shared/prompts.js';
 
 /**
  * Main entry point for player sprite generation.

@@ -20,8 +20,8 @@ import {
   log,
   logError,
   type EnemyType,
-} from './config.js';
-import { getEnemySpritePrompt } from './prompts.js';
+} from '../shared/config.js';
+import { getEnemySpritePrompt } from '../shared/prompts.js';
 
 /**
  * Parses command line arguments.

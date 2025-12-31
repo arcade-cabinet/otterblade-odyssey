@@ -11,8 +11,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { createOpenAIClient, log, logError } from './config.js';
-import { getSpriteAnalysisPrompt } from './prompts.js';
+import { createOpenAIClient, log, logError } from '../shared/config.js';
+import { getSpriteAnalysisPrompt } from '../shared/prompts.js';
 
 /**
  * Reads an image file and converts it to base64.
