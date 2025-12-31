@@ -31,6 +31,7 @@ const ArgsSchema = z.object({
   dryRun: z.boolean().default(false),
   force: z.boolean().default(false),
   id: z.string().optional(),
+  maxItems: z.number().optional(),
 });
 
 type Args = z.infer<typeof ArgsSchema>;
@@ -52,6 +53,11 @@ function parseArgs(): Args {
       result.force = true;
     } else if (arg === '--id' && args[i + 1]) {
       result.id = args[++i];
+    } else if (arg === '--max-items' && args[i + 1]) {
+      const num = parseInt(args[++i], 10);
+      if (!Number.isNaN(num) && num > 0) {
+        result.maxItems = num;
+      }
     } else if (arg === '--help') {
       printHelp();
       process.exit(0);
@@ -76,6 +82,7 @@ Options:
   --dry-run          Show what would be generated without generating
   --force            Regenerate even if asset exists
   --id <asset-id>    Generate only specific asset by ID
+  --max-items <n>    Limit generation to n items (rate limiting)
   --help             Show this help message
 
 Examples:
@@ -83,6 +90,7 @@ Examples:
   pnpm cli --category sprites        # Generate missing sprites only
   pnpm cli --dry-run                 # Preview what would be generated
   pnpm cli --force --id intro_cinematic  # Force regenerate intro
+  pnpm cli --max-items 3             # Generate at most 3 items
 `);
 }
 
@@ -185,16 +193,26 @@ async function main(): Promise<void> {
     }
   }
 
+  // Apply max-items rate limiting
+  let limitedToGenerate = toGenerate;
+  if (args.maxItems && args.maxItems > 0 && toGenerate.length > args.maxItems) {
+    log('⚠️', `Rate limiting: ${toGenerate.length} items found, limiting to ${args.maxItems}`);
+    limitedToGenerate = toGenerate.slice(0, args.maxItems);
+  }
+
   log('', '');
   log('📊', `Found ${toGenerate.length} asset(s) to generate`);
+  if (args.maxItems && limitedToGenerate.length < toGenerate.length) {
+    log('🚦', `Processing ${limitedToGenerate.length} (limited by --max-items)`);
+  }
 
-  if (toGenerate.length === 0) {
+  if (limitedToGenerate.length === 0) {
     log('✅', 'All assets are up to date!');
     return;
   }
 
   // List assets to generate
-  for (const { manifest, asset } of toGenerate) {
+  for (const { manifest, asset } of limitedToGenerate) {
     const status = asset.status === 'needs_regeneration' ? '🔄' : '🆕';
     log(status, `${asset.name} (${manifest.provider}/${manifest.model})`);
     if (asset.reason) {
@@ -220,7 +238,7 @@ async function main(): Promise<void> {
   };
 
   // Generate each asset
-  for (const { manifest, asset } of toGenerate) {
+  for (const { manifest, asset } of limitedToGenerate) {
     try {
       log('⏳', `Generating: ${asset.name}`);
       const outputPath = await generateAsset(basePath, manifest, asset);

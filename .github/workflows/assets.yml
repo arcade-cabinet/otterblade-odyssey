@@ -1,6 +1,17 @@
 # Asset Generation Workflow
 # Generates missing game assets using AI (OpenAI GPT-Image-1, Google Veo 3.1, Imagen 3)
 # Creates a PR with any generated assets
+#
+# ⚠️ COST WARNING: This workflow uses paid AI APIs.
+# - OpenAI GPT-Image-1: ~$0.04-0.08 per image
+# - Google Veo 3.1: ~$0.025 per second of video
+# - Google Imagen 3: ~$0.03 per image
+#
+# Estimated costs per full generation:
+# - Sprites (4 items): ~$0.16-0.32
+# - Enemies (5 items): ~$0.20-0.40
+# - Cinematics (11 items @ 8s each): ~$2.20
+# - Scenes (9 items): ~$0.27
 
 name: Generate Assets
 
@@ -27,7 +38,13 @@ on:
         required: false
         type: boolean
         default: false
+      max_items:
+        description: 'Maximum items to generate (0 = unlimited)'
+        required: false
+        type: number
+        default: 5
 
+# API keys are passed as environment variables but NOT logged
 env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -60,15 +77,53 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check API keys
+      - name: Validate API keys
+        id: validate-keys
         run: |
-          if [ -z "$OPENAI_API_KEY" ] && [ -z "$GEMINI_API_KEY" ]; then
-            echo "❌ No API keys configured. Set OPENAI_API_KEY and/or GEMINI_API_KEY secrets."
+          # Check if at least one API key is configured
+          # Note: We do NOT echo or log API key values or presence in detail
+          HAS_OPENAI=false
+          HAS_GEMINI=false
+          
+          if [ -n "$OPENAI_API_KEY" ]; then
+            HAS_OPENAI=true
+          fi
+          
+          if [ -n "$GEMINI_API_KEY" ]; then
+            HAS_GEMINI=true
+          fi
+          
+          if [ "$HAS_OPENAI" = "false" ] && [ "$HAS_GEMINI" = "false" ]; then
+            echo "::error::No API keys configured. Please set OPENAI_API_KEY and/or GEMINI_API_KEY secrets."
             exit 1
           fi
-          echo "✅ API keys configured"
-          [ -n "$OPENAI_API_KEY" ] && echo "  - OpenAI: configured"
-          [ -n "$GEMINI_API_KEY" ] && echo "  - Gemini: configured"
+          
+          # Determine which providers are available for category validation
+          echo "openai_available=$HAS_OPENAI" >> $GITHUB_OUTPUT
+          echo "gemini_available=$HAS_GEMINI" >> $GITHUB_OUTPUT
+
+      - name: Validate category requirements
+        run: |
+          CATEGORY="${{ inputs.category }}"
+          OPENAI_AVAILABLE="${{ steps.validate-keys.outputs.openai_available }}"
+          GEMINI_AVAILABLE="${{ steps.validate-keys.outputs.gemini_available }}"
+          
+          # Validate that required API key is available for selected category
+          if [ "$CATEGORY" = "sprites" ] || [ "$CATEGORY" = "enemies" ]; then
+            if [ "$OPENAI_AVAILABLE" != "true" ]; then
+              echo "::error::OpenAI API key required for $CATEGORY generation"
+              exit 1
+            fi
+          fi
+          
+          if [ "$CATEGORY" = "cinematics" ] || [ "$CATEGORY" = "scenes" ]; then
+            if [ "$GEMINI_AVAILABLE" != "true" ]; then
+              echo "::error::Gemini API key required for $CATEGORY generation"
+              exit 1
+            fi
+          fi
+          
+          echo "✓ API requirements validated for category: ${CATEGORY:-all}"
 
       - name: Build dev-tools
         run: pnpm --filter @otterblade/dev-tools typecheck
@@ -76,8 +131,11 @@ jobs:
       - name: Generate assets
         id: generate
         run: |
+          set -euo pipefail
+          
           ARGS=""
           
+          # Category is already validated via choice type
           if [ -n "${{ inputs.category }}" ]; then
             ARGS="$ARGS --category ${{ inputs.category }}"
           fi
@@ -90,9 +148,23 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
           
-          echo "Running: pnpm --filter @otterblade/dev-tools cli $ARGS"
+          # Rate limiting: max items per run
+          MAX_ITEMS="${{ inputs.max_items }}"
+          if [ "$MAX_ITEMS" != "0" ] && [ -n "$MAX_ITEMS" ]; then
+            ARGS="$ARGS --max-items $MAX_ITEMS"
+          fi
+          
+          echo "::group::Asset Generation"
           pnpm --filter @otterblade/dev-tools cli $ARGS
-        continue-on-error: true
+          RESULT=$?
+          echo "::endgroup::"
+          
+          if [ $RESULT -ne 0 ]; then
+            echo "::warning::Asset generation completed with errors (exit code: $RESULT)"
+            echo "generation_status=partial" >> $GITHUB_OUTPUT
+          else
+            echo "generation_status=success" >> $GITHUB_OUTPUT
+          fi
 
       - name: Check for changes
         id: changes
@@ -150,6 +222,12 @@ jobs:
           script: |
             const category = '${{ inputs.category }}' || 'all categories';
             const force = '${{ inputs.force }}' === 'true';
+            const maxItems = '${{ inputs.max_items }}';
+            const generationStatus = '${{ steps.generate.outputs.generation_status }}';
+            
+            const statusNote = generationStatus === 'partial' 
+              ? '\n\n⚠️ **Note**: Some assets may have failed to generate. Check the workflow logs for details.'
+              : '';
             
             const { data: pr } = await github.rest.pulls.create({
               owner: context.repo.owner,
@@ -159,11 +237,12 @@ jobs:
               base: 'main',
               body: `## 🎨 Asset Generation
 
-            This PR was automatically created by the asset generation workflow.
+            This PR was automatically created by the asset generation workflow.${statusNote}
 
             ### Configuration
             - **Category**: ${category}
             - **Force regeneration**: ${force}
+            - **Max items**: ${maxItems === '0' ? 'unlimited' : maxItems}
             - **Triggered by**: @${{ github.actor }}
 
             ### Generated Assets
@@ -204,9 +283,19 @@ jobs:
           if [ "${{ inputs.dry_run }}" == "true" ]; then
             echo "🔍 **Dry run completed** - no assets were generated" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
-            echo "✅ **Assets generated successfully**" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.generate.outputs.generation_status }}" == "partial" ]; then
+              echo "⚠️ **Assets generated with warnings** - some items may have failed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ **Assets generated successfully**" >> $GITHUB_STEP_SUMMARY
+            fi
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "A pull request has been created with the new assets." >> $GITHUB_STEP_SUMMARY
           else
             echo "📝 **No new assets needed** - all assets are up to date" >> $GITHUB_STEP_SUMMARY
           fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Category: ${{ inputs.category || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Force: ${{ inputs.force }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Max items: ${{ inputs.max_items }}" >> $GITHUB_STEP_SUMMARY
