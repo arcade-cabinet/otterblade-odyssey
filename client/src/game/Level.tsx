@@ -6,6 +6,7 @@ import { BIOMES, SEGMENT_LEN } from "./constants";
 import { hash1 } from "./utils";
 import { ProceduralSky, GrassInstances, RockInstances, VolumetricFogMesh, createTimeOfDay, type BiomeData } from "@jbcom/strata";
 import * as THREE from "three";
+import { ParallaxBackgroundSystem } from "./ecs/SpriteRenderer";
 
 interface PlatformProps {
   id: string;
@@ -129,6 +130,7 @@ function BiomeVegetation() {
 
 export function Level() {
   const playerX = useStore((s) => s.playerX);
+  const biomeIndex = useStore((s) => s.biomeIndex);
   const setBiomeMeta = useStore((s) => s.setBiomeMeta);
 
   useFrame(() => {
@@ -140,6 +142,7 @@ export function Level() {
 
   return (
     <>
+      <ParallaxBackgroundSystem biomeIndex={biomeIndex} playerX={playerX} />
       <StrataEnvironment />
       <BiomeVegetation />
       <ProceduralPlatforms />

@@ -7,15 +7,22 @@ import GameOverMenu from "@/components/hud/GameOver";
 import TouchControls from "@/components/hud/TouchControls";
 import DamageFlash from "@/components/hud/DamageFlash";
 import PostFX from "@/components/hud/PostFX";
+import ChapterPlate from "@/components/hud/ChapterPlate";
+import { ParallaxBackground } from "@/game/ParallaxBackground";
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative w-full h-screen overflow-hidden bg-black">
+      <div
+        className="relative w-full h-screen overflow-hidden bg-black"
+        style={{ touchAction: "none" }}
+      >
+        <ParallaxBackground />
         <Game />
         <PostFX />
         <DamageFlash />
         <HUD />
+        <ChapterPlate />
         <StartMenu />
         <GameOverMenu />
         <TouchControls />

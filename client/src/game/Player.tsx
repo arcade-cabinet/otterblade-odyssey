@@ -22,7 +22,7 @@ export function Player() {
   const hitPlayer = useStore((s) => s.hitPlayer);
 
   const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const materialRef = useRef<any>();
+  const materialRef = useRef<any>(null);
 
   const grounded = useRef(false);
   const coyoteTimer = useRef(0);
