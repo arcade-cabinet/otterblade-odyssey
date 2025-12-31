@@ -1,19 +1,17 @@
 /**
- * CinematicPlayer - Full-screen video player for intro/outro/chapter cinematics
+ * CinematicPlayer - Seamless full-screen video player for cinematics
  *
- * Handles:
- * - Intro cinematic before StartMenu
- * - Outro cinematic after final boss
- * - Chapter opening cinematics (future)
- * - Boss arrival cinematics (future)
+ * Features:
+ * - Autoplay with muted fallback (browser policy)
+ * - Smooth fade transitions
+ * - Tap/click anywhere to skip (after brief delay)
+ * - No ugly play buttons or loading states
  */
 
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Fade from '@mui/material/Fade';
 import Typography from '@mui/material/Typography';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { hapticMedium } from '@/lib/capacitor';
+import { hapticLight } from '@/lib/capacitor';
 import { brandColors } from '@/lib/theme';
 
 // Import cinematics
@@ -23,88 +21,118 @@ import outroVideo from '@/assets/videos/outro_victory_sunrise_scene.mp4';
 export type CinematicType = 'intro' | 'outro' | 'chapter' | 'boss' | null;
 
 interface CinematicPlayerProps {
-  /** Type of cinematic to play */
   type: CinematicType;
-  /** Optional chapter ID for chapter/boss cinematics */
   chapterId?: number;
-  /** Callback when cinematic ends or is skipped */
   onComplete: () => void;
-  /** Whether the cinematic can be skipped */
   skippable?: boolean;
 }
 
-/** Map cinematic types to video sources */
 const CINEMATIC_SOURCES: Record<string, string> = {
   intro: introVideo,
   outro: outroVideo,
-  // Chapter and boss cinematics would be added here
-  // These would be dynamically loaded based on chapterId
 };
 
 export default function CinematicPlayer({
   type,
-  chapterId,
   onComplete,
   skippable = true,
 }: CinematicPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [showSkip, setShowSkip] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [phase, setPhase] = useState<'fade-in' | 'playing' | 'fade-out'>('fade-in');
+  const [canSkip, setCanSkip] = useState(false);
+  const hasCompletedRef = useRef(false);
 
-  // Get video source based on type
   const videoSrc = type ? CINEMATIC_SOURCES[type] : null;
 
-  // Handle video end
-  const handleVideoEnd = useCallback(() => {
-    setFadeOut(true);
+  // Complete the cinematic with fade out
+  const completeCinematic = useCallback(() => {
+    if (hasCompletedRef.current) return;
+    hasCompletedRef.current = true;
+
+    setPhase('fade-out');
     setTimeout(() => {
       onComplete();
-    }, 500);
+    }, 600);
   }, [onComplete]);
 
-  // Handle skip
-  const handleSkip = useCallback(async () => {
-    await hapticMedium();
-    handleVideoEnd();
-  }, [handleVideoEnd]);
+  // Handle skip interaction
+  const handleSkip = useCallback(() => {
+    if (!canSkip || !skippable) return;
+    hapticLight();
+    completeCinematic();
+  }, [canSkip, skippable, completeCinematic]);
 
-  // Play video on mount
+  // Initialize video playback
   useEffect(() => {
     if (!videoSrc || !videoRef.current) return;
 
     const video = videoRef.current;
+    hasCompletedRef.current = false;
 
-    const playVideo = async () => {
+    const startPlayback = async () => {
       try {
+        // Try unmuted first for full experience
+        video.muted = false;
         video.currentTime = 0;
         await video.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.warn('Video autoplay blocked, showing skip option:', error);
-        setShowSkip(true);
+      } catch {
+        // Browser blocked unmuted autoplay - try muted
+        try {
+          video.muted = true;
+          await video.play();
+        } catch {
+          // Video completely blocked - just complete after showing the frame
+          console.warn('Video autoplay blocked, skipping cinematic');
+          setTimeout(completeCinematic, 2000);
+        }
       }
     };
 
-    playVideo();
+    // Fade in first, then start video
+    const fadeInTimer = setTimeout(() => {
+      setPhase('playing');
+      startPlayback();
+    }, 100);
 
-    // Show skip button after delay
+    // Enable skip after 1.5 seconds (enough to see something)
     const skipTimer = setTimeout(() => {
-      if (skippable) setShowSkip(true);
-    }, 2000);
+      if (skippable) setCanSkip(true);
+    }, 1500);
 
     return () => {
+      clearTimeout(fadeInTimer);
       clearTimeout(skipTimer);
       video.pause();
     };
-  }, [videoSrc, skippable]);
+  }, [videoSrc, skippable, completeCinematic]);
 
-  // Handle keyboard skip
+  // Handle video end
   useEffect(() => {
-    if (!skippable || !showSkip) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleEnded = () => completeCinematic();
+    const handleError = () => {
+      console.error('Video playback error');
+      setTimeout(completeCinematic, 1000);
+    };
+
+    video.addEventListener('ended', handleEnded);
+    video.addEventListener('error', handleError);
+
+    return () => {
+      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('error', handleError);
+    };
+  }, [completeCinematic]);
+
+  // Keyboard skip
+  useEffect(() => {
+    if (!canSkip || !skippable) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') {
+      if (['Space', 'Enter', 'Escape'].includes(e.code)) {
         e.preventDefault();
         handleSkip();
       }
@@ -112,110 +140,75 @@ export default function CinematicPlayer({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [skippable, showSkip, handleSkip]);
+  }, [canSkip, skippable, handleSkip]);
 
   if (!type || !videoSrc) return null;
 
   return (
-    <Fade in={!fadeOut} timeout={500}>
-      <Box
-        data-testid="cinematic-player"
-        sx={{
-          position: 'fixed',
+    <Box
+      ref={containerRef}
+      data-testid="cinematic-player"
+      onClick={handleSkip}
+      onTouchEnd={handleSkip}
+      sx={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 100,
+        backgroundColor: '#000',
+        cursor: canSkip ? 'pointer' : 'default',
+        opacity: phase === 'fade-in' ? 0 : phase === 'fade-out' ? 0 : 1,
+        transition: 'opacity 0.6s ease-in-out',
+      }}
+    >
+      {/* Video - fills screen */}
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        playsInline
+        preload="auto"
+        style={{
+          position: 'absolute',
           inset: 0,
-          zIndex: 100,
-          backgroundColor: '#000',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
         }}
-        onClick={() => showSkip && skippable && handleSkip()}
+      />
+
+      {/* Subtle vignette overlay */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Skip hint - subtle, appears after delay */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: { xs: 16, sm: 24 },
+          right: { xs: 16, sm: 24 },
+          opacity: canSkip ? 0.5 : 0,
+          transition: 'opacity 0.5s ease',
+          pointerEvents: 'none',
+        }}
       >
-        {/* Video */}
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          onEnded={handleVideoEnd}
-          onError={() => {
-            console.error('Video failed to load');
-            setShowSkip(true);
+        <Typography
+          variant="caption"
+          sx={{
+            color: brandColors.stoneBeige.dark,
+            fontSize: '0.7rem',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
           }}
-          playsInline
-          muted={false}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
-
-        {/* Skip button */}
-        <Fade in={showSkip && skippable}>
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: { xs: 24, sm: 40 },
-              right: { xs: 24, sm: 40 },
-            }}
-          >
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSkip();
-              }}
-              sx={{
-                borderColor: brandColors.stoneBeige.main,
-                color: brandColors.stoneBeige.main,
-                opacity: 0.8,
-                fontSize: '0.75rem',
-                px: 2,
-                py: 0.5,
-                '&:hover': {
-                  borderColor: brandColors.honeyGold.main,
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  opacity: 1,
-                },
-              }}
-            >
-              Skip →
-            </Button>
-          </Box>
-        </Fade>
-
-        {/* Loading/error state */}
-        {!isPlaying && !showSkip && (
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#000',
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                color: brandColors.stoneBeige.dark,
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}
-            >
-              Loading...
-            </Typography>
-          </Box>
-        )}
-
-        <style>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-          }
-        `}</style>
+        >
+          Tap to skip
+        </Typography>
       </Box>
-    </Fade>
+    </Box>
   );
 }
 
