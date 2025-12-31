@@ -43,6 +43,9 @@ import bg from "./assets/...";
 ### 4. TypeScript Target is ES2022
 Required for Miniplex query iteration. Never downgrade to ES2021 or lower.
 
+### 5. Node.js Version is 25.x
+All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` at repo root. CI/CD workflows, Replit, and local dev must all align to this version.
+
 ## Architecture Overview
 
 ### Technology Stack

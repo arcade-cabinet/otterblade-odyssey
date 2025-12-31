@@ -4,6 +4,16 @@
 
 Otterblade Odyssey: Zephyros Rising is a production-grade React 2D side-scrolling platformer set in the unique world of Willowmere Hearthhold. Features Prince of Persia-style precision platforming with warm, cozy emotional tone. The game uses rapier2d-compat physics, Miniplex ECS, JSON-based content with Zod validation, and mobile-first touch controls.
 
+## Runtime Requirements
+
+| Requirement | Version | Source |
+|-------------|---------|--------|
+| **Node.js** | 25.x | `.nvmrc` |
+| **pnpm** | 10.x | `package.json` |
+| **TypeScript** | ES2022 target | `tsconfig.json` |
+
+All environments (local, CI, Replit) are aligned via `.nvmrc`.
+
 ## User Preferences
 
 - Preferred communication style: Simple, everyday language
@@ -400,11 +410,15 @@ Features:
 
 ## Recent Changes
 
-- **2024-12-31**: Updated all GitHub Actions to latest SHA-pinned versions
-- **2024-12-31**: Created comprehensive asset generation documentation in replit.md
-- **2024-12-31**: Added asset_agent.md with full generation workflow docs
-- **2024-12-31**: Updated CLAUDE.md and AGENTS.md with manifest system details
-- **2024-12-31**: Enhanced gameplay_agent.md and render_agent.md
+- **2025-12-31**: Upgraded to Node.js 25.x (latest stable) across all environments
+- **2025-12-31**: Merged replit.nix into .replit, removed separate nix file
+- **2025-12-31**: Added .nvmrc for consistent Node.js version alignment
+- **2025-12-31**: Ran pnpm upgrade with Node.js 25, updated testing libraries
+- **2025-12-31**: Updated all GitHub Actions to latest SHA-pinned versions
+- **2025-12-31**: Created comprehensive asset generation documentation in replit.md
+- **2025-12-31**: Added asset_agent.md with full generation workflow docs
+- **2025-12-31**: Updated CLAUDE.md and AGENTS.md with manifest system details
+- **2025-12-31**: Enhanced gameplay_agent.md and render_agent.md
 - **2024-12-31**: Generated all 8 chapter opening cinematics and 5 boss arrival videos
 - **2024-12-31**: Created proofs/ package for sprite sheet testing without WebGL
 - **2024-12-31**: Generated missing parallax backgrounds (village morning, new dawn hall)

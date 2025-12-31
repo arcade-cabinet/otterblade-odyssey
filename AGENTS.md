@@ -21,13 +21,14 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
+| **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
 | Rendering | @react-three/fiber | Orthographic 2D mode |
 | Physics | @dimforge/rapier2d-compat | 2D physics only |
 | Entity Management | Miniplex + miniplex-react | Resources for state |
 | State | Zustand | Gameplay state |
 | Styling | Tailwind CSS v4 | HUD/UI only |
 | UI Components | shadcn/ui + Radix | Menus, dialogs |
-| Package Manager | **pnpm** (never npm/yarn) | |
+| Package Manager | **pnpm 10.x** (never npm/yarn) | |
 | Linting | Biome | Strict mode |
 
 **Removed**: @react-three/rapier, @jbcom/strata (3D not needed for 2D side-scroller)
