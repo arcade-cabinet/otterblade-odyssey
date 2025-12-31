@@ -1,4 +1,4 @@
-import { useStore } from "@/game/store";
+import { useStore } from '@/game/store';
 
 export default function StartMenu() {
   const gameStarted = useStore((s) => s.gameStarted);
@@ -15,7 +15,7 @@ export default function StartMenu() {
     >
       <h1
         className="text-5xl md:text-6xl font-bold text-sky-400 mb-3 tracking-wide text-center"
-        style={{ textShadow: "0 0 20px rgba(14,165,233,0.9)" }}
+        style={{ textShadow: '0 0 20px rgba(14,165,233,0.9)' }}
       >
         Otterblade Odyssey
       </h1>
@@ -29,6 +29,7 @@ export default function StartMenu() {
       </div>
 
       <button
+        type="button"
         onClick={startGame}
         data-testid="button-start-game"
         className="px-10 py-4 bg-transparent border-2 border-sky-400 text-sky-400 font-bold cursor-pointer transition-all duration-200 uppercase tracking-widest text-lg hover:bg-sky-400 hover:text-black hover:shadow-[0_0_22px_rgba(56,189,248,0.8)]"

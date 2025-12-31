@@ -1,46 +1,46 @@
-import { Canvas } from "@react-three/fiber";
-import { PhysicsWrapper } from "./Physics";
-import { Level } from "./Level";
-import { Player } from "./Player";
-import { Suspense, useEffect, useState, Component, type ReactNode } from "react";
-import { useStore } from "./store";
+import { Canvas } from '@react-three/fiber';
+import { Component, type ReactNode, Suspense, useEffect, useState } from 'react';
+import { Level } from './Level';
+import { PhysicsWrapper } from './Physics';
+import { Player } from './Player';
+import { useStore } from './store';
 
 function KeyboardControls() {
   const setControl = useStore((s) => s.setControl);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "KeyA" || e.code === "ArrowLeft") setControl("left", true);
-      if (e.code === "KeyD" || e.code === "ArrowRight") setControl("right", true);
-      if (e.code === "KeyW" || e.code === "ArrowUp") setControl("up", true);
-      if (e.code === "KeyS" || e.code === "ArrowDown" || e.code === "ControlLeft")
-        setControl("crouch", true);
-      if (e.code === "Space") {
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') setControl('left', true);
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') setControl('right', true);
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') setControl('up', true);
+      if (e.code === 'KeyS' || e.code === 'ArrowDown' || e.code === 'ControlLeft')
+        setControl('crouch', true);
+      if (e.code === 'Space') {
         e.preventDefault();
-        setControl("jump", true);
+        setControl('jump', true);
       }
-      if (e.code === "KeyK" || e.code === "KeyX") setControl("attack", true);
+      if (e.code === 'KeyK' || e.code === 'KeyX') setControl('attack', true);
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === "KeyA" || e.code === "ArrowLeft") setControl("left", false);
-      if (e.code === "KeyD" || e.code === "ArrowRight") setControl("right", false);
-      if (e.code === "KeyW" || e.code === "ArrowUp") setControl("up", false);
-      if (e.code === "KeyS" || e.code === "ArrowDown" || e.code === "ControlLeft")
-        setControl("crouch", false);
-      if (e.code === "Space") {
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') setControl('left', false);
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') setControl('right', false);
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') setControl('up', false);
+      if (e.code === 'KeyS' || e.code === 'ArrowDown' || e.code === 'ControlLeft')
+        setControl('crouch', false);
+      if (e.code === 'Space') {
         e.preventDefault();
-        setControl("jump", false);
+        setControl('jump', false);
       }
-      if (e.code === "KeyK" || e.code === "KeyX") setControl("attack", false);
+      if (e.code === 'KeyK' || e.code === 'KeyX') setControl('attack', false);
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [setControl]);
 
@@ -80,8 +80,8 @@ function WebGLFallback() {
       <div className="text-center p-8">
         <h1 className="text-3xl font-bold text-sky-400 mb-4">WebGL Required</h1>
         <p className="text-slate-400 max-w-md">
-          Otterblade Odyssey requires WebGL to run. Please use a browser with WebGL support
-          (Chrome, Firefox, Safari, or Edge).
+          Otterblade Odyssey requires WebGL to run. Please use a browser with WebGL support (Chrome,
+          Firefox, Safari, or Edge).
         </p>
       </div>
     </div>
@@ -90,8 +90,8 @@ function WebGLFallback() {
 
 function checkWebGLSupport(): boolean {
   try {
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
     return !!gl;
   } catch {
     return false;
@@ -114,7 +114,7 @@ export default function Game() {
       <KeyboardControls />
       <WebGLErrorBoundary fallback={<WebGLFallback />}>
         <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
-          <color attach="background" args={["#1a1a2e"]} />
+          <color attach="background" args={['#1a1a2e']} />
           <Suspense fallback={null}>
             <PhysicsWrapper>
               <Player />

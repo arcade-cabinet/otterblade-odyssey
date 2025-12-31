@@ -3,7 +3,7 @@
  * All game content loaded from JSON must pass through these schemas.
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Schema for chapter asset references
@@ -50,8 +50,8 @@ export const BiomeSchema = z.object({
   name: z.string().min(1),
   chapterIds: z.array(z.number().int().nonnegative()),
   colors: BiomeColorsSchema,
-  atmosphere: z.enum(["warm", "serene", "cozy", "tense", "hopeful", "dramatic", "triumphant"]),
-  timeOfDay: z.enum(["morning", "afternoon", "evening", "night", "dawn", "sunset", "sunrise"]),
+  atmosphere: z.enum(['warm', 'serene', 'cozy', 'tense', 'hopeful', 'dramatic', 'triumphant']),
+  timeOfDay: z.enum(['morning', 'afternoon', 'evening', 'night', 'dawn', 'sunset', 'sunrise']),
 });
 
 /**
@@ -77,12 +77,14 @@ export const AnimationStateSchema = z.object({
   name: z.string().min(1),
   frames: z.array(AnimationFrameSchema),
   loop: z.boolean(),
-  hitbox: z.object({
-    offsetX: z.number(),
-    offsetY: z.number(),
-    width: z.number().positive(),
-    height: z.number().positive(),
-  }).optional(),
+  hitbox: z
+    .object({
+      offsetX: z.number(),
+      offsetY: z.number(),
+      width: z.number().positive(),
+      height: z.number().positive(),
+    })
+    .optional(),
 });
 
 /**

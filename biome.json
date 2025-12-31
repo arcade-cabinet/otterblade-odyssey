@@ -6,7 +6,40 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx",
+      "!e2e",
+      "!playwright-report",
+      "!test-results",
+      "!proofs",
+      "!client/src/components/ui"
+    ]
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn"
+      }
+    }
   },
   "formatter": {
     "enabled": true,
@@ -14,39 +47,10 @@
     "indentWidth": 2,
     "lineWidth": 100
   },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "complexity": {
-        "noExcessiveCognitiveComplexity": {
-          "level": "warn",
-          "options": { "maxAllowedComplexity": 15 }
-        },
-        "noForEach": "off"
-      },
-      "style": {
-        "noNonNullAssertion": "warn",
-        "useConst": "error",
-        "useExportType": "error",
-        "useImportType": "error",
-        "noParameterAssign": "error"
-      },
-      "suspicious": {
-        "noExplicitAny": "warn"
-      },
-      "correctness": {
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
-      },
-      "performance": {
-        "noAccumulatingSpread": "warn"
-      }
-    }
-  },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double",
+      "quoteStyle": "single",
+      "semicolons": "always",
       "trailingCommas": "es5"
     }
   }

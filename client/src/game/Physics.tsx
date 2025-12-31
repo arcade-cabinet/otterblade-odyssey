@@ -1,5 +1,5 @@
-import { Physics2DProvider } from "./Physics2D";
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
+import { Physics2DProvider } from './Physics2D';
 
 interface PhysicsWrapperProps {
   children: ReactNode;
@@ -7,9 +7,5 @@ interface PhysicsWrapperProps {
 }
 
 export function PhysicsWrapper({ children }: PhysicsWrapperProps) {
-  return (
-    <Physics2DProvider gravity={{ x: 0, y: -30 }}>
-      {children}
-    </Physics2DProvider>
-  );
+  return <Physics2DProvider gravity={{ x: 0, y: -30 }}>{children}</Physics2DProvider>;
 }

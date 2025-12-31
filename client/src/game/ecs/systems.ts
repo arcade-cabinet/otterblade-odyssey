@@ -1,5 +1,5 @@
-import { queries, world, type Entity } from "./world";
-import type { With } from "miniplex";
+import type { With } from 'miniplex';
+import { type Entity, queries, world } from './world';
 
 const SPEED = 10;
 const JUMP_FORCE = 14;
@@ -26,17 +26,17 @@ export function gravitySystem(dt: number) {
 export function controlSystem(dt: number) {
   for (const entity of queries.controlled) {
     const { controls, velocity } = entity;
-    
+
     let moveX = 0;
     if (controls.left) moveX = -1;
     if (controls.right) moveX = 1;
-    
+
     velocity.x = moveX * SPEED;
-    
+
     if (moveX !== 0) {
       entity.facingRight = moveX > 0;
     }
-    
+
     if (entity.coyoteTime !== undefined) {
       if (entity.grounded) {
         entity.coyoteTime = COYOTE_TIME;
@@ -44,7 +44,7 @@ export function controlSystem(dt: number) {
         entity.coyoteTime = Math.max(0, entity.coyoteTime - dt);
       }
     }
-    
+
     if (entity.jumpBuffer !== undefined) {
       if (controls.jump) {
         entity.jumpBuffer = JUMP_BUFFER;
@@ -52,7 +52,7 @@ export function controlSystem(dt: number) {
         entity.jumpBuffer = Math.max(0, entity.jumpBuffer - dt);
       }
     }
-    
+
     if (
       entity.jumpBuffer !== undefined &&
       entity.coyoteTime !== undefined &&
@@ -70,7 +70,7 @@ export function controlSystem(dt: number) {
 export function healthSystem() {
   for (const entity of queries.withHealth) {
     if (entity.health.current <= 0) {
-      world.addComponent(entity, "dead", true);
+      world.addComponent(entity, 'dead', true);
     }
   }
 }
@@ -87,7 +87,7 @@ export function cleanupSystem() {
   }
 }
 
-export function damageEntity(entity: With<Entity, "health">, amount: number) {
+export function damageEntity(entity: With<Entity, 'health'>, amount: number) {
   entity.health.current -= amount;
 }
 
@@ -112,7 +112,7 @@ export function spawnPlayer(x: number, y: number): Entity {
 }
 
 export function spawnEnemy(
-  type: Entity["enemy"],
+  type: Entity['enemy'],
   x: number,
   y: number,
   health: number = 3

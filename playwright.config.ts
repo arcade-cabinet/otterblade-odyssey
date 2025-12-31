@@ -1,4 +1,4 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright E2E test configuration for Otterblade Odyssey
@@ -10,81 +10,90 @@ import { defineConfig, devices } from "@playwright/test";
  * @see https://playwright.dev/docs/test-configuration
  */
 
-const hasMcpSupport = process.env.PLAYWRIGHT_MCP === "true";
+// Check if running with full Playwright MCP capabilities
+const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 const isCI = !!process.env.CI;
 
 export default defineConfig({
-  testDir: "./e2e",
+  testDir: './e2e',
+  // Run tests in files in parallel
   fullyParallel: true,
+  // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: isCI,
+  // Retry on CI only (not needed with MCP)
   retries: hasMcpSupport ? 0 : isCI ? 2 : 0,
+  // Parallel workers - more with MCP, fewer in CI
   workers: hasMcpSupport ? undefined : isCI ? 2 : undefined,
+  // Longer timeout for WebGL rendering with MCP
   timeout: hasMcpSupport ? 60000 : 30000,
-  reporter: [["html", { outputFolder: "playwright-report" }], ["list"]],
+  // Reporter to use
+  reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
+  // Shared settings for all the projects below
   use: {
-    baseURL: hasMcpSupport ? "http://localhost:5000" : "http://localhost:4173",
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
+    // Base URL to use in actions like `await page.goto('/')`
+    baseURL: hasMcpSupport ? 'http://localhost:5000' : 'http://localhost:4173',
+    // Collect trace when retrying the failed test
+    trace: 'on-first-retry',
+    // Take screenshot on failure
+    screenshot: 'only-on-failure',
+    // Headed mode when MCP is available
     headless: !hasMcpSupport,
-    video: hasMcpSupport ? "on-first-retry" : "off",
+    // Video recording with MCP for debugging
+    video: hasMcpSupport ? 'on-first-retry' : 'off',
+    // Increased action timeout for WebGL rendering
     actionTimeout: 10000,
   },
+  // Expect options for visual regression
   expect: {
+    // Timeout for expect() calls
     timeout: 10000,
+    // Screenshot comparison settings
     toHaveScreenshot: {
+      // Maximum number of pixels that can differ
       maxDiffPixels: 100,
-      animations: "disabled",
-      caret: "hide",
+      // Animation handling
+      animations: 'disabled',
+      // CSS media features
+      caret: 'hide',
     },
   },
+  // Configure projects for major browsers
   projects: [
     {
-      name: "chromium",
+      name: 'chromium',
       use: {
-        ...devices["Desktop Chrome"],
+        ...devices['Desktop Chrome'],
+        // Different launch options based on environment
         launchOptions: hasMcpSupport
           ? {
-              args: ["--enable-webgl", "--ignore-gpu-blocklist"],
+              // MCP mode - headed with full GPU
+              args: ['--enable-webgl', '--ignore-gpu-blocklist'],
             }
           : {
+              // Headless mode - software rendering
               args: [
-                "--use-gl=swiftshader",
-                "--enable-webgl",
-                "--ignore-gpu-blocklist",
-                "--disable-gpu-sandbox",
-              ],
-            },
-      },
-    },
-    {
-      name: "Mobile Chrome",
-      use: {
-        ...devices["Pixel 5"],
-        launchOptions: hasMcpSupport
-          ? {
-              args: ["--enable-webgl", "--ignore-gpu-blocklist"],
-            }
-          : {
-              args: [
-                "--use-gl=swiftshader",
-                "--enable-webgl",
-                "--ignore-gpu-blocklist",
-                "--disable-gpu-sandbox",
+                '--use-gl=swiftshader',
+                '--enable-webgl',
+                '--ignore-gpu-blocklist',
+                '--disable-gpu-sandbox',
               ],
             },
       },
     },
   ],
+  // Run your local dev server before starting the tests
   webServer: hasMcpSupport
     ? {
-        command: "pnpm run dev",
-        url: "http://localhost:5000",
+        // MCP mode: Use dev server for interactive testing
+        command: 'pnpm run dev:client',
+        url: 'http://localhost:5000',
         reuseExistingServer: false,
         timeout: 120000,
       }
     : {
-        command: "pnpm build && pnpm preview",
-        url: "http://localhost:4173",
+        // CI mode: Use production preview
+        command: 'pnpm build:client && pnpm preview',
+        url: 'http://localhost:4173',
         reuseExistingServer: !isCI,
         timeout: 120000,
       },

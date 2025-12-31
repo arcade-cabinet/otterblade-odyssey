@@ -3,5 +3,5 @@
  * Import all game data through this file.
  */
 
-export * from "./schemas";
-export * from "./loaders";
+export * from './loaders';
+export * from './schemas';

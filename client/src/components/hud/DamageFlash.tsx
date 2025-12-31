@@ -1,5 +1,5 @@
-import { useStore } from "@/game/store";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { useStore } from '@/game/store';
 
 export default function DamageFlash() {
   const damageFlash = useStore((s) => s.damageFlash);
@@ -17,10 +17,10 @@ export default function DamageFlash() {
 
   return (
     <div
-      className={`absolute inset-0 pointer-events-none z-[11] transition-opacity duration-100 ${show ? "opacity-100" : "opacity-0"}`}
+      className={`absolute inset-0 pointer-events-none z-[11] transition-opacity duration-100 ${show ? 'opacity-100' : 'opacity-0'}`}
       style={{
         background:
-          "radial-gradient(circle at 50% 50%, rgba(244,63,94,0.22) 0%, rgba(244,63,94,0.0) 70%)",
+          'radial-gradient(circle at 50% 50%, rgba(244,63,94,0.22) 0%, rgba(244,63,94,0.0) 70%)',
       }}
     />
   );

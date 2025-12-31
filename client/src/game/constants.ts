@@ -4,8 +4,8 @@
  * Runtime values and physics constants defined here.
  */
 
-import type { BiomeColors, Chapter as ChapterData } from "./data";
-import { getBiomeColorsArray, loadBiomes, loadChapters } from "./data";
+import type { BiomeColors, Chapter as ChapterData } from './data';
+import { getBiomeColorsArray, loadBiomes, loadChapters } from './data';
 
 /** Chunk size for procedural generation */
 export const CHUNK_SIZE = 48;
@@ -35,11 +35,11 @@ export interface Chapter extends ChapterData {
 
 /** Fallback biome colors if data fails to load */
 const FALLBACK_COLORS: BiomeColors = {
-  bg: "#2d4a3e",
-  fog: "#4a6a5e",
-  accent: "#c4a35a",
-  sky1: "#87ceeb",
-  sky2: "#4a6a5e",
+  bg: '#2d4a3e',
+  fog: '#4a6a5e',
+  accent: '#c4a35a',
+  sky1: '#87ceeb',
+  sky2: '#4a6a5e',
 };
 
 /**
@@ -58,7 +58,7 @@ function loadChaptersWithColors(): Chapter[] {
     if (unmappedChapters.length > 0) {
       console.warn(
         `[constants] ${unmappedChapters.length} chapters have no biome mapping: ` +
-          unmappedChapters.map((ch) => ch.name).join(", ")
+          unmappedChapters.map((ch) => ch.name).join(', ')
       );
     }
 
@@ -79,18 +79,18 @@ function loadChaptersWithColors(): Chapter[] {
       };
     });
   } catch (error) {
-    console.error("[constants] Failed to load chapter data:", error);
+    console.error('[constants] Failed to load chapter data:', error);
     return [
       {
         id: 0,
-        name: "Error Loading Data",
-        setting: "Unknown",
-        quest: "Please refresh the page",
+        name: 'Error Loading Data',
+        setting: 'Unknown',
+        quest: 'Please refresh the page',
         hasBoss: false,
         bossName: null,
         assets: {
-          chapterPlate: "",
-          parallaxBg: "",
+          chapterPlate: '',
+          parallaxBg: '',
         },
         bg: FALLBACK_COLORS.bg,
         fog: FALLBACK_COLORS.fog,
@@ -130,12 +130,12 @@ export const CG = {
 
 /** Story event types for ECS */
 export const STORY_EVENTS = {
-  CHAPTER_START: "chapter_start",
-  CHAPTER_COMPLETE: "chapter_complete",
-  BOSS_ENCOUNTER: "boss_encounter",
-  BOSS_DEFEATED: "boss_defeated",
-  CUTSCENE_START: "cutscene_start",
-  CUTSCENE_END: "cutscene_end",
+  CHAPTER_START: 'chapter_start',
+  CHAPTER_COMPLETE: 'chapter_complete',
+  BOSS_ENCOUNTER: 'boss_encounter',
+  BOSS_DEFEATED: 'boss_defeated',
+  CUTSCENE_START: 'cutscene_start',
+  CUTSCENE_END: 'cutscene_end',
 } as const;
 
 export type StoryEventType = (typeof STORY_EVENTS)[keyof typeof STORY_EVENTS];

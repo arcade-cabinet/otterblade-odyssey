@@ -1,11 +1,7 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import type { Server } from 'node:http';
+import type { Express } from 'express';
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
+export async function registerRoutes(httpServer: Server, _app: Express): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
 

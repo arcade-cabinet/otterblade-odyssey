@@ -1,8 +1,8 @@
-import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef, useMemo } from "react";
-import { useStore } from "./store";
-import { usePhysics2D, RAPIER } from "./Physics2D";
-import * as THREE from "three";
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useRef } from 'react';
+import { PlayerSprite } from './components/PlayerSprite';
+import { type RAPIER, usePhysics2D } from './Physics2D';
+import { useStore } from './store';
 
 const SPEED = 10;
 const JUMP_FORCE = 14;
@@ -11,7 +11,7 @@ const JUMP_BUFFER = 0.1;
 
 export function Player() {
   const { world, rapier } = usePhysics2D();
-  
+
   const runId = useStore((s) => s.runId);
   const checkpointX = useStore((s) => s.checkpointX);
   const checkpointY = useStore((s) => s.checkpointY);
@@ -23,7 +23,7 @@ export function Player() {
   const hitPlayer = useStore((s) => s.hitPlayer);
 
   const rigidBodyRef = useRef<RAPIER.RigidBody | null>(null);
-  const meshRef = useRef<THREE.Mesh>(null);
+  const spritePosition = useRef<[number, number, number]>([checkpointX, checkpointY, 0.5]);
 
   const grounded = useRef(false);
   const coyoteTimer = useRef(0);
@@ -40,9 +40,7 @@ export function Player() {
 
     const body = world.createRigidBody(bodyDesc);
 
-    const colliderDesc = rapier.ColliderDesc.ball(0.5)
-      .setFriction(0.1)
-      .setRestitution(0);
+    const colliderDesc = rapier.ColliderDesc.ball(0.5).setFriction(0.1).setRestitution(0);
     world.createCollider(colliderDesc, body);
 
     rigidBodyRef.current = body;
@@ -53,8 +51,11 @@ export function Player() {
         rigidBodyRef.current = null;
       }
     };
-  }, [world, rapier]);
+  }, [world, rapier, checkpointX, checkpointY]);
 
+  // Reset player position when game restarts or checkpoint changes
+  // runId is intentionally included to trigger reset on new game even if checkpoint is same
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runId triggers reset on new game
   useEffect(() => {
     if (rigidBodyRef.current) {
       rigidBodyRef.current.setTranslation({ x: checkpointX, y: checkpointY }, true);
@@ -70,9 +71,8 @@ export function Player() {
     const pos = rb.translation();
     const vel = rb.linvel();
 
-    if (meshRef.current) {
-      meshRef.current.position.set(pos.x, pos.y, 0);
-    }
+    // Update sprite position (offset slightly for visual centering)
+    spritePosition.current = [pos.x, pos.y + 0.5, 0.5];
 
     setPlayerPos(pos.x, pos.y);
     advanceScore(pos.x);
@@ -119,16 +119,9 @@ export function Player() {
     }
   });
 
-  const playerColor = useMemo(() => new THREE.Color("#8B6914"), []);
-
   if (!world || !rapier) {
     return null;
   }
 
-  return (
-    <mesh ref={meshRef} position={[checkpointX, checkpointY, 0]} castShadow>
-      <circleGeometry args={[0.6, 32]} />
-      <meshStandardMaterial color={playerColor} />
-    </mesh>
-  );
+  return <PlayerSprite position={spritePosition.current} />;
 }

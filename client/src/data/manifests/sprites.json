@@ -1,0 +1,36 @@
+{
+  "$schema": "./manifest-schema.json",
+  "category": "sprites",
+  "provider": "openai",
+  "model": "gpt-image-1",
+  "outputDir": "attached_assets/generated_images/sprites",
+  "assets": [
+    {
+      "id": "player_sprite_sheet",
+      "name": "Player Sprite Sheet",
+      "filename": "player_sprite_sheet.png",
+      "status": "pending",
+      "config": {
+        "columns": 6,
+        "rows": 4,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "1024x1024",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Otter warrior character (Finn Riverstone)",
+        "description": "River otter standing upright, athletic build, rich brown fur with cream chest/muzzle, leather vest, cloth belt with pouch, iron sword (NOT glowing)",
+        "style": "Clean pixel art with defined outlines, storybook aesthetic",
+        "layout": "Sprite sheet grid: Row 1 (Idle 4 + Run start 2), Row 2 (Run 4 + Jump 2), Row 3 (Fall 2 + Attack 4), Row 4 (Hurt 2 + Crouch 2)",
+        "technical": "Transparent PNG, side-view profile facing right, consistent proportions, readable silhouette"
+      },
+      "validation": {
+        "minFileSize": 50000,
+        "maxFileSize": 5000000,
+        "requiredDimensions": [768, 512]
+      }
+    }
+  ]
+}

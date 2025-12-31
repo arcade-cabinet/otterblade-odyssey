@@ -1,0 +1,30 @@
+{
+  "name": "@otterblade/dev-tools",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Development tools for Otterblade Odyssey - AI-powered asset generation using OpenAI and Google Gemini",
+  "private": true,
+  "scripts": {
+    "cli": "tsx src/cli.ts",
+    "generate:sprites": "tsx src/openai/generate-sprites.ts",
+    "generate:enemy-sprites": "tsx src/openai/generate-enemy-sprites.ts",
+    "generate:cinematic": "tsx src/google/generate-cinematic.ts",
+    "generate:scene": "tsx src/google/generate-scene.ts",
+    "analyze:sprite": "tsx src/openai/analyze-sprite.ts",
+    "analyze:video": "tsx src/google/analyze-video.ts",
+    "validate:assets": "tsx src/validate-assets.ts",
+    "audit:cinematics": "tsx src/audit-cinematics.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^0.14.1",
+    "openai": "^5.8.2",
+    "sharp": "^0.34.4",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.27",
+    "tsx": "^4.21.0",
+    "typescript": "^5.6.3"
+  }
+}

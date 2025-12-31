@@ -1,4 +1,4 @@
-import { useStore } from "@/game/store";
+import { useStore } from '@/game/store';
 
 export default function GameOverMenu() {
   const gameOver = useStore((s) => s.gameOver);
@@ -20,7 +20,7 @@ export default function GameOverMenu() {
     >
       <h1
         className="text-4xl md:text-5xl font-bold text-sky-400 mb-2 tracking-wider"
-        style={{ textShadow: "0 0 20px rgba(14,165,233,0.9)" }}
+        style={{ textShadow: '0 0 20px rgba(14,165,233,0.9)' }}
       >
         BLADE BROKEN
       </h1>
@@ -47,6 +47,7 @@ export default function GameOverMenu() {
       <div className="flex gap-4 flex-wrap justify-center">
         {canRespawn && (
           <button
+            type="button"
             onClick={respawn}
             data-testid="button-respawn"
             className="px-10 py-3 bg-transparent border-2 border-emerald-500 text-emerald-500 font-bold cursor-pointer transition-all duration-200 uppercase tracking-widest hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_22px_rgba(52,211,153,0.8)]"
@@ -55,6 +56,7 @@ export default function GameOverMenu() {
           </button>
         )}
         <button
+          type="button"
           onClick={startGame}
           data-testid="button-restart"
           className="px-10 py-3 bg-transparent border-2 border-sky-400 text-sky-400 font-bold cursor-pointer transition-all duration-200 uppercase tracking-widest hover:bg-sky-400 hover:text-black hover:shadow-[0_0_22px_rgba(56,189,248,0.8)]"
@@ -64,9 +66,7 @@ export default function GameOverMenu() {
       </div>
 
       {canRespawn && (
-        <p className="text-rose-500 mt-4 tracking-widest uppercase text-xs">
-          -900 Score Penalty
-        </p>
+        <p className="text-rose-500 mt-4 tracking-widest uppercase text-xs">-900 Score Penalty</p>
       )}
     </div>
   );

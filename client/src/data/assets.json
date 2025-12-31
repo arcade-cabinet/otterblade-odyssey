@@ -8,16 +8,66 @@
       "aspectRatio": "16:9",
       "style": "Storybook illustration, painterly, warm lighting",
       "items": [
-        { "id": "prologue", "file": "prologue_village_chapter_plate.png", "chapter": 0, "status": "complete" },
-        { "id": "abbey_approach", "file": "abbey_approach_chapter_plate.png", "chapter": 1, "status": "complete" },
-        { "id": "gatehouse", "file": "gatehouse_bridge_chapter_plate.png", "chapter": 2, "status": "complete" },
-        { "id": "great_hall", "file": "great_hall_oath_chapter_plate.png", "chapter": 3, "status": "complete" },
-        { "id": "library", "file": "library_map_table_chapter_plate.png", "chapter": 4, "status": "complete" },
-        { "id": "dungeon", "file": "dungeon_descent_chapter_plate.png", "chapter": 5, "status": "complete" },
-        { "id": "courtyard", "file": "courtyard_rally_chapter_plate.png", "chapter": 6, "status": "complete" },
-        { "id": "rooftop", "file": "rooftop_wind_chapter_plate.png", "chapter": 7, "status": "complete" },
-        { "id": "final_ascent", "file": "final_ascent_chapter_plate.png", "chapter": 8, "status": "complete" },
-        { "id": "epilogue", "file": "epilogue_victory_chapter_plate.png", "chapter": 9, "status": "complete" }
+        {
+          "id": "prologue",
+          "file": "prologue_village_chapter_plate.png",
+          "chapter": 0,
+          "status": "complete"
+        },
+        {
+          "id": "abbey_approach",
+          "file": "abbey_approach_chapter_plate.png",
+          "chapter": 1,
+          "status": "complete"
+        },
+        {
+          "id": "gatehouse",
+          "file": "gatehouse_bridge_chapter_plate.png",
+          "chapter": 2,
+          "status": "complete"
+        },
+        {
+          "id": "great_hall",
+          "file": "great_hall_oath_chapter_plate.png",
+          "chapter": 3,
+          "status": "complete"
+        },
+        {
+          "id": "library",
+          "file": "library_map_table_chapter_plate.png",
+          "chapter": 4,
+          "status": "complete"
+        },
+        {
+          "id": "dungeon",
+          "file": "dungeon_descent_chapter_plate.png",
+          "chapter": 5,
+          "status": "complete"
+        },
+        {
+          "id": "courtyard",
+          "file": "courtyard_rally_chapter_plate.png",
+          "chapter": 6,
+          "status": "complete"
+        },
+        {
+          "id": "rooftop",
+          "file": "rooftop_wind_chapter_plate.png",
+          "chapter": 7,
+          "status": "complete"
+        },
+        {
+          "id": "final_ascent",
+          "file": "final_ascent_chapter_plate.png",
+          "chapter": 8,
+          "status": "complete"
+        },
+        {
+          "id": "epilogue",
+          "file": "epilogue_victory_chapter_plate.png",
+          "chapter": 9,
+          "status": "complete"
+        }
       ]
     },
     "parallaxBackgrounds": {
@@ -25,14 +75,62 @@
       "aspectRatio": "16:9",
       "style": "Painterly landscape, atmospheric depth, 3-layer parallax",
       "items": [
-        { "id": "village_morning", "file": "village_morning_parallax_background.png", "biome": "village", "chapters": [0], "status": "complete" },
-        { "id": "outer_ruins", "file": "outer_ruins_parallax_background.png", "biome": "willowbanks", "chapters": [1], "status": "complete" },
-        { "id": "abbey_exterior", "file": "abbey_exterior_parallax_background.png", "biome": "willowbanks", "chapters": [2], "status": "complete" },
-        { "id": "abbey_interior", "file": "abbey_interior_parallax_background.png", "biome": "hearthhold_interior", "chapters": [3, 4], "status": "complete" },
-        { "id": "dungeon", "file": "dungeon_parallax_background.png", "biome": "deep_cellars", "chapters": [5], "status": "complete" },
-        { "id": "courtyard", "file": "courtyard_parallax_background.png", "biome": "gardens", "chapters": [6], "status": "complete" },
-        { "id": "rooftops", "file": "rooftops_parallax_background.png", "biome": "rooftops", "chapters": [7, 8], "status": "complete" },
-        { "id": "new_dawn", "file": "new_dawn_hall_parallax_background.png", "biome": "victory", "chapters": [9], "status": "complete" }
+        {
+          "id": "village_morning",
+          "file": "village_morning_parallax_background.png",
+          "biome": "village",
+          "chapters": [0],
+          "status": "complete"
+        },
+        {
+          "id": "outer_ruins",
+          "file": "outer_ruins_parallax_background.png",
+          "biome": "willowbanks",
+          "chapters": [1],
+          "status": "complete"
+        },
+        {
+          "id": "abbey_exterior",
+          "file": "abbey_exterior_parallax_background.png",
+          "biome": "willowbanks",
+          "chapters": [2],
+          "status": "complete"
+        },
+        {
+          "id": "abbey_interior",
+          "file": "abbey_interior_parallax_background.png",
+          "biome": "hearthhold_interior",
+          "chapters": [3, 4],
+          "status": "complete"
+        },
+        {
+          "id": "dungeon",
+          "file": "dungeon_parallax_background.png",
+          "biome": "deep_cellars",
+          "chapters": [5],
+          "status": "complete"
+        },
+        {
+          "id": "courtyard",
+          "file": "courtyard_parallax_background.png",
+          "biome": "gardens",
+          "chapters": [6],
+          "status": "complete"
+        },
+        {
+          "id": "rooftops",
+          "file": "rooftops_parallax_background.png",
+          "biome": "rooftops",
+          "chapters": [7, 8],
+          "status": "complete"
+        },
+        {
+          "id": "new_dawn",
+          "file": "new_dawn_hall_parallax_background.png",
+          "biome": "victory",
+          "chapters": [9],
+          "status": "complete"
+        }
       ]
     },
     "cinematics": {
@@ -40,21 +138,111 @@
       "aspectRatio": "16:9",
       "duration": "6-8 seconds",
       "items": [
-        { "id": "intro", "file": "intro_cinematic_otter's_journey.mp4", "type": "story", "chapter": null, "status": "complete" },
-        { "id": "outro", "file": "outro_victory_sunrise_scene.mp4", "type": "story", "chapter": null, "status": "complete" },
-        { "id": "chapter_1_open", "file": "chapter_1_opening_cinematic.mp4", "type": "chapter_open", "chapter": 1, "status": "complete" },
-        { "id": "chapter_2_open", "file": "chapter_2_gatehouse_opening.mp4", "type": "chapter_open", "chapter": 2, "status": "complete" },
-        { "id": "chapter_3_open", "file": "chapter_3_great_hall_opening.mp4", "type": "chapter_open", "chapter": 3, "status": "complete" },
-        { "id": "chapter_4_open", "file": "chapter_4_library_opening.mp4", "type": "chapter_open", "chapter": 4, "status": "complete" },
-        { "id": "chapter_5_open", "file": "chapter_5_dungeon_opening.mp4", "type": "chapter_open", "chapter": 5, "status": "complete" },
-        { "id": "chapter_6_open", "file": "chapter_6_courtyard_opening.mp4", "type": "chapter_open", "chapter": 6, "status": "complete" },
-        { "id": "chapter_7_open", "file": "chapter_7_bell_tower_opening.mp4", "type": "chapter_open", "chapter": 7, "status": "complete" },
-        { "id": "chapter_8_open", "file": "chapter_8_final_confrontation_opening.mp4", "type": "chapter_open", "chapter": 8, "status": "complete" },
-        { "id": "boss_gatehouse", "file": "gatehouse_guardian_boss_arrival.mp4", "type": "boss_intro", "chapter": 2, "status": "complete" },
-        { "id": "boss_hall", "file": "hall_invader_boss_arrival.mp4", "type": "boss_intro", "chapter": 3, "status": "complete" },
-        { "id": "boss_cellar", "file": "cellar_keeper_boss_arrival.mp4", "type": "boss_intro", "chapter": 5, "status": "complete" },
-        { "id": "boss_tower", "file": "bell_tower_sentinel_boss_arrival.mp4", "type": "boss_intro", "chapter": 7, "status": "complete" },
-        { "id": "boss_zephyros", "file": "zephyros_storm_hawk_boss_arrival.mp4", "type": "boss_intro", "chapter": 8, "status": "complete" }
+        {
+          "id": "intro",
+          "file": "intro_cinematic_otter's_journey.mp4",
+          "type": "story",
+          "chapter": null,
+          "status": "complete"
+        },
+        {
+          "id": "outro",
+          "file": "outro_victory_sunrise_scene.mp4",
+          "type": "story",
+          "chapter": null,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_1_open",
+          "file": "chapter_1_opening_cinematic.mp4",
+          "type": "chapter_open",
+          "chapter": 1,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_2_open",
+          "file": "chapter_2_gatehouse_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 2,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_3_open",
+          "file": "chapter_3_great_hall_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 3,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_4_open",
+          "file": "chapter_4_library_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 4,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_5_open",
+          "file": "chapter_5_dungeon_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 5,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_6_open",
+          "file": "chapter_6_courtyard_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 6,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_7_open",
+          "file": "chapter_7_bell_tower_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 7,
+          "status": "complete"
+        },
+        {
+          "id": "chapter_8_open",
+          "file": "chapter_8_final_confrontation_opening.mp4",
+          "type": "chapter_open",
+          "chapter": 8,
+          "status": "complete"
+        },
+        {
+          "id": "boss_gatehouse",
+          "file": "gatehouse_guardian_boss_arrival.mp4",
+          "type": "boss_intro",
+          "chapter": 2,
+          "status": "complete"
+        },
+        {
+          "id": "boss_hall",
+          "file": "hall_invader_boss_arrival.mp4",
+          "type": "boss_intro",
+          "chapter": 3,
+          "status": "complete"
+        },
+        {
+          "id": "boss_cellar",
+          "file": "cellar_keeper_boss_arrival.mp4",
+          "type": "boss_intro",
+          "chapter": 5,
+          "status": "complete"
+        },
+        {
+          "id": "boss_tower",
+          "file": "bell_tower_sentinel_boss_arrival.mp4",
+          "type": "boss_intro",
+          "chapter": 7,
+          "status": "complete"
+        },
+        {
+          "id": "boss_zephyros",
+          "file": "zephyros_storm_hawk_boss_arrival.mp4",
+          "type": "boss_intro",
+          "chapter": 8,
+          "status": "complete"
+        }
       ]
     },
     "spriteSheets": {
@@ -62,17 +250,94 @@
       "format": "PNG with transparency",
       "frameSize": { "width": 64, "height": 64 },
       "items": [
-        { "id": "finn_idle", "file": null, "character": "finn", "animation": "idle", "frames": 4, "status": "needed" },
-        { "id": "finn_run", "file": null, "character": "finn", "animation": "run", "frames": 8, "status": "needed" },
-        { "id": "finn_walk", "file": null, "character": "finn", "animation": "walk", "frames": 6, "status": "needed" },
-        { "id": "finn_jump", "file": null, "character": "finn", "animation": "jump", "frames": 4, "status": "needed" },
-        { "id": "finn_fall", "file": null, "character": "finn", "animation": "fall", "frames": 2, "status": "needed" },
-        { "id": "finn_crouch", "file": null, "character": "finn", "animation": "crouch", "frames": 2, "status": "needed" },
-        { "id": "finn_attack", "file": null, "character": "finn", "animation": "attack", "frames": 6, "status": "needed" },
-        { "id": "finn_parry", "file": null, "character": "finn", "animation": "parry", "frames": 4, "status": "needed" },
-        { "id": "finn_wall_climb", "file": null, "character": "finn", "animation": "wall_climb", "frames": 4, "status": "needed" },
-        { "id": "finn_hurt", "file": null, "character": "finn", "animation": "hurt", "frames": 2, "status": "needed" },
-        { "id": "finn_death", "file": null, "character": "finn", "animation": "death", "frames": 6, "status": "needed" }
+        {
+          "id": "finn_idle",
+          "file": null,
+          "character": "finn",
+          "animation": "idle",
+          "frames": 4,
+          "status": "needed"
+        },
+        {
+          "id": "finn_run",
+          "file": null,
+          "character": "finn",
+          "animation": "run",
+          "frames": 8,
+          "status": "needed"
+        },
+        {
+          "id": "finn_walk",
+          "file": null,
+          "character": "finn",
+          "animation": "walk",
+          "frames": 6,
+          "status": "needed"
+        },
+        {
+          "id": "finn_jump",
+          "file": null,
+          "character": "finn",
+          "animation": "jump",
+          "frames": 4,
+          "status": "needed"
+        },
+        {
+          "id": "finn_fall",
+          "file": null,
+          "character": "finn",
+          "animation": "fall",
+          "frames": 2,
+          "status": "needed"
+        },
+        {
+          "id": "finn_crouch",
+          "file": null,
+          "character": "finn",
+          "animation": "crouch",
+          "frames": 2,
+          "status": "needed"
+        },
+        {
+          "id": "finn_attack",
+          "file": null,
+          "character": "finn",
+          "animation": "attack",
+          "frames": 6,
+          "status": "needed"
+        },
+        {
+          "id": "finn_parry",
+          "file": null,
+          "character": "finn",
+          "animation": "parry",
+          "frames": 4,
+          "status": "needed"
+        },
+        {
+          "id": "finn_wall_climb",
+          "file": null,
+          "character": "finn",
+          "animation": "wall_climb",
+          "frames": 4,
+          "status": "needed"
+        },
+        {
+          "id": "finn_hurt",
+          "file": null,
+          "character": "finn",
+          "animation": "hurt",
+          "frames": 2,
+          "status": "needed"
+        },
+        {
+          "id": "finn_death",
+          "file": null,
+          "character": "finn",
+          "animation": "death",
+          "frames": 6,
+          "status": "needed"
+        }
       ]
     }
   },
