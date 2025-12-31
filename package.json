@@ -28,7 +28,11 @@
     "test:e2e:visual": "PLAYWRIGHT_MCP=true playwright test e2e/visual-regression.spec.ts",
     "test:e2e:update-snapshots": "PLAYWRIGHT_MCP=true playwright test --update-snapshots",
     "test:all": "pnpm test:unit && pnpm test:e2e",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "generate:sprites": "pnpm --filter @otterblade/dev-tools generate:sprites",
+    "generate:enemy-sprites": "pnpm --filter @otterblade/dev-tools generate:enemy-sprites",
+    "analyze:sprite": "pnpm --filter @otterblade/dev-tools analyze:sprite",
+    "validate:assets": "pnpm --filter @otterblade/dev-tools validate:assets"
   },
   "dependencies": {
     "@dimforge/rapier2d-compat": "^0.19.3",
