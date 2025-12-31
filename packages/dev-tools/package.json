@@ -5,6 +5,7 @@
   "description": "Development tools for Otterblade Odyssey - AI-powered asset generation using OpenAI and Google Gemini",
   "private": true,
   "scripts": {
+    "cli": "tsx src/cli.ts",
     "generate:sprites": "tsx src/openai/generate-sprites.ts",
     "generate:enemy-sprites": "tsx src/openai/generate-enemy-sprites.ts",
     "generate:cinematic": "tsx src/google/generate-cinematic.ts",

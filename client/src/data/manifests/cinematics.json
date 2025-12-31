@@ -1,0 +1,206 @@
+{
+  "$schema": "./manifest-schema.json",
+  "category": "cinematics",
+  "provider": "google",
+  "model": "veo-3.1",
+  "outputDir": "attached_assets/generated_videos",
+  "assets": [
+    {
+      "id": "intro_cinematic",
+      "name": "Intro Cinematic",
+      "filename": "intro_cinematic_otter's_journey.mp4",
+      "status": "needs_regeneration",
+      "reason": "Contains human characters instead of anthropomorphic animals",
+      "config": {
+        "duration": 8,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Opening cinematic - Finn leaving his village at dawn",
+        "setting": "Small riverside hamlet with thatched-roof cottages, willow trees, morning mist on the water",
+        "action": "Young otter warrior (Finn) says goodbye to elderly mouse couple, shoulders his pack, the Otterblade visible on his back. He walks toward the rising sun along a dirt path.",
+        "mood": "Bittersweet departure, quiet determination, warmth of home left behind",
+        "camera": "Start close on cottage door, pull back to reveal village, follow Finn as he walks away, end with wide shot of him on the path",
+        "audio": "Soft orchestral, birdsong, flowing water, no dialogue"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true
+      }
+    },
+    {
+      "id": "chapter_1_opening",
+      "name": "Chapter 1 Opening",
+      "filename": "chapter_1_opening_cinematic.mp4",
+      "status": "needs_regeneration",
+      "reason": "Visual style inconsistency",
+      "config": {
+        "duration": 5,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn approaches Willowmere along the River Path",
+        "setting": "Willow-lined river path, ancient stone walls of Willowmere visible in distance, afternoon light filtering through leaves",
+        "action": "Finn walks purposefully along the path, occasionally glancing at the massive walls ahead. He pauses to touch a carved waystone.",
+        "mood": "Anticipation, wonder at the ancient sanctuary, sense of destiny",
+        "camera": "Track alongside Finn, reveal the Hearthhold walls gradually, end looking up at the gatehouse",
+        "audio": "Flowing river, rustling leaves, distant bells"
+      }
+    },
+    {
+      "id": "chapter_2_opening",
+      "name": "Chapter 2 Opening",
+      "filename": "chapter_2_gatehouse_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 4,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Arriving at the Northern Gatehouse",
+        "setting": "Massive stone gatehouse with iron-banded doors, lanterns lit along the bridge, banners stirring in breeze",
+        "action": "Finn crosses the old stone bridge, stops before the great doors. A elderly hedgehog gatekeeper peers through a window, then slowly opens the gate.",
+        "mood": "Threshold moment, being tested and accepted, crossing into a new life",
+        "camera": "Finn's POV crossing bridge, then reverse to see him framed in the gateway",
+        "audio": "Creaking wood, chain mechanisms, welcoming warmth from within"
+      }
+    },
+    {
+      "id": "chapter_3_opening",
+      "name": "Chapter 3 Opening",
+      "filename": "chapter_3_great_hall_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 5,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Entering the Great Hall and the Everember",
+        "setting": "Vast hall with vaulted stone ceiling, the Everember hearth burning at center, tapestries on walls depicting woodland heroes",
+        "action": "Finn enters the hall, overwhelmed by its grandeur. Elder badger in robes gestures to the Everember. Finn approaches the fire, feels its warmth.",
+        "mood": "Awe, reverence, sense of ancient tradition, warmth conquering uncertainty",
+        "camera": "Wide establishing shot, then Finn's face lit by firelight, finally close on the Everember flames",
+        "audio": "Crackling fire, echoing footsteps, solemn choir undertone"
+      }
+    },
+    {
+      "id": "chapter_4_opening",
+      "name": "Chapter 4 Opening",
+      "filename": "chapter_4_library_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 4,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Discovering the ancient Archives",
+        "setting": "Towering bookshelves, dusty scrolls, candles and oil lamps, a great map table in the center",
+        "action": "Finn climbs a spiral staircase into the Archives. An elderly owl librarian guides him to a specific scroll - the map showing Zephyros's approach.",
+        "mood": "Mystery, discovery, the weight of ancient knowledge",
+        "camera": "Spiral up with Finn, reveal the vast library, close on the map being unrolled",
+        "audio": "Turning pages, quill scratching, soft hoot of owl"
+      }
+    },
+    {
+      "id": "chapter_5_opening",
+      "name": "Chapter 5 Opening",
+      "filename": "chapter_5_dungeon_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 4,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Descending into the Deep Cellars",
+        "setting": "Narrow stone stairs descending into darkness, torch sconces, roots breaking through ceiling, damp atmosphere",
+        "action": "Finn takes a torch from a sconce, begins descent. Each step echoes. Something moves in the shadows below.",
+        "mood": "Tense, claustrophobic, facing fear, determination overcoming dread",
+        "camera": "Over-shoulder following Finn down, occasional glimpse of what lurks below",
+        "audio": "Dripping water, distant rumbles, Finn's breathing"
+      }
+    },
+    {
+      "id": "chapter_6_opening",
+      "name": "Chapter 6 Opening",
+      "filename": "chapter_6_courtyard_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 4,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Rallying allies in the Kitchen Gardens",
+        "setting": "Sunlit courtyard with vegetable plots, herb spirals, training dummies, Hearthhold defenders gathering",
+        "action": "Finn addresses a group of woodland creatures - mice, squirrels, a young badger. They look uncertain but inspired. Finn raises the Otterblade.",
+        "mood": "Hope rising, community strength, preparing for battle together",
+        "camera": "Start on worried faces, pan to Finn speaking, end with group raising weapons together",
+        "audio": "Birdsong, armor clinking, rising orchestral swell"
+      }
+    },
+    {
+      "id": "chapter_7_opening",
+      "name": "Chapter 7 Opening",
+      "filename": "chapter_7_bell_tower_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 4,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Climbing to the Bell Tower",
+        "setting": "Steep internal staircase, wind howling through arrow slits, storm clouds visible outside, ancient bronze bells above",
+        "action": "Finn climbs against fierce wind. His cloak whips. He reaches the bell chamber, sees Galeborn crows circling outside.",
+        "mood": "Urgency, elemental struggle, approaching climax",
+        "camera": "Vertigo-inducing climb, reveal of storm and enemies through windows",
+        "audio": "Howling wind, distant thunder, clanging metal"
+      }
+    },
+    {
+      "id": "chapter_8_opening",
+      "name": "Chapter 8 Opening",
+      "filename": "chapter_8_final_confrontation_opening.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 5,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Facing Zephyros on the outer ramparts",
+        "setting": "Storm-battered battlements, lightning illuminating massive storm hawk silhouette, ice forming on stones",
+        "action": "Finn emerges onto the ramparts. Zephyros (enormous anthropomorphic hawk in frost-touched armor) lands before him. Their eyes meet - otter and hawk, warmth and cold.",
+        "mood": "Epic confrontation, calm before the storm, destiny manifest",
+        "camera": "Finn small against the storm, Zephyros descending, final shot of them facing each other",
+        "audio": "Thunder, wind roar, silence as they face off"
+      }
+    },
+    {
+      "id": "outro_cinematic",
+      "name": "Outro Cinematic",
+      "filename": "outro_victory_sunrise_scene.mp4",
+      "status": "needs_regeneration",
+      "config": {
+        "duration": 6,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Victory celebration at dawn in the Great Hall",
+        "setting": "Great Hall filled with woodland creatures, Everember burning bright, dawn light streaming through windows, banners restored",
+        "action": "Finn stands by the Everember, surrounded by friends. The elderly badger places a medallion around his neck. Creatures cheer. Finn looks at the fire, then at his companions, and smiles.",
+        "mood": "Triumph, warmth, belonging, promise of peace, bittersweet joy",
+        "camera": "Start on Everember, pull back to reveal celebration, end on Finn's face lit by dawn and firelight",
+        "audio": "Joyful strings, cheering voices, crackling fire, birdsong of new dawn"
+      }
+    }
+  ]
+}

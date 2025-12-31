@@ -79,15 +79,13 @@ async function generateCinematic(
   try {
     // Use Veo 3.1 for video generation
     // The API returns an operation that we need to poll
-    const response = await client.models.generateVideo({
+    const response = await client.models.generateVideos({
       model: GOOGLE_MODELS.VIDEO,
       prompt,
       config: {
         aspectRatio: '16:9',
         numberOfVideos: 1,
         durationSeconds: cinematic.duration,
-        // Veo 3.1 supports native audio generation
-        includeAudio: true,
       },
     });
 
@@ -95,10 +93,12 @@ async function generateCinematic(
     log('⏳', 'Video generation started, polling for completion...');
 
     let operation = response;
-    while (!operation.done) {
+    let pollCount = 0;
+    while (!operation.done && pollCount < 60) {
       await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10s
-      operation = await client.operations.get({ name: operation.name! });
-      log('  ', `Progress: ${operation.metadata?.progress || 'processing'}%`);
+      pollCount++;
+      operation = await client.operations.getVideosOperation({ operation });
+      log('  ', `Progress: polling... (${pollCount * 10}s elapsed)`);
     }
 
     if (operation.error) {
