@@ -1,6 +1,68 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Server
+server/public/
+
+# IDE and editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
 .DS_Store
-server/public
-vite.config.ts.*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test outputs
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
 *.tar.gz
+
+# Vite config variants (generated)
+vite.config.ts.*
+
+# TypeScript incremental
+*.tsbuildinfo
+
+# Replit specific
+.replit
+replit.nix
+.upm/
+.config/
+
+# Generated but committed (uncomment to ignore)
+# attached_assets/generated_images/
+# attached_assets/generated_videos/
