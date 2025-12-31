@@ -42,19 +42,19 @@
       "items": [
         { "id": "intro", "file": "intro_cinematic_otter's_journey.mp4", "type": "story", "chapter": null, "status": "complete" },
         { "id": "outro", "file": "outro_victory_sunrise_scene.mp4", "type": "story", "chapter": null, "status": "complete" },
-        { "id": "chapter_1_open", "file": null, "type": "chapter_open", "chapter": 1, "status": "needed", "prompt": "Finn leaving cottage at dawn, stepping onto river path, willow branches swaying" },
-        { "id": "chapter_2_open", "file": null, "type": "chapter_open", "chapter": 2, "status": "needed", "prompt": "Approaching the ancient gatehouse, stone bridge over rushing water" },
-        { "id": "chapter_3_open", "file": null, "type": "chapter_open", "chapter": 3, "status": "needed", "prompt": "Entering the Great Hall, torchlight illuminating tapestries, Everember visible" },
-        { "id": "chapter_4_open", "file": null, "type": "chapter_open", "chapter": 4, "status": "needed", "prompt": "Climbing spiral stairs to the library, dusty tomes and ancient scrolls" },
-        { "id": "chapter_5_open", "file": null, "type": "chapter_open", "chapter": 5, "status": "needed", "prompt": "Descending into dark cellars, torch flickering, shadows moving" },
-        { "id": "chapter_6_open", "file": null, "type": "chapter_open", "chapter": 6, "status": "needed", "prompt": "Emerging into kitchen gardens at dawn, rallying defenders" },
-        { "id": "chapter_7_open", "file": null, "type": "chapter_open", "chapter": 7, "status": "needed", "prompt": "Climbing bell tower exterior, wind whipping, storm approaching" },
-        { "id": "chapter_8_open", "file": null, "type": "chapter_open", "chapter": 8, "status": "needed", "prompt": "Stepping onto storm-lashed ramparts, Zephyros visible in distance" },
-        { "id": "boss_gatehouse", "file": null, "type": "boss_intro", "chapter": 2, "status": "needed", "prompt": "Gatehouse Guardian emerging from shadows, armor clanking, menacing presence" },
-        { "id": "boss_hall", "file": null, "type": "boss_intro", "chapter": 3, "status": "needed", "prompt": "Hall Invader crashing through door, Galeborn warrior with cruel weapons" },
-        { "id": "boss_cellar", "file": null, "type": "boss_intro", "chapter": 5, "status": "needed", "prompt": "Cellar Keeper rising from darkness, ancient and terrible" },
-        { "id": "boss_tower", "file": null, "type": "boss_intro", "chapter": 7, "status": "needed", "prompt": "Bell Tower Sentinel swooping down, winged predator silhouette" },
-        { "id": "boss_zephyros", "file": null, "type": "boss_intro", "chapter": 8, "status": "needed", "prompt": "Zephyros the Storm Hawk descending, lightning crackling, final confrontation" }
+        { "id": "chapter_1_open", "file": "chapter_1_opening_cinematic.mp4", "type": "chapter_open", "chapter": 1, "status": "complete" },
+        { "id": "chapter_2_open", "file": "chapter_2_gatehouse_opening.mp4", "type": "chapter_open", "chapter": 2, "status": "complete" },
+        { "id": "chapter_3_open", "file": "chapter_3_great_hall_opening.mp4", "type": "chapter_open", "chapter": 3, "status": "complete" },
+        { "id": "chapter_4_open", "file": "chapter_4_library_opening.mp4", "type": "chapter_open", "chapter": 4, "status": "complete" },
+        { "id": "chapter_5_open", "file": "chapter_5_dungeon_opening.mp4", "type": "chapter_open", "chapter": 5, "status": "complete" },
+        { "id": "chapter_6_open", "file": "chapter_6_courtyard_opening.mp4", "type": "chapter_open", "chapter": 6, "status": "complete" },
+        { "id": "chapter_7_open", "file": "chapter_7_bell_tower_opening.mp4", "type": "chapter_open", "chapter": 7, "status": "complete" },
+        { "id": "chapter_8_open", "file": "chapter_8_final_confrontation_opening.mp4", "type": "chapter_open", "chapter": 8, "status": "complete" },
+        { "id": "boss_gatehouse", "file": "gatehouse_guardian_boss_arrival.mp4", "type": "boss_intro", "chapter": 2, "status": "complete" },
+        { "id": "boss_hall", "file": "hall_invader_boss_arrival.mp4", "type": "boss_intro", "chapter": 3, "status": "complete" },
+        { "id": "boss_cellar", "file": "cellar_keeper_boss_arrival.mp4", "type": "boss_intro", "chapter": 5, "status": "complete" },
+        { "id": "boss_tower", "file": "bell_tower_sentinel_boss_arrival.mp4", "type": "boss_intro", "chapter": 7, "status": "complete" },
+        { "id": "boss_zephyros", "file": "zephyros_storm_hawk_boss_arrival.mp4", "type": "boss_intro", "chapter": 8, "status": "complete" }
       ]
     },
     "spriteSheets": {
@@ -79,7 +79,7 @@
   "summary": {
     "chapterPlates": { "complete": 10, "needed": 0 },
     "parallaxBackgrounds": { "complete": 8, "needed": 0 },
-    "cinematics": { "complete": 2, "needed": 13 },
+    "cinematics": { "complete": 15, "needed": 0 },
     "spriteSheets": { "complete": 0, "needed": 11 }
   }
 }
