@@ -1,7 +1,7 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import ChapterPlate from '@/components/hud/ChapterPlate';
 import CinematicPlayer, { type CinematicType } from '@/components/hud/CinematicPlayer';
 import DamageFlash from '@/components/hud/DamageFlash';
@@ -15,6 +15,12 @@ import { useStore } from '@/game/store';
 import { initializeGameMode, loadGameData, onOrientationChange, saveGameData } from './lib/capacitor';
 import { queryClient } from './lib/queryClient';
 import otterbladeTheme from './lib/theme';
+
+// Lazy load Asset Review page (dev only)
+const AssetReview = lazy(() => import('./pages/AssetReview'));
+
+// Check if we're in development mode
+const isDev = import.meta.env.DEV;
 
 /** Key for storing intro watched state */
 const INTRO_WATCHED_KEY = 'otterblade_intro_watched';
@@ -107,11 +113,24 @@ function AppContent() {
 }
 
 function App() {
+  // Check for /assets route in development mode
+  const isAssetReviewRoute = isDev && window.location.pathname === '/assets';
+
   return (
     <ThemeProvider theme={otterbladeTheme}>
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
-        <AppContent />
+        {isAssetReviewRoute ? (
+          <Suspense fallback={
+            <div className="w-full h-screen bg-black flex items-center justify-center">
+              <div className="text-amber-200/60 animate-pulse">Loading Asset Review...</div>
+            </div>
+          }>
+            <AssetReview />
+          </Suspense>
+        ) : (
+          <AppContent />
+        )}
       </QueryClientProvider>
     </ThemeProvider>
   );
