@@ -23,7 +23,13 @@ test.describe('Otterblade Odyssey', () => {
       }
     });
 
+    // Skip intro cinematic for tests by marking it as already watched
     await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('otterblade_intro_watched', 'true');
+    });
+    // Reload to apply the localStorage change
+    await page.reload();
   });
 
   // ============================================
@@ -248,10 +254,17 @@ test.describe('Touch Controls', () => {
 });
 
 test.describe('Accessibility', () => {
-  test('should have accessible start button', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    // Skip intro cinematic for tests
     await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('otterblade_intro_watched', 'true');
+    });
+    await page.reload();
     await page.waitForTimeout(2000);
+  });
 
+  test('should have accessible start button', async ({ page }) => {
     const startButton = page.getByTestId('button-start-game');
     await expect(startButton).toBeVisible();
 
@@ -265,8 +278,6 @@ test.describe('Accessibility', () => {
   });
 
   test('should maintain focus visibility', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
 
     // Tab to start button
     await page.keyboard.press('Tab');
