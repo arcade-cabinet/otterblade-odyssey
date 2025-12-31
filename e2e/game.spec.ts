@@ -24,9 +24,17 @@ test.describe('Otterblade Odyssey', () => {
     });
 
     // Skip intro cinematic for tests by marking it as already watched
+    // Set in both raw localStorage AND Capacitor's web storage format (CapacitorStorage prefix)
     await page.goto('/');
     await page.evaluate(() => {
-      localStorage.setItem('otterblade_intro_watched', 'true');
+      // Set raw localStorage (fallback in capacitor.ts)
+      localStorage.setItem('otterblade_intro_watched', JSON.stringify(true));
+      // Set Capacitor's web storage format (uses CapacitorStorage object stored in localStorage)
+      try {
+        const capStorage = JSON.parse(localStorage.getItem('CapacitorStorage') || '{}');
+        capStorage['otterblade_intro_watched'] = JSON.stringify(true);
+        localStorage.setItem('CapacitorStorage', JSON.stringify(capStorage));
+      } catch {}
     });
     // Reload to apply the localStorage change
     await page.reload();
@@ -256,9 +264,17 @@ test.describe('Touch Controls', () => {
 test.describe('Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     // Skip intro cinematic for tests
+    // Set in both raw localStorage AND Capacitor's web storage format
     await page.goto('/');
     await page.evaluate(() => {
-      localStorage.setItem('otterblade_intro_watched', 'true');
+      // Set raw localStorage (fallback in capacitor.ts)
+      localStorage.setItem('otterblade_intro_watched', JSON.stringify(true));
+      // Set Capacitor's web storage format (uses CapacitorStorage object stored in localStorage)
+      try {
+        const capStorage = JSON.parse(localStorage.getItem('CapacitorStorage') || '{}');
+        capStorage['otterblade_intro_watched'] = JSON.stringify(true);
+        localStorage.setItem('CapacitorStorage', JSON.stringify(capStorage));
+      } catch {}
     });
     await page.reload();
     await page.waitForTimeout(2000);
