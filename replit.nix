@@ -1,6 +1,6 @@
 { pkgs }: {
   deps = [
-    pkgs.nodejs_22
+    pkgs.nodejs_25
     pkgs.nodePackages.pnpm
     pkgs.postgresql_16
   ];
