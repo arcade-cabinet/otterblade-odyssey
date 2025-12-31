@@ -16,11 +16,12 @@ import { initializeGameMode, loadGameData, onOrientationChange, saveGameData } f
 import { queryClient } from './lib/queryClient';
 import otterbladeTheme from './lib/theme';
 
-// Lazy load Asset Review page (dev only)
+// Lazy load Asset Review page
 const AssetReview = lazy(() => import('./pages/AssetReview'));
 
-// Check if we're in development mode
-const isDev = import.meta.env.DEV;
+// Asset review is available until official launch
+// Set VITE_DISABLE_ASSET_REVIEW=true to hide it in production
+const isAssetReviewEnabled = import.meta.env.VITE_DISABLE_ASSET_REVIEW !== 'true';
 
 /** Key for storing intro watched state */
 const INTRO_WATCHED_KEY = 'otterblade_intro_watched';
@@ -113,8 +114,9 @@ function AppContent() {
 }
 
 function App() {
-  // Check for /assets route in development mode
-  const isAssetReviewRoute = isDev && window.location.pathname === '/assets';
+  // Check for /assets route (available until official launch)
+  const isAssetReviewRoute = isAssetReviewEnabled && 
+    (window.location.pathname === '/assets' || window.location.pathname.endsWith('/assets'));
 
   return (
     <ThemeProvider theme={otterbladeTheme}>
