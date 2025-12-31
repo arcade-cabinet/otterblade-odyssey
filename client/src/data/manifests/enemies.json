@@ -1,0 +1,124 @@
+{
+  "$schema": "./manifest-schema.json",
+  "category": "enemy-sprites",
+  "provider": "openai",
+  "model": "gpt-image-1",
+  "outputDir": "attached_assets/generated_images/sprites",
+  "assets": [
+    {
+      "id": "enemy_skirmisher",
+      "name": "Skirmisher Enemy",
+      "filename": "enemy_skirmisher_sprite_sheet.png",
+      "status": "pending",
+      "config": {
+        "columns": 4,
+        "rows": 4,
+        "frameWidth": 96,
+        "frameHeight": 96,
+        "size": "1024x1024",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Galeborn skirmisher (weasel or stoat)",
+        "description": "Small fast predator, anthropomorphic weasel/stoat, weathered leather armor, cold-adapted, menacing but not demonic, bone/iron dagger",
+        "faction": "Galeborn - followers of Zephyros the storm hawk",
+        "style": "Pixel art matching player style, cool grays and dark blues",
+        "layout": "Row 1: Idle (4), Row 2: Walk (4), Row 3: Attack (4), Row 4: Hurt (2) + Death (2)",
+        "technical": "Transparent PNG, side-view facing LEFT (opposite to player)"
+      }
+    },
+    {
+      "id": "enemy_shielded",
+      "name": "Shielded Enemy",
+      "filename": "enemy_shielded_sprite_sheet.png",
+      "status": "pending",
+      "config": {
+        "columns": 4,
+        "rows": 4,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "1024x1024",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Galeborn defender (badger or hedgehog with shield)",
+        "description": "Slow armored defender, anthropomorphic badger/hedgehog, heavy round shield, mace or short sword, banded leather armor",
+        "faction": "Galeborn - followers of Zephyros",
+        "style": "Pixel art, bulky silhouette, intimidating stance",
+        "layout": "Row 1: Idle with shield raised (4), Row 2: Slow advance (4), Row 3: Shield bash attack (4), Row 4: Stagger (2) + Collapse (2)",
+        "technical": "Transparent PNG, side-view facing LEFT"
+      }
+    },
+    {
+      "id": "enemy_ranged",
+      "name": "Ranged Enemy",
+      "filename": "enemy_ranged_sprite_sheet.png",
+      "status": "pending",
+      "config": {
+        "columns": 4,
+        "rows": 4,
+        "frameWidth": 96,
+        "frameHeight": 96,
+        "size": "1024x1024",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Galeborn slinger (rat with sling)",
+        "description": "Projectile thrower, anthropomorphic rat, leather hood, sling weapon with pouch of stones, nimble posture",
+        "faction": "Galeborn",
+        "style": "Pixel art, sneaky silhouette, clear telegraph on ranged attack",
+        "layout": "Row 1: Idle scanning (4), Row 2: Sidestep movement (4), Row 3: Wind-up + Release sling (4), Row 4: Flinch (2) + Fall (2)",
+        "technical": "Transparent PNG, side-view facing LEFT"
+      }
+    },
+    {
+      "id": "enemy_flyer",
+      "name": "Flyer Enemy",
+      "filename": "enemy_flyer_sprite_sheet.png",
+      "status": "pending",
+      "config": {
+        "columns": 4,
+        "rows": 4,
+        "frameWidth": 112,
+        "frameHeight": 112,
+        "size": "1024x1024",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Galeborn scout (crow or bat)",
+        "description": "Aerial enemy, anthropomorphic crow/raven, tattered cloak, sharp talons, wings spread in flight",
+        "faction": "Galeborn - Zephyros's eyes in the sky",
+        "style": "Pixel art, dynamic wing poses, threatening dive posture",
+        "layout": "Row 1: Hovering flap cycle (4), Row 2: Glide/swoop (4), Row 3: Dive attack (4), Row 4: Hit recoil (2) + Spiral fall (2)",
+        "technical": "Transparent PNG, angled view for aerial perspective"
+      }
+    },
+    {
+      "id": "enemy_elite",
+      "name": "Elite Enemy",
+      "filename": "enemy_elite_sprite_sheet.png",
+      "status": "pending",
+      "config": {
+        "columns": 6,
+        "rows": 4,
+        "frameWidth": 160,
+        "frameHeight": 160,
+        "size": "1024x1024",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Galeborn champion (armored fox or wolverine)",
+        "description": "Miniboss enemy, anthropomorphic fox/wolverine, decorated armor with frost motifs, greatsword or polearm, imposing stance",
+        "faction": "Galeborn elite - Zephyros's personal guard",
+        "style": "Pixel art, larger and more detailed than regular enemies, regal menace",
+        "layout": "Row 1: Commanding idle (4) + Weapon flourish (2), Row 2: Stalking advance (6), Row 3: Heavy swing combo (6), Row 4: Block (2) + Wounded retreat (2) + Defeat (2)",
+        "technical": "Transparent PNG, side-view facing LEFT, more frames for complex attacks"
+      }
+    }
+  ]
+}
