@@ -51,7 +51,16 @@ export default defineConfig({
           '@dimforge/rapier2d-compat',
           'miniplex',
           'miniplex-react',
+          '@hmans/use-rerender',
         ],
+      },
+    },
+    // Mock modules that have ESM issues in test environment
+    deps: {
+      optimizer: {
+        web: {
+          include: ['miniplex-react'],
+        },
       },
     },
   },
