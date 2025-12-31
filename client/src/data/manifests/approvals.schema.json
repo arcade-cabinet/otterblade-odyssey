@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Otterblade Asset Approvals",
+  "description": "Export format for approved assets - upload to repo to finalize idempotent state",
+  "type": "object",
+  "required": ["version", "exportedAt", "approvals"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version for forward compatibility",
+      "const": "1.0"
+    },
+    "exportedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when approvals were exported"
+    },
+    "exportedBy": {
+      "type": "string",
+      "description": "Optional identifier of who exported"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about this approval batch"
+    },
+    "approvals": {
+      "type": "array",
+      "description": "List of approved assets",
+      "items": {
+        "type": "object",
+        "required": ["id", "approved"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Asset ID matching manifest"
+          },
+          "approved": {
+            "type": "boolean",
+            "const": true
+          },
+          "approvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Approval notes"
+          },
+          "variantUsed": {
+            "type": "string",
+            "description": "If a specific variant was approved"
+          }
+        }
+      }
+    }
+  }
+}

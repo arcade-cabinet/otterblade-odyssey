@@ -1,6 +1,6 @@
 {
   "$schema": "./manifest-schema.json",
-  "category": "enemy-sprites",
+  "category": "enemies",
   "provider": "openai",
   "model": "gpt-image-1",
   "outputDir": "attached_assets/generated_images/sprites",
