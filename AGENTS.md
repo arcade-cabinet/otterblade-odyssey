@@ -158,8 +158,41 @@ All touch elements must have:
 # Unit tests with Vitest
 pnpm run test
 
-# E2E tests with Playwright
-pnpm run test:e2e
+# E2E tests with Playwright (headless - for CI)
+pnpm playwright test
+
+# E2E tests with full WebGL support (requires GPU)
+PLAYWRIGHT_MCP=true pnpm playwright test
+
+# Interactive test UI
+pnpm playwright test --ui
+
+# Update visual regression snapshots
+PLAYWRIGHT_MCP=true pnpm playwright test --update-snapshots
+```
+
+#### Playwright Test Modes
+- **Headless mode** (default): Uses SwiftShader for software WebGL, skips GPU-dependent tests
+- **MCP mode** (`PLAYWRIGHT_MCP=true`): Full GPU, all tests including visual regression
+
+#### Writing E2E Tests
+```typescript
+const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+
+test('should render canvas', async ({ page }) => {
+  if (hasMcpSupport) {
+    // Full WebGL test
+    await expect(canvas).toBeVisible();
+  } else {
+    // Graceful fallback
+    console.log('Skipped in headless mode');
+  }
+});
+
+test('WebGL-only test', async ({ page }) => {
+  test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  // ... test code
+});
 ```
 
 Write tests for:
@@ -167,6 +200,7 @@ Write tests for:
 - Entity spawning and cleanup
 - Physics interactions
 - UI component rendering
+- Visual regression (MCP mode only)
 
 ### 9. Common Pitfalls
 

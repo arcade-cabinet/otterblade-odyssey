@@ -121,11 +121,59 @@ pnpm run start        # Start production server
 
 # Testing
 pnpm run test         # Run Vitest unit tests
-pnpm run test:e2e     # Run Playwright E2E tests
+pnpm playwright test  # Run Playwright E2E tests (headless)
+PLAYWRIGHT_MCP=true pnpm playwright test  # Full WebGL tests with GPU
+pnpm playwright test --ui  # Interactive test UI
 
 # Database
 pnpm run db:push      # Push schema to database
 ```
+
+## Strata Integration
+
+Strata provides procedural graphics for terrain, characters, and effects:
+
+### Noise Functions
+```typescript
+import { fbm, noise3D } from '@jbcom/strata';
+
+// Procedural terrain height
+const height = noise3D(x * 0.1, 0, z * 0.1) * 5;
+const detail = fbm(x * 0.3, 0, z * 0.3, 3) * 1.5;
+```
+
+### Character Creation
+```typescript
+import { createCharacter, animateCharacter, updateFurUniforms } from '@jbcom/strata';
+
+const character = createCharacter({
+  skinColor: 0x8b6914,
+  furOptions: {
+    baseColor: new THREE.Color('#5d4420'),
+    tipColor: new THREE.Color('#8b6914'),
+    layerCount: 8,
+    spacing: 0.015,
+    windStrength: 0.3,
+  },
+  scale: 1.0,
+});
+
+// In useFrame:
+animateCharacter(character, elapsedTime);
+updateFurUniforms(furGroup, elapsedTime);
+```
+
+## Deployment
+
+### Replit Deployment (Recommended)
+Use Replit's built-in deployment - click "Deploy" in the UI.
+
+### Render.com Deployment
+Push to GitHub, then connect Render to the repo. The `render.yaml` configures:
+- Static site with pnpm build
+- Security headers
+- Asset caching
+- SPA rewrites
 
 ## Brand Guidelines
 
@@ -136,8 +184,28 @@ See `BRAND.md` for complete visual style guide including:
 - UI/UX mobile-first guidelines
 - Cutscene and chapter plate specifications
 
+## Testing Strategy
+
+### Playwright E2E Tests
+The Playwright config supports two modes:
+
+1. **Headless Mode** (default): Uses SwiftShader for software WebGL
+   - Runs in CI/limited environments
+   - GPU-dependent tests are skipped
+
+2. **MCP Mode** (`PLAYWRIGHT_MCP=true`): Full GPU support
+   - Headed browser with hardware acceleration
+   - Visual regression testing with screenshot comparison
+   - All WebGL tests enabled
+
+### Test Files
+- `e2e/game.spec.ts` - Core game tests (page load, canvas, HUD)
+- Visual regression tests use 20% diff tolerance for WebGL variations
+
 ## Recent Changes
 
+- **2024-12-31**: Added Playwright MCP mode for full WebGL testing
+- **2024-12-31**: Created render.yaml for Render.com deployment
 - **2024-12-31**: Integrated Miniplex ECS for entity management
 - **2024-12-31**: Added parallax background renderer with generated biome images
 - **2024-12-31**: Updated to pnpm package manager
