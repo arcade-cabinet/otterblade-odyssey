@@ -293,9 +293,9 @@ pnpm --filter @otterblade/dev-tools cli -- --force
 ### Asset Status Workflow
 
 ```
-pending → [generate] → complete
-                ↓
-         needs_regeneration → [regenerate] → complete
+pending → [generate] → complete → [review] → approved
+                ↓                      ↓
+        needs_regeneration ←──── rejected
 ```
 
 | Status | Description |
@@ -303,6 +303,35 @@ pending → [generate] → complete
 | `pending` | Asset defined but not yet generated |
 | `complete` | Asset exists and passes validation |
 | `needs_regeneration` | Asset exists but has brand violations |
+| `approved` | Asset reviewed and locked (IDEMPOTENT) |
+| `rejected` | Asset reviewed and marked for regeneration |
+
+### Asset Approval Workflow (CRITICAL)
+
+**Idempotency Rule**: Approved assets are NEVER regenerated.
+
+```
+1. GENERATE  → pnpm --filter @otterblade/dev-tools cli
+2. DEPLOY    → Push to main → CD deploys to GitHub Pages
+3. REVIEW    → Visit /assets on GitHub Pages
+4. APPROVE   → Select assets → Click "Approve Selected"
+5. CREATE PR → Click "🚀 Create PR on GitHub" (opens GitHub directly)
+6. COMMIT    → Create branch, commit → PR created automatically
+7. MERGE     → Assets locked as idempotent
+```
+
+**Asset Review Gallery URL:**
+`https://jbdevprimary.github.io/otterblade-odyssey/assets`
+
+**Approval Storage:**
+- `client/src/data/approvals.json` - Production approvals (committed)
+- `localStorage` - Working selections (browser-local)
+
+**Before generating, check:**
+```bash
+# Check if asset is approved
+jq '.approvals[] | select(.id == "intro_cinematic")' client/src/data/approvals.json
+```
 
 ### Brand Compliance (CRITICAL)
 
