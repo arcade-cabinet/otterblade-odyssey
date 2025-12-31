@@ -1,10 +1,11 @@
 import { RigidBody, CuboidCollider } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useCallback } from "react";
 import { useStore } from "./store";
 import { BIOMES, SEGMENT_LEN } from "./constants";
 import { hash1 } from "./utils";
-import { ProceduralSky, GrassInstances, RockInstances, VolumetricFogMesh, createTimeOfDay } from "@jbcom/strata";
+import { ProceduralSky, GrassInstances, RockInstances, VolumetricFogMesh, createTimeOfDay, type BiomeData } from "@jbcom/strata";
+import * as THREE from "three";
 
 interface PlatformProps {
   id: string;
@@ -88,9 +89,8 @@ function StrataEnvironment() {
   const biomeIndex = useStore((s) => s.biomeIndex);
   const biome = BIOMES[biomeIndex % BIOMES.length];
 
-  // Calculate time of day based on biome (each biome has different lighting)
   const timeOfDay = useMemo(() => {
-    const hours = [14, 10, 18, 6]; // Verdant=afternoon, Crystal=morning, Magma=sunset, Aether=dawn
+    const hours = [14, 10, 18, 6];
     return createTimeOfDay(hours[biomeIndex % hours.length]);
   }, [biomeIndex]);
 
@@ -106,13 +106,23 @@ function BiomeVegetation() {
   const playerX = useStore((s) => s.playerX);
   const biomeIndex = useStore((s) => s.biomeIndex);
 
+  // Height function for vegetation placement - returns ground level
+  const heightFunc = useCallback((_x: number, _z: number) => {
+    return 0; // Ground level at y=0
+  }, []);
+
+  // Create biomes that cover the entire vegetation area (centered at origin relative to group)
+  const vegetationBiomes: BiomeData[] = useMemo(() => [
+    { type: 'marsh', center: new THREE.Vector2(0, 0), radius: 100 },
+  ], []);
+
   // Only show grass in VERDANT biome (index 0)
   if (biomeIndex !== 0) return null;
 
   return (
     <group position={[playerX, 0, -5]}>
-      <GrassInstances count={2000} areaSize={50} />
-      <RockInstances count={30} areaSize={40} />
+      <GrassInstances count={2000} areaSize={50} heightFunc={heightFunc} biomes={vegetationBiomes} />
+      <RockInstances count={30} areaSize={40} heightFunc={heightFunc} biomes={vegetationBiomes} />
     </group>
   );
 }
