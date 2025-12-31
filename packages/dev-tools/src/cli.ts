@@ -22,8 +22,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
+import { type AssetManifest, generateAsset } from './manifest-generator.js';
 import { log, logError } from './shared/config.js';
-import { generateAsset, type AssetManifest } from './manifest-generator.js';
 
 /** CLI arguments schema */
 const ArgsSchema = z.object({

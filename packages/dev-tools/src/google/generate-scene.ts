@@ -14,12 +14,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import {
-  GOOGLE_MODELS,
-  createGoogleClient,
-  log,
-  logError,
-} from '../shared/config.js';
+import { createGoogleClient, GOOGLE_MODELS, log, logError } from '../shared/config.js';
 import { getScenePrompt } from '../shared/prompts.js';
 
 /** Scene definitions for parallax backgrounds */
@@ -218,9 +213,7 @@ async function main(): Promise<void> {
     }
 
     const chapters =
-      chapter !== undefined
-        ? [chapter]
-        : (Object.keys(CHAPTER_PLATES).map(Number) as ChapterKey[]);
+      chapter !== undefined ? [chapter] : (Object.keys(CHAPTER_PLATES).map(Number) as ChapterKey[]);
 
     for (const ch of chapters) {
       const plate = CHAPTER_PLATES[ch];

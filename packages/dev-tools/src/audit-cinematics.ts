@@ -12,11 +12,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  GOOGLE_MODELS,
-  VIDEO_OUTPUT_DIR,
   createGoogleClient,
+  GOOGLE_MODELS,
   log,
   logError,
+  VIDEO_OUTPUT_DIR,
 } from './shared/config.js';
 
 /** Quick analysis prompt for batch processing */
@@ -72,8 +72,7 @@ function parseAuditResponse(response: string): Omit<AuditResult, 'file'> {
     return line?.split(':')[1]?.trim() || '';
   };
 
-  const isYes = (value: string): boolean =>
-    value.toUpperCase() === 'YES';
+  const isYes = (value: string): boolean => value.toUpperCase() === 'YES';
 
   const scoreMatch = getValue('VIOLATION_SCORE').match(/(\d+)/);
 
@@ -158,9 +157,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const videoFiles = fs
-    .readdirSync(videoDir)
-    .filter((f) => f.endsWith('.mp4'));
+  const videoFiles = fs.readdirSync(videoDir).filter((f) => f.endsWith('.mp4'));
 
   log('📁', `Found ${videoFiles.length} videos to audit`);
   log('', '');

@@ -14,12 +14,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ENEMY_SPRITE_CONFIGS,
-  OUTPUT_DIR,
   createOpenAIClient,
+  ENEMY_SPRITE_CONFIGS,
+  type EnemyType,
   log,
   logError,
-  type EnemyType,
+  OUTPUT_DIR,
 } from '../shared/config.js';
 import { getEnemySpritePrompt } from '../shared/prompts.js';
 
