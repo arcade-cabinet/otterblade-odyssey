@@ -1,0 +1,108 @@
+import { queries, world } from './world';
+const SPEED = 10;
+const JUMP_FORCE = 14;
+const GRAVITY = -30;
+const COYOTE_TIME = 0.15;
+const JUMP_BUFFER = 0.1;
+export function movementSystem(dt) {
+    for (const entity of queries.moving) {
+        entity.position.x += entity.velocity.x * dt;
+        entity.position.y += entity.velocity.y * dt;
+        entity.position.z += entity.velocity.z * dt;
+    }
+}
+export function gravitySystem(dt) {
+    for (const entity of queries.moving) {
+        if (!entity.grounded) {
+            entity.velocity.y += GRAVITY * dt;
+        }
+    }
+}
+export function controlSystem(dt) {
+    for (const entity of queries.controlled) {
+        const { controls, velocity } = entity;
+        let moveX = 0;
+        if (controls.left)
+            moveX = -1;
+        if (controls.right)
+            moveX = 1;
+        velocity.x = moveX * SPEED;
+        if (moveX !== 0) {
+            entity.facingRight = moveX > 0;
+        }
+        if (entity.coyoteTime !== undefined) {
+            if (entity.grounded) {
+                entity.coyoteTime = COYOTE_TIME;
+            }
+            else {
+                entity.coyoteTime = Math.max(0, entity.coyoteTime - dt);
+            }
+        }
+        if (entity.jumpBuffer !== undefined) {
+            if (controls.jump) {
+                entity.jumpBuffer = JUMP_BUFFER;
+            }
+            else {
+                entity.jumpBuffer = Math.max(0, entity.jumpBuffer - dt);
+            }
+        }
+        if (entity.jumpBuffer !== undefined &&
+            entity.coyoteTime !== undefined &&
+            entity.jumpBuffer > 0 &&
+            entity.coyoteTime > 0) {
+            velocity.y = JUMP_FORCE;
+            entity.coyoteTime = 0;
+            entity.jumpBuffer = 0;
+            entity.grounded = false;
+        }
+    }
+}
+export function healthSystem() {
+    for (const entity of queries.withHealth) {
+        if (entity.health.current <= 0) {
+            world.addComponent(entity, 'dead', true);
+        }
+    }
+}
+export function cleanupSystem() {
+    const toRemove = [];
+    for (const entity of queries.dead) {
+        if (!entity.player) {
+            toRemove.push(entity);
+        }
+    }
+    for (const entity of toRemove) {
+        world.remove(entity);
+    }
+}
+export function damageEntity(entity, amount) {
+    entity.health.current -= amount;
+}
+export function spawnPlayer(x, y) {
+    return world.add({
+        player: true,
+        position: { x, y, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        health: { current: 5, max: 5 },
+        facingRight: true,
+        grounded: false,
+        controls: {
+            left: false,
+            right: false,
+            jump: false,
+            crouch: false,
+            attack: false,
+        },
+        coyoteTime: 0,
+        jumpBuffer: 0,
+    });
+}
+export function spawnEnemy(type, x, y, health = 3) {
+    return world.add({
+        enemy: type,
+        position: { x, y, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        health: { current: health, max: health },
+        facingRight: false,
+    });
+}
