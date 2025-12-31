@@ -1,6 +1,7 @@
 import { World } from "miniplex";
 import createReactAPI from "miniplex-react";
 import type { Object3D } from "three";
+import type { StoryEventType, Chapter } from "../constants";
 
 export type Entity = {
   position: { x: number; y: number; z: number };
@@ -39,6 +40,43 @@ export type Entity = {
   dead?: true;
   
   tag?: string[];
+
+  story?: {
+    currentChapter: number;
+    chaptersCompleted: number[];
+    bossesDefeated: string[];
+    totalShards: number;
+  };
+
+  chapter?: {
+    id: number;
+    data: Chapter;
+    isActive: boolean;
+    isCompleted: boolean;
+    startTime?: number;
+    completionTime?: number;
+  };
+
+  cutscene?: {
+    type: "intro" | "outro" | "chapter_plate" | "boss_intro" | "boss_defeat";
+    chapterId: number;
+    duration: number;
+    startTime: number;
+    isPlaying: boolean;
+  };
+
+  storyEvent?: {
+    type: StoryEventType;
+    chapterId: number;
+    timestamp: number;
+    data?: Record<string, unknown>;
+  };
+
+  narrative?: {
+    questText: string;
+    chapterName: string;
+    setting: string;
+  };
 };
 
 export const world = new World<Entity>();
@@ -58,4 +96,12 @@ export const queries = {
   withHealth: world.with("health"),
   dead: world.with("dead"),
   controlled: world.with("controls", "velocity"),
+
+  story: world.with("story"),
+  chapters: world.with("chapter"),
+  activeChapter: world.with("chapter").where((e) => e.chapter.isActive),
+  cutscenes: world.with("cutscene"),
+  playingCutscenes: world.with("cutscene").where((e) => e.cutscene.isPlaying),
+  storyEvents: world.with("storyEvent"),
+  narratives: world.with("narrative"),
 };
