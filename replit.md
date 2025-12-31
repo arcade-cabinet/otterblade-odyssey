@@ -31,15 +31,22 @@ Otterblade Odyssey is a production-grade React 2.5D platformer game inspired by 
 - Player controls are stored in Zustand to avoid React re-renders during gameplay
 - ECS systems handle movement, gravity, health, and cleanup
 - Procedural level generation creates platforms, enemies, and collectibles
-- Six distinct biomes with Redwall-themed progression
+- 10-chapter story with Redwall-themed progression
 
-### Biomes (Story Progression)
-1. **Abbey Exterior** - Forest approach, bridge, gatehouse
-2. **Abbey Interior** - Great hall, library, cloisters, kitchens
-3. **Dungeon/Catacombs** - Stone, torchlight, damp, roots
-4. **Courtyard/Gardens** - Sunlight, banners, training yard
-5. **Rooftops/Rafters** - Wind, height, bells, shingles
-6. **Outer Ruins/River Path** - Mossy remnants, fog
+### 10-Chapter Story Progression
+
+| # | Chapter | Setting | Quest |
+|---|---------|---------|-------|
+| 0 | Prologue | Otter's village | "Answer the Call" |
+| 1 | Abbey Approach | Forest, bridge | "Reach the Gatehouse" |
+| 2 | Gatehouse | Entry, threshold | "Cross the Threshold" |
+| 3 | Great Hall | Interior, oath | "Defend the Great Hall" |
+| 4 | Library | Maps, secrets | "Find the Ancient Map" |
+| 5 | Dungeon | Catacombs | "Descend into the Depths" |
+| 6 | Courtyard | Gardens, rally | "Rally the Defenders" |
+| 7 | Rooftops | Bells, rafters | "Ascend to the Bells" |
+| 8 | Final Ascent | High keep | "Reach Zephyros" |
+| 9 | Epilogue | Victory, dawn | "A New Dawn" |
 
 ### Backend Architecture
 - Express.js server with TypeScript
@@ -204,6 +211,10 @@ The Playwright config supports two modes:
 
 ## Recent Changes
 
+- **2024-12-31**: Generated all 10 chapter plates and intro/outro videos
+- **2024-12-31**: Created CLAUDE.md, .github/copilot-instructions.md for cross-agent support
+- **2024-12-31**: Expanded from 6 biomes to 10-chapter story structure
+- **2024-12-31**: Updated AGENTS.md with comprehensive patterns
 - **2024-12-31**: Added Playwright MCP mode for full WebGL testing
 - **2024-12-31**: Created render.yaml for Render.com deployment
 - **2024-12-31**: Integrated Miniplex ECS for entity management
