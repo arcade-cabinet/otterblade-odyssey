@@ -182,27 +182,229 @@ The Playwright config supports two modes:
 - `e2e/game.spec.ts` - Core game tests (page load, canvas, HUD)
 - Visual regression tests use 20% diff tolerance for WebGL variations
 
-## Asset Generation
+## Asset Generation System
 
-### Completed Assets
-- **Chapter Plates**: 10/10 complete (all story illustrations)
-- **Parallax Backgrounds**: 8/8 complete (village, ruins, abbey, dungeon, courtyard, rooftops, new dawn)
-- **Cinematics**: 15/15 complete (intro, outro, 8 chapter opens, 5 boss arrivals)
-- **Sprite Sheets**: 0/11 (pending - requires frame extraction from video)
+### Architecture Overview
 
-### Asset Pipeline
-- Asset ledger: `client/src/data/assets.json`
-- All assets stored in: `attached_assets/generated_images/` and `attached_assets/generated_videos/`
-- Import using `@assets` alias in Vite
+The asset generation system uses a **manifest-driven, idempotent pipeline** powered by the `@otterblade/dev-tools` package. This ensures all assets are tracked, validated, and aligned with the brand guidelines.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ASSET GENERATION FLOW                            │
+│                                                                     │
+│  Manifests (JSON)  →  dev-tools CLI  →  AI Providers  →  Assets    │
+│                                                                     │
+│  client/src/data/     packages/        OpenAI GPT-Image-1          │
+│  manifests/*.json     dev-tools/       Google Veo 3.1              │
+│                       src/cli.ts       Google Imagen 3              │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Manifest System
+
+All assets are defined in JSON manifest files that serve as the single source of truth:
+
+| Manifest File | Category | Provider | Description |
+|---------------|----------|----------|-------------|
+| `sprites.json` | sprites | OpenAI | Player sprite sheets |
+| `enemies.json` | enemy-sprites | OpenAI | Enemy sprite sheets (5 types) |
+| `cinematics.json` | cinematics | Google Veo 3.1 | Video cutscenes (10 chapters) |
+| `scenes.json` | scenes | Google Imagen 3 | Parallax backgrounds (8 biomes) |
+
+**Manifest Location**: `client/src/data/manifests/`
+
+### Asset Status Tracking
+
+Each asset in a manifest has a status field:
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| `pending` | Not yet generated | Will be generated on next run |
+| `complete` | Asset exists and is valid | Skipped unless `--force` |
+| `needs_regeneration` | Exists but has issues | Will be regenerated with reason |
+
+### dev-tools CLI Commands
+
+```bash
+# Generate all missing assets
+pnpm --filter @otterblade/dev-tools cli
+
+# Generate specific category
+pnpm --filter @otterblade/dev-tools cli -- --category sprites
+pnpm --filter @otterblade/dev-tools cli -- --category cinematics
+
+# Dry run (preview what would be generated)
+pnpm --filter @otterblade/dev-tools cli -- --dry-run
+
+# Force regeneration of specific asset
+pnpm --filter @otterblade/dev-tools cli -- --force --id intro_cinematic
+
+# Rate-limited generation (for cost control)
+pnpm --filter @otterblade/dev-tools cli -- --max-items 3
+```
+
+### GitHub Actions Integration
+
+The `assets.yml` workflow automates asset generation:
+
+```bash
+# Trigger via GitHub Actions UI:
+# Actions → Generate Assets → Run workflow
+
+# Options:
+# - category: sprites, enemies, cinematics, scenes, or all
+# - force: Regenerate existing assets
+# - dry_run: Preview only
+# - max_items: Limit generation count (cost control)
+```
+
+**Cost Estimates**:
+- Sprites (4 items): ~$0.16-0.32
+- Enemies (5 items): ~$0.20-0.40
+- Cinematics (10 items): ~$2.50
+- Scenes (8 items): ~$0.24
+
+### Provider Selection
+
+| Asset Type | Best Provider | Why |
+|------------|--------------|-----|
+| Sprite sheets | OpenAI GPT-Image-1 | Transparency, grid layout, masking |
+| Player animations | OpenAI GPT-Image-1 | Consistent character across frames |
+| Cinematics | Google Veo 3.1 | Native audio, longer duration |
+| Chapter plates | Google Imagen 3 | Painterly style, wide aspect |
+| Parallax backgrounds | Google Imagen 3 | Scene composition, depth |
+
+### Brand Compliance
+
+All generation prompts automatically enforce brand guidelines from `BRAND.md`:
+
+**MUST HAVE:**
+- Anthropomorphic woodland animals ONLY
+- Warm storybook aesthetic (Willowmere Hearthhold)
+- Grounded materials (fur, cloth, leather, iron, stone)
+- Protagonist is Finn the otter warrior
+
+**MUST AVOID:**
+- Human characters (NO knights, villagers, soldiers)
+- Neon/sci-fi/horror elements
+- Glowing energy weapons
+- Anime/JRPG styling
+
+### Validation Commands
+
+```bash
+# Validate all required assets exist
+pnpm validate:assets
+
+# Audit cinematics for brand violations
+pnpm audit:cinematics
+
+# Analyze individual sprite quality
+pnpm analyze:sprite path/to/sprite.png
+
+# Analyze video for brand compliance
+pnpm analyze:video path/to/video.mp4
+```
+
+### Asset Storage
+
+```
+attached_assets/
+├── generated_images/
+│   ├── sprites/           # Sprite sheets (PNG with transparency)
+│   └── chapter-plates/    # Chapter illustrations
+│
+├── generated_videos/      # Cinematic videos (MP4)
+
+client/src/assets/images/
+└── parallax/              # Parallax backgrounds (PNG)
+```
+
+### Importing Assets
+
+Always use the `@assets` alias in Vite:
+
+```tsx
+// ✅ CORRECT
+import chapterPlate from "@assets/images/chapter-plates/prologue_village_chapter_plate.png";
+import introVideo from "@assets/generated_videos/intro_cinematic_otter's_journey.mp4";
+
+// ❌ WRONG - Never use relative paths to attached_assets
+import bg from "../attached_assets/generated_images/...";
+```
 
 ### Proofs Package
+
 A separate testing package at `/proofs/` provides sprite sheet validation without WebGL:
+
+```bash
+cd proofs && pnpm install && pnpm dev  # Runs on port 5001
+```
+
+Features:
 - Sprite manifest viewer
-- Animation frame player
-- Chroma key background removal
+- Animation frame player with configurable FPS
+- Chroma key background removal tool
+
+### Adding New Assets
+
+1. **Define in manifest**: Add asset entry to appropriate manifest JSON
+2. **Set status**: Use `pending` for new assets
+3. **Run generation**: `pnpm --filter @otterblade/dev-tools cli`
+4. **Verify brand compliance**: Check for violations
+5. **Update status**: Change to `complete` after validation
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "No API keys configured" | Set `OPENAI_API_KEY` and/or `GEMINI_API_KEY` |
+| "Human characters detected" | Asset marked `needs_regeneration` with reason |
+| Generation timeout | Videos can take 5-10 minutes; check Veo polling |
+| Wrong visual style | Check prompts.ts for style directives |
+
+## CI/CD Pipeline
+
+### Continuous Integration (ci.yml)
+
+| Job | Steps |
+|-----|-------|
+| **Build & Lint** | Checkout → pnpm install → lint → typecheck → test:coverage → build |
+| **E2E Tests** | Download artifacts → Playwright install → test:e2e |
+| **SonarQube** | Code quality analysis (if secrets configured) |
+
+### Continuous Deployment (cd.yml)
+
+| Job | Trigger |
+|-----|---------|
+| **Node.js CD** | Push to main, release published |
+| **Deploy to Pages** | After build success |
+| **Sync Docs** | After deploy success |
+
+### Asset Generation (assets.yml)
+
+| Trigger | Description |
+|---------|-------------|
+| `workflow_dispatch` | Manual trigger with category, force, dry_run, max_items inputs |
+| Creates PR | With generated assets and brand compliance checklist |
+
+### Key Workflows
+
+| Workflow | Purpose |
+|----------|---------|
+| `ci.yml` | Lint, typecheck, test, build |
+| `cd.yml` | Deploy to GitHub Pages |
+| `assets.yml` | AI-powered asset generation |
+| `ai-reviewer.yml` | AI code review on PRs |
+| `ecosystem-*.yml` | Multi-repo orchestration |
 
 ## Recent Changes
 
+- **2024-12-31**: Updated all GitHub Actions to latest SHA-pinned versions
+- **2024-12-31**: Created comprehensive asset generation documentation in replit.md
+- **2024-12-31**: Added asset_agent.md with full generation workflow docs
+- **2024-12-31**: Updated CLAUDE.md and AGENTS.md with manifest system details
+- **2024-12-31**: Enhanced gameplay_agent.md and render_agent.md
 - **2024-12-31**: Generated all 8 chapter opening cinematics and 5 boss arrival videos
 - **2024-12-31**: Created proofs/ package for sprite sheet testing without WebGL
 - **2024-12-31**: Generated missing parallax backgrounds (village morning, new dawn hall)

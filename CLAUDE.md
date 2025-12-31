@@ -32,8 +32,8 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 ### 3. Asset Imports Use @assets Alias
 ```typescript
 // CORRECT
-import chapterPlate from "@assets/generated_images/prologue_village_chapter_plate.png";
-import introVideo from "@assets/generated_videos/intro_cinematic_otter's_journey.mp4";
+import chapterPlate from "@assets/images/chapter-plates/prologue_village_chapter_plate.png";
+import parallax from "@assets/images/parallax/village_morning_parallax_background.png";
 
 // WRONG
 import bg from "../attached_assets/generated_images/...";
@@ -160,6 +160,60 @@ const otter = createCharacter({
 });
 ```
 
+## Asset Generation System
+
+### Manifest-Driven Pipeline
+
+All game assets are managed through JSON manifests in `client/src/data/manifests/`:
+
+| Manifest | Assets | Provider |
+|----------|--------|----------|
+| `sprites.json` | Player sprite sheet | OpenAI GPT-Image-1 |
+| `enemies.json` | 5 enemy types | OpenAI GPT-Image-1 |
+| `cinematics.json` | 10 chapter videos | Google Veo 3.1 |
+| `scenes.json` | 8 parallax backgrounds | Google Imagen 3 |
+
+### dev-tools Package
+
+The `@otterblade/dev-tools` package handles all asset generation:
+
+```bash
+# Generate all missing assets
+pnpm --filter @otterblade/dev-tools cli
+
+# Generate specific category
+pnpm --filter @otterblade/dev-tools cli -- --category sprites
+
+# Dry run to preview
+pnpm --filter @otterblade/dev-tools cli -- --dry-run
+
+# Force regeneration
+pnpm --filter @otterblade/dev-tools cli -- --force --id intro_cinematic
+```
+
+### GitHub Actions Workflow
+
+Use `assets.yml` workflow for automated generation:
+- Validates API keys (OPENAI_API_KEY, GEMINI_API_KEY)
+- Creates PR with generated assets
+- Includes brand compliance checklist
+
+### Brand Enforcement
+
+All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
+- **Anthropomorphic woodland animals ONLY** - NO humans ever
+- **Warm storybook aesthetic** - NO neon, sci-fi, horror
+- **Consistent protagonist** - Finn the otter warrior
+- **Willowmere Hearthhold setting** - See WORLD.md
+
+### Asset Status Values
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Not yet generated |
+| `complete` | Valid and ready to use |
+| `needs_regeneration` | Has issues, will be regenerated |
+
 ## Testing Commands
 
 ```bash
@@ -174,6 +228,12 @@ PLAYWRIGHT_MCP=true pnpm playwright test
 
 # Visual regression update
 PLAYWRIGHT_MCP=true pnpm playwright test --update-snapshots
+
+# Validate all assets exist
+pnpm validate:assets
+
+# Audit cinematics for brand violations
+pnpm audit:cinematics
 ```
 
 ## Common Mistakes to Avoid
