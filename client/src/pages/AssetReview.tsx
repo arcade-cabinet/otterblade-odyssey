@@ -405,12 +405,20 @@ export default function AssetReview() {
 
   // Save approvals to localStorage
   useEffect(() => {
-    localStorage.setItem(APPROVAL_STORAGE_KEY, JSON.stringify(approvals));
+    try {
+      localStorage.setItem(APPROVAL_STORAGE_KEY, JSON.stringify(approvals));
+    } catch {
+      // Quota exceeded or localStorage unavailable - continue without persistence
+    }
   }, [approvals]);
 
   // Save selection to localStorage
   useEffect(() => {
-    localStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify([...selectedAssets]));
+    try {
+      localStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify([...selectedAssets]));
+    } catch {
+      // Quota exceeded or localStorage unavailable - continue without persistence
+    }
   }, [selectedAssets]);
 
   // Get current manifest
