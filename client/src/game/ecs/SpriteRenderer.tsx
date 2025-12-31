@@ -8,10 +8,12 @@ import dungeonBg from "../../assets/images/parallax/dungeon_parallax_background.
 import courtyardBg from "../../assets/images/parallax/courtyard_parallax_background.png";
 import rooftopsBg from "../../assets/images/parallax/rooftops_parallax_background.png";
 import outerRuinsBg from "../../assets/images/parallax/outer_ruins_parallax_background.png";
+import villageMorningBg from "../../assets/images/parallax/village_morning_parallax_background.png";
+import newDawnHallBg from "../../assets/images/parallax/new_dawn_hall_parallax_background.png";
 
 const BIOME_BACKGROUNDS = [
+  villageMorningBg,
   outerRuinsBg,
-  abbeyExteriorBg,
   abbeyExteriorBg,
   abbeyInteriorBg,
   abbeyInteriorBg,
@@ -19,7 +21,7 @@ const BIOME_BACKGROUNDS = [
   courtyardBg,
   rooftopsBg,
   rooftopsBg,
-  abbeyExteriorBg,
+  newDawnHallBg,
 ];
 
 interface ParallaxLayerProps {
