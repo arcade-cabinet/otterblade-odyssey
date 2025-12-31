@@ -8,35 +8,92 @@ This directory contains JSON-based game content that is validated at load time v
 |------|---------|--------|
 | `chapters.json` | 10-chapter story progression definitions | `ChapterSchema` |
 | `biomes.json` | Visual environment configurations | `BiomeSchema` |
-| `animations.json` | Sprite animation state definitions | `AnimationSchema` |
-| `assets.json` | Asset ledger tracking plates, backgrounds, videos, sprites | - |
+| `assets.json` | Legacy asset ledger (deprecated, use manifests) | - |
 
-## Asset Ledger
+## Asset Manifest System
 
-The `assets.json` file is a comprehensive tracking system for all visual assets:
+The `manifests/` subdirectory contains the **authoritative source** for all generated assets:
 
-### Categories
+### Manifest Files
 
-| Category | Description | Status |
-|----------|-------------|--------|
-| **Chapter Plates** | Story illustrations for chapter transitions | 10/10 complete |
-| **Parallax Backgrounds** | Multi-layer scrolling backgrounds | 8/8 complete |
-| **Cinematics** | Video cutscenes (intro, outro, chapter opens, boss intros) | 15/15 complete |
-| **Sprite Sheets** | Character animation frames | 0/11 (pending) |
+| Manifest | Category | Provider | Assets |
+|----------|----------|----------|--------|
+| `sprites.json` | sprites | OpenAI GPT-Image-1 | Player sprite sheet |
+| `enemies.json` | enemy-sprites | OpenAI GPT-Image-1 | 5 enemy types |
+| `cinematics.json` | cinematics | Google Veo 3.1 | 10 chapter videos |
+| `scenes.json` | scenes | Google Imagen 3 | 8 parallax backgrounds |
+
+### Manifest Structure
+
+Each manifest follows this schema:
+
+```json
+{
+  "$schema": "./manifest-schema.json",
+  "category": "sprites",
+  "provider": "openai",
+  "model": "gpt-image-1",
+  "outputDir": "attached_assets/generated_images/sprites",
+  "assets": [
+    {
+      "id": "player_sprite_sheet",
+      "name": "Player Sprite Sheet",
+      "filename": "player_sprite_sheet.png",
+      "status": "pending",
+      "config": { ... },
+      "prompt": { ... },
+      "validation": { ... }
+    }
+  ]
+}
+```
+
+### Asset Status Values
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| `pending` | Not yet generated | Will be generated on next CLI run |
+| `complete` | Asset exists and is valid | Skipped unless `--force` |
+| `needs_regeneration` | Exists but has issues | Will be regenerated with logged reason |
+
+### Generating Assets
+
+Use the `@otterblade/dev-tools` CLI:
+
+```bash
+# Generate all missing assets
+pnpm --filter @otterblade/dev-tools cli
+
+# Generate specific category
+pnpm --filter @otterblade/dev-tools cli -- --category sprites
+
+# Preview what would be generated
+pnpm --filter @otterblade/dev-tools cli -- --dry-run
+
+# Force regeneration
+pnpm --filter @otterblade/dev-tools cli -- --force --id player_sprite_sheet
+```
 
 ### Asset Locations
 
-All generated assets are stored in `/attached_assets/`:
-- `generated_images/` - PNG files (plates, backgrounds)
-- `generated_videos/` - MP4 files (cinematics)
+| Type | Location |
+|------|----------|
+| Sprites | `attached_assets/generated_images/sprites/` |
+| Chapter plates | `client/src/assets/images/chapter-plates/` |
+| Parallax backgrounds | `client/src/assets/images/parallax/` |
+| Cinematics | `attached_assets/generated_videos/` |
 
 ### Importing Assets
 
 Always use the `@assets` alias in Vite:
 
 ```tsx
-import chapterPlate from '@assets/generated_images/prologue_village_chapter_plate.png';
-import chapterVideo from '@assets/generated_videos/chapter_1_opening_cinematic.mp4';
+// ✅ CORRECT
+import parallax from '@assets/images/parallax/village_morning_parallax_background.png';
+import chapterPlate from '@assets/images/chapter-plates/prologue_village_chapter_plate.png';
+
+// ❌ WRONG - Never use relative paths to attached_assets
+import bg from '../../../attached_assets/...';
 ```
 
 ## Design Principles
@@ -45,7 +102,7 @@ import chapterVideo from '@assets/generated_videos/chapter_1_opening_cinematic.m
 2. **Validation**: All JSON is validated at load time via Zod schemas in `game/data/`
 3. **Modularity**: Each domain has its own file - never combine unrelated data
 4. **Immutability**: This data does not change at runtime
-5. **Asset Tracking**: The assets.json ledger tracks all visual asset generation status
+5. **Manifest-Driven Assets**: All visual assets tracked in `manifests/` directory
 
 ## Schema Versioning
 
@@ -66,6 +123,14 @@ Each JSON file should include a `$schema` field pointing to a JSON Schema for ID
 4. Export from `game/data/index.ts`
 5. Never import JSON directly - always use typed loaders
 
+## Adding New Assets
+
+1. **Define in manifest**: Add entry to appropriate `manifests/*.json`
+2. **Set status**: Use `pending` for new assets
+3. **Run generation**: `pnpm --filter @otterblade/dev-tools cli`
+4. **Verify brand compliance**: Check against BRAND.md
+5. **Update status**: Change to `complete` after validation
+
 ## Proofs Package
 
 A separate testing package exists at `/proofs/` for sprite sheet validation without WebGL:
@@ -78,3 +143,12 @@ This provides:
 - Sprite sheet manifest viewer
 - Animation frame player with configurable FPS
 - Chroma key background removal tool
+
+## Related Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [BRAND.md](../../../BRAND.md) | Visual style guide |
+| [WORLD.md](../../../WORLD.md) | World-building and lore |
+| [packages/dev-tools/README.md](../../../packages/dev-tools/README.md) | Asset generation CLI |
+| [agents/asset_agent.md](../../../agents/asset_agent.md) | Asset agent instructions |

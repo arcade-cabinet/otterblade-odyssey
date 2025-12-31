@@ -4,12 +4,68 @@ AI-powered development tools for Otterblade Odyssey asset generation and validat
 
 ## Overview
 
-This package provides command-line tools for generating and validating game assets using:
+This package provides a **manifest-driven, idempotent CLI** for generating and validating game assets using:
 
 - **OpenAI GPT-Image-1** - Sprite sheets with transparency, masking, and precise control
 - **Google Veo 3.1** - High-fidelity cinematic videos with native audio
 - **Google Imagen 3** - Scene backgrounds and chapter plates
 - **Google Gemini 2.0** - Vision analysis for quality validation
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ASSET GENERATION FLOW                            │
+│                                                                     │
+│  Manifests (JSON)  →  CLI (cli.ts)  →  AI Providers  →  Assets     │
+│                                                                     │
+│  client/src/data/     manifest-       OpenAI GPT-Image-1           │
+│  manifests/*.json     generator.ts    Google Veo 3.1               │
+│                                       Google Imagen 3               │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## Manifest System
+
+All assets are defined in JSON manifests at `client/src/data/manifests/`:
+
+| Manifest | Category | Provider | Assets |
+|----------|----------|----------|--------|
+| `sprites.json` | sprites | OpenAI | Player sprite sheet |
+| `enemies.json` | enemy-sprites | OpenAI | 5 enemy types |
+| `cinematics.json` | cinematics | Google Veo | 10 chapter videos |
+| `scenes.json` | scenes | Google Imagen | 8 parallax backgrounds |
+
+### Manifest Schema
+
+```json
+{
+  "$schema": "./manifest-schema.json",
+  "category": "sprites",
+  "provider": "openai",
+  "model": "gpt-image-1",
+  "outputDir": "attached_assets/generated_images/sprites",
+  "assets": [
+    {
+      "id": "player_sprite_sheet",
+      "name": "Player Sprite Sheet",
+      "filename": "player_sprite_sheet.png",
+      "status": "pending",
+      "config": { ... },
+      "prompt": { ... },
+      "validation": { ... }
+    }
+  ]
+}
+```
+
+### Asset Status Values
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| `pending` | Not yet generated | Will be generated on next CLI run |
+| `complete` | Asset exists and is valid | Skipped unless `--force` |
+| `needs_regeneration` | Exists but has issues | Will be regenerated |
 
 ## Use Case Matrix
 
@@ -35,7 +91,39 @@ export GEMINI_API_KEY="..."
 
 ## Commands
 
-### OpenAI (Sprites)
+### Main CLI (Recommended)
+
+The manifest-driven CLI is the primary way to generate assets:
+
+```bash
+# Generate all missing assets
+pnpm --filter @otterblade/dev-tools cli
+
+# Generate specific category
+pnpm --filter @otterblade/dev-tools cli -- --category sprites
+pnpm --filter @otterblade/dev-tools cli -- --category enemies
+pnpm --filter @otterblade/dev-tools cli -- --category cinematics
+pnpm --filter @otterblade/dev-tools cli -- --category scenes
+
+# Preview without generating (dry run)
+pnpm --filter @otterblade/dev-tools cli -- --dry-run
+
+# Force regeneration of existing assets
+pnpm --filter @otterblade/dev-tools cli -- --force
+
+# Regenerate specific asset by ID
+pnpm --filter @otterblade/dev-tools cli -- --force --id intro_cinematic
+
+# Rate limit for cost control
+pnpm --filter @otterblade/dev-tools cli -- --max-items 3
+
+# Show help
+pnpm --filter @otterblade/dev-tools cli -- --help
+```
+
+### Legacy Commands (Individual Scripts)
+
+These scripts still work but the CLI is preferred:
 
 ```bash
 # Generate player sprite sheet
@@ -73,6 +161,33 @@ pnpm audit:cinematics
 # Validate all required assets exist
 pnpm validate:assets
 ```
+
+## GitHub Actions Integration
+
+The `assets.yml` workflow automates generation:
+
+```yaml
+# Triggered via workflow_dispatch (manual)
+# Inputs:
+#   - category: sprites, enemies, cinematics, scenes, or all
+#   - force: Regenerate existing assets
+#   - dry_run: Preview only
+#   - max_items: Limit for cost control
+
+# Creates PR with generated assets
+# Includes brand compliance checklist
+```
+
+## Cost Estimates
+
+| Category | Items | Estimated Cost |
+|----------|-------|----------------|
+| Sprites | 1 | ~$0.04-0.08 |
+| Enemies | 5 | ~$0.20-0.40 |
+| Cinematics | 10 | ~$2.50 |
+| Scenes | 8 | ~$0.24 |
+
+Always use `--dry-run` first to preview what will be generated.
 
 ## Brand Compliance
 

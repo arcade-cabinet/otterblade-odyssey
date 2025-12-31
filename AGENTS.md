@@ -21,13 +21,14 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
+| **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
 | Rendering | @react-three/fiber | Orthographic 2D mode |
 | Physics | @dimforge/rapier2d-compat | 2D physics only |
 | Entity Management | Miniplex + miniplex-react | Resources for state |
 | State | Zustand | Gameplay state |
 | Styling | Tailwind CSS v4 | HUD/UI only |
 | UI Components | shadcn/ui + Radix | Menus, dialogs |
-| Package Manager | **pnpm** (never npm/yarn) | |
+| Package Manager | **pnpm 10.x** (never npm/yarn) | |
 | Linting | Biome | Strict mode |
 
 **Removed**: @react-three/rapier, @jbcom/strata (3D not needed for 2D side-scroller)
@@ -254,6 +255,118 @@ toRemove.forEach(e => world.remove(e));
 
 ---
 
+## Asset Generation System
+
+### Manifest-Driven Architecture
+
+All visual assets are managed through JSON manifests in `client/src/data/manifests/`:
+
+```
+client/src/data/manifests/
+├── sprites.json      # Player sprite sheet (OpenAI)
+├── enemies.json      # 5 enemy types (OpenAI)
+├── cinematics.json   # 10 chapter videos (Google Veo 3.1)
+└── scenes.json       # 8 parallax backgrounds (Google Imagen 3)
+```
+
+### dev-tools Package
+
+The `@otterblade/dev-tools` package provides idempotent asset generation:
+
+```bash
+# Located at: packages/dev-tools/
+
+# Generate all missing assets
+pnpm --filter @otterblade/dev-tools cli
+
+# Generate by category
+pnpm --filter @otterblade/dev-tools cli -- --category sprites
+pnpm --filter @otterblade/dev-tools cli -- --category cinematics
+
+# Preview without generating
+pnpm --filter @otterblade/dev-tools cli -- --dry-run
+
+# Force regeneration
+pnpm --filter @otterblade/dev-tools cli -- --force
+```
+
+### Asset Status Workflow
+
+```
+pending → [generate] → complete
+                ↓
+         needs_regeneration → [regenerate] → complete
+```
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Asset defined but not yet generated |
+| `complete` | Asset exists and passes validation |
+| `needs_regeneration` | Asset exists but has brand violations |
+
+### Brand Compliance (CRITICAL)
+
+All generation prompts enforce these rules from `BRAND.md`:
+
+**REQUIRED:**
+- Anthropomorphic woodland animals ONLY
+- Warm storybook aesthetic (moss, stone, lantern light)
+- Protagonist: Finn the otter warrior
+- Willowmere Hearthhold setting
+
+**FORBIDDEN:**
+- Human characters (NO knights, villagers, soldiers)
+- Neon, sci-fi, or horror elements
+- Glowing energy weapons or magic beams
+- Anime/JRPG styling
+
+### GitHub Actions Integration
+
+The `assets.yml` workflow automates generation:
+
+1. Triggered via `workflow_dispatch` (manual)
+2. Validates API keys (OPENAI_API_KEY, GEMINI_API_KEY)
+3. Runs dev-tools CLI with selected options
+4. Creates PR with generated assets
+5. PR includes brand compliance checklist
+
+### Provider Selection Matrix
+
+| Asset Type | Provider | Model | Why |
+|------------|----------|-------|-----|
+| Sprites | OpenAI | gpt-image-1 | Transparency, precise grid |
+| Enemies | OpenAI | gpt-image-1 | Consistent style |
+| Cinematics | Google | veo-3.1 | Native audio, long duration |
+| Scenes | Google | imagen-3.0 | Painterly, wide format |
+
+### Validation Commands
+
+```bash
+# Validate all assets exist
+pnpm validate:assets
+
+# Audit cinematics for brand violations
+pnpm audit:cinematics
+
+# Analyze sprite quality
+pnpm analyze:sprite path/to/sprite.png
+
+# Analyze video compliance
+pnpm analyze:video path/to/video.mp4
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `packages/dev-tools/src/cli.ts` | Main CLI entry point |
+| `packages/dev-tools/src/manifest-generator.ts` | Asset generation logic |
+| `packages/dev-tools/src/shared/prompts.ts` | Brand-aligned prompts |
+| `packages/dev-tools/src/shared/config.ts` | API clients, models |
+| `.github/workflows/assets.yml` | GitHub Actions workflow |
+
+---
+
 ## Reference Files
 
 | File | Purpose |
@@ -263,6 +376,8 @@ toRemove.forEach(e => world.remove(e));
 | `replit.md` | Project architecture |
 | `client/src/data/*.json` | Game content data |
 | `client/src/game/data/` | Typed data loaders |
+| `client/src/data/manifests/` | Asset generation manifests |
+| `packages/dev-tools/` | Asset generation tools |
 
 ---
 
