@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
-import * as THREE from 'three';
+import { useEffect, useRef } from 'react';
+import { PlayerSprite } from './components/PlayerSprite';
 import { type RAPIER, usePhysics2D } from './Physics2D';
 import { useStore } from './store';
 
@@ -23,7 +23,7 @@ export function Player() {
   const hitPlayer = useStore((s) => s.hitPlayer);
 
   const rigidBodyRef = useRef<RAPIER.RigidBody | null>(null);
-  const meshRef = useRef<THREE.Mesh>(null);
+  const spritePosition = useRef<[number, number, number]>([checkpointX, checkpointY, 0.5]);
 
   const grounded = useRef(false);
   const coyoteTimer = useRef(0);
@@ -68,9 +68,8 @@ export function Player() {
     const pos = rb.translation();
     const vel = rb.linvel();
 
-    if (meshRef.current) {
-      meshRef.current.position.set(pos.x, pos.y, 0);
-    }
+    // Update sprite position (offset slightly for visual centering)
+    spritePosition.current = [pos.x, pos.y + 0.5, 0.5];
 
     setPlayerPos(pos.x, pos.y);
     advanceScore(pos.x);
@@ -117,16 +116,9 @@ export function Player() {
     }
   });
 
-  const playerColor = useMemo(() => new THREE.Color('#8B6914'), []);
-
   if (!world || !rapier) {
     return null;
   }
 
-  return (
-    <mesh ref={meshRef} position={[checkpointX, checkpointY, 0]} castShadow>
-      <circleGeometry args={[0.6, 32]} />
-      <meshStandardMaterial color={playerColor} />
-    </mesh>
-  );
+  return <PlayerSprite position={spritePosition.current} />;
 }
