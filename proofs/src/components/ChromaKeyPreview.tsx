@@ -65,7 +65,8 @@ export function ChromaKeyPreview() {
     if (sourceImage) {
       applyChromaKey();
     }
-  }, [sourceImage, applyChromaKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings, sourceImage]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

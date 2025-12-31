@@ -32,8 +32,6 @@ vi.mock('miniplex-react', () => {
   };
 });
 
-// Now import the modules that depend on miniplex-react
-import { queries, world, type Entity } from '@/game/ecs/world';
 import {
   cleanupSystem,
   controlSystem,
@@ -44,6 +42,8 @@ import {
   spawnEnemy,
   spawnPlayer,
 } from '@/game/ecs/systems';
+// Now import the modules that depend on miniplex-react
+import { type Entity, queries, world } from '@/game/ecs/world';
 
 describe('ECS World', () => {
   beforeEach(() => {
@@ -175,7 +175,7 @@ describe('ECS Systems', () => {
       gravitySystem(0.1);
 
       const entity = [...queries.moving][0];
-      expect(entity.velocity!.y).toBeLessThan(0);
+      expect(entity.velocity?.y).toBeLessThan(0);
     });
 
     it('should not apply gravity to grounded entities', () => {
@@ -188,7 +188,7 @@ describe('ECS Systems', () => {
       gravitySystem(0.1);
 
       const entity = [...queries.moving][0];
-      expect(entity.velocity!.y).toBe(0);
+      expect(entity.velocity?.y).toBe(0);
     });
   });
 
@@ -209,7 +209,7 @@ describe('ECS Systems', () => {
       controlSystem(0.016);
 
       const entity = [...queries.controlled][0];
-      expect(entity.velocity!.x).toBeGreaterThan(0);
+      expect(entity.velocity?.x).toBeGreaterThan(0);
     });
 
     it('should update facing direction', () => {
@@ -307,9 +307,9 @@ describe('Entity Spawning', () => {
       const player = spawnPlayer(0, 0);
 
       expect(player.controls).toBeDefined();
-      expect(player.controls!.left).toBe(false);
-      expect(player.controls!.right).toBe(false);
-      expect(player.controls!.jump).toBe(false);
+      expect(player.controls?.left).toBe(false);
+      expect(player.controls?.right).toBe(false);
+      expect(player.controls?.jump).toBe(false);
     });
   });
 

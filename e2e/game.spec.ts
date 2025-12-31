@@ -198,19 +198,8 @@ test.describe('Game Over Flow', () => {
     await page.getByTestId('button-start-game').click();
     await page.waitForTimeout(1000);
 
-    // Trigger game over by manipulating store (for testing purposes)
-    await page.evaluate(() => {
-      type GameWindow = Window & {
-        useStore?: {
-          getState(): {
-            hitPlayer: (amount: number) => void;
-          };
-        };
-      };
-
-      const gameWindow = window as GameWindow;
-      // This would need the store to be exposed on window for testing
-    });
+    // Note: Direct store manipulation would require exposing the store on window
+    // For now, we rely on gameplay to trigger game over
 
     // Alternative: Move left to fall off the platform
     await page.keyboard.down('KeyA');

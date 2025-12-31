@@ -47,8 +47,9 @@ export function createGoogleClient(): GoogleGenAI {
   const env = getEnv();
   if (!env.GEMINI_API_KEY) {
     logError('GEMINI_API_KEY environment variable is required', true);
+    throw new Error('GEMINI_API_KEY is required');
   }
-  return new GoogleGenAI({ apiKey: env.GEMINI_API_KEY! });
+  return new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 }
 
 /**

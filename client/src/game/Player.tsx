@@ -12,7 +12,7 @@ const JUMP_BUFFER = 0.1;
 export function Player() {
   const { world, rapier } = usePhysics2D();
 
-  const _runId = useStore((s) => s.runId);
+  const runId = useStore((s) => s.runId);
   const checkpointX = useStore((s) => s.checkpointX);
   const checkpointY = useStore((s) => s.checkpointY);
   const gameOver = useStore((s) => s.gameOver);
@@ -53,13 +53,16 @@ export function Player() {
     };
   }, [world, rapier, checkpointX, checkpointY]);
 
+  // Reset player position when game restarts or checkpoint changes
+  // runId is intentionally included to trigger reset on new game even if checkpoint is same
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runId triggers reset on new game
   useEffect(() => {
     if (rigidBodyRef.current) {
       rigidBodyRef.current.setTranslation({ x: checkpointX, y: checkpointY }, true);
       rigidBodyRef.current.setLinvel({ x: 0, y: 0 }, true);
       lastY.current = checkpointY;
     }
-  }, [checkpointX, checkpointY]);
+  }, [runId, checkpointX, checkpointY]);
 
   useFrame((_, delta) => {
     if (!rigidBodyRef.current || gameOver) return;

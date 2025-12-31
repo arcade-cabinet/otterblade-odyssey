@@ -27,10 +27,11 @@ export function Physics2DProvider({
 
   useEffect(() => {
     let mounted = true;
+    const gravityVector = { x: gravity.x, y: gravity.y };
 
     RAPIER.init().then(() => {
       if (!mounted) return;
-      worldRef.current = new RAPIER.World(gravity);
+      worldRef.current = new RAPIER.World(gravityVector);
       setReady(true);
     });
 
@@ -41,7 +42,7 @@ export function Physics2DProvider({
         worldRef.current = null;
       }
     };
-  }, [gravity.x, gravity.y, gravity]);
+  }, [gravity.x, gravity.y]);
 
   useFrame(() => {
     if (worldRef.current) {
