@@ -153,6 +153,185 @@ jobs:
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   # ==========================================================================
+  # Build Android APKs (downloads build artifact, creates APKs for all archs)
+  # ==========================================================================
+  build-android:
+    name: Build Android APKs
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - abi: arm64-v8a
+            arch_name: arm64
+          - abi: armeabi-v7a
+            arch_name: arm32
+          - abi: x86_64
+            arch_name: x86_64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@5d7b2146334bacf88728daaa70414a99f5164e0f # v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
+      - name: Setup Gradle
+        uses: gradle/actions@bfd569614358980afc8f89c2730eee75bb97efdf # v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile || pnpm install
+
+      # Download pre-built web assets
+      - name: Download build artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: build-dist
+          path: dist/public
+
+      # Initialize Capacitor Android platform if not exists
+      - name: Add Capacitor Android platform
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx cap sync android
+
+      # Generate debug keystore for signing
+      - name: Generate debug keystore
+        run: |
+          mkdir -p android/app
+          if [ ! -f android/app/debug.keystore ]; then
+            keytool -genkey -v -keystore android/app/debug.keystore \
+              -storepass android -alias androiddebugkey -keypass android \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US"
+          fi
+
+      # Configure build.gradle for specific ABI
+      - name: Configure ABI filter
+        run: |
+          # Add ABI filter to build.gradle
+          sed -i '/android {/a\    splits {\n        abi {\n            enable true\n            reset()\n            include "${{ matrix.abi }}"\n            universalApk false\n        }\n    }' android/app/build.gradle || true
+
+      # Build APK
+      - name: Build APK
+        working-directory: android
+        run: |
+          ./gradlew assembleDebug \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/android/app/debug.keystore \
+            -Pandroid.injected.signing.store.password=android \
+            -Pandroid.injected.signing.key.alias=androiddebugkey \
+            -Pandroid.injected.signing.key.password=android
+
+      # Find and rename APK
+      - name: Prepare APK artifact
+        id: apk
+        run: |
+          APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
+          if [ -n "$APK_PATH" ]; then
+            NEW_NAME="otterblade-odyssey-${{ matrix.arch_name }}.apk"
+            cp "$APK_PATH" "$NEW_NAME"
+            echo "apk_path=$NEW_NAME" >> $GITHUB_OUTPUT
+            echo "✅ APK built: $NEW_NAME"
+          else
+            echo "❌ APK not found"
+            exit 1
+          fi
+
+      # Upload APK artifact
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: apk-${{ matrix.arch_name }}
+          path: ${{ steps.apk.outputs.apk_path }}
+          retention-days: 7
+
+  # ==========================================================================
+  # Create GitHub Release with APKs (only on release event or manual trigger)
+  # ==========================================================================
+  release-android:
+    name: Release Android APKs
+    needs: [build-android, detect]
+    if: |
+      always() &&
+      !cancelled() &&
+      needs.build-android.result == 'success' &&
+      (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      # Download all APK artifacts
+      - name: Download ARM64 APK
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: apk-arm64
+          path: apks/
+
+      - name: Download ARM32 APK
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: apk-arm32
+          path: apks/
+
+      - name: Download x86_64 APK
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: apk-x86_64
+          path: apks/
+
+      - name: List APKs
+        run: ls -la apks/
+
+      # Create or update GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@5122b4edc95f85501a71628a57dc180a03ec7588 # v2
+        with:
+          tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || format('v{0}-dev', github.run_number) }}
+          name: ${{ github.event_name == 'release' && github.event.release.name || format('Development Build #{0}', github.run_number) }}
+          body: |
+            ## Otterblade Odyssey - Android APKs
+
+            ### Download for your device:
+            - **ARM64 (arm64-v8a)**: Most modern Android devices (recommended)
+            - **ARM32 (armeabi-v7a)**: Older 32-bit Android devices
+            - **x86_64**: Android emulators and Intel-based devices
+
+            ### Installation
+            1. Download the APK matching your device architecture
+            2. Enable "Install from unknown sources" in Android settings
+            3. Open the APK file to install
+
+            > ⚠️ **Note**: These are debug builds, signed with a debug key.
+            > Not intended for Google Play Store distribution.
+
+            ---
+            Built from commit: ${{ github.sha }}
+            Workflow run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          draft: ${{ github.event_name == 'workflow_dispatch' }}
+          prerelease: ${{ github.event_name == 'workflow_dispatch' }}
+          files: |
+            apks/*.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ==========================================================================
   # Sync Documentation to Org Portal (downloads docs artifact)
   # ==========================================================================
   sync-docs:
