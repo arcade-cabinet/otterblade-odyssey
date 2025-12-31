@@ -8,7 +8,7 @@ const COYOTE_TIME = 0.15;
 const JUMP_BUFFER = 0.1;
 
 export function movementSystem(dt: number) {
-  for (const entity of queries.moving.entities) {
+  for (const entity of queries.moving) {
     entity.position.x += entity.velocity.x * dt;
     entity.position.y += entity.velocity.y * dt;
     entity.position.z += entity.velocity.z * dt;
@@ -16,7 +16,7 @@ export function movementSystem(dt: number) {
 }
 
 export function gravitySystem(dt: number) {
-  for (const entity of queries.moving.entities) {
+  for (const entity of queries.moving) {
     if (!entity.grounded) {
       entity.velocity.y += GRAVITY * dt;
     }
@@ -24,7 +24,7 @@ export function gravitySystem(dt: number) {
 }
 
 export function controlSystem(dt: number) {
-  for (const entity of queries.controlled.entities) {
+  for (const entity of queries.controlled) {
     const { controls, velocity } = entity;
     
     let moveX = 0;
@@ -68,7 +68,7 @@ export function controlSystem(dt: number) {
 }
 
 export function healthSystem() {
-  for (const entity of queries.withHealth.entities) {
+  for (const entity of queries.withHealth) {
     if (entity.health.current <= 0) {
       world.addComponent(entity, "dead", true);
     }
@@ -76,10 +76,14 @@ export function healthSystem() {
 }
 
 export function cleanupSystem() {
-  for (const entity of queries.dead.entities) {
+  const toRemove: Entity[] = [];
+  for (const entity of queries.dead) {
     if (!entity.player) {
-      world.remove(entity);
+      toRemove.push(entity);
     }
+  }
+  for (const entity of toRemove) {
+    world.remove(entity);
   }
 }
 
@@ -119,19 +123,5 @@ export function spawnEnemy(
     velocity: { x: 0, y: 0, z: 0 },
     health: { current: health, max: health },
     facingRight: false,
-  });
-}
-
-export function spawnParallaxLayer(
-  src: string,
-  layer: number,
-  scrollFactor: number,
-  width: number = 1920,
-  height: number = 1080
-): Entity {
-  return world.add({
-    position: { x: 0, y: 0, z: -layer * 10 },
-    sprite: { src, width, height },
-    parallax: { layer, scrollFactor },
   });
 }

@@ -1,6 +1,4 @@
-import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
-import { ECS, queries, world } from "./world";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
@@ -66,41 +64,5 @@ export function ParallaxBackgroundSystem({ biomeIndex, playerX }: ParallaxBackgr
       <ParallaxLayer biomeIndex={biomeIndex} playerX={playerX} layer={1} scrollFactor={0.4} />
       <ParallaxLayer biomeIndex={biomeIndex} playerX={playerX} layer={2} scrollFactor={0.6} />
     </group>
-  );
-}
-
-export function SpriteEntities() {
-  return (
-    <ECS.Entities in={queries.sprites}>
-      {(entity) => (
-        <ECS.Entity key={world.id(entity)} entity={entity}>
-          <ECS.Component name="object3d">
-            <SpriteRenderer entity={entity} />
-          </ECS.Component>
-        </ECS.Entity>
-      )}
-    </ECS.Entities>
-  );
-}
-
-function SpriteRenderer({ entity }: { entity: typeof queries.sprites.entities[0] }) {
-  const { sprite, position } = entity;
-  const texture = useTexture(sprite.src);
-
-  const scale = useMemo(() => {
-    const aspect = sprite.width / sprite.height;
-    return [aspect * 2, 2, 1] as [number, number, number];
-  }, [sprite.width, sprite.height]);
-
-  return (
-    <mesh position={[position.x, position.y, position.z]}>
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial
-        map={texture}
-        transparent
-        side={THREE.DoubleSide}
-        depthWrite={false}
-      />
-    </mesh>
   );
 }
