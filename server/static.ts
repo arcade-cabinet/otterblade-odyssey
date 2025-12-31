@@ -1,6 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import express, { type Express } from 'express';
+import rateLimit from 'express-rate-limit';
+
+/**
+ * Rate limiter for static file serving.
+ * Limits requests to prevent file system abuse.
+ */
+const staticRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute per IP
+  message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, 'public');
@@ -13,7 +26,8 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use('*', (_req, res) => {
+  // Rate limited to prevent file system abuse
+  app.use('*', staticRateLimiter, (_req, res) => {
     res.sendFile(path.resolve(distPath, 'index.html'));
   });
 }

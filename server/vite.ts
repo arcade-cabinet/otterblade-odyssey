@@ -2,11 +2,24 @@ import fs from 'node:fs';
 import type { Server } from 'node:http';
 import path from 'node:path';
 import type { Express } from 'express';
+import rateLimit from 'express-rate-limit';
 import { nanoid } from 'nanoid';
 import { createLogger, createServer as createViteServer } from 'vite';
 import viteConfig from '../vite.config';
 
 const viteLogger = createLogger();
+
+/**
+ * Rate limiter for development server.
+ * Limits requests to prevent file system abuse during development.
+ */
+const devRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 200, // 200 requests per minute per IP (higher for dev with HMR)
+  message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 export async function setupVite(server: Server, app: Express) {
   const serverOptions = {
@@ -31,7 +44,8 @@ export async function setupVite(server: Server, app: Express) {
 
   app.use(vite.middlewares);
 
-  app.use('*', async (req, res, next) => {
+  // Rate limited to prevent file system abuse
+  app.use('*', devRateLimiter, async (req, res, next) => {
     const url = req.originalUrl;
 
     try {
