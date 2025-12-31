@@ -8,7 +8,7 @@
     "bossName": null,
     "assets": {
       "chapterPlate": "prologue_village_chapter_plate.png",
-      "parallaxBg": "outer_ruins_parallax_background.png"
+      "parallaxBg": "village_morning_parallax_background.png"
     }
   },
   {
@@ -116,7 +116,7 @@
     "bossName": null,
     "assets": {
       "chapterPlate": "epilogue_victory_chapter_plate.png",
-      "parallaxBg": "abbey_exterior_parallax_background.png"
+      "parallaxBg": "new_dawn_hall_parallax_background.png"
     }
   }
 ]
