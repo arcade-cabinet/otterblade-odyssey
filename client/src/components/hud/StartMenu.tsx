@@ -5,6 +5,7 @@
  * - Warm, woodland-epic aesthetic (NOT neon sci-fi)
  * - Storybook art style with lantern glow
  * - Practical, grounded materials
+ * - FULLSCREEN immersion on game start
  */
 
 import Box from '@mui/material/Box';
@@ -16,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import { useStore } from '@/game/store';
 import { hapticMedium } from '@/lib/capacitor';
+import { enterImmersiveMode, isFullscreenSupported } from '@/lib/fullscreen';
 import { brandColors } from '@/lib/theme';
 // Import the prologue chapter plate as splash image
 import splashImage from '@/assets/images/chapter-plates/prologue_village_chapter_plate.png';
@@ -27,6 +29,7 @@ export default function StartMenu() {
   const startGame = useStore((s) => s.startGame);
 
   const [showContent, setShowContent] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     // Fade in content after a short delay
@@ -37,8 +40,20 @@ export default function StartMenu() {
   if (gameStarted) return null;
 
   const handleStartGame = async () => {
+    if (isStarting) return;
+    setIsStarting(true);
+
     await hapticMedium();
-    startGame();
+
+    // Enter fullscreen immersive mode - MUST be triggered by user interaction
+    if (isFullscreenSupported()) {
+      await enterImmersiveMode();
+    }
+
+    // Small delay for fullscreen transition to feel smooth
+    setTimeout(() => {
+      startGame();
+    }, 100);
   };
 
   return (

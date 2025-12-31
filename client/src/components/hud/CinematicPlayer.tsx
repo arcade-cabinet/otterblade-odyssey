@@ -20,6 +20,16 @@ import outroVideo from '@/assets/videos/outro_victory_sunrise_scene.mp4';
 
 export type CinematicType = 'intro' | 'outro' | 'chapter' | 'boss' | null;
 
+/** Pre-computed firefly configurations for stable keys */
+const FIREFLY_CONFIGS = Array.from({ length: 12 }).map((_, i) => ({
+  id: `firefly-${i}`,
+  left: `${10 + ((i * 7) % 80)}%`,
+  top: `${10 + ((i * 11) % 80)}%`,
+  animation: `fireflyFloat${i % 4}`,
+  duration: 8 + (i % 6),
+  delay: (i * 0.4) % 4,
+}));
+
 interface CinematicPlayerProps {
   type: CinematicType;
   chapterId?: number;
@@ -39,13 +49,19 @@ const CINEMATIC_TITLES: Record<string, { title: string; subtitle: string }> = {
 
 /** Decorative corner component */
 function StoryCorner({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
-  const corners = {
-    tl: { top: 0, left: 0, borderTop: true, borderLeft: true },
-    tr: { top: 0, right: 0, borderTop: true, borderRight: true },
-    bl: { bottom: 0, left: 0, borderBottom: true, borderLeft: true },
-    br: { bottom: 0, right: 0, borderBottom: true, borderRight: true },
+  const positionStyles = {
+    tl: { top: 0, left: 0 },
+    tr: { top: 0, right: 0 },
+    bl: { bottom: 0, left: 0 },
+    br: { bottom: 0, right: 0 },
   };
-  const c = corners[position];
+
+  const borderStyles = {
+    tl: { borderTop: '2px solid', borderLeft: '2px solid', borderBottom: 'none', borderRight: 'none' },
+    tr: { borderTop: '2px solid', borderRight: '2px solid', borderBottom: 'none', borderLeft: 'none' },
+    bl: { borderBottom: '2px solid', borderLeft: '2px solid', borderTop: 'none', borderRight: 'none' },
+    br: { borderBottom: '2px solid', borderRight: '2px solid', borderTop: 'none', borderLeft: 'none' },
+  };
 
   return (
     <Box
@@ -53,14 +69,9 @@ function StoryCorner({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
         position: 'absolute',
         width: { xs: 24, sm: 40, md: 56 },
         height: { xs: 24, sm: 40, md: 56 },
-        ...c,
+        ...positionStyles[position],
+        ...borderStyles[position],
         borderColor: `${brandColors.honeyGold.main}50`,
-        borderWidth: 2,
-        borderStyle: 'solid',
-        borderTop: c.borderTop ? undefined : 'none',
-        borderBottom: c.borderBottom ? undefined : 'none',
-        borderLeft: c.borderLeft ? undefined : 'none',
-        borderRight: c.borderRight ? undefined : 'none',
         pointerEvents: 'none',
       }}
     />
@@ -79,9 +90,9 @@ function FireflyMotes() {
         opacity: 0.6,
       }}
     >
-      {Array.from({ length: 12 }).map((_, i) => (
+      {FIREFLY_CONFIGS.map((config) => (
         <Box
-          key={i}
+          key={config.id}
           sx={{
             position: 'absolute',
             width: { xs: 2, sm: 3 },
@@ -89,10 +100,10 @@ function FireflyMotes() {
             borderRadius: '50%',
             backgroundColor: brandColors.lanternGlow,
             boxShadow: `0 0 8px ${brandColors.lanternGlow}, 0 0 16px ${brandColors.honeyGold.main}`,
-            left: `${10 + Math.random() * 80}%`,
-            top: `${10 + Math.random() * 80}%`,
-            animation: `fireflyFloat${i % 4} ${8 + Math.random() * 6}s ease-in-out infinite`,
-            animationDelay: `${Math.random() * 4}s`,
+            left: config.left,
+            top: config.top,
+            animation: `${config.animation} ${config.duration}s ease-in-out infinite`,
+            animationDelay: `${config.delay}s`,
           }}
         />
       ))}
@@ -277,6 +288,7 @@ export default function CinematicPlayer({
             backgroundColor: '#000',
           }}
         >
+          {/* biome-ignore lint/a11y/useMediaCaption: Game cinematic, captions not applicable */}
           <video
             ref={videoRef}
             src={videoSrc}
