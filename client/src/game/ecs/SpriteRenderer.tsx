@@ -2,20 +2,24 @@ import { useTexture } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
-import abbeyExteriorBg from "@assets/generated_images/abbey_exterior_parallax_background.png";
-import abbeyInteriorBg from "@assets/generated_images/abbey_interior_parallax_background.png";
-import dungeonBg from "@assets/generated_images/dungeon_parallax_background.png";
-import courtyardBg from "@assets/generated_images/courtyard_parallax_background.png";
-import rooftopsBg from "@assets/generated_images/rooftops_parallax_background.png";
-import outerRuinsBg from "@assets/generated_images/outer_ruins_parallax_background.png";
+import abbeyExteriorBg from "../../assets/images/parallax/abbey_exterior_parallax_background.png";
+import abbeyInteriorBg from "../../assets/images/parallax/abbey_interior_parallax_background.png";
+import dungeonBg from "../../assets/images/parallax/dungeon_parallax_background.png";
+import courtyardBg from "../../assets/images/parallax/courtyard_parallax_background.png";
+import rooftopsBg from "../../assets/images/parallax/rooftops_parallax_background.png";
+import outerRuinsBg from "../../assets/images/parallax/outer_ruins_parallax_background.png";
 
 const BIOME_BACKGROUNDS = [
+  outerRuinsBg,
   abbeyExteriorBg,
+  abbeyExteriorBg,
+  abbeyInteriorBg,
   abbeyInteriorBg,
   dungeonBg,
   courtyardBg,
   rooftopsBg,
-  outerRuinsBg,
+  rooftopsBg,
+  abbeyExteriorBg,
 ];
 
 interface ParallaxLayerProps {

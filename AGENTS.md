@@ -1,128 +1,213 @@
-# AI Agent Instructions for Otterblade Odyssey
+# AI Agent Quality Standards for Otterblade Odyssey
 
-This document provides comprehensive guidance for **all AI agents** (Claude, Copilot, Cursor, Windsurf, etc.) working on Otterblade Odyssey. Follow these instructions to maintain consistency and quality.
+This document defines **mandatory** code quality standards for all AI agents working on this project.
+These standards must be enforced rigorously to prevent technical debt accumulation.
 
 **Repository**: `github.com/jbdevprimary/otterblade-odyssey`
 
 ---
 
-## Project Context
+## Core Principles
 
-**Otterblade Odyssey: Zephyros Rising** is a production-grade React 2.5D platformer with a **Redwall-inspired woodland-epic** aesthetic. Think warm lantern light, mossy stone abbeys, brave woodland creatures—not neon sci-fi or grimdark horror.
-
-### Technology Stack
-| Layer | Technology |
-|-------|------------|
-| 3D Rendering | @react-three/fiber |
-| Physics | @react-three/rapier |
-| Entity Management | Miniplex + miniplex-react |
-| State | Zustand |
-| Procedural Graphics | @jbcom/strata |
-| Styling | Tailwind CSS v4 |
-| UI Components | shadcn/ui + Radix primitives |
-| Package Manager | **pnpm** (not npm/yarn) |
+1. **No Monoliths**: Files must be modular and focused. Max ~300 lines per file.
+2. **No Duplicates**: Refactor, don't duplicate. Search before creating.
+3. **Clean As You Go**: Remove obsolete code immediately when refactoring.
+4. **Test-Driven**: Write tests for new functionality.
+5. **Document**: All exports must have JSDoc comments.
 
 ---
 
-## Critical Guidelines
+## Technology Stack (Updated)
 
-### 1. Brand Consistency (MANDATORY)
+| Layer | Technology | Notes |
+|-------|------------|-------|
+| Rendering | @react-three/fiber | Orthographic 2D mode |
+| Physics | @dimforge/rapier2d-compat | 2D physics only |
+| Entity Management | Miniplex + miniplex-react | Resources for state |
+| State | Zustand | Gameplay state |
+| Styling | Tailwind CSS v4 | HUD/UI only |
+| UI Components | shadcn/ui + Radix | Menus, dialogs |
+| Package Manager | **pnpm** (never npm/yarn) | |
+| Linting | Biome | Strict mode |
 
-**Always reference `BRAND.md` before generating visual content or making design decisions.**
+**Removed**: @react-three/rapier, @jbcom/strata (3D not needed for 2D side-scroller)
 
-| DO | DON'T |
-|----|-------|
-| Warm greens, honey gold, cool misty blues | Neon colors, electric blues |
-| Mossy stone, lantern light, cloth, leather | Sci-fi aesthetics, glowing energy |
-| Quiet heroism, storybook realism | Grimdark, horror, demons |
-| Subtle magic (firefly motes) | Laser beams, energy weapons |
+---
 
-### 2. Package Manager: pnpm ONLY
+## File Structure Standards
 
-```bash
-# CORRECT
-pnpm install
-pnpm run dev
-pnpm add package-name
-pnpm run test
+### Maximum File Sizes
+| Type | Max Lines | Action if Exceeded |
+|------|-----------|-------------------|
+| Component | 200 | Split into subcomponents |
+| Utility | 150 | Split by domain |
+| System | 300 | Split by responsibility |
+| Constants | 100 | Move to JSON data files |
 
-# WRONG - DO NOT USE
-npm install
-npm run dev
-yarn add
+### Directory Responsibilities
+```
+client/src/
+├── data/               # JSON content files ONLY
+│   ├── chapters.json   # Chapter definitions
+│   ├── biomes.json     # Visual environment configs
+│   └── README.md       # Data architecture docs
+├── game/
+│   ├── data/           # Zod loaders for JSON validation
+│   │   ├── schemas.ts  # Zod schemas
+│   │   ├── loaders.ts  # Typed data loaders
+│   │   └── index.ts    # Barrel export
+│   ├── ecs/            # Miniplex entities/systems
+│   └── *.tsx           # Game components
+├── components/
+│   ├── hud/            # Game UI overlays
+│   └── ui/             # Reusable UI primitives (shadcn)
+└── pages/              # Route pages
 ```
 
-### 3. Asset Imports Use @assets Alias
+---
+
+## Data Architecture
+
+### Static Content (JSON files in `client/src/data/`)
+- Chapter definitions → `chapters.json`
+- Biome configurations → `biomes.json`
+- Animation specs → `animations.json` (future)
+- Dialogue trees → `dialogue.json` (future)
+
+### Runtime State (ECS/Zustand)
+- Current chapter progress → Miniplex resources
+- Player state → Zustand store
+- Physics bodies → Rapier2D world
+- Active entities → Miniplex world
+
+### Critical Rules
+- **NEVER** put mutable state in JSON
+- **NEVER** put authored content in TypeScript constants
+- **NEVER** import JSON directly - always use typed loaders
+- **ALWAYS** validate JSON via Zod schemas
+
+---
+
+## Code Quality Checklist
+
+Before completing any task, verify ALL of these:
+
+- [ ] `pnpm biome check .` reports no errors
+- [ ] `pnpm tsc --noEmit` passes
+- [ ] No unused imports (Biome enforces)
+- [ ] No unused variables (Biome enforces)
+- [ ] JSDoc on all exports
+- [ ] No console.log in production code
+- [ ] No hardcoded magic strings/numbers
+- [ ] No duplicate code
+- [ ] Obsolete files removed
+
+---
+
+## Naming Conventions
+
+### Files
+- Components: `PascalCase.tsx`
+- Utilities: `camelCase.ts`
+- Data: `kebab-case.json`
+- Tests: `*.test.ts` or `*.spec.ts`
+
+### Code
+- Components: `PascalCase`
+- Functions: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
+- Types/Interfaces: `PascalCase`
+- Schema validators: `*Schema` suffix
+
+---
+
+## Forbidden Patterns
 
 ```typescript
-// CORRECT
-import chapterPlate from "@assets/generated_images/prologue_village_chapter_plate.png";
-import introVideo from "@assets/generated_videos/intro_cinematic_otter's_journey.mp4";
+// ❌ Hardcoded magic numbers
+const damage = 10;
 
-// WRONG
-import bg from "../attached_assets/generated_images/...";
+// ✅ Named constants or JSON data
+import { PLAYER_BASE_DAMAGE } from "./constants";
+
+// ❌ Direct JSON import
+import data from './data.json';
+
+// ✅ Typed loader with validation
+import { loadChapters } from './data';
+
+// ❌ Any type
+function process(data: any) {}
+
+// ✅ Proper typing
+function process(data: Chapter) {}
+
+// ❌ Massive component (500+ lines)
+function GameScreen() { /* everything */ }
+
+// ✅ Composed components
+function GameScreen() {
+  return (
+    <>
+      <GameCanvas />
+      <GameHUD />
+      <GameControls />
+    </>
+  );
+}
+
+// ❌ Using npm/yarn
+npm install something
+
+// ✅ Using pnpm
+pnpm add something
 ```
-
-### 4. TypeScript Target is ES2022
-
-Required for Miniplex query iteration. Never downgrade.
 
 ---
 
-## Architecture
+## World Identity: Willowmere Hearthhold
 
-### File Structure
-```
-client/src/game/
-├── ecs/
-│   ├── world.ts          # Entity types, world instance, queries
-│   ├── systems.ts        # ECS systems (movement, gravity, etc.)
-│   └── SpriteRenderer.tsx # Parallax and sprite rendering
-├── Player.tsx            # Player controller with Rapier physics
-├── Level.tsx             # Level generation and environment
-├── store.ts              # Zustand state
-├── constants.ts          # Biomes, collision groups
-└── utils.ts              # Helper functions
+This game has its **own unique world** - not Redwall, but inspired by its emotional core.
 
-attached_assets/
-├── generated_images/     # Chapter plates, parallax backgrounds
-└── generated_videos/     # Intro/outro cinematics
-```
+| Old (Don't Use) | New (Use Instead) |
+|-----------------|-------------------|
+| "The Abbey" | "The Hearthhold" or "Willowmere" |
+| "Redwall" | "Willowmere" |
+| "Martin the Warrior" | "The Otterblade Legacy" |
+| "Mossflower" | "The Willow Banks" |
+| "vermin" | "Galeborn" |
 
-### 10-Chapter Story Structure
-
-| # | Chapter | Biome | Quest | Assets |
-|---|---------|-------|-------|--------|
-| 0 | Prologue | Village | "Answer the Call" | prologue_village_chapter_plate.png |
-| 1 | Abbey Approach | Forest/Bridge | "Reach the Gatehouse" | abbey_approach_chapter_plate.png |
-| 2 | Gatehouse | Entry | "Cross the Threshold" | gatehouse_bridge_chapter_plate.png |
-| 3 | Great Hall | Interior | "Defend the Great Hall" | great_hall_oath_chapter_plate.png |
-| 4 | Library | Interior | "Find the Ancient Map" | library_map_table_chapter_plate.png |
-| 5 | Dungeon | Catacombs | "Descend into the Depths" | dungeon_descent_chapter_plate.png |
-| 6 | Courtyard | Gardens | "Rally the Defenders" | courtyard_rally_chapter_plate.png |
-| 7 | Rooftops | Rafters | "Ascend to the Bells" | rooftop_wind_chapter_plate.png |
-| 8 | Final Ascent | High Keep | "Reach Zephyros" | final_ascent_chapter_plate.png |
-| 9 | Epilogue | Victory | "A New Dawn" | epilogue_victory_chapter_plate.png |
-
-**Videos**: `intro_cinematic_otter's_journey.mp4`, `outro_victory_sunrise_scene.mp4`
+See `WORLD.md` for complete lore and world-building details.
 
 ---
 
-## Code Patterns
+## 10-Chapter Story Structure
 
-### ECS Pattern (Miniplex)
+| # | Chapter | Location | Quest |
+|---|---------|----------|-------|
+| 0 | The Calling | Finn's Cottage | Answer the Call |
+| 1 | River Path | Willow Banks | Reach the Gatehouse |
+| 2 | The Gatehouse | Northern Gate | Cross the Threshold |
+| 3 | Great Hall | Central Hearthhold | Take the Oath |
+| 4 | The Archives | Library Spire | Find the Ancient Map |
+| 5 | Deep Cellars | Underground Passages | Descend into the Depths |
+| 6 | Kitchen Gardens | Southern Grounds | Rally the Defenders |
+| 7 | Bell Tower | Highest Spire | Sound the Alarm |
+| 8 | Storm's Edge | Outer Ramparts | Face Zephyros |
+| 9 | New Dawn | The Great Hearth | The Everember Rekindled |
+
+---
+
+## ECS Pattern (Miniplex)
 
 ```typescript
-// client/src/game/ecs/world.ts
 import { World } from "miniplex";
 
 export type Entity = {
   position: { x: number; y: number; z: number };
   velocity?: { x: number; y: number; z: number };
   player?: true;
-  enemy?: { type: "skirmisher" | "shielded" | "ranged" | "flyer" | "trap" | "elite" };
-  health?: { current: number; max: number };
-  collectible?: { type: "shard" | "health" };
+  // ... other components
 };
 
 export const world = new World<Entity>();
@@ -131,232 +216,41 @@ export const world = new World<Entity>();
 export const queries = {
   moving: world.with("position", "velocity"),
   players: world.with("player", "position"),
-  enemies: world.with("enemy", "position", "health"),
-  collectibles: world.with("collectible", "position"),
 };
 
-// Iterate safely (requires ES2022 target)
+// Safe iteration (requires ES2022 target)
 for (const entity of queries.moving) {
   entity.position.x += entity.velocity.x * dt;
 }
 
 // Entity removal - collect first, remove after
 const toRemove: Entity[] = [];
-for (const entity of queries.cleanup) {
-  if (entity.position.y < -10) toRemove.push(entity);
-}
+for (const e of queries.dead) toRemove.push(e);
 toRemove.forEach(e => world.remove(e));
 ```
 
-### Physics with Rapier
-
-```tsx
-import { RigidBody, CuboidCollider } from "@react-three/rapier";
-
-// Collision groups (bitwise)
-export const COLLISION_GROUPS = {
-  PLAYER: 0x0001,
-  WORLD: 0x0002,
-  ENEMY: 0x0004,
-  COLLECTIBLE: 0x0008,
-  TRIGGER: 0x0010,
-};
-
-function Platform({ position, args }: PlatformProps) {
-  return (
-    <RigidBody type="fixed" position={position} collisionGroups={COLLISION_GROUPS.WORLD}>
-      <CuboidCollider args={args} />
-      <mesh>
-        <boxGeometry args={[args[0] * 2, args[1] * 2, args[2] * 2]} />
-        <meshStandardMaterial color="#8B7355" />
-      </mesh>
-    </RigidBody>
-  );
-}
-```
-
-### State with Zustand
-
-```typescript
-// client/src/game/store.ts
-import { create } from "zustand";
-
-interface GameState {
-  health: number;
-  maxHealth: number;
-  shards: number;
-  currentBiome: number;
-  checkpointPosition: { x: number; y: number };
-  
-  takeDamage: (amount: number) => void;
-  heal: (amount: number) => void;
-  collectShard: () => void;
-  setCheckpoint: (pos: { x: number; y: number }) => void;
-  advanceBiome: () => void;
-}
-
-export const useStore = create<GameState>((set, get) => ({
-  health: 5,
-  maxHealth: 5,
-  shards: 0,
-  currentBiome: 0,
-  checkpointPosition: { x: 0, y: 0 },
-  
-  takeDamage: (amount) => set((s) => ({ 
-    health: Math.max(0, s.health - amount) 
-  })),
-  heal: (amount) => set((s) => ({ 
-    health: Math.min(s.maxHealth, s.health + amount) 
-  })),
-  collectShard: () => set((s) => ({ shards: s.shards + 1 })),
-  setCheckpoint: (pos) => set({ checkpointPosition: pos }),
-  advanceBiome: () => set((s) => ({ 
-    currentBiome: Math.min(9, s.currentBiome + 1) 
-  })),
-}));
-```
-
-### Strata Procedural Graphics
-
-```typescript
-import { createCharacter, animateCharacter, updateFurUniforms, fbm, noise3D } from "@jbcom/strata";
-import * as THREE from "three";
-
-// Procedural terrain height
-const height = noise3D(x * 0.1, 0, z * 0.1) * 5;
-const detail = fbm(x * 0.3, 0, z * 0.3, 3) * 1.5;
-const finalHeight = height + detail;
-
-// Character creation with fur
-const otter = createCharacter({
-  skinColor: 0x8b6914,
-  furOptions: {
-    baseColor: new THREE.Color("#5d4420"),
-    tipColor: new THREE.Color("#8b6914"),
-    layerCount: 8,
-    spacing: 0.015,
-    windStrength: 0.3,
-  },
-  scale: 1.0,
-});
-
-// In useFrame loop:
-animateCharacter(otter, elapsedTime);
-updateFurUniforms(furGroup, elapsedTime);
-```
-
 ---
 
-## Mobile Controls
+## Agent Responsibilities
 
-Touch controls use a diamond layout on the right side:
-- **Jump** (top)
-- **Attack** (right)
-- **Crouch/Slide** (bottom)
-- **Special/Interact** (left)
+### Before Starting Work
+1. Read this document
+2. Read `WORLD.md` for lore context
+3. Review `replit.md` for technical context
+4. Check existing code patterns
 
-Movement buttons on the left side:
-- **Left** / **Right**
+### During Work
+1. Follow these standards strictly
+2. Clean up as you go
+3. Test your changes
+4. Use typed data loaders
 
-All touch elements must have:
-- `touch-action: none` to prevent browser gestures
-- No hover dependency
-- Large, thumb-friendly sizing (min 44px)
-
----
-
-## Testing
-
-```bash
-# Unit tests with Vitest
-pnpm run test
-
-# E2E tests with Playwright (headless - for CI)
-pnpm playwright test
-
-# E2E tests with full WebGL support (requires GPU)
-PLAYWRIGHT_MCP=true pnpm playwright test
-
-# Interactive test UI
-pnpm playwright test --ui
-
-# Update visual regression snapshots
-PLAYWRIGHT_MCP=true pnpm playwright test --update-snapshots
-```
-
-### Playwright Test Modes
-- **Headless mode** (default): Uses SwiftShader for software WebGL, skips GPU-dependent tests
-- **MCP mode** (`PLAYWRIGHT_MCP=true`): Full GPU, all tests including visual regression
-
-### Writing E2E Tests
-```typescript
-const hasMcpSupport = process.env.PLAYWRIGHT_MCP === "true";
-
-test("should render canvas", async ({ page }) => {
-  await page.goto("/");
-  if (hasMcpSupport) {
-    await expect(page.locator("canvas")).toBeVisible();
-  } else {
-    console.log("Canvas test skipped in headless mode");
-  }
-});
-
-test("WebGL-only test", async ({ page }) => {
-  test.skip(!hasMcpSupport, "Requires WebGL/MCP support");
-  // ... full WebGL test code
-});
-```
-
----
-
-## Common Pitfalls
-
-| Pitfall | Solution |
-|---------|----------|
-| Using npm/yarn | Always use pnpm |
-| Wrong asset paths | Use `@assets` alias |
-| Query iteration with forEach | Use `for (const e of query)` |
-| Entity removal during iteration | Collect first, remove after |
-| Neon/sci-fi aesthetics | Check BRAND.md |
-| ES2021 target | Must be ES2022+ |
-| Biome index out of bounds | Use `Math.max(0, Math.min(9, index))` |
-
----
-
-## Performance Guidelines
-
-- Minimize React re-renders during gameplay
-- Use `useFrame` for per-frame updates instead of `useEffect`
-- Pre-create queries outside render functions
-- Use instanced meshes for repeated geometry
-- Keep ECS systems lightweight
-- Dispose of Three.js resources on unmount
-
----
-
-## Prompt Templates
-
-### For Image Generation
-```
-Generate a [chapter plate / parallax background] for [chapter name].
-
-Style: Storybook art, painterly, warm lighting, Redwall-inspired woodland-epic
-Palette: [refer to BRAND.md biome colors]
-Elements: [specific scene elements]
-Negative: Neon, sci-fi, grimdark, demons, glowing energy weapons, anime, modern
-```
-
-### For Code Generation
-```
-Implement [feature] for Otterblade Odyssey.
-
-Requirements:
-- Use Miniplex ECS pattern
-- Follow existing code style in [reference file]
-- Maintain Redwall woodland-epic aesthetic
-- Support mobile touch controls
-- Use pnpm for any package operations
-```
+### Before Completing
+1. Run `pnpm biome check .`
+2. Run `pnpm tsc --noEmit`
+3. Request architect review
+4. Fix all raised issues
+5. Verify workflow runs without errors
 
 ---
 
@@ -364,11 +258,12 @@ Requirements:
 
 | File | Purpose |
 |------|---------|
-| `BRAND.md` | Complete visual style guide |
-| `CLAUDE.md` | Claude-specific instructions |
-| `.github/copilot-instructions.md` | Copilot configuration |
-| `replit.md` | Project architecture (Replit-specific) |
-| `client/src/game/ecs/world.ts` | Entity type definitions |
-| `client/src/game/constants.ts` | Biome definitions |
-| `client/src/game/store.ts` | Zustand state structure |
-| `playwright.config.ts` | E2E test configuration |
+| `WORLD.md` | World-building and lore |
+| `BRAND.md` | Visual style guide |
+| `replit.md` | Project architecture |
+| `client/src/data/*.json` | Game content data |
+| `client/src/game/data/` | Typed data loaders |
+
+---
+
+*"Clean code is not written by following rules. It's written by craftsmen who care."*

@@ -2,36 +2,36 @@
 
 ## Overview
 
-Otterblade Odyssey is a production-grade React 2.5D platformer game inspired by the woodland-epic adventures of Redwall. Players control a mystical otter warrior navigating treacherous biomes, defeating bosses, and collecting shards. The game features Rapier physics, Miniplex ECS architecture, procedural generation with Strata, and mobile-first touch controls.
+Otterblade Odyssey: Zephyros Rising is a production-grade React 2D side-scrolling platformer set in the unique world of Willowmere Hearthhold. Features Prince of Persia-style precision platforming with warm, cozy emotional tone. The game uses rapier2d-compat physics, Miniplex ECS, JSON-based content with Zod validation, and mobile-first touch controls.
 
 ## User Preferences
 
 - Preferred communication style: Simple, everyday language
-- Package manager: **pnpm** (not npm)
-- Visual style: Redwall-inspired woodland-epic (see BRAND.md)
+- Package manager: **pnpm** (not npm/yarn)
+- Visual style: Willowmere Hearthhold aesthetic (see BRAND.md, WORLD.md)
+- Code quality: Strict linting with Biome, max 300 lines per file, no duplicates
 
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React 19 with TypeScript (ES2022 target)
 - **Build Tool**: Vite with hot module replacement
-- **3D Rendering**: @react-three/fiber (React renderer for Three.js)
-- **3D Utilities**: @react-three/drei for helper components
-- **Physics Engine**: @react-three/rapier (React bindings for Rapier physics)
+- **Rendering**: @react-three/fiber in orthographic 2D mode
+- **Physics Engine**: @dimforge/rapier2d-compat (pure 2D physics)
 - **ECS**: Miniplex + miniplex-react for entity management
-- **State Management**: Zustand for game state (health, score, controls, checkpoints)
-- **Procedural Graphics**: @jbcom/strata for sky, fog, vegetation
+- **State Management**: Zustand for game state
+- **Data Validation**: Zod schemas for JSON content
 - **Styling**: Tailwind CSS v4 for HUD/UI overlays
 - **UI Components**: shadcn/ui component library with Radix primitives
+- **Linting**: Biome (strict mode)
 
 ### Game Architecture
-- All 3D components live within the Canvas context from react-three-fiber
-- Physics logic is handled inside RigidBody components using Rapier hooks
-- Per-frame logic uses the useFrame hook from react-three-fiber
-- Player controls are stored in Zustand to avoid React re-renders during gameplay
+- 2D orthographic rendering with sprite-based graphics
+- Physics logic handled by rapier2d-compat
+- Content defined in JSON files with typed Zod loaders
+- Player controls stored in Zustand to avoid React re-renders
 - ECS systems handle movement, gravity, health, and cleanup
-- Procedural level generation creates platforms, enemies, and collectibles
-- 10-chapter story with Redwall-themed progression
+- 10-chapter story set in Willowmere Hearthhold
 
 ### 10-Chapter Story Progression
 
@@ -57,19 +57,25 @@ Otterblade Odyssey is a production-grade React 2.5D platformer game inspired by 
 ### Project Structure
 ```
 /client/src/
-  ├── game/           # Core game logic
-  │   ├── ecs/        # Miniplex ECS (world, systems, renderers)
-  │   ├── Player.tsx  # Player controller with Rapier physics
-  │   ├── Level.tsx   # Level generation and environment
-  │   ├── store.ts    # Zustand game state
-  │   └── constants.ts # Biomes, collision groups, dimensions
+  ├── data/             # JSON content files
+  │   ├── chapters.json # Chapter definitions
+  │   ├── biomes.json   # Visual environment configs
+  │   └── README.md     # Data architecture docs
+  ├── game/             # Core game logic
+  │   ├── data/         # Zod loaders for JSON validation
+  │   ├── ecs/          # Miniplex ECS (world, systems, renderers)
+  │   ├── Player.tsx    # Player controller with Rapier2D physics
+  │   ├── Physics2D.tsx # 2D physics wrapper
+  │   ├── Level.tsx     # Level generation
+  │   ├── store.ts      # Zustand game state
+  │   └── constants.ts  # Loaded from JSON via typed loaders
   ├── components/
-  │   ├── hud/        # UI overlays (HUD, menus, touch controls)
-  │   └── ui/         # Reusable shadcn/ui components
-  └── pages/          # Route pages (Home)
-/server/              # Express server and API routes
-/shared/              # Shared TypeScript schemas (Drizzle + Zod)
-/attached_assets/     # Generated images (parallax backgrounds, chapter plates)
+  │   ├── hud/          # UI overlays (HUD, menus, touch controls)
+  │   └── ui/           # Reusable shadcn/ui components
+  └── pages/            # Route pages
+/server/                # Express server and API routes
+/shared/                # Shared TypeScript schemas (Drizzle + Zod)
+/attached_assets/       # Generated images
 ```
 
 ### Key Design Patterns
@@ -136,40 +142,6 @@ pnpm playwright test --ui  # Interactive test UI
 pnpm run db:push      # Push schema to database
 ```
 
-## Strata Integration
-
-Strata provides procedural graphics for terrain, characters, and effects:
-
-### Noise Functions
-```typescript
-import { fbm, noise3D } from '@jbcom/strata';
-
-// Procedural terrain height
-const height = noise3D(x * 0.1, 0, z * 0.1) * 5;
-const detail = fbm(x * 0.3, 0, z * 0.3, 3) * 1.5;
-```
-
-### Character Creation
-```typescript
-import { createCharacter, animateCharacter, updateFurUniforms } from '@jbcom/strata';
-
-const character = createCharacter({
-  skinColor: 0x8b6914,
-  furOptions: {
-    baseColor: new THREE.Color('#5d4420'),
-    tipColor: new THREE.Color('#8b6914'),
-    layerCount: 8,
-    spacing: 0.015,
-    windStrength: 0.3,
-  },
-  scale: 1.0,
-});
-
-// In useFrame:
-animateCharacter(character, elapsedTime);
-updateFurUniforms(furGroup, elapsedTime);
-```
-
 ## Deployment
 
 ### Replit Deployment (Recommended)
@@ -185,7 +157,7 @@ Push to GitHub, then connect Render to the repo. The `render.yaml` configures:
 ## Brand Guidelines
 
 See `BRAND.md` for complete visual style guide including:
-- Redwall-inspired woodland-epic aesthetic
+- Willowmere Hearthhold aesthetic (not Redwall - unique world)
 - Color palettes per biome
 - Character and enemy design requirements
 - UI/UX mobile-first guidelines
@@ -211,14 +183,14 @@ The Playwright config supports two modes:
 
 ## Recent Changes
 
+- **2024-12-31**: Created strict biome.json with Biome 2.3.10 linting rules
+- **2024-12-31**: Refactored constants.ts to use typed JSON loaders with error handling
+- **2024-12-31**: Updated AGENTS.md with comprehensive quality standards
+- **2024-12-31**: Removed obsolete 3D materials and ParallaxBackground component
+- **2024-12-31**: Fixed TypeScript errors in storySystem.ts with NonNullable types
+- **2024-12-31**: Created JSON-based data system with Zod validation
+- **2024-12-31**: Refactored from 3D to 2D architecture (rapier2d-compat)
+- **2024-12-31**: Established Willowmere Hearthhold world identity in WORLD.md
 - **2024-12-31**: Generated all 10 chapter plates and intro/outro videos
-- **2024-12-31**: Created CLAUDE.md, .github/copilot-instructions.md for cross-agent support
-- **2024-12-31**: Expanded from 6 biomes to 10-chapter story structure
-- **2024-12-31**: Updated AGENTS.md with comprehensive patterns
-- **2024-12-31**: Added Playwright MCP mode for full WebGL testing
-- **2024-12-31**: Created render.yaml for Render.com deployment
 - **2024-12-31**: Integrated Miniplex ECS for entity management
-- **2024-12-31**: Added parallax background renderer with generated biome images
-- **2024-12-31**: Updated to pnpm package manager
 - **2024-12-31**: Fixed TypeScript target to ES2022 for query iteration
-- **2024-12-31**: Created BRAND.md style guide for Redwall aesthetic

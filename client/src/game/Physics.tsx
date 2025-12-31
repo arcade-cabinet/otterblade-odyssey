@@ -1,4 +1,4 @@
-import { Physics } from "@react-three/rapier";
+import { Physics2DProvider } from "./Physics2D";
 import type { ReactNode } from "react";
 
 interface PhysicsWrapperProps {
@@ -8,8 +8,8 @@ interface PhysicsWrapperProps {
 
 export function PhysicsWrapper({ children }: PhysicsWrapperProps) {
   return (
-    <Physics gravity={[0, -30, 0]} timeStep="vary">
+    <Physics2DProvider gravity={{ x: 0, y: -30 }}>
       {children}
-    </Physics>
+    </Physics2DProvider>
   );
 }

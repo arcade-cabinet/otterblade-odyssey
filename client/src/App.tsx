@@ -1,14 +1,13 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient";
-import Game from "@/game/Game";
-import HUD from "@/components/hud/HUD";
-import StartMenu from "@/components/hud/StartMenu";
-import GameOverMenu from "@/components/hud/GameOver";
-import TouchControls from "@/components/hud/TouchControls";
-import DamageFlash from "@/components/hud/DamageFlash";
-import PostFX from "@/components/hud/PostFX";
 import ChapterPlate from "@/components/hud/ChapterPlate";
-import { ParallaxBackground } from "@/game/ParallaxBackground";
+import DamageFlash from "@/components/hud/DamageFlash";
+import GameOverMenu from "@/components/hud/GameOver";
+import HUD from "@/components/hud/HUD";
+import PostFX from "@/components/hud/PostFX";
+import StartMenu from "@/components/hud/StartMenu";
+import TouchControls from "@/components/hud/TouchControls";
+import Game from "@/game/Game";
+import { queryClient } from "./lib/queryClient";
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
         className="relative w-full h-screen overflow-hidden bg-black"
         style={{ touchAction: "none" }}
       >
-        <ParallaxBackground />
         <Game />
         <PostFX />
         <DamageFlash />

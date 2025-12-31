@@ -1,5 +1,5 @@
-import { world, queries, type Entity } from "./world";
-import { CHAPTERS, STORY_EVENTS, type Chapter } from "../constants";
+import { CHAPTERS, type Chapter, STORY_EVENTS } from "../constants";
+import { type Entity, queries, world } from "./world";
 
 export function initializeStory(): Entity {
   const existingStory = [...queries.story];
@@ -112,11 +112,9 @@ export function completeChapter(chapterId: number): void {
   }
 }
 
-export function startCutscene(
-  type: Entity["cutscene"]["type"],
-  chapterId: number,
-  duration: number
-): Entity {
+export type CutsceneType = NonNullable<Entity["cutscene"]>["type"];
+
+export function startCutscene(type: CutsceneType, chapterId: number, duration: number): Entity {
   const cutsceneEntity = world.add({
     position: { x: 0, y: 0, z: 0 },
     cutscene: {

@@ -1,23 +1,24 @@
-import { RigidBody, CuboidCollider } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { useStore } from "./store";
+import { usePhysics2D, RAPIER } from "./Physics2D";
 import { BIOMES, SEGMENT_LEN } from "./constants";
 import { hash1 } from "./utils";
-import { ProceduralSky, GrassInstances, RockInstances, VolumetricFogMesh, createTimeOfDay, type BiomeData } from "@jbcom/strata";
-import * as THREE from "three";
 import { ParallaxBackgroundSystem } from "./ecs/SpriteRenderer";
+import * as THREE from "three";
 
 interface PlatformProps {
   id: string;
-  position: [number, number, number];
-  args: [number, number, number];
+  position: [number, number];
+  size: [number, number];
   kind?: string;
 }
 
-function Platform({ id, position, args, kind = "plain" }: PlatformProps) {
+function Platform({ id, position, size, kind = "plain" }: PlatformProps) {
+  const { world, rapier } = usePhysics2D();
   const register = useStore((s) => s.registerPlatform);
   const unregister = useStore((s) => s.unregisterPlatform);
+  const bodyRef = useRef<RAPIER.RigidBody | null>(null);
 
   const color = useMemo(() => {
     if (kind === "boss") return "#0b1020";
@@ -26,22 +27,40 @@ function Platform({ id, position, args, kind = "plain" }: PlatformProps) {
   }, [kind]);
 
   useEffect(() => {
-    const [x, y] = position;
-    const [w, h] = args;
-    register(id, { minX: x - w / 2, maxX: x + w / 2, topY: y + h / 2 });
-    return () => unregister(id);
-  }, [id, position, args, register, unregister]);
+    if (!world || !rapier) return;
 
-  const halfExtents: [number, number, number] = [args[0] / 2, args[1] / 2, args[2] / 2];
+    const [x, y] = position;
+    const [w, h] = size;
+
+    register(id, { minX: x - w / 2, maxX: x + w / 2, topY: y + h / 2 });
+
+    const bodyDesc = rapier.RigidBodyDesc.fixed().setTranslation(x, y);
+    const body = world.createRigidBody(bodyDesc);
+
+    const colliderDesc = rapier.ColliderDesc.cuboid(w / 2, h / 2)
+      .setFriction(0.1)
+      .setRestitution(0);
+    world.createCollider(colliderDesc, body);
+
+    bodyRef.current = body;
+
+    return () => {
+      unregister(id);
+      if (world && bodyRef.current) {
+        world.removeRigidBody(bodyRef.current);
+        bodyRef.current = null;
+      }
+    };
+  }, [world, rapier, id, position, size, register, unregister]);
+
+  const [x, y] = position;
+  const [w, h] = size;
 
   return (
-    <RigidBody type="fixed" position={position} colliders={false}>
-      <CuboidCollider args={halfExtents} friction={0.1} restitution={0} />
-      <mesh receiveShadow>
-        <boxGeometry args={args} />
-        <meshStandardMaterial color={color} />
-      </mesh>
-    </RigidBody>
+    <mesh position={[x, y, 0]} receiveShadow>
+      <planeGeometry args={[w, h]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
   );
 }
 
@@ -49,28 +68,26 @@ function ProceduralPlatforms() {
   const platforms = useMemo(() => {
     const result: Array<{
       id: string;
-      position: [number, number, number];
-      args: [number, number, number];
+      position: [number, number];
+      size: [number, number];
     }> = [];
 
-    // Ground
     for (let i = -2; i < 50; i++) {
       result.push({
         id: `ground-${i}`,
-        position: [i * 20, -2, 0],
-        args: [20, 4, 10],
+        position: [i * 20, -2],
+        size: [20, 4],
       });
     }
 
-    // Procedural platforms
     for (let i = 0; i < 40; i++) {
       const x = i * 12 + hash1(i * 0.5) * 8;
       const y = 2 + hash1(i * 0.7) * 6;
       const w = 4 + hash1(i * 1.2) * 3;
       result.push({
         id: `plat-${i}`,
-        position: [x, y, 0],
-        args: [w, 1, 2],
+        position: [x, y],
+        size: [w, 1],
       });
     }
 
@@ -80,31 +97,25 @@ function ProceduralPlatforms() {
   return (
     <>
       {platforms.map((p) => (
-        <Platform key={p.id} id={p.id} position={p.position} args={p.args} />
+        <Platform key={p.id} id={p.id} position={p.position} size={p.size} />
       ))}
     </>
   );
 }
 
-function StrataEnvironment() {
+function SimpleEnvironment() {
   const biomeIndex = useStore((s) => s.biomeIndex);
   const biome = BIOMES[biomeIndex % BIOMES.length];
-
-  const timeOfDay = useMemo(() => {
-    const hours = [14, 10, 18, 6];
-    return createTimeOfDay(hours[biomeIndex % hours.length]);
-  }, [biomeIndex]);
+  
+  const fogColor = useMemo(() => new THREE.Color(biome.fog), [biome.fog]);
+  const skyColor = useMemo(() => new THREE.Color(biome.sky1), [biome.sky1]);
 
   return (
     <>
-      <ProceduralSky timeOfDay={timeOfDay} size={[200, 100]} distance={50} />
-      <VolumetricFogMesh density={0.015} color={biome.fog} />
+      <fog attach="fog" args={[fogColor, 20, 80]} />
+      <color attach="background" args={[skyColor]} />
     </>
   );
-}
-
-function BiomeVegetation() {
-  return null;
 }
 
 export function Level() {
@@ -124,8 +135,7 @@ export function Level() {
   return (
     <>
       <ParallaxBackgroundSystem biomeIndex={biomeIndex} playerX={playerX} />
-      <StrataEnvironment />
-      <BiomeVegetation />
+      <SimpleEnvironment />
       <ProceduralPlatforms />
       <ambientLight intensity={0.4} />
       <pointLight position={[playerX + 10, 15, 5]} intensity={0.8} castShadow />
