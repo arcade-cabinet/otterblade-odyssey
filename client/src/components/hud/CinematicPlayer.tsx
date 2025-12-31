@@ -262,6 +262,10 @@ export default function CinematicPlayer({
   return (
     <Box
       data-testid="cinematic-player"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${titles?.title || 'Cinematic'} - ${canSkip ? 'Press Space, Enter, or tap to skip' : 'Playing'}`}
+      tabIndex={0}
       onClick={handleInteraction}
       onTouchEnd={(e) => {
         e.preventDefault();
@@ -279,6 +283,7 @@ export default function CinematicPlayer({
         p: { xs: 2, sm: 4, md: 6 },
         opacity: phase === 'enter' ? 0 : phase === 'exit' ? 0 : 1,
         transition: 'opacity 0.8s ease-in-out',
+        outline: 'none',
       }}
     >
       {/* Outer decorative border */}

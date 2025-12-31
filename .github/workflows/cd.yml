@@ -298,26 +298,48 @@ jobs:
       - name: Build APK
         working-directory: android
         run: |
-          ./gradlew assembleDebug \
+          set -euo pipefail
+          echo "🔨 Building APK for ${{ matrix.abi }}..."
+          
+          if ! ./gradlew assembleDebug \
             -Pandroid.injected.signing.store.file=${{ github.workspace }}/android/app/debug.keystore \
             -Pandroid.injected.signing.store.password=${{ steps.keystore.outputs.keystore_pass }} \
             -Pandroid.injected.signing.key.alias=androiddebugkey \
-            -Pandroid.injected.signing.key.password=${{ steps.keystore.outputs.keystore_pass }}
+            -Pandroid.injected.signing.key.password=${{ steps.keystore.outputs.keystore_pass }}; then
+            echo "❌ Gradle build failed for ${{ matrix.abi }}"
+            exit 1
+          fi
+          
+          echo "✅ Gradle build completed"
 
-      # Find and rename APK
+      # Find and rename APK with validation
       - name: Prepare APK artifact
         id: apk
         run: |
-          APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
-          if [ -n "$APK_PATH" ]; then
-            NEW_NAME="otterblade-odyssey-${{ matrix.arch_name }}.apk"
-            cp "$APK_PATH" "$NEW_NAME"
-            echo "apk_path=$NEW_NAME" >> $GITHUB_OUTPUT
-            echo "✅ APK built: $NEW_NAME"
-          else
-            echo "❌ APK not found"
+          set -euo pipefail
+          
+          # Wait briefly for filesystem sync
+          sleep 2
+          
+          APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" -type f 2>/dev/null | head -1)
+          
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ APK not found in android/app/build/outputs/apk"
+            echo "📁 Directory contents:"
+            find android/app/build -name "*.apk" -type f 2>/dev/null || echo "No APKs found anywhere"
             exit 1
           fi
+          
+          # Validate APK size (should be > 1MB for a real APK)
+          APK_SIZE=$(stat -f%z "$APK_PATH" 2>/dev/null || stat -c%s "$APK_PATH")
+          if [ "$APK_SIZE" -lt 1000000 ]; then
+            echo "⚠️ APK seems too small ($APK_SIZE bytes), may be corrupted"
+          fi
+          
+          NEW_NAME="otterblade-odyssey-${{ matrix.arch_name }}.apk"
+          cp "$APK_PATH" "$NEW_NAME"
+          echo "apk_path=$NEW_NAME" >> $GITHUB_OUTPUT
+          echo "✅ APK prepared: $NEW_NAME ($APK_SIZE bytes)"
 
       # Upload APK artifact
       - name: Upload APK artifact
