@@ -6,7 +6,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Preferences } from '@capacitor/preferences';
-import { ScreenOrientation, type OrientationLockType } from '@capacitor/screen-orientation';
+import { type OrientationLockType, ScreenOrientation } from '@capacitor/screen-orientation';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
@@ -73,9 +73,7 @@ export async function getCurrentOrientation(): Promise<OrientationType | null> {
  * Listen for screen orientation changes
  * Important for foldable devices like OnePlus Open
  */
-export function onOrientationChange(
-  callback: (orientation: OrientationType) => void
-): () => void {
+export function onOrientationChange(callback: (orientation: OrientationType) => void): () => void {
   if (!isNative) {
     // Web fallback using matchMedia
     const mediaQuery = window.matchMedia('(orientation: portrait)');
@@ -365,7 +363,9 @@ export function getSafeAreaInsets(): {
 /**
  * Vibrate pattern for game events
  */
-export async function vibratePattern(pattern: 'damage' | 'collect' | 'checkpoint' | 'death'): Promise<void> {
+export async function vibratePattern(
+  pattern: 'damage' | 'collect' | 'checkpoint' | 'death'
+): Promise<void> {
   switch (pattern) {
     case 'damage':
       await hapticMedium();

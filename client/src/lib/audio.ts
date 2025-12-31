@@ -418,7 +418,9 @@ export function destroyAudio(): void {
 /**
  * Play sound effect for game event
  */
-export function playSfx(event: 'jump' | 'land' | 'attack' | 'hit' | 'collect' | 'checkpoint' | 'death'): void {
+export function playSfx(
+  event: 'jump' | 'land' | 'attack' | 'hit' | 'collect' | 'checkpoint' | 'death'
+): void {
   const sfxMap: Record<string, string> = {
     jump: 'sfx_footsteps_stone',
     land: 'sfx_footsteps_stone',
