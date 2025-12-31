@@ -11,12 +11,11 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useCallback, useEffect, useRef, useState } from 'react';
+// Import cinematics
+import introVideo from '@/assets/videos/intro_cinematic_otters_journey.mp4';
+import outroVideo from '@/assets/videos/outro_victory_sunrise_scene.mp4';
 import { hapticLight } from '@/lib/capacitor';
 import { brandColors } from '@/lib/theme';
-
-// Import cinematics
-import introVideo from '@/assets/videos/intro_cinematic_otter\'s_journey.mp4';
-import outroVideo from '@/assets/videos/outro_victory_sunrise_scene.mp4';
 
 export type CinematicType = 'intro' | 'outro' | 'chapter' | 'boss' | null;
 
@@ -57,10 +56,30 @@ function StoryCorner({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
   };
 
   const borderStyles = {
-    tl: { borderTop: '2px solid', borderLeft: '2px solid', borderBottom: 'none', borderRight: 'none' },
-    tr: { borderTop: '2px solid', borderRight: '2px solid', borderBottom: 'none', borderLeft: 'none' },
-    bl: { borderBottom: '2px solid', borderLeft: '2px solid', borderTop: 'none', borderRight: 'none' },
-    br: { borderBottom: '2px solid', borderRight: '2px solid', borderTop: 'none', borderLeft: 'none' },
+    tl: {
+      borderTop: '2px solid',
+      borderLeft: '2px solid',
+      borderBottom: 'none',
+      borderRight: 'none',
+    },
+    tr: {
+      borderTop: '2px solid',
+      borderRight: '2px solid',
+      borderBottom: 'none',
+      borderLeft: 'none',
+    },
+    bl: {
+      borderBottom: '2px solid',
+      borderLeft: '2px solid',
+      borderTop: 'none',
+      borderRight: 'none',
+    },
+    br: {
+      borderBottom: '2px solid',
+      borderRight: '2px solid',
+      borderTop: 'none',
+      borderLeft: 'none',
+    },
   };
 
   return (

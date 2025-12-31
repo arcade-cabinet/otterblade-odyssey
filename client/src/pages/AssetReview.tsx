@@ -31,10 +31,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Import manifests
 import cinematicsManifest from '@/data/manifests/cinematics.json';
+import enemiesManifest from '@/data/manifests/enemies.json';
 import scenesManifest from '@/data/manifests/scenes.json';
 import soundsManifest from '@/data/manifests/sounds.json';
 import spritesManifest from '@/data/manifests/sprites.json';
-import enemiesManifest from '@/data/manifests/enemies.json';
 
 // Types
 interface AssetItem {
@@ -71,15 +71,27 @@ const BASE_PATH = import.meta.env.BASE_URL || '/';
 
 // Combine all manifests
 const ALL_MANIFESTS: ManifestData[] = [
-  { ...spritesManifest, assets: spritesManifest.assets.map(a => ({ ...a, category: 'sprites' })) },
-  { ...enemiesManifest, assets: enemiesManifest.assets.map(a => ({ ...a, category: 'enemies' })) },
-  { ...cinematicsManifest, assets: cinematicsManifest.assets.map(a => ({ ...a, category: 'cinematics' })) },
-  { ...scenesManifest, assets: scenesManifest.assets.map(a => ({ ...a, category: 'scenes' })) },
-  { ...soundsManifest, assets: soundsManifest.assets.map(a => ({ ...a, category: 'sounds' })) },
+  {
+    ...spritesManifest,
+    assets: spritesManifest.assets.map((a) => ({ ...a, category: 'sprites' })),
+  },
+  {
+    ...enemiesManifest,
+    assets: enemiesManifest.assets.map((a) => ({ ...a, category: 'enemies' })),
+  },
+  {
+    ...cinematicsManifest,
+    assets: cinematicsManifest.assets.map((a) => ({ ...a, category: 'cinematics' })),
+  },
+  { ...scenesManifest, assets: scenesManifest.assets.map((a) => ({ ...a, category: 'scenes' })) },
+  { ...soundsManifest, assets: soundsManifest.assets.map((a) => ({ ...a, category: 'sounds' })) },
 ] as ManifestData[];
 
 // Status color mapping
-const STATUS_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+const STATUS_COLORS: Record<
+  string,
+  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+> = {
   pending: 'default',
   generating: 'info',
   complete: 'success',
@@ -115,7 +127,11 @@ function AssetCard({ asset, outputDir, selected, approved, onSelect, onPreview }
         position: 'relative',
         cursor: 'pointer',
         transition: 'all 0.2s',
-        border: approved ? '2px solid #4caf50' : selected ? '2px solid #2196f3' : '2px solid transparent',
+        border: approved
+          ? '2px solid #4caf50'
+          : selected
+            ? '2px solid #2196f3'
+            : '2px solid transparent',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: 4,
@@ -148,11 +164,27 @@ function AssetCard({ asset, outputDir, selected, approved, onSelect, onPreview }
 
       {/* Thumbnail */}
       {isVideo ? (
-        <Box sx={{ height: 160, bgcolor: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            height: 160,
+            bgcolor: '#1a1a2e',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Typography variant="h3">🎬</Typography>
         </Box>
       ) : isAudio ? (
-        <Box sx={{ height: 160, bgcolor: '#2d4a3e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            height: 160,
+            bgcolor: '#2d4a3e',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Typography variant="h3">🔊</Typography>
         </Box>
       ) : (
@@ -163,7 +195,8 @@ function AssetCard({ asset, outputDir, selected, approved, onSelect, onPreview }
           alt={asset.name}
           sx={{ objectFit: 'cover' }}
           onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-            e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="160"><rect fill="%23333" width="200" height="160"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dy=".3em">Not Found</text></svg>';
+            e.currentTarget.src =
+              'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="160"><rect fill="%23333" width="200" height="160"/><text x="50%" y="50%" fill="%23666" text-anchor="middle" dy=".3em">Not Found</text></svg>';
           }}
         />
       )}
@@ -178,8 +211,12 @@ function AssetCard({ asset, outputDir, selected, approved, onSelect, onPreview }
       )}
 
       <CardContent sx={{ py: 1.5 }}>
-        <Typography variant="subtitle2" noWrap>{asset.name}</Typography>
-        <Typography variant="caption" color="text.secondary" noWrap>{asset.filename}</Typography>
+        <Typography variant="subtitle2" noWrap>
+          {asset.name}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" noWrap>
+          {asset.filename}
+        </Typography>
         <Box sx={{ mt: 1 }}>
           <Chip
             label={asset.status}
@@ -225,16 +262,13 @@ function PreviewModal({ open, asset, outputDir, onClose }: PreviewModalProps) {
         {isVideo ? (
           <Box sx={{ width: '100%', aspectRatio: '16/9', bgcolor: '#000' }}>
             {/* biome-ignore lint/a11y/useMediaCaption: Asset review preview */}
-            <video
-              src={assetPath}
-              controls
-              autoPlay
-              style={{ width: '100%', height: '100%' }}
-            />
+            <video src={assetPath} controls autoPlay style={{ width: '100%', height: '100%' }} />
           </Box>
         ) : isAudio ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant="h4" sx={{ mb: 3 }}>🔊</Typography>
+            <Typography variant="h4" sx={{ mb: 3 }}>
+              🔊
+            </Typography>
             {/* biome-ignore lint/a11y/useMediaCaption: Asset review audio preview */}
             <audio src={assetPath} controls style={{ width: '100%' }} />
           </Box>
@@ -296,15 +330,20 @@ function PreviewModal({ open, asset, outputDir, onClose }: PreviewModalProps) {
         <Divider sx={{ my: 2 }} />
         <Typography variant="subtitle2">Details</Typography>
         <Typography variant="body2" color="text.secondary">
-          <strong>ID:</strong> {asset.id}<br />
-          <strong>Filename:</strong> {asset.filename}<br />
-          <strong>Status:</strong> {asset.status}<br />
+          <strong>ID:</strong> {asset.id}
+          <br />
+          <strong>Filename:</strong> {asset.filename}
+          <br />
+          <strong>Status:</strong> {asset.status}
+          <br />
           <strong>Category:</strong> {asset.category}
         </Typography>
 
         {asset.prompt && (
           <>
-            <Typography variant="subtitle2" sx={{ mt: 2 }}>Prompt</Typography>
+            <Typography variant="subtitle2" sx={{ mt: 2 }}>
+              Prompt
+            </Typography>
             <Box
               component="pre"
               sx={{
@@ -447,7 +486,7 @@ export default function AssetReview() {
   const handleCreatePR = useCallback(() => {
     const exportData = buildExportData();
     const approvalCount = exportData.approvals.length;
-    
+
     if (approvalCount === 0) {
       alert('No assets approved yet. Select and approve assets first.');
       return;
@@ -457,14 +496,14 @@ export default function AssetReview() {
     const repoOwner = 'jbdevprimary';
     const repoName = 'otterblade-odyssey';
     const filePath = 'client/src/data/approvals.json';
-    
+
     // Create commit message
     const commitTitle = `chore(assets): approve ${approvalCount} asset${approvalCount > 1 ? 's' : ''}`;
-    const commitDesc = `Approved assets:\n${exportData.approvals.map(a => `- ${a.id}`).join('\n')}\n\nExported from Asset Review Gallery`;
+    const commitDesc = `Approved assets:\n${exportData.approvals.map((a) => `- ${a.id}`).join('\n')}\n\nExported from Asset Review Gallery`;
 
     // Encode the file content for URL
     const fileContent = JSON.stringify(exportData, null, 2);
-    
+
     // Use GitHub's new file URL which allows creating on a new branch (triggers PR flow)
     // Format: https://github.com/{owner}/{repo}/new/{branch}?filename={path}&value={content}
     const params = new URLSearchParams({
@@ -473,9 +512,9 @@ export default function AssetReview() {
       message: commitTitle,
       description: commitDesc,
     });
-    
+
     const githubUrl = `https://github.com/${repoOwner}/${repoName}/new/main?${params.toString()}`;
-    
+
     // Open in new tab - user just needs to:
     // 1. Change branch name (GitHub prompts for new branch)
     // 2. Click "Propose changes" -> Creates PR automatically
@@ -542,25 +581,37 @@ export default function AssetReview() {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             Review, approve, and manage generated assets for Otterblade Odyssey.
           </Typography>
-          
+
           {/* Workflow Instructions */}
-          <Box sx={{ 
-            p: 2, 
-            bgcolor: 'rgba(212, 168, 75, 0.1)', 
-            border: '1px solid rgba(212, 168, 75, 0.3)',
-            borderRadius: 2,
-            mb: 2
-          }}>
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: 'rgba(212, 168, 75, 0.1)',
+              border: '1px solid rgba(212, 168, 75, 0.3)',
+              borderRadius: 2,
+              mb: 2,
+            }}
+          >
             <Typography variant="subtitle2" sx={{ color: '#d4a84b', mb: 1 }}>
               📋 How Asset Approval Works
             </Typography>
             <Typography variant="body2" color="text.secondary" component="div">
               <ol style={{ margin: 0, paddingLeft: '1.2rem' }}>
-                <li><strong>Select</strong> assets using checkboxes (or "Select All")</li>
-                <li><strong>Approve</strong> selected assets with the green button</li>
-                <li><strong>Create PR</strong> → Opens GitHub with your approvals pre-filled</li>
-                <li><strong>Commit</strong> on a new branch → GitHub creates the PR automatically</li>
-                <li><strong>Merge</strong> → Approved assets become idempotent (won't regenerate)</li>
+                <li>
+                  <strong>Select</strong> assets using checkboxes (or "Select All")
+                </li>
+                <li>
+                  <strong>Approve</strong> selected assets with the green button
+                </li>
+                <li>
+                  <strong>Create PR</strong> → Opens GitHub with your approvals pre-filled
+                </li>
+                <li>
+                  <strong>Commit</strong> on a new branch → GitHub creates the PR automatically
+                </li>
+                <li>
+                  <strong>Merge</strong> → Approved assets become idempotent (won't regenerate)
+                </li>
               </ol>
             </Typography>
           </Box>
@@ -587,29 +638,32 @@ export default function AssetReview() {
         </Box>
 
         {/* Primary Action - Create PR */}
-        {Object.values(approvals).some(a => a.approved) && (
-          <Box sx={{ 
-            mb: 3, 
-            p: 2, 
-            bgcolor: 'rgba(74, 103, 65, 0.2)', 
-            border: '2px solid #4a6741',
-            borderRadius: 2,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            flexWrap: 'wrap'
-          }}>
+        {Object.values(approvals).some((a) => a.approved) && (
+          <Box
+            sx={{
+              mb: 3,
+              p: 2,
+              bgcolor: 'rgba(74, 103, 65, 0.2)',
+              border: '2px solid #4a6741',
+              borderRadius: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              flexWrap: 'wrap',
+            }}
+          >
             <Typography variant="body1" sx={{ flex: 1 }}>
-              <strong>{Object.values(approvals).filter(a => a.approved).length}</strong> assets approved and ready to commit
+              <strong>{Object.values(approvals).filter((a) => a.approved).length}</strong> assets
+              approved and ready to commit
             </Typography>
             <Button
               variant="contained"
               size="large"
               onClick={handleCreatePR}
-              sx={{ 
-                bgcolor: '#4a6741', 
+              sx={{
+                bgcolor: '#4a6741',
                 '&:hover': { bgcolor: '#6b8a5f' },
-                px: 4
+                px: 4,
               }}
             >
               🚀 Create PR on GitHub

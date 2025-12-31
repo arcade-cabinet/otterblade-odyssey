@@ -8,8 +8,8 @@ const config: CapacitorConfig = {
   server: {
     // Use the correct hostname for mobile testing
     androidScheme: 'https',
-    // Enable clear text traffic for local development
-    cleartext: true,
+    // Security: Only enable cleartext in development
+    cleartext: process.env.NODE_ENV !== 'production',
   },
   // Plugins configuration
   plugins: {
@@ -41,13 +41,15 @@ const config: CapacitorConfig = {
   },
   // Android-specific configuration
   android: {
-    allowMixedContent: true,
+    // Security: Only allow mixed content in development
+    allowMixedContent: process.env.NODE_ENV !== 'production',
     captureInput: true,
-    webContentsDebuggingEnabled: true,
+    // Security: Only enable debugging in development
+    webContentsDebuggingEnabled: process.env.NODE_ENV !== 'production',
     // Responsive scaling for foldables
     overrideUserAgent: 'OtterbladeOdyssey/1.0',
-    // Enable immersive mode
-    hideLogs: false,
+    // Hide logs in production
+    hideLogs: process.env.NODE_ENV === 'production',
   },
   // iOS-specific configuration (for future)
   ios: {

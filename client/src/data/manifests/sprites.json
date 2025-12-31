@@ -3,33 +3,328 @@
   "category": "sprites",
   "provider": "openai",
   "model": "gpt-image-1",
-  "outputDir": "attached_assets/generated_images/sprites",
+  "outputDir": "client/src/assets/images/sprites",
+  "brandGuidance": {
+    "style": "Clean pixel art with defined outlines, storybook aesthetic, warm palette",
+    "materials": "Leather, cloth, iron - NO glowing effects, NO energy weapons",
+    "characters": "Anthropomorphic woodland animals ONLY - NO humans ever",
+    "palette": "Warm browns, creams, forest greens, honey golds - NO neon"
+  },
   "assets": [
     {
-      "id": "player_sprite_sheet",
-      "name": "Player Sprite Sheet",
-      "filename": "player_sprite_sheet.png",
+      "id": "player_finn_idle",
+      "name": "Finn Idle Animation",
+      "filename": "finn_idle_sprite_sheet.png",
       "status": "pending",
+      "type": "sprite_sheet",
       "config": {
-        "columns": 6,
-        "rows": 4,
+        "columns": 8,
+        "rows": 1,
         "frameWidth": 128,
         "frameHeight": 128,
-        "size": "1024x1024",
+        "size": "1024x128",
         "quality": "high",
         "transparent": true
       },
       "prompt": {
-        "subject": "Otter warrior character (Finn Riverstone)",
-        "description": "River otter standing upright, athletic build, rich brown fur with cream chest/muzzle, leather vest, cloth belt with pouch, iron sword (NOT glowing)",
-        "style": "Clean pixel art with defined outlines, storybook aesthetic",
-        "layout": "Sprite sheet grid: Row 1 (Idle 4 + Run start 2), Row 2 (Run 4 + Jump 2), Row 3 (Fall 2 + Attack 4), Row 4 (Hurt 2 + Crouch 2)",
-        "technical": "Transparent PNG, side-view profile facing right, consistent proportions, readable silhouette"
+        "subject": "Finn Riverstone - Young river otter warrior (protagonist)",
+        "physique": "Athletic build, standing about 4 heads tall, river otter proportions - sleek body, webbed paws, thick rudder tail",
+        "fur": "Rich chocolate brown fur with cream-colored chest and muzzle, visible fur texture with individual strands suggested",
+        "face": "Bright intelligent eyes (dark amber), small rounded ears, whiskers, determined but kind expression",
+        "outfit": "Worn leather vest with brass toggles, cloth belt with small pouch, simple iron sword (the Otterblade) in leather sheath on back, travel-worn cloak clasped at shoulder",
+        "animation": "Idle breathing cycle - subtle chest rise/fall, tail sway, ear twitch, weight shift between feet. 8 frames for smooth loop.",
+        "pose": "Standing profile facing RIGHT, feet shoulder-width apart, one paw resting near belt, alert but relaxed",
+        "style": "Pixel art, 128x128 per frame, transparent background, side-view platformer perspective",
+        "lighting": "Warm ambient as if lit by afternoon sun, subtle rim light suggesting depth",
+        "negative": "NO humans, NO glowing weapons, NO neon colors, NO anime style, NO chibi proportions"
       },
       "validation": {
-        "minFileSize": 50000,
-        "maxFileSize": 5000000,
-        "requiredDimensions": [768, 512]
+        "minFileSize": 30000,
+        "maxFileSize": 500000,
+        "requiredDimensions": [1024, 128]
+      }
+    },
+    {
+      "id": "player_finn_run",
+      "name": "Finn Run Cycle",
+      "filename": "finn_run_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 1,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "1024x128",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Finn Riverstone running",
+        "description": "Full run cycle showing otter's distinctive bounding gait. Tail acts as counterbalance.",
+        "animation": "8-frame run cycle: contact, down, passing, up (both sides). Arms pump naturally, cloak trails behind.",
+        "physicsNotes": "Show weight and momentum - compression on landing, extension on push-off. Otters have a rolling, efficient run.",
+        "details": "Maintain exact character design from idle sprite. Sword bounces slightly in sheath.",
+        "style": "Pixel art matching idle sheet exactly",
+        "negative": "NO floating/weightless feel, NO stiff robotic movement"
+      }
+    },
+    {
+      "id": "player_finn_jump",
+      "name": "Finn Jump Sequence",
+      "filename": "finn_jump_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 6,
+        "rows": 1,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "768x128",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Finn Riverstone jump sequence",
+        "animation": "6 frames: crouch anticipation, launch (legs extended), rise (tucked), apex (spread), fall (legs down), land compression",
+        "details": "Cloak billows upward on rise, settles on fall. Tail extends for balance. Arms reach up then brace for landing.",
+        "expression": "Focused, determined",
+        "style": "Pixel art matching character design exactly",
+        "negative": "NO floaty physics, NO superhero poses"
+      }
+    },
+    {
+      "id": "player_finn_attack",
+      "name": "Finn Sword Attack Combo",
+      "filename": "finn_attack_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 12,
+        "rows": 1,
+        "frameWidth": 160,
+        "frameHeight": 128,
+        "size": "1920x128",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Finn sword attack 3-hit combo",
+        "weapon": "The Otterblade - simple but well-crafted iron sword with leather-wrapped grip, slight curve, NOT glowing",
+        "animation": "12 frames total: Draw (2) → Slash right (3) → Slash left (3) → Overhead finish (3) → Recovery (1)",
+        "movement": "Each swing has clear anticipation (wind-up) and follow-through. Body rotates with swings.",
+        "details": "Sword reflects light naturally (metal glint, not magic glow). Cloak swirls with momentum.",
+        "hitboxVisual": "Arc of sword swing should be clear and readable for gameplay",
+        "style": "Pixel art, wider frames (160px) to accommodate sword reach",
+        "negative": "NO energy trails, NO glowing blade, NO laser effects"
+      }
+    },
+    {
+      "id": "player_finn_hurt",
+      "name": "Finn Hurt Reaction",
+      "filename": "finn_hurt_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 4,
+        "rows": 1,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "512x128",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Finn taking damage",
+        "animation": "4 frames: Impact flinch, stumble back, catch self, recovery stance",
+        "expression": "Pained wince, gritted teeth, determination returning",
+        "details": "One arm comes up defensively. Body recoils from hit direction. Tail tucks slightly.",
+        "style": "Pixel art matching character design",
+        "negative": "NO gore, NO excessive violence"
+      }
+    },
+    {
+      "id": "player_finn_crouch",
+      "name": "Finn Crouch/Slide",
+      "filename": "finn_crouch_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 4,
+        "rows": 1,
+        "frameWidth": 160,
+        "frameHeight": 96,
+        "size": "640x96",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Finn crouching and sliding",
+        "animation": "4 frames: Stand-to-crouch, crouch idle, slide start, slide momentum",
+        "pose": "Low crouch with one paw on ground. Slide shows legs forward, body leaning back.",
+        "details": "Tail extends back for balance. Cloak drapes over body. Clear low profile for dodging.",
+        "utility": "For passing under obstacles and dodging attacks",
+        "style": "Pixel art, shorter height frames (96px)",
+        "negative": "NO stiff poses"
+      }
+    },
+    {
+      "id": "player_finn_death",
+      "name": "Finn Death Sequence",
+      "filename": "finn_death_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 6,
+        "rows": 1,
+        "frameWidth": 160,
+        "frameHeight": 128,
+        "size": "960x128",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Finn defeated/death sequence",
+        "animation": "6 frames: Final hit, stagger, knee buckle, collapse, prone, fade (slight transparency)",
+        "tone": "Dignified defeat, not gruesome. Hero falling honorably.",
+        "expression": "Exhaustion, eyes closing peacefully",
+        "details": "Sword falls from grasp. Cloak settles around body. Fade to slight transparency for respawn.",
+        "style": "Pixel art, respectful treatment of defeat",
+        "negative": "NO gore, NO blood pools, NO violent death"
+      }
+    },
+    {
+      "id": "npc_elder_badger",
+      "name": "Elder Badger (Mentor)",
+      "filename": "npc_elder_badger_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 4,
+        "rows": 2,
+        "frameWidth": 160,
+        "frameHeight": 160,
+        "size": "640x320",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Elder Badger - Willowmere's wise keeper",
+        "physique": "Large, stocky badger, elderly but still strong, walks with carved oak staff",
+        "fur": "Silver-streaked black and white face markings, graying around muzzle, thick winter coat",
+        "outfit": "Simple brown robes with rope belt, wooden prayer beads, reading spectacles perched on nose",
+        "expression": "Kind, wise, slightly worried eyes. Grandfather energy.",
+        "animation": "Row 1: Idle (2 frames breathing), talking gesture (2 frames). Row 2: Pointing direction, blessing gesture, reading scroll, looking up",
+        "role": "Quest giver, lore keeper, gives Finn guidance at the Everember",
+        "style": "Pixel art, larger frames for imposing presence",
+        "negative": "NO threatening poses, NO weapons"
+      }
+    },
+    {
+      "id": "npc_hedgehog_gatekeeper",
+      "name": "Hedgehog Gatekeeper",
+      "filename": "npc_hedgehog_gatekeeper_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 4,
+        "rows": 1,
+        "frameWidth": 96,
+        "frameHeight": 112,
+        "size": "384x112",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Elderly hedgehog gatekeeper",
+        "physique": "Short, round hedgehog with spectacles, slightly hunched from years of watching the gate",
+        "fur": "Tan/brown spines going gray, cream-colored face and belly",
+        "outfit": "Heavy wool tunic, leather apron with keys and tools hanging from it, warm cap",
+        "expression": "Squinting, suspicious at first, then welcoming warmth",
+        "animation": "Idle, looking through window, opening gate gesture, nodding approval",
+        "role": "Guards the Northern Gatehouse, first to welcome Finn",
+        "style": "Pixel art, characterful and endearing",
+        "negative": "NO intimidating appearance"
+      }
+    },
+    {
+      "id": "npc_owl_librarian",
+      "name": "Owl Librarian",
+      "filename": "npc_owl_librarian_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 4,
+        "rows": 1,
+        "frameWidth": 128,
+        "frameHeight": 144,
+        "size": "512x144",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Elderly owl librarian/archivist",
+        "physique": "Tall tawny owl, dignified posture, large wise eyes behind round spectacles",
+        "plumage": "Tawny brown feathers with cream barring, slightly ruffled from age, prominent ear tufts",
+        "outfit": "Scholar's robes in deep burgundy, ink-stained wing-tips, quill tucked behind ear tuft",
+        "expression": "Scholarly, slightly absent-minded, knows everything but forgets where they put their quill",
+        "animation": "Idle with head tilt, pointing to scroll, handing over map, wise nod",
+        "role": "Keeper of the Archives, helps Finn find the ancient map",
+        "style": "Pixel art, intellectual and warm",
+        "negative": "NO threatening owls, NO predatory poses"
+      }
+    },
+    {
+      "id": "npc_mouse_villagers",
+      "name": "Mouse Villager Sprites",
+      "filename": "npc_mouse_villagers_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 6,
+        "rows": 2,
+        "frameWidth": 64,
+        "frameHeight": 80,
+        "size": "384x160",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Villager mice - background NPCs",
+        "variants": "Row 1: Male farmer (straw hat, pitchfork), female baker (apron, rolling pin), child mouse (simple tunic). Row 2: Same characters in different poses - working, walking, gesturing",
+        "physique": "Small field mice, round ears, long tails, friendly proportions",
+        "outfit": "Simple medieval peasant clothing - tunics, aprons, caps. Natural wool and linen colors.",
+        "expression": "Cheerful, hardworking, community-minded",
+        "role": "Background characters, give sense of community at Willowmere",
+        "style": "Pixel art, smaller scale (background characters)",
+        "negative": "NO modern clothing, NO identical copies"
+      }
+    },
+    {
+      "id": "npc_squirrel_defender",
+      "name": "Squirrel Defender",
+      "filename": "npc_squirrel_defender_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 4,
+        "rows": 2,
+        "frameWidth": 96,
+        "frameHeight": 112,
+        "size": "384x224",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Red squirrel militia member",
+        "physique": "Athletic red squirrel, bushy tail, nimble build suited for climbing",
+        "fur": "Russet red with cream chest, fluffy ear tufts",
+        "outfit": "Light leather armor (practical, not heavy plate), shortbow and quiver, small dagger",
+        "expression": "Alert, brave despite nervousness, looking to Finn for leadership",
+        "animation": "Row 1: Stand at attention, salute, draw bow, fire arrow. Row 2: Run, climb pose, cheer, determined nod",
+        "role": "Defender that Finn rallies in Chapter 6, fights alongside player",
+        "style": "Pixel art, ally character",
+        "negative": "NO heavy armor, NO oversized weapons"
       }
     }
   ]

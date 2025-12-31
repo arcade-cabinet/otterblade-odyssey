@@ -7,7 +7,13 @@
  * - Graceful fallback when not supported
  */
 
-import { hideStatusBar, isNative, lockOrientation, showStatusBar, unlockOrientation } from './capacitor';
+import {
+  hideStatusBar,
+  isNative,
+  lockOrientation,
+  showStatusBar,
+  unlockOrientation,
+} from './capacitor';
 
 /** Check if fullscreen API is available */
 export function isFullscreenSupported(): boolean {
@@ -45,11 +51,11 @@ export function isFullscreen(): boolean {
 export async function enterFullscreen(element?: HTMLElement): Promise<boolean> {
   const el = element || document.documentElement;
 
-  const requestFullscreen = (el as HTMLElement & {
+  const requestFullscreen = el as HTMLElement & {
     webkitRequestFullscreen?: () => Promise<void>;
     mozRequestFullScreen?: () => Promise<void>;
     msRequestFullscreen?: () => Promise<void>;
-  });
+  };
 
   try {
     if (requestFullscreen.requestFullscreen) {
@@ -145,7 +151,9 @@ export async function enterImmersiveMode(): Promise<boolean> {
   // Try to lock to landscape for better gameplay on mobile
   try {
     // Use Screen Orientation API if available
-    const orientation = screen.orientation as ScreenOrientation & { lock?: (orientation: string) => Promise<void> };
+    const orientation = screen.orientation as ScreenOrientation & {
+      lock?: (orientation: string) => Promise<void>;
+    };
     if (orientation?.lock) {
       await orientation.lock('landscape');
     } else if (isNative) {

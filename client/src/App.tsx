@@ -69,9 +69,8 @@ function AppContent() {
     initializeGameMode();
 
     // Listen for orientation changes (important for foldables)
-    const unsubscribe = onOrientationChange((orientation) => {
-      console.log('Orientation changed:', orientation);
-      // Trigger resize event to update canvas
+    const unsubscribe = onOrientationChange(() => {
+      // Trigger resize event to update canvas when orientation changes
       window.dispatchEvent(new Event('resize'));
     });
 
