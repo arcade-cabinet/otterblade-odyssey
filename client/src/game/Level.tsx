@@ -1,11 +1,10 @@
 import { RigidBody, CuboidCollider } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import { useStore } from "./store";
 import { BIOMES, SEGMENT_LEN } from "./constants";
 import { hash1 } from "./utils";
-import "./materials/ParallaxMaterial";
-import * as THREE from "three";
+import { ProceduralSky, GrassInstances, RockInstances, VolumetricFogMesh, createTimeOfDay } from "@jbcom/strata";
 
 interface PlatformProps {
   id: string;
@@ -31,7 +30,6 @@ function Platform({ id, position, args, kind = "plain" }: PlatformProps) {
     return () => unregister(id);
   }, [id, position, args, register, unregister]);
 
-  // Rapier uses half-extents for colliders
   const halfExtents: [number, number, number] = [args[0] / 2, args[1] / 2, args[2] / 2];
 
   return (
@@ -86,27 +84,36 @@ function ProceduralPlatforms() {
   );
 }
 
-function ParallaxBackground() {
+function StrataEnvironment() {
   const biomeIndex = useStore((s) => s.biomeIndex);
-  const playerX = useStore((s) => s.playerX);
-  const materialRef = useRef<any>();
-
   const biome = BIOMES[biomeIndex % BIOMES.length];
 
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uTime = state.clock.elapsedTime;
-      materialRef.current.uColorA = new THREE.Color(biome.sky1);
-      materialRef.current.uColorB = new THREE.Color(biome.sky2);
-    }
-  });
+  // Calculate time of day based on biome (each biome has different lighting)
+  const timeOfDay = useMemo(() => {
+    const hours = [14, 10, 18, 6]; // Verdant=afternoon, Crystal=morning, Magma=sunset, Aether=dawn
+    return createTimeOfDay(hours[biomeIndex % hours.length]);
+  }, [biomeIndex]);
 
   return (
-    <mesh position={[playerX, 10, -15]}>
-      <planeGeometry args={[200, 80]} />
-      {/* @ts-ignore */}
-      <parallaxMaterial ref={materialRef} side={THREE.DoubleSide} />
-    </mesh>
+    <>
+      <ProceduralSky timeOfDay={timeOfDay} size={[200, 100]} distance={50} />
+      <VolumetricFogMesh density={0.015} color={biome.fog} />
+    </>
+  );
+}
+
+function BiomeVegetation() {
+  const playerX = useStore((s) => s.playerX);
+  const biomeIndex = useStore((s) => s.biomeIndex);
+
+  // Only show grass in VERDANT biome (index 0)
+  if (biomeIndex !== 0) return null;
+
+  return (
+    <group position={[playerX, 0, -5]}>
+      <GrassInstances count={2000} areaSize={50} />
+      <RockInstances count={30} areaSize={40} />
+    </group>
   );
 }
 
@@ -115,7 +122,6 @@ export function Level() {
   const setBiomeMeta = useStore((s) => s.setBiomeMeta);
 
   useFrame(() => {
-    // Update biome based on player position
     const segmentProgress = playerX / SEGMENT_LEN;
     const idx = Math.floor(segmentProgress) % BIOMES.length;
     const biome = BIOMES[idx];
@@ -124,7 +130,8 @@ export function Level() {
 
   return (
     <>
-      <ParallaxBackground />
+      <StrataEnvironment />
+      <BiomeVegetation />
       <ProceduralPlatforms />
       <ambientLight intensity={0.4} />
       <pointLight position={[playerX + 10, 15, 5]} intensity={0.8} castShadow />
