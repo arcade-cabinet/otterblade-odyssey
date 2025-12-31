@@ -1,8 +1,8 @@
-import { useBox } from "@react-three/cannon";
+import { RigidBody, CuboidCollider } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef, useEffect } from "react";
 import { useStore } from "./store";
-import { BIOMES, SEGMENT_LEN, CG } from "./constants";
+import { BIOMES, SEGMENT_LEN } from "./constants";
 import { hash1 } from "./utils";
 import "./materials/ParallaxMaterial";
 import * as THREE from "three";
@@ -31,19 +31,17 @@ function Platform({ id, position, args, kind = "plain" }: PlatformProps) {
     return () => unregister(id);
   }, [id, position, args, register, unregister]);
 
-  const [ref] = useBox(() => ({
-    type: "Static",
-    position,
-    args,
-    collisionFilterGroup: CG.WORLD,
-    collisionFilterMask: CG.PLAYER | CG.ENEMY | CG.PROJECTILE,
-  }));
+  // Rapier uses half-extents for colliders
+  const halfExtents: [number, number, number] = [args[0] / 2, args[1] / 2, args[2] / 2];
 
   return (
-    <mesh ref={ref as any} receiveShadow>
-      <boxGeometry args={args} />
-      <meshStandardMaterial color={color} />
-    </mesh>
+    <RigidBody type="fixed" position={position} colliders={false}>
+      <CuboidCollider args={halfExtents} friction={0.1} restitution={0} />
+      <mesh receiveShadow>
+        <boxGeometry args={args} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </RigidBody>
   );
 }
 

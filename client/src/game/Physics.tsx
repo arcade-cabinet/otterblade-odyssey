@@ -1,18 +1,15 @@
-import { Physics as CannonPhysics } from "@react-three/cannon";
+import { Physics } from "@react-three/rapier";
+import type { ReactNode } from "react";
 
 interface PhysicsWrapperProps {
-  children: React.ReactNode;
+  children: ReactNode;
   debug?: boolean;
 }
 
 export function PhysicsWrapper({ children }: PhysicsWrapperProps) {
   return (
-    <CannonPhysics
-      gravity={[0, -30, 0]}
-      defaultContactMaterial={{ friction: 0.1, restitution: 0 }}
-      isPaused={false}
-    >
+    <Physics gravity={[0, -30, 0]} timeStep="vary">
       {children}
-    </CannonPhysics>
+    </Physics>
   );
 }
