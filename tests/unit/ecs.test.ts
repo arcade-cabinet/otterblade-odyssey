@@ -1,27 +1,48 @@
 /**
  * @fileoverview Unit tests for ECS (Entity Component System)
- * Tests Miniplex world, queries, and systems using a mock world
+ * Tests Miniplex world, queries, and systems
+ *
+ * Note: We mock miniplex-react because it uses React internals that don't work
+ * in the happy-dom test environment. The ECS logic itself doesn't need React.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { World } from 'miniplex';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock miniplex-react to avoid ESM import issues in tests
-vi.mock('miniplex-react', () => ({
-  default: vi.fn(() => ({})),
-}));
+// Mock miniplex-react before any imports that use it
+// Based on: https://vitest.dev/guide/mocking/modules
+vi.mock('miniplex-react', () => {
+  return {
+    default: vi.fn(() => ({
+      world: null,
+      Component: vi.fn(),
+      Entity: vi.fn(),
+      Entities: vi.fn(),
+      useCurrentEntity: vi.fn(),
+    })),
+    createReactAPI: vi.fn(() => ({
+      world: null,
+      Component: vi.fn(),
+      Entity: vi.fn(),
+      Entities: vi.fn(),
+      useCurrentEntity: vi.fn(),
+    })),
+    useEntities: vi.fn(),
+    useOnEntityAdded: vi.fn(),
+    useOnEntityRemoved: vi.fn(),
+  };
+});
 
-// Now import the actual modules
-import { world, queries, type Entity } from '@/game/ecs/world';
+// Now import the modules that depend on miniplex-react
+import { queries, world, type Entity } from '@/game/ecs/world';
 import {
-  movementSystem,
-  gravitySystem,
-  controlSystem,
-  healthSystem,
   cleanupSystem,
+  controlSystem,
   damageEntity,
-  spawnPlayer,
+  gravitySystem,
+  healthSystem,
+  movementSystem,
   spawnEnemy,
+  spawnPlayer,
 } from '@/game/ecs/systems';
 
 describe('ECS World', () => {
@@ -126,20 +147,20 @@ describe('ECS Systems', () => {
     });
 
     it('should handle multiple entities', () => {
-      world.add({
+      const e1 = world.add({
         position: { x: 0, y: 0, z: 0 },
         velocity: { x: 10, y: 0, z: 0 },
       });
-      world.add({
+      const e2 = world.add({
         position: { x: 5, y: 0, z: 0 },
         velocity: { x: -10, y: 0, z: 0 },
       });
 
       movementSystem(0.1);
 
-      const entities = [...queries.moving];
-      expect(entities[0].position.x).toBeCloseTo(1);
-      expect(entities[1].position.x).toBeCloseTo(4);
+      // Check the entities directly instead of relying on query order
+      expect(e1.position.x).toBeCloseTo(1);
+      expect(e2.position.x).toBeCloseTo(4);
     });
   });
 
