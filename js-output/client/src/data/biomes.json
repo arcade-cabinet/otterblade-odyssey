@@ -1,0 +1,100 @@
+[
+    {
+        "id": "village",
+        "name": "Finn's Village",
+        "chapterIds": [0],
+        "colors": {
+            "bg": "#2a3a2a",
+            "fog": "#4a5a4a",
+            "accent": "#8fbc8f",
+            "sky1": "#1a2518",
+            "sky2": "#3d5a3d"
+        },
+        "atmosphere": "warm",
+        "timeOfDay": "morning"
+    },
+    {
+        "id": "willowbanks",
+        "name": "Willow Banks",
+        "chapterIds": [1, 2],
+        "colors": {
+            "bg": "#2d3b2d",
+            "fog": "#4a6741",
+            "accent": "#8fbc8f",
+            "sky1": "#1a2518",
+            "sky2": "#3d5a3d"
+        },
+        "atmosphere": "serene",
+        "timeOfDay": "afternoon"
+    },
+    {
+        "id": "hearthhold_interior",
+        "name": "Hearthhold Interior",
+        "chapterIds": [3, 4],
+        "colors": {
+            "bg": "#3d2b1f",
+            "fog": "#5c4033",
+            "accent": "#d4a574",
+            "sky1": "#1f1510",
+            "sky2": "#4a3628"
+        },
+        "atmosphere": "cozy",
+        "timeOfDay": "evening"
+    },
+    {
+        "id": "deep_cellars",
+        "name": "Deep Cellars",
+        "chapterIds": [5],
+        "colors": {
+            "bg": "#1a1a24",
+            "fog": "#2d2d3d",
+            "accent": "#e67e22",
+            "sky1": "#0d0d12",
+            "sky2": "#1a1a28"
+        },
+        "atmosphere": "tense",
+        "timeOfDay": "night"
+    },
+    {
+        "id": "gardens",
+        "name": "Kitchen Gardens",
+        "chapterIds": [6],
+        "colors": {
+            "bg": "#4a5d3a",
+            "fog": "#6b8e4a",
+            "accent": "#c0392b",
+            "sky1": "#2d3a24",
+            "sky2": "#5a7048"
+        },
+        "atmosphere": "hopeful",
+        "timeOfDay": "dawn"
+    },
+    {
+        "id": "rooftops",
+        "name": "Bell Tower",
+        "chapterIds": [7, 8],
+        "colors": {
+            "bg": "#3a3a4a",
+            "fog": "#5a5a6a",
+            "accent": "#cd7f32",
+            "sky1": "#1a1a24",
+            "sky2": "#3d3d4d"
+        },
+        "atmosphere": "dramatic",
+        "timeOfDay": "sunset"
+    },
+    {
+        "id": "victory",
+        "name": "New Dawn",
+        "chapterIds": [9],
+        "colors": {
+            "bg": "#4a5d3a",
+            "fog": "#7a9e5a",
+            "accent": "#ffd700",
+            "sky1": "#3d4a34",
+            "sky2": "#6a8058"
+        },
+        "atmosphere": "triumphant",
+        "timeOfDay": "sunrise"
+    }
+]
