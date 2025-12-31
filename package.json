@@ -45,6 +45,13 @@
     "validate:assets": "pnpm --filter @otterblade/dev-tools validate:assets"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
+    "@capacitor/screen-orientation": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
     "@dimforge/rapier2d-compat": "^0.19.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
