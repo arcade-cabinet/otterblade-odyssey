@@ -75,7 +75,8 @@ Otterblade Odyssey: Zephyros Rising is a production-grade React 2D side-scrollin
   └── pages/            # Route pages
 /server/                # Express server and API routes
 /shared/                # Shared TypeScript schemas (Drizzle + Zod)
-/attached_assets/       # Generated images
+/attached_assets/       # Generated images and videos
+/proofs/                # Sprite sheet testing package (port 5001)
 ```
 
 ### Key Design Patterns
@@ -181,8 +182,31 @@ The Playwright config supports two modes:
 - `e2e/game.spec.ts` - Core game tests (page load, canvas, HUD)
 - Visual regression tests use 20% diff tolerance for WebGL variations
 
+## Asset Generation
+
+### Completed Assets
+- **Chapter Plates**: 10/10 complete (all story illustrations)
+- **Parallax Backgrounds**: 8/8 complete (village, ruins, abbey, dungeon, courtyard, rooftops, new dawn)
+- **Cinematics**: 15/15 complete (intro, outro, 8 chapter opens, 5 boss arrivals)
+- **Sprite Sheets**: 0/11 (pending - requires frame extraction from video)
+
+### Asset Pipeline
+- Asset ledger: `client/src/data/assets.json`
+- All assets stored in: `attached_assets/generated_images/` and `attached_assets/generated_videos/`
+- Import using `@assets` alias in Vite
+
+### Proofs Package
+A separate testing package at `/proofs/` provides sprite sheet validation without WebGL:
+- Sprite manifest viewer
+- Animation frame player
+- Chroma key background removal
+
 ## Recent Changes
 
+- **2024-12-31**: Generated all 8 chapter opening cinematics and 5 boss arrival videos
+- **2024-12-31**: Created proofs/ package for sprite sheet testing without WebGL
+- **2024-12-31**: Generated missing parallax backgrounds (village morning, new dawn hall)
+- **2024-12-31**: Created comprehensive asset ledger (assets.json) with generation tracking
 - **2024-12-31**: Created strict biome.json with Biome 2.3.10 linting rules
 - **2024-12-31**: Refactored constants.ts to use typed JSON loaders with error handling
 - **2024-12-31**: Updated AGENTS.md with comprehensive quality standards
