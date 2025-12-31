@@ -30,8 +30,11 @@ import Typography from '@mui/material/Typography';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Import manifests
+import chapterPlatesManifest from '@/data/manifests/chapter-plates.json';
 import cinematicsManifest from '@/data/manifests/cinematics.json';
+import effectsManifest from '@/data/manifests/effects.json';
 import enemiesManifest from '@/data/manifests/enemies.json';
+import itemsManifest from '@/data/manifests/items.json';
 import scenesManifest from '@/data/manifests/scenes.json';
 import soundsManifest from '@/data/manifests/sounds.json';
 import spritesManifest from '@/data/manifests/sprites.json';
@@ -83,7 +86,16 @@ const ALL_MANIFESTS: ManifestData[] = [
     ...cinematicsManifest,
     assets: cinematicsManifest.assets.map((a) => ({ ...a, category: 'cinematics' })),
   },
+  {
+    ...chapterPlatesManifest,
+    assets: chapterPlatesManifest.assets.map((a) => ({ ...a, category: 'chapter-plates' })),
+  },
   { ...scenesManifest, assets: scenesManifest.assets.map((a) => ({ ...a, category: 'scenes' })) },
+  { ...itemsManifest, assets: itemsManifest.assets.map((a) => ({ ...a, category: 'items' })) },
+  {
+    ...effectsManifest,
+    assets: effectsManifest.assets.map((a) => ({ ...a, category: 'effects' })),
+  },
   { ...soundsManifest, assets: soundsManifest.assets.map((a) => ({ ...a, category: 'sounds' })) },
 ] as ManifestData[];
 

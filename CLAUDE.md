@@ -171,10 +171,14 @@ All game assets are managed through JSON manifests in `client/src/data/manifests
 
 | Manifest | Assets | Provider |
 |----------|--------|----------|
-| `sprites.json` | Player sprite sheet | OpenAI GPT-Image-1 |
-| `enemies.json` | 5 enemy types | OpenAI GPT-Image-1 |
-| `cinematics.json` | 10 chapter videos | Google Veo 3.1 |
+| `sprites.json` | Finn (12 animations) + 5 NPCs | OpenAI GPT-Image-1 |
+| `enemies.json` | 6 enemy types + Zephyros boss | OpenAI GPT-Image-1 |
+| `cinematics.json` | 18 cinematics (intro, chapters, boss, outro) | Google Veo 3.1 |
+| `chapter-plates.json` | 10 storybook chapter plates | Google Imagen 3 |
 | `scenes.json` | 8 parallax backgrounds | Google Imagen 3 |
+| `items.json` | Collectibles, doors, platforms, hazards | OpenAI GPT-Image-1 |
+| `effects.json` | Particles, combat effects, weather | OpenAI GPT-Image-1 |
+| `sounds.json` | 18 ambient, SFX, and music tracks | Freesound/Custom |
 
 ### dev-tools Package
 

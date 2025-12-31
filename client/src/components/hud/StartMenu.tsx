@@ -15,12 +15,12 @@ import Fade from '@mui/material/Fade';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
+// Import the prologue chapter plate as splash image
+import splashImage from '@/assets/images/chapter-plates/prologue_village_chapter_plate.png';
 import { useStore } from '@/game/store';
 import { hapticMedium } from '@/lib/capacitor';
 import { enterImmersiveMode, isFullscreenSupported } from '@/lib/fullscreen';
 import { brandColors } from '@/lib/theme';
-// Import the prologue chapter plate as splash image
-import splashImage from '@/assets/images/chapter-plates/prologue_village_chapter_plate.png';
 
 export default function StartMenu() {
   const gameStarted = useStore((s) => s.gameStarted);
@@ -158,9 +158,8 @@ export default function StartMenu() {
               px: 2,
             }}
           >
-            A woodland-epic adventure awaits. Play as Finn, a brave otter warrior
-            wielding the legendary Otterblade, defending Willowmere Hearthhold
-            against the storm hawk Zephyros.
+            A woodland-epic adventure awaits. Play as Finn, a brave otter warrior wielding the
+            legendary Otterblade, defending Willowmere Hearthhold against the storm hawk Zephyros.
           </Typography>
 
           {/* Start Button */}
@@ -232,10 +231,7 @@ export default function StartMenu() {
                     mb: 1,
                   }}
                 >
-                  <Typography
-                    variant="body2"
-                    sx={{ color: brandColors.stoneBeige.main }}
-                  >
+                  <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
                     Best Score
                   </Typography>
                   <Typography
@@ -250,10 +246,7 @@ export default function StartMenu() {
                 </Box>
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: brandColors.stoneBeige.main }}
-                  >
+                  <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
                     Furthest Distance
                   </Typography>
                   <Typography

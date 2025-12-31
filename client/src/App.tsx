@@ -12,7 +12,12 @@ import StartMenu from '@/components/hud/StartMenu';
 import TouchControls from '@/components/hud/TouchControls';
 import Game from '@/game/Game';
 import { useStore } from '@/game/store';
-import { initializeGameMode, loadGameData, onOrientationChange, saveGameData } from './lib/capacitor';
+import {
+  initializeGameMode,
+  loadGameData,
+  onOrientationChange,
+  saveGameData,
+} from './lib/capacitor';
 import { queryClient } from './lib/queryClient';
 import otterbladeTheme from './lib/theme';
 
@@ -114,7 +119,8 @@ function AppContent() {
 
 function App() {
   // Check for /assets route (available until official launch)
-  const isAssetReviewRoute = isAssetReviewEnabled && 
+  const isAssetReviewRoute =
+    isAssetReviewEnabled &&
     (window.location.pathname === '/assets' || window.location.pathname.endsWith('/assets'));
 
   return (
@@ -122,11 +128,13 @@ function App() {
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
         {isAssetReviewRoute ? (
-          <Suspense fallback={
-            <div className="w-full h-screen bg-black flex items-center justify-center">
-              <div className="text-amber-200/60 animate-pulse">Loading Asset Review...</div>
-            </div>
-          }>
+          <Suspense
+            fallback={
+              <div className="w-full h-screen bg-black flex items-center justify-center">
+                <div className="text-amber-200/60 animate-pulse">Loading Asset Review...</div>
+              </div>
+            }
+          >
             <AssetReview />
           </Suspense>
         ) : (

@@ -19,6 +19,35 @@ Otterblade Odyssey is a modern, polished 2.5D action platformer inspired by the 
 - NOT sci-fi neon spectacle
 - NOT generic AAA fantasy key-art
 
+### Storytelling Philosophy: Pantomime & Visual Narrative
+
+**This game tells its story through the visual medium, not dialogue.**
+
+We follow the tradition of:
+- **British pantomime** - gesture, expression, and music carry the narrative
+- **Silent film masters** - Chaplin, Keaton, where a single look conveys volumes
+- **Wordless picture books** - Raymond Briggs' "The Snowman", "The Arrival" by Shaun Tan
+- **Studio Ghibli's environmental storytelling** - the world itself tells the story
+- **Games like Journey, Inside, Limbo** - pure visual/audio emotional experience
+
+**Why wordless?**
+- **More powerful, not less** - A nod from the Elder Badger carries more weight than any speech
+- **Universal** - No localization needed, transcends language
+- **Respects the player** - Trusts their intelligence and imagination
+- **Emotionally direct** - No filter between image and feeling
+
+**How we tell story:**
+| Element | Purpose |
+|---------|---------|
+| Character expression | Joy, fear, determination, sadness - readable in a glance |
+| Body language | A raised blade is defiance; a lowered head is respect |
+| Camera movement | Slow reveals for wonder, quick cuts for tension |
+| Lighting shifts | Warmth = safety, cold blue = danger |
+| Music | The Hearth Leitmotif = home; Storm motif = Zephyros |
+| Environmental details | A worn path, a lit candle, a set table - life happened here |
+
+**Cinematics have NO spoken dialogue.** Characters communicate through gesture, expression, and action. The orchestral score and ambient sound carry the emotional weight.
+
 ---
 
 ## Visual Aesthetic

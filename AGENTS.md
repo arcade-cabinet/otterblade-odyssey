@@ -263,10 +263,14 @@ All visual assets are managed through JSON manifests in `client/src/data/manifes
 
 ```
 client/src/data/manifests/
-├── sprites.json      # Player sprite sheet (OpenAI)
-├── enemies.json      # 5 enemy types (OpenAI)
-├── cinematics.json   # 10 chapter videos (Google Veo 3.1)
-└── scenes.json       # 8 parallax backgrounds (Google Imagen 3)
+├── sprites.json        # Finn + NPCs (OpenAI GPT-Image-1)
+├── enemies.json        # 6 enemies + Zephyros boss (OpenAI)
+├── cinematics.json     # 18 story/boss cinematics (Google Veo 3.1)
+├── chapter-plates.json # 10 storybook chapter plates (Google Imagen 3)
+├── scenes.json         # 8 parallax backgrounds (Google Imagen 3)
+├── items.json          # Collectibles, platforms, hazards (OpenAI)
+├── effects.json        # Particles, combat, weather (OpenAI)
+└── sounds.json         # 18 ambient, SFX, music (Freesound)
 ```
 
 ### dev-tools Package

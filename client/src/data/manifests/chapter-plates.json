@@ -1,0 +1,208 @@
+{
+  "$schema": "./manifest-schema.json",
+  "category": "chapter-plates",
+  "provider": "google",
+  "model": "imagen-3.0-generate-002",
+  "outputDir": "client/src/assets/images/chapter-plates",
+  "brandGuidance": {
+    "style": "Illuminated manuscript meets storybook illustration. Warm, painterly, noble.",
+    "format": "16:9 aspect ratio, designed for full-screen chapter transitions",
+    "characters": "Finn (otter warrior) must be consistent across all plates - same face, outfit, blade",
+    "tone": "Quiet courage, not bombastic heroism. The calm before action, not the action itself.",
+    "framing": "Slight vignette, aged parchment texture at edges, subtle decorative borders"
+  },
+  "assets": [
+    {
+      "id": "chapter_plate_prologue",
+      "name": "Prologue - The Calling",
+      "filename": "prologue_village_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn's cottage at dawn, the moment of departure",
+        "composition": "Cottage in warm morning light, door open, Finn's silhouette on the threshold looking toward the sunrise road. Willow trees, river in background.",
+        "finn": "Back to viewer, travel pack shouldered, Otterblade visible on back. Posture shows determination mixed with reluctance to leave.",
+        "lighting": "Golden hour, warm light on cottage, cool mist on the road ahead",
+        "mood": "Bittersweet departure, answering the call, leaving home for duty",
+        "decorative": "Subtle vine border at edges, aged parchment texture in corners",
+        "text_area": "Lower third clear for chapter title overlay",
+        "style": "Storybook illustration, painterly, warm palette"
+      }
+    },
+    {
+      "id": "chapter_plate_1",
+      "name": "Chapter 1 - Abbey Approach",
+      "filename": "abbey_approach_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn on the River Path, first glimpse of Willowmere",
+        "composition": "Finn walking along willow-lined riverbank, looking up. Willowmere Hearthhold visible through the trees - ancient stone walls, towers with banners.",
+        "finn": "Three-quarter view, travel-worn, wonder on his face, one paw touching a carved waystone",
+        "lighting": "Afternoon sun filtering through willow canopy, god rays, golden-green tones",
+        "mood": "Anticipation, arriving at destiny, wonder at the ancient sanctuary",
+        "decorative": "Willow branches framing the edges, subtle Celtic knotwork border",
+        "style": "Storybook illustration, depth through atmospheric perspective"
+      }
+    },
+    {
+      "id": "chapter_plate_2",
+      "name": "Chapter 2 - Gatehouse Bridge",
+      "filename": "gatehouse_bridge_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn before the Northern Gatehouse",
+        "composition": "Finn standing at the foot of the old stone bridge, massive gatehouse looming before him. Lanterns lit despite daylight. Faded banners stirring.",
+        "finn": "Small against the imposing gate, but standing tall. Hand on sword hilt (not drawn), ready for judgment.",
+        "lighting": "Transition lighting - warm lanterns against cooler stone, threshold moment",
+        "mood": "Testing, being judged, the moment before acceptance",
+        "decorative": "Stone archway framing, iron bands echoed in border design",
+        "style": "Storybook illustration, emphasis on scale - small hero, great doorway"
+      }
+    },
+    {
+      "id": "chapter_plate_3",
+      "name": "Chapter 3 - Great Hall Oath",
+      "filename": "great_hall_oath_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn before the Everember in the Great Hall",
+        "composition": "The vast Great Hall, Everember blazing at center. Finn approaching the fire, Elder Badger waiting beside it. Tapestries on walls, vaulted ceiling lost in shadow.",
+        "finn": "Approaching the fire, bathed in golden light from below, face showing awe and resolve",
+        "lighting": "Warm firelight dominating, candles on pillars, deep shadows above",
+        "mood": "Sacred moment, taking an oath, understanding what must be protected",
+        "decorative": "Tapestry-edge framing, medieval illumination style borders",
+        "style": "Storybook illustration, cathedral-like reverence, warm throughout"
+      }
+    },
+    {
+      "id": "chapter_plate_4",
+      "name": "Chapter 4 - Library Map Table",
+      "filename": "library_map_table_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn in the Archives, studying the ancient map",
+        "composition": "Spiral library tower interior, great map table in center. Finn bent over the map, Owl Librarian perched nearby. Candles, dusty tomes, scrolls.",
+        "finn": "Leaning over map, one claw tracing a route, expression of concentration and growing concern",
+        "lighting": "Warm candlelight, dust motes in light beams from high windows",
+        "mood": "Discovery, the weight of knowledge, planning for what's coming",
+        "decorative": "Scroll and book motifs in border, ink-stained parchment texture",
+        "style": "Storybook illustration, scholarly atmosphere, intimate scale"
+      }
+    },
+    {
+      "id": "chapter_plate_5",
+      "name": "Chapter 5 - Dungeon Descent",
+      "filename": "dungeon_descent_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn descending into the Deep Cellars",
+        "composition": "Stone staircase spiraling down into darkness. Finn at the top, torch in one paw, the Otterblade drawn. Roots breaking through ceiling, damp stones.",
+        "finn": "Lit from his own torch, casting long shadows, determination overcoming fear visible in posture",
+        "lighting": "Single torch source, deep shadows, hints of movement in the darkness below",
+        "mood": "Tense descent, facing fear, the unknown waiting below",
+        "decorative": "Root and stone motifs, darker border with subtle danger hints",
+        "style": "Storybook illustration, chiaroscuro lighting, NOT horror"
+      }
+    },
+    {
+      "id": "chapter_plate_6",
+      "name": "Chapter 6 - Courtyard Rally",
+      "filename": "courtyard_rally_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn rallying the defenders in the Kitchen Gardens",
+        "composition": "Sunlit courtyard, Finn standing on a low wall addressing gathered woodland creatures. Mice, squirrels, a young badger - all with simple weapons. Training dummies, herb gardens visible.",
+        "finn": "Standing tall, Otterblade raised (not threatening, but as a symbol), expression of earnest leadership",
+        "lighting": "Bright afternoon sun, hopeful clear light, banners visible against blue sky",
+        "mood": "Hope rising, community gathering strength, the power of standing together",
+        "decorative": "Banner and herb motifs, warm summery border",
+        "style": "Storybook illustration, communal and hopeful, many characters but Finn central"
+      }
+    },
+    {
+      "id": "chapter_plate_7",
+      "name": "Chapter 7 - Rooftop Wind",
+      "filename": "rooftop_wind_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn climbing toward the Bell Tower as the storm arrives",
+        "composition": "Slate rooftops at dramatic angle, Bell Tower spire above. Finn climbing against fierce wind, cloak whipping. Storm clouds gathering, lightning in distance.",
+        "finn": "Bracing against wind, determined expression, one paw reaching for the next handhold",
+        "lighting": "Dramatic sunset breaking through storm clouds, orange and purple, wind-swept",
+        "mood": "Urgency, elemental struggle, the climax approaching",
+        "decorative": "Wind and bell motifs, storm-edge border",
+        "style": "Storybook illustration, dynamic composition, dramatic atmosphere"
+      }
+    },
+    {
+      "id": "chapter_plate_8",
+      "name": "Chapter 8 - Final Ascent",
+      "filename": "final_ascent_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "Finn on the ramparts, Zephyros descending from the storm",
+        "composition": "Storm-battered battlements, Finn small but unbowed. Above, the massive silhouette of Zephyros descending through lightning. The Hearthhold visible below, Everember's glow fighting the dark.",
+        "finn": "Blade drawn, stance ready, looking up at the descending storm hawk. Small but resolute.",
+        "zephyros": "Silhouette only, massive wingspan, frost-touched armor glinting, descending like judgment",
+        "lighting": "Lightning illumination, cold blues above, warm ember glow from below",
+        "mood": "Ultimate confrontation, destiny manifest, warmth vs cold",
+        "decorative": "Ice and fire motifs intertwined in border, dramatic contrast",
+        "style": "Storybook illustration, epic scale, the moment before battle"
+      }
+    },
+    {
+      "id": "chapter_plate_epilogue",
+      "name": "Epilogue - Victory",
+      "filename": "epilogue_victory_chapter_plate.png",
+      "status": "complete",
+      "config": {
+        "aspectRatio": "16:9",
+        "outputMimeType": "image/png"
+      },
+      "prompt": {
+        "scene": "The New Dawn - victory celebration in the Great Hall",
+        "composition": "Great Hall filled with life, dawn light streaming through tall windows. Finn by the Everember, surrounded by friends. The Elder Badger, the defenders, all the allies made along the way.",
+        "finn": "Not centered/heroic, but among friends. Humble smile, medallion around neck, hand being shaken by a mouse. The hero as part of the community.",
+        "lighting": "Golden sunrise mixing with warm firelight, radiant and peaceful",
+        "mood": "Triumph, warmth restored, belonging, the promise of peace",
+        "decorative": "Celebration motifs, sunrise rays in border, joyful",
+        "style": "Storybook illustration, the final page, happily ever after"
+      }
+    }
+  ]
+}

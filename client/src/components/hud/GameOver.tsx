@@ -126,10 +126,7 @@ export default function GameOverMenu() {
                 mb: 1.5,
               }}
             >
-              <Typography
-                variant="body2"
-                sx={{ color: brandColors.stoneBeige.main }}
-              >
+              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
                 Score
               </Typography>
               <Typography
@@ -150,10 +147,7 @@ export default function GameOverMenu() {
                 mb: 1.5,
               }}
             >
-              <Typography
-                variant="body2"
-                sx={{ color: brandColors.stoneBeige.main }}
-              >
+              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
                 Distance Traveled
               </Typography>
               <Typography
@@ -168,10 +162,7 @@ export default function GameOverMenu() {
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography
-                variant="body2"
-                sx={{ color: brandColors.stoneBeige.main }}
-              >
+              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
                 Shards Preserved
               </Typography>
               <Typography
