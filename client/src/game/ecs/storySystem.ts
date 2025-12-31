@@ -1,5 +1,5 @@
-import { CHAPTERS, type Chapter, STORY_EVENTS } from "../constants";
-import { type Entity, queries, world } from "./world";
+import { CHAPTERS, type Chapter, STORY_EVENTS } from '../constants';
+import { type Entity, queries, world } from './world';
 
 export function initializeStory(): Entity {
   const existingStory = [...queries.story];
@@ -65,9 +65,9 @@ export function startChapter(chapterId: number): void {
   });
 
   if (chapterId === 0) {
-    startCutscene("intro", chapterId, 8000);
+    startCutscene('intro', chapterId, 8000);
   } else {
-    startCutscene("chapter_plate", chapterId, 3000);
+    startCutscene('chapter_plate', chapterId, 3000);
   }
 
   world.add({
@@ -108,11 +108,11 @@ export function completeChapter(chapterId: number): void {
   if (nextChapterId < CHAPTERS.length) {
     startChapter(nextChapterId);
   } else {
-    startCutscene("outro", chapterId, 8000);
+    startCutscene('outro', chapterId, 8000);
   }
 }
 
-export type CutsceneType = NonNullable<Entity["cutscene"]>["type"];
+export type CutsceneType = NonNullable<Entity['cutscene']>['type'];
 
 export function startCutscene(type: CutsceneType, chapterId: number, duration: number): Entity {
   const cutsceneEntity = world.add({
@@ -166,7 +166,7 @@ export function triggerBossEncounter(chapterId: number, bossName: string): void 
     },
   });
 
-  startCutscene("boss_intro", chapterId, 2000);
+  startCutscene('boss_intro', chapterId, 2000);
 }
 
 export function defeatBoss(chapterId: number, bossName: string): void {
@@ -187,7 +187,7 @@ export function defeatBoss(chapterId: number, bossName: string): void {
     },
   });
 
-  startCutscene("boss_defeat", chapterId, 3000);
+  startCutscene('boss_defeat', chapterId, 3000);
 }
 
 export function updateCutscenes(): void {
@@ -249,7 +249,7 @@ export function isInCutscene(): boolean {
   return [...queries.playingCutscenes].length > 0;
 }
 
-export function getActiveCutscene(): Entity["cutscene"] | null {
+export function getActiveCutscene(): Entity['cutscene'] | null {
   const playing = [...queries.playingCutscenes];
   return playing.length > 0 ? playing[0].cutscene : null;
 }

@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { useFrame } from "@react-three/fiber";
-import RAPIER from "@dimforge/rapier2d-compat";
+import RAPIER from '@dimforge/rapier2d-compat';
+import { useFrame } from '@react-three/fiber';
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
 interface Physics2DContextType {
   world: RAPIER.World | null;
@@ -18,7 +18,10 @@ interface Physics2DProviderProps {
   gravity?: { x: number; y: number };
 }
 
-export function Physics2DProvider({ children, gravity = { x: 0, y: -30 } }: Physics2DProviderProps) {
+export function Physics2DProvider({
+  children,
+  gravity = { x: 0, y: -30 },
+}: Physics2DProviderProps) {
   const [ready, setReady] = useState(false);
   const worldRef = useRef<RAPIER.World | null>(null);
 
@@ -38,7 +41,7 @@ export function Physics2DProvider({ children, gravity = { x: 0, y: -30 } }: Phys
         worldRef.current = null;
       }
     };
-  }, [gravity.x, gravity.y]);
+  }, [gravity.x, gravity.y, gravity]);
 
   useFrame(() => {
     if (worldRef.current) {

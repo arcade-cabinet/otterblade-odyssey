@@ -1,8 +1,8 @@
-import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef, useMemo } from "react";
-import { useStore } from "./store";
-import { usePhysics2D, RAPIER } from "./Physics2D";
-import * as THREE from "three";
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { type RAPIER, usePhysics2D } from './Physics2D';
+import { useStore } from './store';
 
 const SPEED = 10;
 const JUMP_FORCE = 14;
@@ -11,8 +11,8 @@ const JUMP_BUFFER = 0.1;
 
 export function Player() {
   const { world, rapier } = usePhysics2D();
-  
-  const runId = useStore((s) => s.runId);
+
+  const _runId = useStore((s) => s.runId);
   const checkpointX = useStore((s) => s.checkpointX);
   const checkpointY = useStore((s) => s.checkpointY);
   const gameOver = useStore((s) => s.gameOver);
@@ -40,9 +40,7 @@ export function Player() {
 
     const body = world.createRigidBody(bodyDesc);
 
-    const colliderDesc = rapier.ColliderDesc.ball(0.5)
-      .setFriction(0.1)
-      .setRestitution(0);
+    const colliderDesc = rapier.ColliderDesc.ball(0.5).setFriction(0.1).setRestitution(0);
     world.createCollider(colliderDesc, body);
 
     rigidBodyRef.current = body;
@@ -53,7 +51,7 @@ export function Player() {
         rigidBodyRef.current = null;
       }
     };
-  }, [world, rapier]);
+  }, [world, rapier, checkpointX, checkpointY]);
 
   useEffect(() => {
     if (rigidBodyRef.current) {
@@ -61,7 +59,7 @@ export function Player() {
       rigidBodyRef.current.setLinvel({ x: 0, y: 0 }, true);
       lastY.current = checkpointY;
     }
-  }, [runId, checkpointX, checkpointY]);
+  }, [checkpointX, checkpointY]);
 
   useFrame((_, delta) => {
     if (!rigidBodyRef.current || gameOver) return;
@@ -119,7 +117,7 @@ export function Player() {
     }
   });
 
-  const playerColor = useMemo(() => new THREE.Color("#8B6914"), []);
+  const playerColor = useMemo(() => new THREE.Color('#8B6914'), []);
 
   if (!world || !rapier) {
     return null;

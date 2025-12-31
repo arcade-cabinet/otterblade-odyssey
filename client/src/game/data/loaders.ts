@@ -3,16 +3,11 @@
  * Never import JSON directly - always use these typed loaders.
  */
 
-import { fromError } from "zod-validation-error";
-import {
-  ChaptersArraySchema,
-  BiomesArraySchema,
-  type Chapter,
-  type Biome,
-} from "./schemas";
+import { fromError } from 'zod-validation-error';
+import biomesData from '../../data/biomes.json';
 
-import chaptersData from "../../data/chapters.json";
-import biomesData from "../../data/biomes.json";
+import chaptersData from '../../data/chapters.json';
+import { type Biome, BiomesArraySchema, type Chapter, ChaptersArraySchema } from './schemas';
 
 /**
  * Loads and validates chapter data from JSON.
@@ -78,11 +73,11 @@ export function getBiomeColorsArray(): Array<{
   return chapters.map((ch) => {
     const biome = biomes.find((b) => b.chapterIds.includes(ch.id));
     const colors = biome?.colors ?? {
-      bg: "#1a1a2e",
-      fog: "#2a2a3e",
-      accent: "#8fbc8f",
-      sky1: "#1a1a24",
-      sky2: "#2d2d3d",
+      bg: '#1a1a2e',
+      fog: '#2a2a3e',
+      accent: '#8fbc8f',
+      sky1: '#1a1a24',
+      sky2: '#2d2d3d',
     };
 
     return {

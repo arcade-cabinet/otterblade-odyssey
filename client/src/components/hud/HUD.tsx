@@ -1,17 +1,18 @@
-import { useStore } from "@/game/store";
-import { Coins } from "lucide-react";
-import Toast from "./Toast";
-import BossBar from "./BossBar";
-import { BIOMES } from "@/game/constants";
+import { Coins } from 'lucide-react';
+import { BIOMES } from '@/game/constants';
+import { useStore } from '@/game/store';
+import BossBar from './BossBar';
+import Toast from './Toast';
 
 function HeartIcon({ filled }: { filled: boolean }) {
   return (
     <svg
-      className={`w-5 h-5 ${filled ? "text-rose-500" : "text-rose-900/50"}`}
+      className={`w-5 h-5 ${filled ? 'text-rose-500' : 'text-rose-900/50'}`}
       viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
+      fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
       strokeWidth="2"
+      aria-hidden="true"
     >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
@@ -37,11 +38,14 @@ export default function HUD() {
 
   return (
     <>
-      <div className="absolute top-0 left-0 w-full p-4 pointer-events-none select-none z-10">
+      <div
+        className="absolute top-0 left-0 w-full p-4 pointer-events-none select-none z-10"
+        data-testid="hud-container"
+      >
         {/* Top bar: Health left, Score right */}
         <div
           className="flex justify-between items-start"
-          style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}
+          style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
         >
           {/* Left side: Hearts and Shards */}
           <div className="flex flex-col gap-2">
@@ -49,7 +53,7 @@ export default function HUD() {
               {hearts}
             </div>
             <div className="flex items-center gap-2 text-amber-400 text-sm font-medium">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 2L9 9H2L7 14L5 22L12 17L19 22L17 14L22 9H15L12 2Z" />
               </svg>
               <span data-testid="shard-count">{shards}</span>

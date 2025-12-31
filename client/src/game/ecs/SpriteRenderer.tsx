@@ -1,15 +1,15 @@
-import { useTexture } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
-import * as THREE from "three";
+import { useTexture } from '@react-three/drei';
+import { useEffect, useMemo } from 'react';
+import * as THREE from 'three';
 
-import abbeyExteriorBg from "../../assets/images/parallax/abbey_exterior_parallax_background.png";
-import abbeyInteriorBg from "../../assets/images/parallax/abbey_interior_parallax_background.png";
-import dungeonBg from "../../assets/images/parallax/dungeon_parallax_background.png";
-import courtyardBg from "../../assets/images/parallax/courtyard_parallax_background.png";
-import rooftopsBg from "../../assets/images/parallax/rooftops_parallax_background.png";
-import outerRuinsBg from "../../assets/images/parallax/outer_ruins_parallax_background.png";
-import villageMorningBg from "../../assets/images/parallax/village_morning_parallax_background.png";
-import newDawnHallBg from "../../assets/images/parallax/new_dawn_hall_parallax_background.png";
+import abbeyExteriorBg from '../../assets/images/parallax/abbey_exterior_parallax_background.png';
+import abbeyInteriorBg from '../../assets/images/parallax/abbey_interior_parallax_background.png';
+import courtyardBg from '../../assets/images/parallax/courtyard_parallax_background.png';
+import dungeonBg from '../../assets/images/parallax/dungeon_parallax_background.png';
+import newDawnHallBg from '../../assets/images/parallax/new_dawn_hall_parallax_background.png';
+import outerRuinsBg from '../../assets/images/parallax/outer_ruins_parallax_background.png';
+import rooftopsBg from '../../assets/images/parallax/rooftops_parallax_background.png';
+import villageMorningBg from '../../assets/images/parallax/village_morning_parallax_background.png';
 
 const BIOME_BACKGROUNDS = [
   villageMorningBg,
@@ -48,12 +48,7 @@ function ParallaxLayer({ biomeIndex, playerX, layer, scrollFactor }: ParallaxLay
   return (
     <mesh position={[playerX, 5, -50 - layer * 5]}>
       <planeGeometry args={[200, 50]} />
-      <meshBasicMaterial
-        map={texture}
-        transparent
-        opacity={1 - layer * 0.15}
-        depthWrite={false}
-      />
+      <meshBasicMaterial map={texture} transparent opacity={1 - layer * 0.15} depthWrite={false} />
     </mesh>
   );
 }

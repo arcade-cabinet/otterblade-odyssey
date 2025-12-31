@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 interface AnimationConfig {
   spriteSheet: string | null;
@@ -41,7 +41,7 @@ export function AnimationPlayer() {
 
   useEffect(() => {
     if (!canvasRef.current || !imageRef.current) return;
-    const ctx = canvasRef.current.getContext("2d");
+    const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
 
     ctx.clearRect(0, 0, config.frameWidth * 3, config.frameHeight * 3);
@@ -79,29 +79,29 @@ export function AnimationPlayer() {
 
   return (
     <div>
-      <h2 style={{ color: "#d4a574", marginBottom: "1rem" }}>Animation Player</h2>
+      <h2 style={{ color: '#d4a574', marginBottom: '1rem' }}>Animation Player</h2>
 
-      <div className="card" style={{ marginBottom: "1rem" }}>
-        <h3 style={{ color: "#e0e0e0", marginBottom: "0.5rem" }}>Load Sprite Sheet</h3>
+      <div className="card" style={{ marginBottom: '1rem' }}>
+        <h3 style={{ color: '#e0e0e0', marginBottom: '0.5rem' }}>Load Sprite Sheet</h3>
         <input
           type="file"
           accept="image/*"
           onChange={handleFileUpload}
-          style={{ color: "#e0e0e0" }}
+          style={{ color: '#e0e0e0' }}
         />
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
         <div className="card">
-          <h3 style={{ color: "#e0e0e0", marginBottom: "0.5rem" }}>Preview</h3>
+          <h3 style={{ color: '#e0e0e0', marginBottom: '0.5rem' }}>Preview</h3>
           <div
             className="sprite-preview"
             style={{
-              minHeight: "250px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              minHeight: '250px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             {config.spriteSheet ? (
@@ -109,63 +109,71 @@ export function AnimationPlayer() {
                 ref={canvasRef}
                 width={config.frameWidth * 3}
                 height={config.frameHeight * 3}
-                style={{ imageRendering: "pixelated" }}
+                style={{ imageRendering: 'pixelated' }}
               />
             ) : (
-              <span style={{ color: "#4a4a5e" }}>Upload a sprite sheet to preview</span>
+              <span style={{ color: '#4a4a5e' }}>Upload a sprite sheet to preview</span>
             )}
           </div>
           <div className="controls">
-            <button onClick={() => setIsPlaying(!isPlaying)}>
-              {isPlaying ? "Pause" : "Play"}
-            </button>
+            <button onClick={() => setIsPlaying(!isPlaying)}>{isPlaying ? 'Pause' : 'Play'}</button>
             <button onClick={() => setCurrentFrame(0)}>Reset</button>
-            <span style={{ color: "#8a8a9e", marginLeft: "auto" }}>
+            <span style={{ color: '#8a8a9e', marginLeft: 'auto' }}>
               Frame: {currentFrame + 1} / {config.frameCount}
             </span>
           </div>
         </div>
 
         <div className="card">
-          <h3 style={{ color: "#e0e0e0", marginBottom: "0.5rem" }}>Settings</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ color: '#e0e0e0', marginBottom: '0.5rem' }}>Settings</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <label
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <span>Frame Width:</span>
               <input
                 type="number"
                 value={config.frameWidth}
                 onChange={(e) => setConfig({ ...config, frameWidth: Number(e.target.value) })}
-                style={{ width: "80px", padding: "0.25rem" }}
+                style={{ width: '80px', padding: '0.25rem' }}
               />
             </label>
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <span>Frame Height:</span>
               <input
                 type="number"
                 value={config.frameHeight}
                 onChange={(e) => setConfig({ ...config, frameHeight: Number(e.target.value) })}
-                style={{ width: "80px", padding: "0.25rem" }}
+                style={{ width: '80px', padding: '0.25rem' }}
               />
             </label>
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <span>Frame Count:</span>
               <input
                 type="number"
                 value={config.frameCount}
                 onChange={(e) => setConfig({ ...config, frameCount: Number(e.target.value) })}
-                style={{ width: "80px", padding: "0.25rem" }}
+                style={{ width: '80px', padding: '0.25rem' }}
               />
             </label>
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <span>FPS:</span>
               <input
                 type="number"
                 value={config.fps}
                 onChange={(e) => setConfig({ ...config, fps: Number(e.target.value) })}
-                style={{ width: "80px", padding: "0.25rem" }}
+                style={{ width: '80px', padding: '0.25rem' }}
               />
             </label>
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <span>Loop:</span>
               <input
                 type="checkbox"

@@ -6,16 +6,16 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**"],
-    "ignores": [
-      "e2e",
-      "playwright-report",
-      "test-results",
-      "dist",
-      "coverage",
-      "attached_assets",
-      "proofs",
-      "*.json"
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx",
+      "!e2e",
+      "!playwright-report",
+      "!test-results",
+      "!proofs",
+      "!client/src/components/ui"
     ]
   },
   "assist": {

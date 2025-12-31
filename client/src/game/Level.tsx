@@ -1,11 +1,11 @@
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useEffect, useRef } from "react";
-import { useStore } from "./store";
-import { usePhysics2D, RAPIER } from "./Physics2D";
-import { BIOMES, SEGMENT_LEN } from "./constants";
-import { hash1 } from "./utils";
-import { ParallaxBackgroundSystem } from "./ecs/SpriteRenderer";
-import * as THREE from "three";
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { BIOMES, SEGMENT_LEN } from './constants';
+import { ParallaxBackgroundSystem } from './ecs/SpriteRenderer';
+import { type RAPIER, usePhysics2D } from './Physics2D';
+import { useStore } from './store';
+import { hash1 } from './utils';
 
 interface PlatformProps {
   id: string;
@@ -14,16 +14,16 @@ interface PlatformProps {
   kind?: string;
 }
 
-function Platform({ id, position, size, kind = "plain" }: PlatformProps) {
+function Platform({ id, position, size, kind = 'plain' }: PlatformProps) {
   const { world, rapier } = usePhysics2D();
   const register = useStore((s) => s.registerPlatform);
   const unregister = useStore((s) => s.unregisterPlatform);
   const bodyRef = useRef<RAPIER.RigidBody | null>(null);
 
   const color = useMemo(() => {
-    if (kind === "boss") return "#0b1020";
-    if (kind === "bridge") return "#060912";
-    return "#090b12";
+    if (kind === 'boss') return '#0b1020';
+    if (kind === 'bridge') return '#060912';
+    return '#090b12';
   }, [kind]);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ function ProceduralPlatforms() {
 function SimpleEnvironment() {
   const biomeIndex = useStore((s) => s.biomeIndex);
   const biome = BIOMES[biomeIndex % BIOMES.length];
-  
+
   const fogColor = useMemo(() => new THREE.Color(biome.fog), [biome.fog]);
   const skyColor = useMemo(() => new THREE.Color(biome.sky1), [biome.sky1]);
 

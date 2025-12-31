@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { BIOMES } from "./constants";
+import { create } from 'zustand';
+import { BIOMES } from './constants';
 
 interface PlatformAABB {
   minX: number;
@@ -74,17 +74,12 @@ interface GameState {
   advanceScore: (newDistance: number) => void;
   addShard: () => void;
   checkpoint: (roomIndex: number, x: number, y: number) => void;
-  setBossState: (
-    inBossFight: boolean,
-    bossHp: number,
-    bossMax: number,
-    bossIndex: number
-  ) => void;
+  setBossState: (inBossFight: boolean, bossHp: number, bossMax: number, bossIndex: number) => void;
   hitPlayer: (dmg?: number) => void;
   respawnFromCheckpoint: () => void;
 }
 
-export const useStore = create<GameState>((set, get) => ({
+export const useStore = create<GameState>((set, _get) => ({
   runId: 0,
   gameStarted: false,
   gameOver: false,
@@ -109,7 +104,7 @@ export const useStore = create<GameState>((set, get) => ({
   checkpointY: 8,
   checkpointSeen: -1,
 
-  toast: "",
+  toast: '',
   toastUntil: 0,
 
   controls: {
@@ -125,7 +120,7 @@ export const useStore = create<GameState>((set, get) => ({
   playerX: 0,
   playerY: 0,
   playerFacingRight: true,
-  playerState: "run",
+  playerState: 'run',
 
   damageFlash: 0,
 
@@ -172,9 +167,9 @@ export const useStore = create<GameState>((set, get) => ({
       checkpointX: 0,
       checkpointY: 8,
       checkpointSeen: -1,
-      toast: "",
+      toast: '',
       toastUntil: 0,
-      playerState: "run",
+      playerState: 'run',
       damageFlash: 0,
       quality: 2,
       avgMs: 16.7,
@@ -203,7 +198,7 @@ export const useStore = create<GameState>((set, get) => ({
         shards: 0,
         health,
         score: s.score + 400,
-        toast: "Checkpoint acquired",
+        toast: 'Checkpoint acquired',
         toastUntil: performance.now() + 1300,
       };
     }),
@@ -237,8 +232,8 @@ export const useStore = create<GameState>((set, get) => ({
       bossHp: 0,
       bossMax: 0,
       bossIndex: 0,
-      toast: "Restored from shrine",
+      toast: 'Restored from shrine',
       toastUntil: performance.now() + 1200,
-      playerState: "run",
+      playerState: 'run',
     })),
 }));
