@@ -11,12 +11,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import {
-  GOOGLE_MODELS,
-  createGoogleClient,
-  log,
-  logError,
-} from '../shared/config.js';
+import { createGoogleClient, GOOGLE_MODELS, log, logError } from '../shared/config.js';
 import { getVideoAnalysisPrompt } from '../shared/prompts.js';
 
 /**

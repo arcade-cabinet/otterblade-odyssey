@@ -17,11 +17,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   CINEMATICS,
-  GOOGLE_MODELS,
-  VIDEO_OUTPUT_DIR,
   createGoogleClient,
+  GOOGLE_MODELS,
   log,
   logError,
+  VIDEO_OUTPUT_DIR,
 } from '../shared/config.js';
 import { getCinematicPrompt } from '../shared/prompts.js';
 
@@ -66,11 +66,7 @@ async function generateCinematic(
   outputPath: string
 ): Promise<void> {
   const cinematic = CINEMATICS[key];
-  const prompt = getCinematicPrompt(
-    cinematic.name,
-    cinematic.description,
-    cinematic.duration
-  );
+  const prompt = getCinematicPrompt(cinematic.name, cinematic.description, cinematic.duration);
 
   log('🎬', `Generating: ${cinematic.name}`);
   log('📝', `Description: ${cinematic.description}`);

@@ -6,13 +6,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  GOOGLE_MODELS,
   createGoogleClient,
   createOpenAIClient,
+  GOOGLE_MODELS,
   log,
   logError,
 } from './shared/config.js';
-import { STYLE_DIRECTIVE, FINN_DESCRIPTION } from './shared/prompts.js';
+import { FINN_DESCRIPTION, STYLE_DIRECTIVE } from './shared/prompts.js';
 
 /** Asset manifest structure */
 export interface AssetManifest {

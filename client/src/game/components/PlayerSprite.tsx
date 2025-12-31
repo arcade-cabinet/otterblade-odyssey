@@ -6,14 +6,13 @@
  * as a placeholder with a bobbing animation effect.
  */
 
+// Import the otter warrior image
+import otterSprite from '@assets/generated_images/pixel_art_otter_warrior_holding_a_glowing_sword.png';
 import { useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useStore } from '../store';
-
-// Import the otter warrior image
-import otterSprite from '@assets/generated_images/pixel_art_otter_warrior_holding_a_glowing_sword.png';
 
 interface PlayerSpriteProps {
   position: [number, number, number];
@@ -79,18 +78,9 @@ export function PlayerSprite({ position }: PlayerSpriteProps) {
   const spriteHeight = 2.0;
 
   return (
-    <mesh
-      ref={meshRef}
-      position={position}
-      scale={[facingRight ? 1 : -1, 1, 1]}
-    >
+    <mesh ref={meshRef} position={position} scale={[facingRight ? 1 : -1, 1, 1]}>
       <planeGeometry args={[spriteWidth, spriteHeight]} />
-      <meshBasicMaterial
-        map={texture}
-        transparent
-        alphaTest={0.1}
-        side={THREE.DoubleSide}
-      />
+      <meshBasicMaterial map={texture} transparent alphaTest={0.1} side={THREE.DoubleSide} />
     </mesh>
   );
 }

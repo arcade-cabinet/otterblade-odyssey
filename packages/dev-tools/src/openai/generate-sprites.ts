@@ -12,11 +12,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  OUTPUT_DIR,
-  PLAYER_SPRITE_CONFIG,
   createOpenAIClient,
   log,
   logError,
+  OUTPUT_DIR,
+  PLAYER_SPRITE_CONFIG,
 } from '../shared/config.js';
 import { getPlayerSpritePrompt } from '../shared/prompts.js';
 

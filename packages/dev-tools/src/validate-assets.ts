@@ -59,9 +59,7 @@ const REQUIRED_ASSETS: AssetCategory[] = [
   {
     name: 'Sprite Sheets',
     directory: 'attached_assets/generated_images/sprites',
-    required: [
-      'player_sprite_sheet.png',
-    ],
+    required: ['player_sprite_sheet.png'],
     optional: [
       'enemy_skirmisher_sprite_sheet.png',
       'enemy_shielded_sprite_sheet.png',
@@ -73,10 +71,7 @@ const REQUIRED_ASSETS: AssetCategory[] = [
   {
     name: 'Cinematics',
     directory: 'client/src/assets/videos',
-    required: [
-      "intro_cinematic_otter's_journey.mp4",
-      'outro_victory_sunrise_scene.mp4',
-    ],
+    required: ["intro_cinematic_otter's_journey.mp4", 'outro_victory_sunrise_scene.mp4'],
   },
 ];
 
