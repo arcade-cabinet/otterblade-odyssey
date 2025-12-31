@@ -23,21 +23,20 @@ test.describe('Otterblade Odyssey', () => {
       }
     });
 
-    // Skip intro cinematic for tests by marking it as already watched
-    // Set in both raw localStorage AND Capacitor's web storage format (CapacitorStorage prefix)
     await page.goto('/');
-    await page.evaluate(() => {
-      // Set raw localStorage (fallback in capacitor.ts)
-      localStorage.setItem('otterblade_intro_watched', JSON.stringify(true));
-      // Set Capacitor's web storage format (uses CapacitorStorage object stored in localStorage)
-      try {
-        const capStorage = JSON.parse(localStorage.getItem('CapacitorStorage') || '{}');
-        capStorage['otterblade_intro_watched'] = JSON.stringify(true);
-        localStorage.setItem('CapacitorStorage', JSON.stringify(capStorage));
-      } catch {}
-    });
-    // Reload to apply the localStorage change
-    await page.reload();
+
+    // Skip intro cinematic if it appears
+    // Wait for the page to settle
+    await page.waitForTimeout(1000);
+
+    // If cinematic player is showing, skip it
+    const cinematicPlayer = page.getByTestId('cinematic-player');
+    if (await cinematicPlayer.isVisible().catch(() => false)) {
+      // Wait for the "tap to skip" state (2 seconds)
+      await page.waitForTimeout(2500);
+      await page.keyboard.press('Space');
+      await expect(cinematicPlayer).not.toBeVisible({ timeout: 5000 });
+    }
   });
 
   // ============================================
@@ -89,13 +88,12 @@ test.describe('Otterblade Odyssey', () => {
   });
 
   test('should display start menu', async ({ page }) => {
-    await page.waitForTimeout(hasMcpSupport ? 3000 : 2000);
-
+    // beforeEach already handles skipping the intro cinematic
     const startMenu = page.getByTestId('start-menu');
     await expect(startMenu).toBeVisible({ timeout: 15000 });
 
-    // Check for game title
-    await expect(page.getByText('Otterblade Odyssey')).toBeVisible();
+    // Check for game title - use specific locator within start-menu
+    await expect(startMenu.getByText('Otterblade Odyssey')).toBeVisible();
 
     // Check for start button
     await expect(page.getByTestId('button-start-game')).toBeVisible();
@@ -106,8 +104,7 @@ test.describe('Otterblade Odyssey', () => {
   // ============================================
 
   test('should start game when clicking begin button', async ({ page }) => {
-    await page.waitForTimeout(hasMcpSupport ? 3000 : 2000);
-
+    // beforeEach already handles skipping the intro cinematic
     const startMenu = page.getByTestId('start-menu');
     await expect(startMenu).toBeVisible({ timeout: 15000 });
 
@@ -263,21 +260,16 @@ test.describe('Touch Controls', () => {
 
 test.describe('Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    // Skip intro cinematic for tests
-    // Set in both raw localStorage AND Capacitor's web storage format
     await page.goto('/');
-    await page.evaluate(() => {
-      // Set raw localStorage (fallback in capacitor.ts)
-      localStorage.setItem('otterblade_intro_watched', JSON.stringify(true));
-      // Set Capacitor's web storage format (uses CapacitorStorage object stored in localStorage)
-      try {
-        const capStorage = JSON.parse(localStorage.getItem('CapacitorStorage') || '{}');
-        capStorage['otterblade_intro_watched'] = JSON.stringify(true);
-        localStorage.setItem('CapacitorStorage', JSON.stringify(capStorage));
-      } catch {}
-    });
-    await page.reload();
-    await page.waitForTimeout(2000);
+
+    // Skip intro cinematic if it appears
+    await page.waitForTimeout(1000);
+    const cinematicPlayer = page.getByTestId('cinematic-player');
+    if (await cinematicPlayer.isVisible().catch(() => false)) {
+      await page.waitForTimeout(2500);
+      await page.keyboard.press('Space');
+      await expect(cinematicPlayer).not.toBeVisible({ timeout: 5000 });
+    }
   });
 
   test('should have accessible start button', async ({ page }) => {
