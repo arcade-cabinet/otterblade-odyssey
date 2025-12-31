@@ -5,6 +5,7 @@ modules = ["nodejs-25"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["nodejs_25", "nodePackages.pnpm", "postgresql_16"]
 
 [[ports]]
 localPort = 5000
