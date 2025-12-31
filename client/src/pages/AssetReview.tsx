@@ -66,6 +66,9 @@ interface ManifestData {
 const APPROVAL_STORAGE_KEY = 'otterblade_asset_approvals';
 const SELECTION_STORAGE_KEY = 'otterblade_asset_selection';
 
+// Get base path for assets (handles GitHub Pages subdirectory deployment)
+const BASE_PATH = import.meta.env.BASE_URL || '/';
+
 // Combine all manifests
 const ALL_MANIFESTS: ManifestData[] = [
   { ...spritesManifest, assets: spritesManifest.assets.map(a => ({ ...a, category: 'sprites' })) },
@@ -103,8 +106,8 @@ function AssetCard({ asset, outputDir, selected, approved, onSelect, onPreview }
   const isAudio = asset.filename.endsWith('.mp3') || asset.filename.endsWith('.wav');
   const isSprite = asset.type === 'sprite_sheet' || asset.category === 'sprites';
 
-  // Construct asset path
-  const assetPath = `/${outputDir}/${asset.filename}`;
+  // Construct asset path with base path for GitHub Pages
+  const assetPath = `${BASE_PATH}${outputDir}/${asset.filename}`.replace(/\/+/g, '/');
 
   return (
     <Card
@@ -208,7 +211,7 @@ function PreviewModal({ open, asset, outputDir, onClose }: PreviewModalProps) {
   const isVideo = asset.filename.endsWith('.mp4');
   const isAudio = asset.filename.endsWith('.mp3') || asset.filename.endsWith('.wav');
   const isSprite = asset.type === 'sprite_sheet' || asset.category === 'sprites';
-  const assetPath = `/${outputDir}/${asset.filename}`;
+  const assetPath = `${BASE_PATH}${outputDir}/${asset.filename}`.replace(/\/+/g, '/');
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>

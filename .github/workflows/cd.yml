@@ -89,6 +89,21 @@ jobs:
         env:
           VITE_BASE_PATH: /${{ env.REPO_NAME }}/
 
+      # Copy generated assets to dist for Asset Review gallery
+      - name: Copy generated assets
+        run: |
+          # Copy attached_assets to dist/public for asset review
+          mkdir -p dist/public/attached_assets
+          cp -r attached_assets/generated_images dist/public/attached_assets/ 2>/dev/null || true
+          cp -r attached_assets/generated_videos dist/public/attached_assets/ 2>/dev/null || true
+          
+          # Ensure client assets are accessible
+          mkdir -p dist/public/client/src/assets
+          cp -r client/src/assets/* dist/public/client/src/assets/ 2>/dev/null || true
+          
+          echo "📦 Assets copied for review gallery"
+          ls -la dist/public/attached_assets/ 2>/dev/null || echo "No attached_assets"
+
       # Build TypeDoc documentation
       - name: Build Documentation
         run: |
