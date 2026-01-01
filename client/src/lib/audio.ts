@@ -37,7 +37,11 @@ export interface SoundConfig {
 // Audio State
 // ============================================================================
 
-const sounds: Map<string, Howl> = new Map();
+interface SoundInfo {
+  howl: Howl;
+  category: SoundCategory;
+}
+const sounds: Map<string, SoundInfo> = new Map();
 const activeSounds: Map<string, number> = new Map(); // sound id -> howl play id
 let masterVolume = 1.0;
 let musicVolume = 0.5;
