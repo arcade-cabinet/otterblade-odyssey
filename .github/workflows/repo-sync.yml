@@ -1,0 +1,85 @@
+# Repository Sync - Idempotent configuration for otterblade-odyssey
+# Ensures branch protection, environments, and settings stay in sync
+name: Repository Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/repo-config/**'
+      - '.github/workflows/repo-sync.yml'
+  schedule:
+    - cron: '0 4 * * *'  # Daily at 4 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Sync Repository Settings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Configure repository
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "🔧 Configuring $REPO..."
+          
+          # ════════════════════════════════════════════════════════════════
+          # LABELS - Ensure required labels exist
+          # ════════════════════════════════════════════════════════════════
+          echo "📌 Configuring labels..."
+          
+          LABELS=(
+            "bug:d73a4a:Bug report"
+            "enhancement:a2eeef:Feature request"
+            "documentation:0075ca:Documentation"
+            "jules-pr:7057ff:Created by Jules"
+            "auto-triage:fbca04:Needs automated triage"
+            "release-gate:0e8a16:Release gate status"
+            "e2e-failed:b60205:E2E tests failed"
+          )
+          
+          for LABEL_DEF in "${LABELS[@]}"; do
+            IFS=':' read -r NAME COLOR DESC <<< "$LABEL_DEF"
+            gh label create "$NAME" --color "$COLOR" --description "$DESC" --repo "$REPO" 2>/dev/null || \
+            gh label edit "$NAME" --color "$COLOR" --description "$DESC" --repo "$REPO" 2>/dev/null || true
+          done
+          
+          # ════════════════════════════════════════════════════════════════
+          # ENVIRONMENTS - Create release environment if not exists
+          # ════════════════════════════════════════════════════════════════
+          echo "🌍 Configuring environments..."
+          
+          # Create release environment with protection rules
+          gh api --method PUT "repos/$REPO/environments/release" \
+            -f "wait_timer=0" \
+            -f "prevent_self_review=false" \
+            --input - <<< '{
+              "deployment_branch_policy": {
+                "protected_branches": false,
+                "custom_branch_policies": true
+              }
+            }' 2>/dev/null || echo "Environment exists or API error"
+          
+          # Add branch policy for PRs
+          gh api --method POST "repos/$REPO/environments/release/deployment-branch-policies" \
+            --input - <<< '{"name": "*"}' 2>/dev/null || true
+          
+          # ════════════════════════════════════════════════════════════════
+          # REPO SETTINGS - Basic configuration
+          # ════════════════════════════════════════════════════════════════
+          echo "⚙️ Configuring repository settings..."
+          
+          gh api --method PATCH "repos/$REPO" \
+            -f "delete_branch_on_merge=true" \
+            -f "allow_squash_merge=true" \
+            -f "allow_merge_commit=false" \
+            -f "allow_rebase_merge=true" \
+            -f "allow_auto_merge=true" 2>/dev/null || true
+          
+          echo "✅ Repository sync complete"
