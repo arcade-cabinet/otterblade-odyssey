@@ -1,0 +1,89 @@
+name: Jules Weekly Cleanup
+
+on:
+  schedule:
+    # Run every Monday at 2 AM UTC
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+# No workflow-level permissions - all permissions defined at job level
+permissions: {}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Invoke Jules for Cleanup
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          prompt: |
+            You are performing weekly maintenance on **Otterblade Odyssey: Zephyros Rising**.
+
+            ## Project Context
+            - **Tech Stack:** React Three Fiber, Rapier2D, Miniplex ECS, Zustand, Tailwind CSS v4
+            - **Package Manager:** pnpm ONLY
+            - **Linter:** Biome (strict mode)
+            - **Key Directories:**
+              - `client/src/game/` - Game logic
+              - `client/src/components/` - UI components
+              - `client/src/data/` - JSON content files
+              - `server/` - Express server
+
+            ## Focus Areas
+
+            ### 1. Dead Code Removal
+            - Find unused variables, functions, and components
+            - Remove commented-out code blocks
+            - Clean up unreachable code paths
+            - Remove unused imports (Biome should catch these)
+
+            ### 2. Code Duplication (DRY Principle)
+            - Identify duplicated code blocks
+            - Refactor into reusable functions/hooks
+            - Look for repeated patterns in ECS systems
+
+            ### 3. Complexity Reduction
+            - Simplify overly complex functions
+            - Break down large components (>200 lines)
+            - Reduce nested conditionals
+            - Extract custom hooks where appropriate
+
+            ### 4. Naming Improvements
+            - Find unclear variable/function names
+            - Apply consistent naming conventions:
+              - Components: PascalCase
+              - Functions: camelCase
+              - Constants: UPPER_SNAKE_CASE
+              - Types/Interfaces: PascalCase
+
+            ### 5. Type Safety
+            - Find any `any` types and add proper typing
+            - Add missing JSDoc comments to exports
+            - Ensure Zod schemas match TypeScript types
+
+            ## File Size Limits (from AGENTS.md)
+            - Components: Max 200 lines
+            - Utilities: Max 150 lines
+            - Systems: Max 300 lines
+            - Constants: Max 100 lines (move to JSON data files)
+
+            ## Verification
+
+            Before creating PR, run:
+            ```bash
+            pnpm biome check .
+            pnpm tsc --noEmit
+            ```
+
+            ## Guidelines
+
+            - Make incremental, safe refactorings
+            - Preserve existing functionality
+            - Group related changes logically
+            - Do not open a PR if you do not have a validated and impactful change
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          include_commit_log: true

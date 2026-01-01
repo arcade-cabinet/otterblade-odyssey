@@ -1,0 +1,63 @@
+name: Jules Bug Fixer
+
+on:
+  issues:
+    types: [labeled]
+
+# No workflow-level permissions - all permissions defined at job level
+permissions: {}
+
+jobs:
+  fix-bug:
+    # Only run when the 'bug' label is added
+    if: github.event.label.name == 'bug'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: read
+      id-token: write
+    steps:
+      - name: Invoke Jules
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          prompt: |
+            You are working on **Otterblade Odyssey: Zephyros Rising**, a React 2.5D platformer game.
+
+            ## Project Context
+            - **Tech Stack:** React Three Fiber, Rapier2D physics, Miniplex ECS, Zustand, Tailwind CSS v4
+            - **Package Manager:** pnpm ONLY (never npm/yarn)
+            - **TypeScript Target:** ES2022 (required for Miniplex)
+            - **Node.js:** 25.x
+
+            ## Bug Report
+
+            ### ${{ github.event.issue.title }}
+
+            ${{ github.event.issue.body }}
+
+            ## Debugging Process
+
+            1. **Analysis** - Review the bug report and understand the symptoms
+            2. **Diagnosis** - Trace the issue through the codebase
+               - Check ECS entities in `client/src/game/ecs/`
+               - Check physics in `client/src/game/Physics2D.tsx`
+               - Check state in `client/src/game/store.ts`
+            3. **Fix** - Implement a minimal, targeted fix
+            4. **Testing** - Add a regression test that would have caught this bug
+            5. **Verification** - Run `pnpm biome check .` and `pnpm tsc --noEmit`
+
+            ## Code Quality Rules
+
+            - Follow patterns in AGENTS.md and CLAUDE.md
+            - Max 200 lines per component, 150 per utility
+            - Use typed data loaders for JSON (see `client/src/game/data/`)
+            - JSDoc on all exports
+            - No console.log in production code
+
+            Please provide:
+            - Clear explanation of the root cause
+            - The complete fix with all necessary changes
+            - Test cases to prevent regression
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          starting_branch: 'main'
