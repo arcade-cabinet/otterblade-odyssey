@@ -227,6 +227,33 @@ test.describe('Otterblade Odyssey', () => {
       expect(webglInfo.available).toBe(true);
     }
   });
+
+  // ============================================
+  // Accessibility Tests
+  // ============================================
+
+  test('should have accessible start button', async ({ page }) => {
+    const startButton = page.getByTestId('button-start-game');
+    await expect(startButton).toBeVisible();
+
+    // Button should be focusable
+    await startButton.focus();
+    await expect(startButton).toBeFocused();
+
+    // Should be activatable with Enter
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('start-menu')).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('should maintain focus visibility', async ({ page }) => {
+
+    // Tab to start button
+    await page.keyboard.press('Tab');
+
+    // Should have visible focus indicator (checking the button is focused)
+    const startButton = page.getByTestId('button-start-game');
+    await expect(startButton).toBeFocused();
+  });
 });
 
 test.describe('Game Over Flow', () => {
@@ -286,32 +313,5 @@ test.describe('Touch Controls', () => {
       await expect(page.getByTestId('button-right')).toBeVisible();
       await expect(page.getByTestId('button-jump')).toBeVisible();
     }
-  });
-});
-
-test.describe('Accessibility', () => {
-  // Note: Uses top-level beforeEach which handles page navigation and cinematic skip
-
-  test('should have accessible start button', async ({ page }) => {
-    const startButton = page.getByTestId('button-start-game');
-    await expect(startButton).toBeVisible();
-
-    // Button should be focusable
-    await startButton.focus();
-    await expect(startButton).toBeFocused();
-
-    // Should be activatable with Enter
-    await page.keyboard.press('Enter');
-    await expect(page.getByTestId('start-menu')).not.toBeVisible({ timeout: 5000 });
-  });
-
-  test('should maintain focus visibility', async ({ page }) => {
-
-    // Tab to start button
-    await page.keyboard.press('Tab');
-
-    // Should have visible focus indicator (checking the button is focused)
-    const startButton = page.getByTestId('button-start-game');
-    await expect(startButton).toBeFocused();
   });
 });
