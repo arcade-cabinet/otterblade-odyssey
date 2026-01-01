@@ -16,10 +16,11 @@ import { log, logError } from '../shared/config';
 
 /**
  * Environment schema for Freesound API.
+ * FREESOUND_CLIENT_SECRET functions as the API key for authentication.
  */
 const FreesoundEnvSchema = z.object({
-  FREESOUND_API_KEY: z.string().optional(),
   FREESOUND_CLIENT_ID: z.string().optional(),
+  FREESOUND_CLIENT_SECRET: z.string().optional(), // Also functions as API key
 });
 
 /**
@@ -230,17 +231,23 @@ export type AudioCategory = keyof typeof AUDIO_CATEGORIES;
 
 /**
  * Creates and configures the Freesound client.
+ * Uses FREESOUND_CLIENT_SECRET as the API key (client secret doubles as API key).
  */
 export function createFreesoundClient(): Freesound {
   const env = FreesoundEnvSchema.parse(process.env);
 
-  if (!env.FREESOUND_API_KEY) {
-    logError('FREESOUND_API_KEY environment variable is required for audio search');
-    logError('Get your API key at: https://freesound.org/apiv2/apply/', true);
+  // Client secret functions as the API key for Freesound
+  const apiKey = env.FREESOUND_CLIENT_SECRET;
+
+  if (!apiKey) {
+    logError('FREESOUND_CLIENT_SECRET environment variable is required for audio search');
+    logError('Get your API credentials at: https://freesound.org/apiv2/apply/', true);
   }
 
   const client = new Freesound();
-  client.setToken(env.FREESOUND_API_KEY as string);
+  client.setToken(apiKey as string);
+
+  log('🔊', `Freesound client initialized (Client ID: ${env.FREESOUND_CLIENT_ID ?? 'not set'})`);
 
   return client;
 }

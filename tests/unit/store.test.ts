@@ -122,13 +122,14 @@ describe('Game Store', () => {
       expect(state.health).toBe(0);
     });
 
-    it('should detect game over when health goes negative', () => {
+    it('should detect game over when health goes to zero (clamped, never negative)', () => {
       useStore.getState().startGame();
       useStore.getState().hitPlayer(10);
 
       const state = useStore.getState();
       expect(state.gameOver).toBe(true);
-      expect(state.health).toBe(-5);
+      // Health is clamped to 0, never goes negative
+      expect(state.health).toBe(0);
     });
 
     it('should not take damage when already game over', () => {
@@ -246,7 +247,8 @@ describe('Game Store', () => {
       useStore.getState().checkpoint(0, 0, 0);
 
       const state = useStore.getState();
-      expect(state.toast).toBe('Checkpoint acquired');
+      // Brand-aligned toast message
+      expect(state.toast).toBe('Hearth kindled');
       expect(state.toastUntil).toBeGreaterThan(performance.now());
     });
 

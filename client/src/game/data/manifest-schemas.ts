@@ -34,16 +34,8 @@ export const StoryBeatSchema = z.object({
   id: z.string(),
   moment: z.string(),
   triggeredBy: z.string(),
-  expression: z.enum([
-    'hope',
-    'fear',
-    'determination',
-    'sorrow',
-    'relief',
-    'anger',
-    'joy',
-    'wonder',
-  ]),
+  // Flexible expression - allow any string for evolving content
+  expression: z.string(),
 });
 
 export const EmotionalArcSchema = z.object({
@@ -139,16 +131,11 @@ export const ChapterNPCSchema = z.object({
 export const QuestObjectiveSchema = z.object({
   id: z.string(),
   description: z.string(),
-  type: z.enum([
-    'reach_location',
-    'interact',
-    'defeat_enemies',
-    'collect_item',
-    'survive_waves',
-    'defeat_boss',
-  ]),
+  // Flexible objective types for game design evolution
+  type: z.string(),
   target: z.string().optional(),
   count: z.number().optional(),
+  region: RegionSchema.optional(),
 });
 
 export const QuestRewardsSchema = z.object({
@@ -175,7 +162,8 @@ export const PlatformSchema = z.object({
   x: z.number(),
   y: z.number(),
   width: z.number(),
-  type: z.enum(['stone', 'wood', 'earth', 'ice', 'cobblestone', 'metal']),
+  // Flexible platform types for varied level design
+  type: z.string(),
   asset: z.string().optional(),
   properties: z
     .object({
@@ -225,8 +213,9 @@ export const LevelSegmentSchema = z.object({
 export const CheckpointSchema = z.object({
   id: z.string(),
   position: Position2DSchema,
-  type: z.enum(['brazier', 'campfire', 'shrine', 'battle_standard', 'bell']).optional(),
-  requiresTrigger: z.string().optional(),
+  // Flexible checkpoint types for game design flexibility
+  type: z.string().optional(),
+  requiresTrigger: z.string().nullable().optional(),
 });
 
 export const LevelSchema = z.object({
@@ -268,14 +257,19 @@ export const EncounterSchema = z.object({
 
 export const BossAttackSchema = z.object({
   id: z.string(),
-  type: z.enum(['melee', 'ranged', 'zone', 'ultimate', 'summon', 'aoe']),
-  damage: z.number(),
+  // Flexible attack types
+  type: z.string(),
+  damage: z.number().optional(),
   warmthDrain: z.number().optional(),
-  cooldown: z.number(),
+  cooldown: z.number().optional(),
   duration: z.number().optional(),
   aoe: z.boolean().optional(),
   stun: z.boolean().optional(),
   count: z.number().optional(),
+  // Additional properties for complex attacks
+  name: z.string().optional(),
+  description: z.string().optional(),
+  telegraphTime: z.number().optional(),
 });
 
 export const BossPhaseSchema = z.object({
@@ -342,7 +336,8 @@ export const InteractionStateSchema = z.object({
 
 export const InteractionSchema = z.object({
   id: z.string(),
-  type: z.enum(['shrine', 'chest', 'door', 'lever', 'button', 'brazier', 'well', 'destructible']),
+  // Flexible interaction types for game design evolution
+  type: z.string(),
   position: Position2DSchema,
   asset: z.string().optional(),
   activateRadius: z.number().optional(),

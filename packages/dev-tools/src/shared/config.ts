@@ -14,7 +14,8 @@ const EnvSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_ORG_ID: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
-  FREESOUND_API_KEY: z.string().optional(),
+  FREESOUND_CLIENT_ID: z.string().optional(),
+  FREESOUND_CLIENT_SECRET: z.string().optional(), // Also functions as API key
 });
 
 /**
