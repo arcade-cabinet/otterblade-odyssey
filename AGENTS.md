@@ -70,15 +70,32 @@ client/src/
 ## Data Architecture
 
 ### Static Content (JSON files in `client/src/data/`)
-- Chapter definitions → `chapters.json`
+- Legacy chapter definitions → `chapters.json`
 - Biome configurations → `biomes.json`
-- Animation specs → `animations.json` (future)
-- Dialogue trees → `dialogue.json` (future)
+- **Chapter manifests** → `manifests/chapters/chapter-*.json` (comprehensive)
+- **NPC definitions** → `manifests/npcs.json`
+- Asset manifests → `manifests/sprites.json`, `cinematics.json`, etc.
+
+### Typed Data Loaders (in `client/src/game/data/`)
+
+```typescript
+// Load chapter manifests with full type safety
+import { loadChapterManifest, getChapterBoss } from '@/game/data';
+
+const chapter0 = loadChapterManifest(0);
+const boss = getChapterBoss(8); // Returns Zephyros data
+
+// Load NPC data
+import { getCharacterById, getCharacterDrawFunction } from '@/game/data';
+
+const finn = getCharacterById('finn_otterblade');
+const drawFn = getCharacterDrawFunction('finn_otterblade'); // "drawFinn"
+```
 
 ### Runtime State (ECS/Zustand)
-- Current chapter progress → Miniplex resources
-- Player state → Zustand store
-- Physics bodies → Rapier2D world
+- Current chapter progress → Zustand store (persisted)
+- Player state → Zustand store (persisted)
+- Physics bodies → Matter.js world
 - Active entities → Miniplex world
 
 ### Critical Rules
@@ -86,6 +103,7 @@ client/src/
 - **NEVER** put authored content in TypeScript constants
 - **NEVER** import JSON directly - always use typed loaders
 - **ALWAYS** validate JSON via Zod schemas
+- **Schemas are flexible** - use `.passthrough()` for evolving content
 
 ---
 
