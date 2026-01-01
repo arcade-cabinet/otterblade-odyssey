@@ -48,23 +48,15 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'skip-review')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Get diff
         id: diff
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          # Validate base ref contains only safe characters
-          if [[ ! "$BASE_REF" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
-            echo "::error::Invalid base ref"
-            exit 1
-          fi
-          
-          DIFF=$(git diff "origin/${BASE_REF}...HEAD" -- \
+          DIFF=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- \
             '*.py' '*.ts' '*.js' '*.tsx' '*.jsx' '*.go' '*.rs' '*.tf' \
             ':!*.lock' ':!*-lock.*' ':!*.min.*' | head -5000)
           
@@ -79,21 +71,22 @@ jobs:
         if: steps.diff.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          PR_NUM: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          TITLE="${{ github.event.pull_request.title }}"
+          
           # Check for existing review comment
-          EXISTING=$(gh pr view "$PR_NUM" --json comments --jq '.comments[] | select(.body | contains("🤖 **Ecosystem Review**")) | .id' | head -1)
+          EXISTING=$(gh pr view $PR_NUM --json comments --jq '.comments[] | select(.body | contains("🤖 **Ecosystem Review**")) | .id' | head -1)
           
           if [ -n "$EXISTING" ]; then
             echo "Review already posted, skipping"
             exit 0
           fi
           
-          # Post initial review acknowledgment (title sanitized via env var)
-          gh pr comment "$PR_NUM" --body "🤖 **Ecosystem Review**
+          # Post initial review acknowledgment
+          gh pr comment $PR_NUM --body "🤖 **Ecosystem Review**
 
-          Reviewing PR: **${PR_TITLE}**
+          Reviewing PR: **$TITLE**
 
           ✅ Code diff captured
           ⏳ Analysis pending (manual review recommended)
@@ -111,7 +104,7 @@ jobs:
       contains(github.event.comment.body, '@cascade')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
@@ -165,7 +158,7 @@ jobs:
       contains(github.event.comment.body, '/jules')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
@@ -206,7 +199,7 @@ jobs:
       contains(github.event.comment.body, '/cursor')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
@@ -247,13 +240,13 @@ jobs:
       contains(github.event.comment.body, '@claude')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Claude Code
         if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
-        uses: anthropics/claude-code-action@0a2593483e318c6693adcb04af942367df7157f0 # v1
+        uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
@@ -282,7 +275,7 @@ jobs:
       github.event.check_suite.pull_requests[0] != null
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.check_suite.head_branch }}
@@ -324,10 +317,11 @@ jobs:
       - name: Check and merge
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          PR_NUM: ${{ github.event.pull_request.number }}
         run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          
           # Check if auto-merge label exists
-          HAS_AUTO=$(gh pr view "$PR_NUM" --json labels --jq '.labels[].name' | grep -c "auto-merge" || true)
+          HAS_AUTO=$(gh pr view $PR_NUM --json labels --jq '.labels[].name' | grep -c "auto-merge" || true)
           
           if [ "$HAS_AUTO" -eq 0 ]; then
             echo "No auto-merge label, skipping"
@@ -335,7 +329,7 @@ jobs:
           fi
           
           # Check all status checks
-          STATUS=$(gh pr checks "$PR_NUM" --json state --jq '.[] | select(.state != "SUCCESS" and .state != "SKIPPED") | .state' | head -1)
+          STATUS=$(gh pr checks $PR_NUM --json state --jq '.[] | select(.state != "SUCCESS" and .state != "SKIPPED") | .state' | head -1)
           
           if [ -n "$STATUS" ]; then
             echo "Checks not all passing, waiting..."
@@ -343,9 +337,9 @@ jobs:
           fi
           
           # Merge
-          gh pr merge "$PR_NUM" --squash --delete-branch --body "Auto-merged after approval"
+          gh pr merge $PR_NUM --squash --delete-branch --body "Auto-merged after approval"
           
-          echo "✅ PR #${PR_NUM} merged"
+          echo "✅ PR #$PR_NUM merged"
 
   # ============================================================
   # SYNC-TRIAGE: Handle sync PRs from control center
@@ -361,13 +355,15 @@ jobs:
       - name: Auto-approve sync PRs
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          PR_NUM: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          # Add label for tracking
-          gh pr edit "$PR_NUM" --add-label "sync,auto-merge"
+          PR_NUM=${{ github.event.pull_request.number }}
           
-          # Approve if from trusted source (author via env var to prevent injection)
-          if [[ "$PR_AUTHOR" == *"[bot]"* ]] || [ "$PR_AUTHOR" = "jbcom" ]; then
-            gh pr review "$PR_NUM" --approve --body "✅ Approved: Sync from control center"
+          # Add label for tracking
+          gh pr edit $PR_NUM --add-label "sync,auto-merge"
+          
+          # Approve if from trusted source
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          
+          if [[ "$AUTHOR" == *"[bot]"* ]] || [ "$AUTHOR" = "jbcom" ]; then
+            gh pr review $PR_NUM --approve --body "✅ Approved: Sync from control center"
           fi
