@@ -14,6 +14,7 @@ const EnvSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_ORG_ID: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
+  FREESOUND_API_KEY: z.string().optional(),
 });
 
 /**
@@ -188,6 +189,7 @@ export const CINEMATICS = {
 /** Output directories */
 export const OUTPUT_DIR = 'attached_assets/generated_images/sprites';
 export const VIDEO_OUTPUT_DIR = 'attached_assets/generated_videos';
+export const AUDIO_OUTPUT_DIR = 'client/public/audio';
 
 /**
  * Logs a styled message to console.

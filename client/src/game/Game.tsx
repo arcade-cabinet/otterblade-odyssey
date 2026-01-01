@@ -14,7 +14,7 @@ function KeyboardControls() {
       if (e.code === 'KeyD' || e.code === 'ArrowRight') setControl('right', true);
       if (e.code === 'KeyW' || e.code === 'ArrowUp') setControl('up', true);
       if (e.code === 'KeyS' || e.code === 'ArrowDown' || e.code === 'ControlLeft')
-        setControl('crouch', true);
+        setControl('slink', true);
       if (e.code === 'Space') {
         e.preventDefault();
         setControl('jump', true);
@@ -27,7 +27,7 @@ function KeyboardControls() {
       if (e.code === 'KeyD' || e.code === 'ArrowRight') setControl('right', false);
       if (e.code === 'KeyW' || e.code === 'ArrowUp') setControl('up', false);
       if (e.code === 'KeyS' || e.code === 'ArrowDown' || e.code === 'ControlLeft')
-        setControl('crouch', false);
+        setControl('slink', false);
       if (e.code === 'Space') {
         e.preventDefault();
         setControl('jump', false);

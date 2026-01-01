@@ -1,15 +1,15 @@
 /**
  * @fileoverview Zustand game store with persistence
- * 
+ *
  * State is divided into:
  * - Persisted: Best scores, settings, progress (survives page refresh)
  * - Runtime: Current game session data (reset on new game)
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { BIOMES } from './constants';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { capacitorStorage, STORAGE_KEYS } from '../lib/storage';
+import { BIOMES } from './constants';
 
 // ============================================================================
 // Types
@@ -170,7 +170,13 @@ interface GameActions {
   addShard: () => void;
   addHearthstone: () => void;
   checkpoint: (roomIndex: number, x: number, y: number) => void;
-  setBossState: (inBossFight: boolean, bossHp: number, bossMax: number, bossIndex: number, bossName?: string) => void;
+  setBossState: (
+    inBossFight: boolean,
+    bossHp: number,
+    bossMax: number,
+    bossIndex: number,
+    bossName?: string
+  ) => void;
   hitPlayer: (dmg?: number) => void;
   drainWarmth: (amount: number) => void;
   restoreWarmth: (amount: number) => void;
@@ -442,8 +448,7 @@ export const useStore = create<GameState>()(
           return { warmth: newWarmth };
         }),
 
-      restoreWarmth: (amount) =>
-        set((s) => ({ warmth: Math.min(s.maxWarmth, s.warmth + amount) })),
+      restoreWarmth: (amount) => set((s) => ({ warmth: Math.min(s.maxWarmth, s.warmth + amount) })),
 
       respawnFromCheckpoint: () =>
         set((s) => ({
