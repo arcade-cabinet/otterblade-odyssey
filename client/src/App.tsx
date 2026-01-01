@@ -119,9 +119,14 @@ function AppContent() {
 
 function App() {
   // Check for /assets route (available until official launch)
+  // Handles both root deployment and GitHub Pages with base path
+  const basePath = import.meta.env.BASE_URL || '/';
+  const assetsPath = `${basePath}assets`.replace('//', '/');
   const isAssetReviewRoute =
     isAssetReviewEnabled &&
-    (window.location.pathname === '/assets' || window.location.pathname.endsWith('/assets'));
+    (window.location.pathname === '/assets' ||
+      window.location.pathname === assetsPath ||
+      window.location.pathname.endsWith('/assets'));
 
   return (
     <ThemeProvider theme={otterbladeTheme}>
