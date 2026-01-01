@@ -1,6 +1,5 @@
 # Release E2E Tests - Runs once before merge to main
 # Runs in custom "release" environment with branch protection
-# On failure, triggers e2e-fixer.yml for AI assessment and auto-fixes
 name: Release E2E Tests
 
 on:
@@ -135,35 +134,3 @@ jobs:
         run: |
           echo "✅ E2E tests passed"
           echo "test_status=passed" >> $GITHUB_OUTPUT
-
-  # Trigger fixer workflow on failure
-  trigger-fixer:
-    name: Trigger E2E Fixer
-    needs: [build, e2e-tests]
-    if: failure() && needs.e2e-tests.result == 'failure' && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: write
-    steps:
-      - name: Trigger e2e-fixer workflow
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-        with:
-          script: |
-            // Trigger the fixer workflow
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'e2e-fixer.yml',
-              ref: context.payload.pull_request.head.ref,
-              inputs: {
-                pr_number: context.payload.pull_request.number.toString(),
-                run_id: context.runId.toString(),
-                commit_sha: context.payload.pull_request.head.sha
-              }
-            });
-            
-            console.log('✅ Triggered e2e-fixer workflow');
