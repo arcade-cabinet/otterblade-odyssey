@@ -276,7 +276,7 @@ const DEFAULT_RUNTIME: RuntimeState = {
 
 export const useStore = create<GameState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // Persisted state
       ...DEFAULT_PERSISTED,
 
