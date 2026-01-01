@@ -80,11 +80,14 @@ export const ConnectionsSchema = z.object({
 // NPCs
 // ============================================================================
 
-export const NPCBehaviorSchema = z.object({
-  idle: z.enum(['stand', 'sit', 'work', 'patrol', 'bounce', 'combat', 'waiting']).optional(),
-  patrolPath: z.array(Position2DSchema).optional(),
-  interactRadius: z.number().optional(),
-});
+export const NPCBehaviorSchema = z
+  .object({
+    // Flexible idle behavior
+    idle: z.string().optional(),
+    patrolPath: z.array(Position2DSchema).optional(),
+    interactRadius: z.number().optional(),
+  })
+  .passthrough();
 
 export const NPCStateSchema = z.object({
   animation: z.string(),
@@ -110,19 +113,22 @@ export const NPCInteractionSchema = z.object({
   ),
 });
 
-export const ChapterNPCSchema = z.object({
-  id: z.string(),
-  characterId: z.string().optional(),
-  name: z.string(),
-  role: z.enum(['ally', 'mentor', 'guide', 'ambient', 'family', 'quest_giver']),
-  position: Position2DSchema,
-  facing: z.enum(['left', 'right']).optional(),
-  behavior: NPCBehaviorSchema.optional(),
-  storyState: NPCStoryStateSchema.optional(),
-  interactions: z.array(NPCInteractionSchema).optional(),
-  givesQuest: z.string().optional(),
-  isEssential: z.boolean().optional(),
-});
+export const ChapterNPCSchema = z
+  .object({
+    id: z.string(),
+    characterId: z.string().optional(),
+    name: z.string(),
+    // Flexible roles for varied NPCs
+    role: z.string(),
+    position: Position2DSchema,
+    facing: z.enum(['left', 'right']).optional(),
+    behavior: NPCBehaviorSchema.optional(),
+    storyState: NPCStoryStateSchema.optional(),
+    interactions: z.array(NPCInteractionSchema).optional(),
+    givesQuest: z.string().optional(),
+    isEssential: z.boolean().optional(),
+  })
+  .passthrough();
 
 // ============================================================================
 // QUESTS
@@ -186,7 +192,8 @@ export const LadderSchema = z.object({
   x: z.number(),
   y: z.number(),
   height: z.number(),
-  type: z.enum(['wood', 'rope', 'vine']).optional(),
+  // Flexible ladder types
+  type: z.string().optional(),
   asset: z.string().optional(),
 });
 
@@ -195,6 +202,19 @@ export const KillZoneSchema = z.object({
   y: z.number(),
   width: z.number(),
 });
+
+// Water can be a region or a more complex object with flow direction
+export const WaterZoneSchema = z
+  .object({
+    x: z.number().optional(),
+    y: z.number().optional(),
+    width: z.number().optional(),
+    height: z.number().optional(),
+    region: RegionSchema.optional(),
+    flow: z.string().optional(),
+    depth: z.string().optional(),
+  })
+  .passthrough();
 
 export const LevelSegmentSchema = z.object({
   id: z.string(),
@@ -205,7 +225,8 @@ export const LevelSegmentSchema = z.object({
   ceilings: z.array(WallSchema).optional(),
   ladders: z.array(LadderSchema).optional(),
   semiSolids: z.array(PlatformSchema).optional(),
-  water: z.array(RegionSchema).optional(),
+  // Water zones can have flexible structure
+  water: z.array(WaterZoneSchema).optional(),
   killZones: z.array(KillZoneSchema).optional(),
   scamperZones: z.array(RegionSchema).optional(),
 });
@@ -235,11 +256,14 @@ export const LevelSchema = z.object({
 // ENCOUNTERS
 // ============================================================================
 
-export const EnemyBehaviorSchema = z.object({
-  type: z.enum(['patrol', 'chase', 'guard', 'ambush', 'scripted']),
-  aggroRadius: z.number().optional(),
-  guardRadius: z.number().optional(),
-});
+export const EnemyBehaviorSchema = z
+  .object({
+    // Flexible behavior types for varied AI
+    type: z.string(),
+    aggroRadius: z.number().optional(),
+    guardRadius: z.number().optional(),
+  })
+  .passthrough();
 
 export const EncounterSchema = z.object({
   id: z.string(),
@@ -399,15 +423,18 @@ export const SequenceActionSchema = z.object({
   async: z.boolean().optional(),
 });
 
-export const SequenceSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  playerControl: z.enum(['full', 'limited', 'none']).optional(),
-  skippable: z.boolean().optional(),
-  once: z.boolean().optional(),
-  actions: z.array(SequenceActionSchema),
-});
+export const SequenceSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    playerControl: z.enum(['full', 'limited', 'none']).optional(),
+    skippable: z.boolean().optional(),
+    once: z.boolean().optional(),
+    // Actions may be defined elsewhere or inline
+    actions: z.array(SequenceActionSchema).optional(),
+  })
+  .passthrough();
 
 // ============================================================================
 // COLLECTIBLES & SECRETS
@@ -460,7 +487,8 @@ export const LightingSchema = z.object({
 });
 
 export const WeatherSchema = z.object({
-  type: z.enum(['clear', 'rain', 'snow', 'wind', 'fog', 'blizzard']),
+  // Flexible weather types
+  type: z.string(),
   intensity: z.number(),
   affectsGameplay: z.boolean().optional(),
 });

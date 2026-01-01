@@ -76,7 +76,7 @@ export function getCharacterById(characterId: string): CharacterDefinition | und
  */
 export function getCharactersByChapter(chapterId: number): CharacterDefinition[] {
   const characters = getAllCharacters();
-  return characters.filter((c) => c.chapters.includes(chapterId));
+  return characters.filter((c) => c.chapters?.includes(chapterId) ?? false);
 }
 
 /**
@@ -105,10 +105,13 @@ export function getGestureLibrary(): GestureLibrary {
 
 /**
  * Gets a specific gesture by name.
+ * Note: Gestures are organized by category in the library.
  */
-export function getGesture(gestureName: string): GestureLibrary[string] | undefined {
+export function getGesture(gestureName: string): string[] | undefined {
   const library = getGestureLibrary();
-  return library[gestureName];
+  // The library is organized by category (greetings, directions, etc.)
+  // Each category is an array of gesture names
+  return library[gestureName as keyof GestureLibrary];
 }
 
 /**
@@ -117,7 +120,7 @@ export function getGesture(gestureName: string): GestureLibrary[string] | undefi
  */
 export function getCharacterDrawFunction(characterId: string): string | undefined {
   const character = getCharacterById(characterId);
-  return character?.drawFunction;
+  return character?.procedural?.drawFunction;
 }
 
 /**
@@ -127,7 +130,7 @@ export function getCharacterHitbox(
   characterId: string
 ): { width: number; height: number; offsetY?: number } | undefined {
   const character = getCharacterById(characterId);
-  return character?.hitbox;
+  return character?.procedural?.hitbox;
 }
 
 /**
