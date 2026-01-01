@@ -61,9 +61,10 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
         run: |
           SUGGESTIONS="${{ steps.review.outputs.suggestion_count }}"
-          ADDITIONS=$(gh pr view ${{ github.event.pull_request.number }} --json additions --jq '.additions' || echo "0")
+          ADDITIONS=$(gh pr view "$PR_NUM" --json additions --jq '.additions' || echo "0")
           
           # Escalate if: >5 suggestions OR >500 lines changed
           if [[ "${SUGGESTIONS:-0}" -gt 5 ]] || [[ "${ADDITIONS:-0}" -gt 500 ]]; then
@@ -170,8 +171,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
           GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          SUGGESTION_COUNT: ${{ needs.ollama-review.outputs.suggestion_count }}
         run: |
-          PR_DATA=$(gh pr view ${{ github.event.pull_request.number }} --json title,headRefName)
+          # Fetch PR data safely via gh CLI
+          PR_DATA=$(gh pr view "$PR_NUM" --json title,headRefName)
           PR_TITLE=$(echo "$PR_DATA" | jq -r .title)
           PR_BRANCH=$(echo "$PR_DATA" | jq -r .headRefName)
 
@@ -179,8 +184,8 @@ jobs:
             -H "X-Goog-Api-Key: $GOOGLE_JULES_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$(jq -n \
-              --arg task "Refactor PR #${{ github.event.pull_request.number }}: $PR_TITLE - Address the ${{ needs.ollama-review.outputs.suggestion_count }} review suggestions" \
-              --arg repo "${{ github.repository }}" \
+              --arg task "Refactor PR #${PR_NUM}: $PR_TITLE - Address the ${SUGGESTION_COUNT} review suggestions" \
+              --arg repo "$REPO" \
               --arg branch "$PR_BRANCH" \
               '{
                 prompt: $task,
@@ -195,5 +200,5 @@ jobs:
           SESSION_ID=$(echo "$RESPONSE" | jq -r '.name // empty' | sed 's|sessions/||')
 
           if [ -n "$SESSION_ID" ]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "🔧 **Jules refactoring session started**: https://jules.google.com/session/${SESSION_ID} - This PR has ${{ needs.ollama-review.outputs.suggestion_count }} suggestions. Jules will create a follow-up PR with improvements."
+            gh pr comment "$PR_NUM" --body "🔧 **Jules refactoring session started**: https://jules.google.com/session/${SESSION_ID} - This PR has ${SUGGESTION_COUNT} suggestions. Jules will create a follow-up PR with improvements."
           fi

@@ -241,6 +241,8 @@ jobs:
             echo "available=false" >> $GITHUB_OUTPUT
           fi
 
+      # Note: head_branch is validated in 'validate' job with regex ^[a-zA-Z0-9/_.-]+$
+      # and fork PRs are rejected, making this safe for checkout
       - name: Checkout code
         if: steps.check-key.outputs.available == 'true'
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -331,14 +333,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
           GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          REPO: ${{ github.repository }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          PR_NUM: ${{ needs.validate.outputs.pr_number }}
+          HEAD_BRANCH: ${{ needs.validate.outputs.head_branch }}
         run: |
+          # All user-controlled values passed via env vars (head_branch validated in 'validate' job)
           RESPONSE=$(curl -sf -X POST "https://jules.googleapis.com/v1alpha/sessions" \
             -H "X-Goog-Api-Key: $GOOGLE_JULES_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$(jq -n \
-              --arg task "Fix CI failure in PR #${{ needs.validate.outputs.pr_number }} - The automated fixers couldn't resolve this. Please analyze the failure at ${{ github.event.workflow_run.html_url }} and implement a comprehensive fix." \
-              --arg repo "${{ github.repository }}" \
-              --arg branch "${{ needs.validate.outputs.head_branch }}" \
+              --arg task "Fix CI failure in PR #${PR_NUM} - The automated fixers couldn't resolve this. Please analyze the failure at ${WORKFLOW_URL} and implement a comprehensive fix." \
+              --arg repo "$REPO" \
+              --arg branch "$HEAD_BRANCH" \
               '{
                 prompt: $task,
                 sourceContext: {
@@ -352,5 +359,5 @@ jobs:
           SESSION_ID=$(echo "$RESPONSE" | jq -r '.name // empty' | sed 's|sessions/||')
 
           if [ -n "$SESSION_ID" ]; then
-            gh pr comment ${{ needs.validate.outputs.pr_number }} --body "🔧 **Jules major refactor session started**: https://jules.google.com/session/${SESSION_ID} - Both Ollama and Claude couldn't fix this CI failure. Jules will attempt a more comprehensive solution."
+            gh pr comment "$PR_NUM" --body "🔧 **Jules major refactor session started**: https://jules.google.com/session/${SESSION_ID} - Both Ollama and Claude couldn't fix this CI failure. Jules will attempt a more comprehensive solution."
           fi
