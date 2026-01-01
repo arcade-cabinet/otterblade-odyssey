@@ -1,0 +1,447 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 8,
+  "chapterId": 8,
+  "name": "Storm's Edge",
+  "description": "Face Zephyros on the outer ramparts as the storm reaches its peak.",
+  "bounds": {
+    "width": 2400,
+    "height": 800
+  },
+  "spawn": {
+    "x": 100,
+    "y": 350
+  },
+  "exit": {
+    "x": 2300,
+    "y": 300,
+    "width": 100,
+    "height": 250,
+    "targetChapter": 9
+  },
+  "platforms": [
+    {
+      "id": "rampart_start",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 300,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "battlement_1",
+      "x": 350,
+      "y": 350,
+      "width": 100,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "rampart_section_1",
+      "x": 400,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "crumbling_section_1",
+      "x": 700,
+      "y": 250,
+      "width": 150,
+      "height": 30,
+      "type": "crumbling",
+      "material": "stone",
+      "crumbleDelay": 400
+    },
+    {
+      "id": "battlement_2",
+      "x": 850,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "ice_platform_1",
+      "x": 900,
+      "y": 380,
+      "width": 120,
+      "height": 25,
+      "type": "solid",
+      "material": "ice"
+    },
+    {
+      "id": "ice_platform_2",
+      "x": 1070,
+      "y": 420,
+      "width": 120,
+      "height": 25,
+      "type": "solid",
+      "material": "ice"
+    },
+    {
+      "id": "rampart_section_2",
+      "x": 1150,
+      "y": 0,
+      "width": 300,
+      "height": 300,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "crumbling_section_2",
+      "x": 1450,
+      "y": 250,
+      "width": 150,
+      "height": 30,
+      "type": "crumbling",
+      "material": "stone",
+      "crumbleDelay": 400
+    },
+    {
+      "id": "boss_arena_floor",
+      "x": 1600,
+      "y": 0,
+      "width": 800,
+      "height": 250,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "boss_platform_left",
+      "x": 1650,
+      "y": 350,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "boss_platform_center",
+      "x": 1900,
+      "y": 400,
+      "width": 200,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "boss_platform_right",
+      "x": 2150,
+      "y": 350,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "rampart_start_brazier",
+      "x": 200,
+      "y": 330,
+      "isStart": true
+    },
+    {
+      "id": "mid_rampart_brazier",
+      "x": 1000,
+      "y": 330
+    }
+  ],
+  "enemies": [
+    {
+      "id": "elite_guard_1",
+      "type": "elite",
+      "x": 500,
+      "y": 330,
+      "patrolPath": [
+        { "x": 450, "y": 330 },
+        { "x": 650, "y": 330 }
+      ]
+    },
+    {
+      "id": "flyer_storm_1",
+      "type": "flyer",
+      "x": 750,
+      "y": 450,
+      "patrolPath": [
+        { "x": 700, "y": 450 },
+        { "x": 850, "y": 500 }
+      ]
+    },
+    {
+      "id": "ranged_battlement",
+      "type": "ranged",
+      "x": 1000,
+      "y": 330,
+      "patrolPath": []
+    },
+    {
+      "id": "shielded_guard",
+      "type": "shielded",
+      "x": 1300,
+      "y": 330,
+      "patrolPath": [
+        { "x": 1200, "y": 330 },
+        { "x": 1400, "y": 330 }
+      ]
+    },
+    {
+      "id": "flyer_storm_2",
+      "type": "flyer",
+      "x": 1500,
+      "y": 450,
+      "patrolPath": [
+        { "x": 1450, "y": 450 },
+        { "x": 1550, "y": 500 }
+      ]
+    }
+  ],
+  "boss": {
+    "id": "zephyros",
+    "name": "Zephyros",
+    "type": "final_boss",
+    "x": 2000,
+    "y": 300,
+    "health": 50,
+    "phases": [
+      {
+        "healthThreshold": 1.0,
+        "patterns": ["gale_breath", "talon_dive", "ice_shards"],
+        "speed": 1.0,
+        "dialogue": "You dare challenge the storm, little otter?"
+      },
+      {
+        "healthThreshold": 0.7,
+        "patterns": ["gale_breath", "talon_dive", "ice_shards", "wing_tempest"],
+        "speed": 1.15,
+        "dialogue": "Feel the cold that will consume your precious hearth!"
+      },
+      {
+        "healthThreshold": 0.4,
+        "patterns": ["gale_breath", "talon_dive", "ice_shards", "wing_tempest", "frost_nova"],
+        "speed": 1.3,
+        "dialogue": "Your warmth is nothing against eternal winter!"
+      },
+      {
+        "healthThreshold": 0.15,
+        "patterns": ["desperation_assault"],
+        "speed": 1.5,
+        "dialogue": "No! The cold... cannot be defeated by such... warmth..."
+      }
+    ],
+    "arena": {
+      "x": 1600,
+      "y": 250,
+      "width": 800,
+      "height": 550
+    }
+  },
+  "collectibles": [
+    {
+      "id": "shard_rampart_1",
+      "type": "shard",
+      "x": 275,
+      "y": 380,
+      "value": 1
+    },
+    {
+      "id": "health_battlement",
+      "type": "health",
+      "x": 1000,
+      "y": 330,
+      "value": 2
+    },
+    {
+      "id": "shard_ice",
+      "type": "shard",
+      "x": 1130,
+      "y": 470,
+      "value": 1
+    },
+    {
+      "id": "health_pre_boss",
+      "type": "health",
+      "x": 1550,
+      "y": 280,
+      "value": 2
+    }
+  ],
+  "triggers": [
+    {
+      "id": "chapter_8_opening",
+      "x": 50,
+      "y": 250,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "chapter_8_opening"
+      }
+    },
+    {
+      "id": "storm_intensifies",
+      "x": 800,
+      "y": 250,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "intensify_storm",
+        "effect": "lightning_strikes"
+      }
+    },
+    {
+      "id": "zephyros_arrival",
+      "x": 1650,
+      "y": 250,
+      "width": 50,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "zephyros_descent",
+        "duration": 3
+      }
+    },
+    {
+      "id": "boss_intro",
+      "x": 1700,
+      "y": 250,
+      "width": 50,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "boss_start",
+        "bossId": "zephyros",
+        "lockArena": true
+      }
+    },
+    {
+      "id": "zephyros_defeated",
+      "x": 2000,
+      "y": 250,
+      "width": 200,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "zephyros_defeat",
+        "requiresBossDefeated": "zephyros"
+      }
+    },
+    {
+      "id": "chapter_complete",
+      "x": 2200,
+      "y": 250,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "data": {
+        "event": "chapter_complete",
+        "nextChapter": 9
+      }
+    }
+  ],
+  "hazards": [
+    {
+      "id": "storm_wind_left",
+      "x": 600,
+      "y": 200,
+      "width": 600,
+      "height": 400,
+      "type": "wind",
+      "direction": { "x": -0.7, "y": -0.3 },
+      "strength": 5
+    },
+    {
+      "id": "ice_zone",
+      "x": 850,
+      "y": 350,
+      "width": 400,
+      "height": 150,
+      "type": "ice",
+      "friction": 0.1
+    },
+    {
+      "id": "lightning_zone",
+      "x": 1600,
+      "y": 0,
+      "width": 800,
+      "height": 600,
+      "type": "lightning",
+      "interval": 5000,
+      "damage": 1,
+      "telegraph": 1000
+    },
+    {
+      "id": "abyss",
+      "x": 0,
+      "y": -200,
+      "width": 2400,
+      "height": 200,
+      "type": "void",
+      "damage": 999,
+      "respawnPoint": { "x": 200, "y": 330 }
+    }
+  ],
+  "decorations": [
+    {
+      "id": "broken_battlement",
+      "type": "prop",
+      "x": 700,
+      "y": 250,
+      "layer": "foreground",
+      "sprite": "broken_stone"
+    },
+    {
+      "id": "frost_formation_1",
+      "type": "prop",
+      "x": 900,
+      "y": 300,
+      "layer": "foreground",
+      "sprite": "ice_crystals"
+    },
+    {
+      "id": "frost_formation_2",
+      "type": "prop",
+      "x": 1100,
+      "y": 300,
+      "layer": "foreground",
+      "sprite": "ice_crystals"
+    },
+    {
+      "id": "storm_sky",
+      "type": "effect",
+      "x": 0,
+      "y": 0,
+      "layer": "far_background",
+      "sprite": "storm_clouds_dark",
+      "animated": true
+    },
+    {
+      "id": "lightning_effect",
+      "type": "effect",
+      "x": 0,
+      "y": 0,
+      "layer": "foreground",
+      "sprite": "lightning_flash",
+      "animated": true,
+      "interval": 8000
+    }
+  ],
+  "ambiance": {
+    "music": "storms_edge",
+    "ambientSounds": ["thunder_rolls", "fierce_wind", "ice_cracking", "rain_heavy"],
+    "lighting": "storm_dark",
+    "weather": "blizzard"
+  }
+}

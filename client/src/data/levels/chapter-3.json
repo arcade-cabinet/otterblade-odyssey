@@ -1,0 +1,348 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 3,
+  "chapterId": 3,
+  "name": "Great Hall",
+  "description": "Stand before the Everember and take the oath to defend Willowmere Hearthhold.",
+  "bounds": {
+    "width": 2400,
+    "height": 700
+  },
+  "spawn": {
+    "x": 100,
+    "y": 200
+  },
+  "exit": {
+    "x": 2300,
+    "y": 150,
+    "width": 100,
+    "height": 250,
+    "targetChapter": 4
+  },
+  "platforms": [
+    {
+      "id": "entrance_hall",
+      "x": 0,
+      "y": 0,
+      "width": 500,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "main_floor",
+      "x": 500,
+      "y": 0,
+      "width": 1400,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "raised_dais",
+      "x": 1100,
+      "y": 150,
+      "width": 300,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "gallery_left",
+      "x": 200,
+      "y": 280,
+      "width": 250,
+      "height": 25,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "gallery_right",
+      "x": 1600,
+      "y": 280,
+      "width": 250,
+      "height": 25,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "chandelier_ledge_1",
+      "x": 600,
+      "y": 380,
+      "width": 100,
+      "height": 20,
+      "type": "passthrough",
+      "material": "iron"
+    },
+    {
+      "id": "chandelier_ledge_2",
+      "x": 1100,
+      "y": 420,
+      "width": 100,
+      "height": 20,
+      "type": "passthrough",
+      "material": "iron"
+    },
+    {
+      "id": "chandelier_ledge_3",
+      "x": 1600,
+      "y": 380,
+      "width": 100,
+      "height": 20,
+      "type": "passthrough",
+      "material": "iron"
+    },
+    {
+      "id": "exit_corridor",
+      "x": 1900,
+      "y": 0,
+      "width": 500,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "entrance_fire",
+      "x": 200,
+      "y": 180,
+      "isStart": true
+    },
+    {
+      "id": "everember_hearth",
+      "x": 1250,
+      "y": 230
+    }
+  ],
+  "enemies": [
+    {
+      "id": "skirmisher_ambush_1",
+      "type": "skirmisher",
+      "x": 700,
+      "y": 180,
+      "spawnTrigger": "hall_invasion"
+    },
+    {
+      "id": "skirmisher_ambush_2",
+      "type": "skirmisher",
+      "x": 1500,
+      "y": 180,
+      "spawnTrigger": "hall_invasion"
+    },
+    {
+      "id": "shielded_ambush",
+      "type": "shielded",
+      "x": 1100,
+      "y": 180,
+      "spawnTrigger": "hall_invasion"
+    },
+    {
+      "id": "ranged_gallery_left",
+      "type": "ranged",
+      "x": 325,
+      "y": 330,
+      "spawnTrigger": "hall_invasion"
+    },
+    {
+      "id": "ranged_gallery_right",
+      "type": "ranged",
+      "x": 1725,
+      "y": 330,
+      "spawnTrigger": "hall_invasion"
+    }
+  ],
+  "boss": {
+    "id": "hall_invader",
+    "name": "Hall Invader",
+    "type": "elite",
+    "x": 1250,
+    "y": 230,
+    "health": 20,
+    "phases": [
+      {
+        "healthThreshold": 1.0,
+        "patterns": ["sword_combo", "shield_bash"],
+        "speed": 1.0
+      },
+      {
+        "healthThreshold": 0.6,
+        "patterns": ["sword_combo", "shield_bash", "leap_attack"],
+        "speed": 1.15
+      },
+      {
+        "healthThreshold": 0.3,
+        "patterns": ["sword_combo", "shield_bash", "leap_attack", "fury_strikes"],
+        "speed": 1.3
+      }
+    ],
+    "arena": {
+      "x": 500,
+      "y": 150,
+      "width": 1400,
+      "height": 400
+    }
+  },
+  "collectibles": [
+    {
+      "id": "shard_entrance",
+      "type": "shard",
+      "x": 350,
+      "y": 180,
+      "value": 1
+    },
+    {
+      "id": "shard_gallery_left",
+      "type": "shard",
+      "x": 325,
+      "y": 320,
+      "value": 1
+    },
+    {
+      "id": "shard_gallery_right",
+      "type": "shard",
+      "x": 1725,
+      "y": 320,
+      "value": 1
+    },
+    {
+      "id": "health_chandelier",
+      "type": "health",
+      "x": 1150,
+      "y": 460,
+      "value": 1
+    },
+    {
+      "id": "secret_rafters",
+      "type": "secret",
+      "x": 650,
+      "y": 420,
+      "value": 5
+    }
+  ],
+  "triggers": [
+    {
+      "id": "chapter_3_opening",
+      "x": 50,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "chapter_3_opening"
+      }
+    },
+    {
+      "id": "everember_approach",
+      "x": 1000,
+      "y": 150,
+      "width": 100,
+      "height": 200,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Elder Oakpaw",
+        "npcSpecies": "badger",
+        "lines": [
+          "The Everember... it has burned since the founding.",
+          "Approach, young one. Let its warmth judge your heart."
+        ]
+      }
+    },
+    {
+      "id": "oath_ceremony",
+      "x": 1200,
+      "y": 150,
+      "width": 100,
+      "height": 150,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "oath_ceremony",
+        "unlocks": ["hearth_strike"]
+      }
+    },
+    {
+      "id": "hall_invasion",
+      "x": 1400,
+      "y": 150,
+      "width": 50,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "spawn_wave",
+        "waveId": "hall_invasion"
+      }
+    },
+    {
+      "id": "boss_intro",
+      "x": 1100,
+      "y": 150,
+      "width": 50,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "boss_start",
+        "bossId": "hall_invader",
+        "requiresTrigger": "hall_invasion"
+      }
+    },
+    {
+      "id": "chapter_complete",
+      "x": 2200,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "data": {
+        "event": "chapter_complete",
+        "nextChapter": 4
+      }
+    }
+  ],
+  "hazards": [],
+  "decorations": [
+    {
+      "id": "everember_hearth",
+      "type": "prop",
+      "x": 1150,
+      "y": 200,
+      "layer": "background",
+      "sprite": "everember_hearth",
+      "animated": true
+    },
+    {
+      "id": "tapestry_left",
+      "type": "prop",
+      "x": 300,
+      "y": 150,
+      "layer": "background",
+      "sprite": "tapestry_otterblade"
+    },
+    {
+      "id": "tapestry_right",
+      "type": "prop",
+      "x": 1800,
+      "y": 150,
+      "layer": "background",
+      "sprite": "tapestry_hearthhold"
+    },
+    {
+      "id": "chandelier_main",
+      "type": "prop",
+      "x": 1100,
+      "y": 500,
+      "layer": "foreground",
+      "sprite": "great_chandelier"
+    }
+  ],
+  "ambiance": {
+    "music": "great_hall",
+    "ambientSounds": ["fire_crackling", "echoing_footsteps", "distant_chatter"],
+    "lighting": "warm_interior",
+    "weather": "indoor"
+  }
+}

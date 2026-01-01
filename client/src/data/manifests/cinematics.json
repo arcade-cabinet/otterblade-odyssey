@@ -27,7 +27,10 @@
       "validation": {
         "noHumans": true,
         "protagonistIsOtter": true,
-        "warmPalette": true
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true
       }
     },
     {
@@ -48,6 +51,14 @@
         "mood": "Anticipation, wonder at the ancient sanctuary, sense of destiny",
         "camera": "Track alongside Finn, reveal the Hearthhold walls gradually, end looking up at the gatehouse",
         "audio": "Flowing river, rustling leaves, distant bells"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true
       }
     },
     {
@@ -55,6 +66,7 @@
       "name": "Chapter 2 Opening",
       "filename": "chapter_2_gatehouse_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 4,
         "aspectRatio": "16:9",
@@ -63,10 +75,19 @@
       "prompt": {
         "scene": "Arriving at the Northern Gatehouse",
         "setting": "Massive stone gatehouse with iron-banded doors, lanterns lit along the bridge, banners stirring in breeze",
-        "action": "Finn crosses the old stone bridge, stops before the great doors. A elderly hedgehog gatekeeper peers through a window, then slowly opens the gate.",
+        "action": "Finn crosses the old stone bridge, stops before the great doors. An elderly hedgehog gatekeeper peers through a window, then slowly opens the gate.",
         "mood": "Threshold moment, being tested and accepted, crossing into a new life",
         "camera": "Finn's POV crossing bridge, then reverse to see him framed in the gateway",
         "audio": "Creaking wood, chain mechanisms, welcoming warmth from within"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "supportingCharactersAreAnimals": true
       }
     },
     {
@@ -74,6 +95,7 @@
       "name": "Chapter 3 Opening",
       "filename": "chapter_3_great_hall_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 5,
         "aspectRatio": "16:9",
@@ -86,6 +108,16 @@
         "mood": "Awe, reverence, sense of ancient tradition, warmth conquering uncertainty",
         "camera": "Wide establishing shot, then Finn's face lit by firelight, finally close on the Everember flames",
         "audio": "Crackling fire, echoing footsteps, solemn choir undertone"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "supportingCharactersAreAnimals": true,
+        "fireIsWarmNotThreatening": true
       }
     },
     {
@@ -93,6 +125,7 @@
       "name": "Chapter 4 Opening",
       "filename": "chapter_4_library_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 4,
         "aspectRatio": "16:9",
@@ -105,6 +138,15 @@
         "mood": "Mystery, discovery, the weight of ancient knowledge",
         "camera": "Spiral up with Finn, reveal the vast library, close on the map being unrolled",
         "audio": "Turning pages, quill scratching, soft hoot of owl"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "supportingCharactersAreAnimals": true
       }
     },
     {
@@ -112,6 +154,7 @@
       "name": "Chapter 5 Opening",
       "filename": "chapter_5_dungeon_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 4,
         "aspectRatio": "16:9",
@@ -124,6 +167,15 @@
         "mood": "Tense, claustrophobic, facing fear, determination overcoming dread",
         "camera": "Over-shoulder following Finn down, occasional glimpse of what lurks below",
         "audio": "Dripping water, distant rumbles, Finn's breathing"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": false,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "tensionNotHorror": true
       }
     },
     {
@@ -131,6 +183,7 @@
       "name": "Chapter 6 Opening",
       "filename": "chapter_6_courtyard_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 4,
         "aspectRatio": "16:9",
@@ -143,6 +196,16 @@
         "mood": "Hope rising, community strength, preparing for battle together",
         "camera": "Start on worried faces, pan to Finn speaking, end with group raising weapons together",
         "audio": "Birdsong, armor clinking, rising orchestral swell"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "supportingCharactersAreAnimals": true,
+        "communityFocus": true
       }
     },
     {
@@ -150,6 +213,7 @@
       "name": "Chapter 7 Opening",
       "filename": "chapter_7_bell_tower_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 4,
         "aspectRatio": "16:9",
@@ -162,6 +226,15 @@
         "mood": "Urgency, elemental struggle, approaching climax",
         "camera": "Vertigo-inducing climb, reveal of storm and enemies through windows",
         "audio": "Howling wind, distant thunder, clanging metal"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": false,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "naturalWeatherNotSupernatural": true
       }
     },
     {
@@ -169,6 +242,7 @@
       "name": "Chapter 8 Opening",
       "filename": "chapter_8_final_confrontation_opening.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 5,
         "aspectRatio": "16:9",
@@ -181,6 +255,16 @@
         "mood": "Epic confrontation, calm before the storm, destiny manifest",
         "camera": "Finn small against the storm, Zephyros descending, final shot of them facing each other",
         "audio": "Thunder, wind roar, silence as they face off"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": false,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "antagonistIsAnthropomorphicBird": true,
+        "noGlowingMagicEffects": true
       }
     },
     {
@@ -188,6 +272,7 @@
       "name": "Outro Cinematic",
       "filename": "outro_victory_sunrise_scene.mp4",
       "status": "needs_regeneration",
+      "reason": "Needs validation fields added",
       "config": {
         "duration": 6,
         "aspectRatio": "16:9",
@@ -200,6 +285,17 @@
         "mood": "Triumph, warmth, belonging, promise of peace, bittersweet joy",
         "camera": "Start on Everember, pull back to reveal celebration, end on Finn's face lit by dawn and firelight",
         "audio": "Joyful strings, cheering voices, crackling fire, birdsong of new dawn"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true,
+        "noNeonOrSciFi": true,
+        "noHorrorElements": true,
+        "storybookAesthetic": true,
+        "supportingCharactersAreAnimals": true,
+        "communityFocus": true,
+        "celebratoryNotViolent": true
       }
     }
   ]

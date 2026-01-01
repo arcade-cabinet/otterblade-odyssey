@@ -1,0 +1,478 @@
+{
+  "$schema": "./manifest-schema.json",
+  "category": "audio",
+  "provider": "procedural",
+  "model": "custom",
+  "outputDir": "client/src/assets/audio",
+  "assets": {
+    "music": [
+      {
+        "id": "village_morning",
+        "name": "Village Morning Theme",
+        "filename": "music/village_morning.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 120,
+          "loop": true,
+          "fadeIn": 2,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Warm, peaceful, nostalgic departure",
+          "instruments": ["Wooden flute", "Soft strings", "Gentle harp"],
+          "tempo": "Slow, flowing",
+          "style": "Folk-inspired, Celtic undertones, storybook warmth"
+        }
+      },
+      {
+        "id": "river_path",
+        "name": "River Path Theme",
+        "filename": "music/river_path.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 150,
+          "loop": true,
+          "fadeIn": 2,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Adventure beginning, anticipation, wonder",
+          "instruments": ["Recorder", "Acoustic guitar", "Light percussion"],
+          "tempo": "Medium, walking pace",
+          "style": "Folk adventure, gentle mystery"
+        }
+      },
+      {
+        "id": "gatehouse_approach",
+        "name": "Gatehouse Approach Theme",
+        "filename": "music/gatehouse_approach.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 120,
+          "loop": true,
+          "fadeIn": 2,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Threshold, anticipation, ancient grandeur",
+          "instruments": ["French horn", "Strings", "Timpani rolls"],
+          "tempo": "Building, purposeful",
+          "style": "Noble, medieval-inspired"
+        }
+      },
+      {
+        "id": "great_hall",
+        "name": "Great Hall Theme",
+        "filename": "music/great_hall.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 180,
+          "loop": true,
+          "fadeIn": 3,
+          "fadeOut": 4
+        },
+        "prompt": {
+          "mood": "Sacred, warm, ancestral tradition",
+          "instruments": ["Choir", "Organ", "Deep strings", "Bells"],
+          "tempo": "Slow, reverent",
+          "style": "Cathedral-like warmth, not religious but spiritual"
+        }
+      },
+      {
+        "id": "library_spire",
+        "name": "Library Spire Theme",
+        "filename": "music/library_spire.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 150,
+          "loop": true,
+          "fadeIn": 2,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Mystery, discovery, ancient knowledge",
+          "instruments": ["Celesta", "Pizzicato strings", "Woodwinds"],
+          "tempo": "Moderate, curious",
+          "style": "Whimsical, intellectual"
+        }
+      },
+      {
+        "id": "deep_cellars",
+        "name": "Deep Cellars Theme",
+        "filename": "music/deep_cellars.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 180,
+          "loop": true,
+          "fadeIn": 3,
+          "fadeOut": 4
+        },
+        "prompt": {
+          "mood": "Tense, claustrophobic, determined",
+          "instruments": ["Low strings", "Distant percussion", "Sparse piano"],
+          "tempo": "Slow, suspenseful",
+          "style": "Dark but not horror, tension with hope"
+        }
+      },
+      {
+        "id": "kitchen_gardens",
+        "name": "Kitchen Gardens Theme",
+        "filename": "music/kitchen_gardens.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 120,
+          "loop": true,
+          "fadeIn": 2,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Hopeful, community, preparation",
+          "instruments": ["Fiddle", "Bodhrán", "Tin whistle", "Acoustic guitar"],
+          "tempo": "Upbeat, energetic",
+          "style": "Folk, rallying, communal celebration"
+        }
+      },
+      {
+        "id": "bell_tower",
+        "name": "Bell Tower Theme",
+        "filename": "music/bell_tower.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 150,
+          "loop": true,
+          "fadeIn": 2,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Urgent, elemental, climactic",
+          "instruments": ["Brass section", "Full orchestra", "Choir bursts"],
+          "tempo": "Fast, driving",
+          "style": "Epic, wind-swept, ascending"
+        }
+      },
+      {
+        "id": "storms_edge",
+        "name": "Storm's Edge Theme",
+        "filename": "music/storms_edge.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 240,
+          "loop": true,
+          "fadeIn": 4,
+          "fadeOut": 5
+        },
+        "prompt": {
+          "mood": "Epic confrontation, destiny, final battle",
+          "instruments": ["Full orchestra", "Choir", "War drums", "Bells"],
+          "tempo": "Variable, building to climax",
+          "style": "Cinematic boss battle, warmth vs cold"
+        }
+      },
+      {
+        "id": "new_dawn",
+        "name": "New Dawn Theme",
+        "filename": "music/new_dawn.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 180,
+          "loop": true,
+          "fadeIn": 4,
+          "fadeOut": 5
+        },
+        "prompt": {
+          "mood": "Triumph, warmth, belonging, bittersweet joy",
+          "instruments": ["Full orchestra", "Choir", "Wooden flute solo", "Bells"],
+          "tempo": "Slow building to joyful",
+          "style": "Victory theme, emotional resolution, hearth melody returns"
+        }
+      },
+      {
+        "id": "boss_battle",
+        "name": "Boss Battle Theme",
+        "filename": "music/boss_battle.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 180,
+          "loop": true,
+          "fadeIn": 1,
+          "fadeOut": 2
+        },
+        "prompt": {
+          "mood": "Intense, dangerous, but hopeful",
+          "instruments": ["Brass", "Strings", "Percussion", "Choir stabs"],
+          "tempo": "Fast, rhythmic",
+          "style": "Action-adventure boss, not horror"
+        }
+      },
+      {
+        "id": "game_over",
+        "name": "Game Over Theme",
+        "filename": "music/game_over.mp3",
+        "status": "pending",
+        "config": {
+          "duration": 15,
+          "loop": false,
+          "fadeIn": 0,
+          "fadeOut": 3
+        },
+        "prompt": {
+          "mood": "Somber but encouraging",
+          "instruments": ["Solo cello", "Distant bells"],
+          "tempo": "Slow",
+          "style": "Brief, melancholic, hints of hope"
+        }
+      }
+    ],
+    "sfx_player": [
+      {
+        "id": "player_footstep_grass",
+        "name": "Footstep - Grass",
+        "filename": "sfx/player/footstep_grass.wav",
+        "status": "pending",
+        "config": { "variations": 4 }
+      },
+      {
+        "id": "player_footstep_stone",
+        "name": "Footstep - Stone",
+        "filename": "sfx/player/footstep_stone.wav",
+        "status": "pending",
+        "config": { "variations": 4 }
+      },
+      {
+        "id": "player_footstep_wood",
+        "name": "Footstep - Wood",
+        "filename": "sfx/player/footstep_wood.wav",
+        "status": "pending",
+        "config": { "variations": 4 }
+      },
+      {
+        "id": "player_jump",
+        "name": "Jump",
+        "filename": "sfx/player/jump.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "player_land",
+        "name": "Land",
+        "filename": "sfx/player/land.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "player_attack_swing",
+        "name": "Sword Swing",
+        "filename": "sfx/player/sword_swing.wav",
+        "status": "pending",
+        "config": { "variations": 3 }
+      },
+      {
+        "id": "player_attack_hit",
+        "name": "Sword Hit",
+        "filename": "sfx/player/sword_hit.wav",
+        "status": "pending",
+        "config": { "variations": 3 }
+      },
+      {
+        "id": "player_parry",
+        "name": "Parry",
+        "filename": "sfx/player/parry.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "player_hurt",
+        "name": "Player Hurt",
+        "filename": "sfx/player/hurt.wav",
+        "status": "pending",
+        "config": { "variations": 3 }
+      },
+      {
+        "id": "player_death",
+        "name": "Player Death",
+        "filename": "sfx/player/death.wav",
+        "status": "pending",
+        "config": { "variations": 1 }
+      },
+      {
+        "id": "player_hearth_strike",
+        "name": "Hearth Strike",
+        "filename": "sfx/player/hearth_strike.wav",
+        "status": "pending",
+        "config": { "variations": 1 }
+      }
+    ],
+    "sfx_enemies": [
+      {
+        "id": "enemy_skirmisher_attack",
+        "name": "Skirmisher Attack",
+        "filename": "sfx/enemies/skirmisher_attack.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "enemy_shielded_block",
+        "name": "Shielded Block",
+        "filename": "sfx/enemies/shielded_block.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "enemy_ranged_throw",
+        "name": "Ranged Throw",
+        "filename": "sfx/enemies/ranged_throw.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "enemy_flyer_wingbeat",
+        "name": "Flyer Wingbeat",
+        "filename": "sfx/enemies/flyer_wingbeat.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      },
+      {
+        "id": "enemy_hurt",
+        "name": "Enemy Hurt",
+        "filename": "sfx/enemies/hurt.wav",
+        "status": "pending",
+        "config": { "variations": 3 }
+      },
+      {
+        "id": "enemy_death",
+        "name": "Enemy Death",
+        "filename": "sfx/enemies/death.wav",
+        "status": "pending",
+        "config": { "variations": 2 }
+      }
+    ],
+    "sfx_ui": [
+      {
+        "id": "ui_button_hover",
+        "name": "Button Hover",
+        "filename": "sfx/ui/button_hover.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_button_click",
+        "name": "Button Click",
+        "filename": "sfx/ui/button_click.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_menu_open",
+        "name": "Menu Open",
+        "filename": "sfx/ui/menu_open.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_menu_close",
+        "name": "Menu Close",
+        "filename": "sfx/ui/menu_close.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_shard_collect",
+        "name": "Shard Collect",
+        "filename": "sfx/ui/shard_collect.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_health_pickup",
+        "name": "Health Pickup",
+        "filename": "sfx/ui/health_pickup.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_secret_found",
+        "name": "Secret Found",
+        "filename": "sfx/ui/secret_found.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_checkpoint_lit",
+        "name": "Checkpoint Lit",
+        "filename": "sfx/ui/checkpoint_lit.wav",
+        "status": "pending"
+      },
+      {
+        "id": "ui_chapter_complete",
+        "name": "Chapter Complete",
+        "filename": "sfx/ui/chapter_complete.wav",
+        "status": "pending"
+      }
+    ],
+    "sfx_environment": [
+      {
+        "id": "env_fire_crackling",
+        "name": "Fire Crackling",
+        "filename": "sfx/environment/fire_crackling.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_river_flowing",
+        "name": "River Flowing",
+        "filename": "sfx/environment/river_flowing.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_wind_light",
+        "name": "Wind Light",
+        "filename": "sfx/environment/wind_light.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_wind_strong",
+        "name": "Wind Strong",
+        "filename": "sfx/environment/wind_strong.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_rain",
+        "name": "Rain",
+        "filename": "sfx/environment/rain.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_thunder",
+        "name": "Thunder",
+        "filename": "sfx/environment/thunder.wav",
+        "status": "pending",
+        "config": { "variations": 4, "loop": false }
+      },
+      {
+        "id": "env_birdsong",
+        "name": "Birdsong",
+        "filename": "sfx/environment/birdsong.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_dripping_water",
+        "name": "Dripping Water",
+        "filename": "sfx/environment/dripping_water.wav",
+        "status": "pending",
+        "config": { "loop": true }
+      },
+      {
+        "id": "env_bells_distant",
+        "name": "Bells Distant",
+        "filename": "sfx/environment/bells_distant.wav",
+        "status": "pending",
+        "config": { "loop": false }
+      },
+      {
+        "id": "env_bells_loud",
+        "name": "Bells Loud",
+        "filename": "sfx/environment/bells_loud.wav",
+        "status": "pending",
+        "config": { "loop": false }
+      }
+    ]
+  }
+}

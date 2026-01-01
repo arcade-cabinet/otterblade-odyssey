@@ -2,99 +2,253 @@
   {
     "id": "village",
     "name": "Finn's Village",
+    "description": "A peaceful riverside hamlet where Finn grew up. Thatched cottages, willow trees, and the gentle morning mist.",
     "chapterIds": [0],
     "colors": {
       "bg": "#2a3a2a",
       "fog": "#4a5a4a",
       "accent": "#8fbc8f",
       "sky1": "#1a2518",
-      "sky2": "#3d5a3d"
+      "sky2": "#3d5a3d",
+      "ground": "#5d4420",
+      "water": "#5dade2"
     },
     "atmosphere": "warm",
-    "timeOfDay": "morning"
+    "timeOfDay": "morning",
+    "environment": {
+      "weather": "clear",
+      "windStrength": 0.2,
+      "fogDensity": 0.3,
+      "particleEffects": ["fireflies", "pollen"],
+      "ambientLight": 0.8
+    },
+    "audio": {
+      "music": "village_morning",
+      "ambientSounds": ["birdsong", "river_gentle", "wind_light", "rooster_distant"],
+      "footstepMaterial": "grass"
+    },
+    "parallaxLayers": {
+      "far": ["distant_hills", "morning_sky"],
+      "mid": ["willow_trees", "cottage_silhouettes"],
+      "near": ["path_details", "flowers"]
+    },
+    "materials": ["grass", "wood", "thatch", "stone"],
+    "hazards": []
   },
   {
     "id": "willowbanks",
     "name": "Willow Banks",
+    "description": "The ancient river path leading to Willowmere. Stone waystones mark the route through the forest.",
     "chapterIds": [1, 2],
     "colors": {
       "bg": "#2d3b2d",
       "fog": "#4a6741",
       "accent": "#8fbc8f",
       "sky1": "#1a2518",
-      "sky2": "#3d5a3d"
+      "sky2": "#3d5a3d",
+      "ground": "#5d4e37",
+      "water": "#4a90a4"
     },
     "atmosphere": "serene",
-    "timeOfDay": "afternoon"
+    "timeOfDay": "afternoon",
+    "environment": {
+      "weather": "clear",
+      "windStrength": 0.4,
+      "fogDensity": 0.2,
+      "particleEffects": ["leaves", "pollen", "water_spray"],
+      "ambientLight": 0.9
+    },
+    "audio": {
+      "music": "river_path",
+      "ambientSounds": ["river_flowing", "birdsong", "leaves_rustle", "distant_bells"],
+      "footstepMaterial": "stone"
+    },
+    "parallaxLayers": {
+      "far": ["hearthhold_silhouette", "forest_canopy"],
+      "mid": ["ancient_walls", "willow_trees"],
+      "near": ["river_bank", "waystones"]
+    },
+    "materials": ["grass", "stone", "moss", "wood"],
+    "hazards": ["water"]
   },
   {
     "id": "hearthhold_interior",
     "name": "Hearthhold Interior",
+    "description": "The warm heart of Willowmere. Vaulted stone halls lit by the eternal Everember and countless candles.",
     "chapterIds": [3, 4],
     "colors": {
       "bg": "#3d2b1f",
       "fog": "#5c4033",
       "accent": "#d4a574",
       "sky1": "#1f1510",
-      "sky2": "#4a3628"
+      "sky2": "#4a3628",
+      "ground": "#8b7355",
+      "fire": "#e67e22"
     },
     "atmosphere": "cozy",
-    "timeOfDay": "evening"
+    "timeOfDay": "evening",
+    "environment": {
+      "weather": "indoor",
+      "windStrength": 0,
+      "fogDensity": 0.1,
+      "particleEffects": ["dust_motes", "ember_sparks", "candle_flicker"],
+      "ambientLight": 0.6
+    },
+    "audio": {
+      "music": "great_hall",
+      "ambientSounds": ["fire_crackling", "echoing_footsteps", "distant_chatter", "page_turning"],
+      "footstepMaterial": "stone"
+    },
+    "parallaxLayers": {
+      "far": ["stone_walls", "tapestries"],
+      "mid": ["pillars", "everember_glow"],
+      "near": ["candle_stands", "furniture"]
+    },
+    "materials": ["stone", "wood", "iron", "cloth"],
+    "hazards": []
   },
   {
     "id": "deep_cellars",
     "name": "Deep Cellars",
+    "description": "Underground passages beneath the Hearthhold. Damp stone, flickering torches, and ancient secrets.",
     "chapterIds": [5],
     "colors": {
       "bg": "#1a1a24",
       "fog": "#2d2d3d",
       "accent": "#e67e22",
       "sky1": "#0d0d12",
-      "sky2": "#1a1a28"
+      "sky2": "#1a1a28",
+      "ground": "#3a3a3a",
+      "torch": "#ff6b35"
     },
     "atmosphere": "tense",
-    "timeOfDay": "night"
+    "timeOfDay": "night",
+    "environment": {
+      "weather": "underground",
+      "windStrength": 0.1,
+      "fogDensity": 0.4,
+      "particleEffects": ["torch_smoke", "dripping_water", "dust"],
+      "ambientLight": 0.3
+    },
+    "audio": {
+      "music": "deep_cellars",
+      "ambientSounds": ["dripping_water", "distant_rumble", "rats_scurrying", "wind_through_cracks"],
+      "footstepMaterial": "stone_wet"
+    },
+    "parallaxLayers": {
+      "far": ["darkness", "distant_torches"],
+      "mid": ["stone_arches", "roots"],
+      "near": ["barrels", "debris"]
+    },
+    "materials": ["stone", "moss", "wood", "iron"],
+    "hazards": ["water", "spikes", "crumbling"]
   },
   {
     "id": "gardens",
     "name": "Kitchen Gardens",
+    "description": "Sunlit courtyards and training yards. A place of growth, preparation, and community.",
     "chapterIds": [6],
     "colors": {
       "bg": "#4a5d3a",
       "fog": "#6b8e4a",
       "accent": "#c0392b",
       "sky1": "#2d3a24",
-      "sky2": "#5a7048"
+      "sky2": "#5a7048",
+      "ground": "#6b4423",
+      "foliage": "#7cb342"
     },
     "atmosphere": "hopeful",
-    "timeOfDay": "dawn"
+    "timeOfDay": "dawn",
+    "environment": {
+      "weather": "clear",
+      "windStrength": 0.3,
+      "fogDensity": 0.1,
+      "particleEffects": ["pollen", "butterflies", "leaves"],
+      "ambientLight": 1.0
+    },
+    "audio": {
+      "music": "kitchen_gardens",
+      "ambientSounds": ["birdsong_bright", "fountain_splash", "training_strikes", "wind_leaves"],
+      "footstepMaterial": "dirt"
+    },
+    "parallaxLayers": {
+      "far": ["hearthhold_walls", "blue_sky"],
+      "mid": ["trellises", "fruit_trees"],
+      "near": ["vegetable_plots", "training_dummies"]
+    },
+    "materials": ["grass", "soil", "stone", "wood"],
+    "hazards": []
   },
   {
     "id": "rooftops",
     "name": "Bell Tower",
+    "description": "The highest reaches of the Hearthhold. Wind-swept rafters and ancient bells beneath gathering storm clouds.",
     "chapterIds": [7, 8],
     "colors": {
       "bg": "#3a3a4a",
       "fog": "#5a5a6a",
       "accent": "#cd7f32",
       "sky1": "#1a1a24",
-      "sky2": "#3d3d4d"
+      "sky2": "#3d3d4d",
+      "ground": "#4a4a4a",
+      "lightning": "#f4f4ff"
     },
     "atmosphere": "dramatic",
-    "timeOfDay": "sunset"
+    "timeOfDay": "sunset",
+    "environment": {
+      "weather": "stormy",
+      "windStrength": 0.8,
+      "fogDensity": 0.3,
+      "particleEffects": ["rain", "wind_debris", "lightning_flash"],
+      "ambientLight": 0.4
+    },
+    "audio": {
+      "music": "bell_tower",
+      "ambientSounds": ["howling_wind", "distant_thunder", "creaking_wood", "rain_heavy"],
+      "footstepMaterial": "stone"
+    },
+    "parallaxLayers": {
+      "far": ["storm_clouds", "lightning"],
+      "mid": ["rooftops", "bell_tower_silhouette"],
+      "near": ["shingles", "banners_torn"]
+    },
+    "materials": ["stone", "slate", "iron", "wood"],
+    "hazards": ["wind", "lightning", "ice"]
   },
   {
     "id": "victory",
     "name": "New Dawn",
+    "description": "The Great Hall at sunrise. The storm has passed, the Everember burns bright, and Willowmere celebrates.",
     "chapterIds": [9],
     "colors": {
       "bg": "#4a5d3a",
       "fog": "#7a9e5a",
       "accent": "#ffd700",
       "sky1": "#3d4a34",
-      "sky2": "#6a8058"
+      "sky2": "#6a8058",
+      "ground": "#8b7355",
+      "sunlight": "#ffe4b5"
     },
     "atmosphere": "triumphant",
-    "timeOfDay": "sunrise"
+    "timeOfDay": "sunrise",
+    "environment": {
+      "weather": "clear",
+      "windStrength": 0.1,
+      "fogDensity": 0.05,
+      "particleEffects": ["golden_dust", "celebration_petals", "ember_sparks"],
+      "ambientLight": 1.2
+    },
+    "audio": {
+      "music": "new_dawn",
+      "ambientSounds": ["fire_crackling_warm", "joyful_chatter", "birdsong_dawn", "bells_distant"],
+      "footstepMaterial": "stone"
+    },
+    "parallaxLayers": {
+      "far": ["sunrise_sky", "clear_horizon"],
+      "mid": ["windows_golden", "restored_tapestries"],
+      "near": ["celebration_banners", "everember_radiant"]
+    },
+    "materials": ["stone", "wood", "cloth", "gold"],
+    "hazards": []
   }
 ]

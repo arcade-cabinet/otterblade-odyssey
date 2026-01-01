@@ -1,0 +1,334 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 9,
+  "chapterId": 9,
+  "name": "New Dawn",
+  "description": "Return to the Great Hall as the storm breaks and the Everember burns bright once more.",
+  "bounds": {
+    "width": 1600,
+    "height": 600
+  },
+  "spawn": {
+    "x": 100,
+    "y": 200
+  },
+  "exit": {
+    "x": 1500,
+    "y": 150,
+    "width": 100,
+    "height": 250,
+    "targetChapter": null
+  },
+  "platforms": [
+    {
+      "id": "return_path",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "courtyard_crossing",
+      "x": 400,
+      "y": 0,
+      "width": 300,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "great_hall_entrance",
+      "x": 700,
+      "y": 0,
+      "width": 900,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "everember_dais",
+      "x": 1000,
+      "y": 150,
+      "width": 300,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "dawn_arrival",
+      "x": 200,
+      "y": 180,
+      "isStart": true
+    },
+    {
+      "id": "everember_restored",
+      "x": 1150,
+      "y": 230
+    }
+  ],
+  "enemies": [],
+  "allies": [
+    {
+      "id": "thornback_victory",
+      "species": "badger",
+      "name": "Thornback",
+      "x": 850,
+      "y": 180,
+      "role": "defender",
+      "state": "celebrating"
+    },
+    {
+      "id": "pip_victory",
+      "species": "mouse",
+      "name": "Pip",
+      "x": 950,
+      "y": 180,
+      "role": "trainee",
+      "state": "celebrating"
+    },
+    {
+      "id": "nutkin_victory",
+      "species": "squirrel",
+      "name": "Nutkin",
+      "x": 1050,
+      "y": 180,
+      "role": "scout",
+      "state": "celebrating"
+    },
+    {
+      "id": "featherquill_victory",
+      "species": "owl",
+      "name": "Sage Featherquill",
+      "x": 1200,
+      "y": 180,
+      "role": "sage",
+      "state": "celebrating"
+    },
+    {
+      "id": "oakpaw_ceremony",
+      "species": "badger",
+      "name": "Elder Oakpaw",
+      "x": 1150,
+      "y": 230,
+      "role": "elder",
+      "state": "ceremony"
+    }
+  ],
+  "collectibles": [
+    {
+      "id": "shard_celebration_1",
+      "type": "shard",
+      "x": 300,
+      "y": 180,
+      "value": 1
+    },
+    {
+      "id": "shard_celebration_2",
+      "type": "shard",
+      "x": 550,
+      "y": 180,
+      "value": 1
+    },
+    {
+      "id": "shard_celebration_3",
+      "type": "shard",
+      "x": 1300,
+      "y": 180,
+      "value": 1
+    },
+    {
+      "id": "secret_founders_tribute",
+      "type": "secret",
+      "x": 1400,
+      "y": 230,
+      "value": 10
+    }
+  ],
+  "triggers": [
+    {
+      "id": "dawn_arrival_trigger",
+      "x": 50,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "dawn_breaks",
+        "effect": "sunrise_transition"
+      }
+    },
+    {
+      "id": "victory_procession",
+      "x": 400,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Narrator",
+        "lines": [
+          "The storm has passed. Dawn breaks over Willowmere.",
+          "Finn returns to the Great Hall, the Otterblade bright in the morning light."
+        ]
+      }
+    },
+    {
+      "id": "celebration_start",
+      "x": 800,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "celebration_music",
+        "allies_cheer": true
+      }
+    },
+    {
+      "id": "oakpaw_ceremony_trigger",
+      "x": 1000,
+      "y": 150,
+      "width": 100,
+      "height": 150,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Elder Oakpaw",
+        "npcSpecies": "badger",
+        "lines": [
+          "Finn Riverstone. You have walked the path of your ancestors.",
+          "You have faced the cold and kept the fire burning.",
+          "The Everember recognizes you. Willowmere thanks you."
+        ]
+      }
+    },
+    {
+      "id": "medallion_award",
+      "x": 1100,
+      "y": 150,
+      "width": 100,
+      "height": 150,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "award_medallion",
+        "item": "guardian_medallion"
+      }
+    },
+    {
+      "id": "finn_response",
+      "x": 1150,
+      "y": 150,
+      "width": 100,
+      "height": 150,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Finn",
+        "lines": [
+          "I couldn't have done it alone. Every creature here fought beside me.",
+          "The Hearthhold stands because we stood together."
+        ]
+      }
+    },
+    {
+      "id": "outro_cinematic_trigger",
+      "x": 1300,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "outro_cinematic"
+      }
+    },
+    {
+      "id": "game_complete",
+      "x": 1400,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "data": {
+        "event": "game_complete",
+        "credits": true
+      }
+    }
+  ],
+  "hazards": [],
+  "decorations": [
+    {
+      "id": "everember_restored",
+      "type": "prop",
+      "x": 1100,
+      "y": 200,
+      "layer": "background",
+      "sprite": "everember_hearth_bright",
+      "animated": true
+    },
+    {
+      "id": "tapestry_victory_left",
+      "type": "prop",
+      "x": 800,
+      "y": 150,
+      "layer": "background",
+      "sprite": "tapestry_otterblade"
+    },
+    {
+      "id": "tapestry_victory_right",
+      "type": "prop",
+      "x": 1400,
+      "y": 150,
+      "layer": "background",
+      "sprite": "tapestry_hearthhold"
+    },
+    {
+      "id": "banner_celebration_1",
+      "type": "prop",
+      "x": 900,
+      "y": 250,
+      "layer": "foreground",
+      "sprite": "celebration_banner"
+    },
+    {
+      "id": "banner_celebration_2",
+      "type": "prop",
+      "x": 1300,
+      "y": 250,
+      "layer": "foreground",
+      "sprite": "celebration_banner"
+    },
+    {
+      "id": "dawn_light",
+      "type": "effect",
+      "x": 0,
+      "y": 0,
+      "layer": "far_background",
+      "sprite": "golden_sunrise",
+      "animated": true
+    },
+    {
+      "id": "dust_motes",
+      "type": "effect",
+      "x": 700,
+      "y": 150,
+      "layer": "foreground",
+      "sprite": "golden_particles",
+      "animated": true
+    }
+  ],
+  "ambiance": {
+    "music": "new_dawn",
+    "ambientSounds": ["fire_crackling_warm", "joyful_chatter", "birdsong_dawn", "bells_distant"],
+    "lighting": "golden_sunrise",
+    "weather": "clear"
+  }
+}

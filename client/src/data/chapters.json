@@ -4,11 +4,21 @@
     "name": "THE CALLING",
     "setting": "Finn's Cottage",
     "quest": "Answer the Call",
+    "questDescription": "Leave the comfort of home and begin the journey to Willowmere Hearthhold.",
     "hasBoss": false,
     "bossName": null,
+    "mechanics": {
+      "introduced": ["movement", "jump"],
+      "focus": "tutorial"
+    },
+    "difficulty": 1,
+    "estimatedMinutes": 5,
+    "secrets": 1,
+    "npcs": [],
     "assets": {
       "chapterPlate": "prologue_village_chapter_plate.png",
-      "parallaxBg": "village_morning_parallax_background.png"
+      "parallaxBg": "village_morning_parallax_background.png",
+      "levelData": "chapter-0.json"
     }
   },
   {
@@ -16,11 +26,21 @@
     "name": "RIVER PATH",
     "setting": "Willow Banks",
     "quest": "Reach the Gatehouse",
+    "questDescription": "Follow the ancient river path toward the sanctuary walls.",
     "hasBoss": false,
     "bossName": null,
+    "mechanics": {
+      "introduced": ["attack", "enemy_skirmisher"],
+      "focus": "combat_basics"
+    },
+    "difficulty": 2,
+    "estimatedMinutes": 8,
+    "secrets": 1,
+    "npcs": [],
     "assets": {
       "chapterPlate": "abbey_approach_chapter_plate.png",
-      "parallaxBg": "abbey_exterior_parallax_background.png"
+      "parallaxBg": "abbey_exterior_parallax_background.png",
+      "levelData": "chapter-1.json"
     }
   },
   {
@@ -28,11 +48,30 @@
     "name": "THE GATEHOUSE",
     "setting": "Northern Gate",
     "quest": "Cross the Threshold",
+    "questDescription": "Prove yourself worthy to enter Willowmere Hearthhold by facing the Gatehouse Guardian.",
     "hasBoss": true,
     "bossName": "Gatehouse Guardian",
+    "bossDescription": "A corrupted badger, once a defender, now twisted by Zephyros's cold influence.",
+    "mechanics": {
+      "introduced": ["parry", "boss_patterns", "enemy_ranged"],
+      "focus": "first_boss"
+    },
+    "difficulty": 3,
+    "estimatedMinutes": 12,
+    "secrets": 1,
+    "npcs": [
+      {
+        "id": "bramble_gatekeeper",
+        "name": "Bramble",
+        "species": "hedgehog",
+        "role": "gatekeeper",
+        "dialogue": "You carry the Otterblade... I've been expecting you."
+      }
+    ],
     "assets": {
       "chapterPlate": "gatehouse_bridge_chapter_plate.png",
-      "parallaxBg": "abbey_exterior_parallax_background.png"
+      "parallaxBg": "abbey_exterior_parallax_background.png",
+      "levelData": "chapter-2.json"
     }
   },
   {
@@ -40,11 +79,30 @@
     "name": "GREAT HALL",
     "setting": "Central Hearthhold",
     "quest": "Take the Oath",
+    "questDescription": "Stand before the Everember and swear to defend Willowmere, then repel the Galeborn invaders.",
     "hasBoss": true,
     "bossName": "Hall Invader",
+    "bossDescription": "A Galeborn champion who leads the first assault on the Hearthhold's sacred heart.",
+    "mechanics": {
+      "introduced": ["hearth_strike", "enemy_shielded", "wave_defense"],
+      "focus": "special_ability"
+    },
+    "difficulty": 4,
+    "estimatedMinutes": 15,
+    "secrets": 1,
+    "npcs": [
+      {
+        "id": "elder_oakpaw",
+        "name": "Elder Oakpaw",
+        "species": "badger",
+        "role": "elder",
+        "dialogue": "The Everember... it has burned since the founding."
+      }
+    ],
     "assets": {
       "chapterPlate": "great_hall_oath_chapter_plate.png",
-      "parallaxBg": "abbey_interior_parallax_background.png"
+      "parallaxBg": "abbey_interior_parallax_background.png",
+      "levelData": "chapter-3.json"
     }
   },
   {
@@ -52,11 +110,29 @@
     "name": "THE ARCHIVES",
     "setting": "Library Spire",
     "quest": "Find the Ancient Map",
+    "questDescription": "Climb the towering Library Spire to discover the map that reveals Zephyros's approach.",
     "hasBoss": false,
     "bossName": null,
+    "mechanics": {
+      "introduced": ["vertical_platforming", "moving_platforms", "enemy_flyer"],
+      "focus": "exploration"
+    },
+    "difficulty": 4,
+    "estimatedMinutes": 12,
+    "secrets": 1,
+    "npcs": [
+      {
+        "id": "sage_featherquill",
+        "name": "Sage Featherquill",
+        "species": "owl",
+        "role": "librarian",
+        "dialogue": "The map you seek is in the upper chamber."
+      }
+    ],
     "assets": {
       "chapterPlate": "library_map_table_chapter_plate.png",
-      "parallaxBg": "abbey_interior_parallax_background.png"
+      "parallaxBg": "abbey_interior_parallax_background.png",
+      "levelData": "chapter-4.json"
     }
   },
   {
@@ -64,11 +140,22 @@
     "name": "DEEP CELLARS",
     "setting": "Underground Passages",
     "quest": "Descend into the Depths",
+    "questDescription": "Navigate the dark cellars and catacombs to cut off the Galeborn infiltration route.",
     "hasBoss": true,
     "bossName": "Cellar Keeper",
+    "bossDescription": "A massive mole corrupted by isolation and cold, guarding the underground passages.",
+    "mechanics": {
+      "introduced": ["lantern_mechanics", "crumbling_platforms", "trap_navigation"],
+      "focus": "tension_atmosphere"
+    },
+    "difficulty": 5,
+    "estimatedMinutes": 15,
+    "secrets": 1,
+    "npcs": [],
     "assets": {
       "chapterPlate": "dungeon_descent_chapter_plate.png",
-      "parallaxBg": "dungeon_parallax_background.png"
+      "parallaxBg": "dungeon_parallax_background.png",
+      "levelData": "chapter-5.json"
     }
   },
   {
@@ -76,11 +163,43 @@
     "name": "KITCHEN GARDENS",
     "setting": "Southern Grounds",
     "quest": "Rally the Defenders",
+    "questDescription": "Gather the scattered defenders of Willowmere and prepare for the final push against Zephyros.",
     "hasBoss": false,
     "bossName": null,
+    "mechanics": {
+      "introduced": ["ally_mechanics", "group_defense", "training_sequences"],
+      "focus": "community"
+    },
+    "difficulty": 4,
+    "estimatedMinutes": 12,
+    "secrets": 1,
+    "npcs": [
+      {
+        "id": "pip",
+        "name": "Pip",
+        "species": "mouse",
+        "role": "trainee",
+        "dialogue": "I want to help! Show me how to fight!"
+      },
+      {
+        "id": "nutkin",
+        "name": "Nutkin",
+        "species": "squirrel",
+        "role": "scout",
+        "dialogue": "I've seen their camps. I know the way."
+      },
+      {
+        "id": "thornback",
+        "name": "Thornback",
+        "species": "badger",
+        "role": "defender",
+        "dialogue": "We'll need to sound the bells. To the tower!"
+      }
+    ],
     "assets": {
       "chapterPlate": "courtyard_rally_chapter_plate.png",
-      "parallaxBg": "courtyard_parallax_background.png"
+      "parallaxBg": "courtyard_parallax_background.png",
+      "levelData": "chapter-6.json"
     }
   },
   {
@@ -88,11 +207,22 @@
     "name": "BELL TOWER",
     "setting": "Highest Spire",
     "quest": "Sound the Alarm",
+    "questDescription": "Climb the bell tower against fierce winds to rally all of Willowmere for the final battle.",
     "hasBoss": true,
     "bossName": "Bell Tower Sentinel",
+    "bossDescription": "A Galeborn crow commander, Zephyros's eyes in the sky, blocking the bells.",
+    "mechanics": {
+      "introduced": ["wind_mechanics", "advanced_vertical", "bell_puzzles"],
+      "focus": "climax_buildup"
+    },
+    "difficulty": 6,
+    "estimatedMinutes": 15,
+    "secrets": 1,
+    "npcs": [],
     "assets": {
       "chapterPlate": "rooftop_wind_chapter_plate.png",
-      "parallaxBg": "rooftops_parallax_background.png"
+      "parallaxBg": "rooftops_parallax_background.png",
+      "levelData": "chapter-7.json"
     }
   },
   {
@@ -100,11 +230,22 @@
     "name": "STORM'S EDGE",
     "setting": "Outer Ramparts",
     "quest": "Face Zephyros",
+    "questDescription": "Confront the lord of cold on the storm-battered ramparts and end the threat to Willowmere forever.",
     "hasBoss": true,
     "bossName": "Zephyros",
+    "bossDescription": "The storm hawk himself. Spirit of bitter wind and frozen ambition. The final challenge.",
+    "mechanics": {
+      "introduced": ["all_mechanics_combined", "multi_phase_boss", "environmental_hazards"],
+      "focus": "final_battle"
+    },
+    "difficulty": 8,
+    "estimatedMinutes": 20,
+    "secrets": 0,
+    "npcs": [],
     "assets": {
       "chapterPlate": "final_ascent_chapter_plate.png",
-      "parallaxBg": "rooftops_parallax_background.png"
+      "parallaxBg": "rooftops_parallax_background.png",
+      "levelData": "chapter-8.json"
     }
   },
   {
@@ -112,11 +253,43 @@
     "name": "NEW DAWN",
     "setting": "The Great Hearth",
     "quest": "The Everember Rekindled",
+    "questDescription": "Return to the Great Hall as dawn breaks. The storm has passed. Willowmere celebrates.",
     "hasBoss": false,
     "bossName": null,
+    "mechanics": {
+      "introduced": [],
+      "focus": "resolution"
+    },
+    "difficulty": 1,
+    "estimatedMinutes": 5,
+    "secrets": 1,
+    "npcs": [
+      {
+        "id": "elder_oakpaw_ceremony",
+        "name": "Elder Oakpaw",
+        "species": "badger",
+        "role": "elder",
+        "dialogue": "The Everember recognizes you. Willowmere thanks you."
+      },
+      {
+        "id": "thornback_victory",
+        "name": "Thornback",
+        "species": "badger",
+        "role": "defender",
+        "dialogue": "You did it, young otter. The cold retreats."
+      },
+      {
+        "id": "sage_featherquill_victory",
+        "name": "Sage Featherquill",
+        "species": "owl",
+        "role": "sage",
+        "dialogue": "The chronicles will remember this day."
+      }
+    ],
     "assets": {
       "chapterPlate": "epilogue_victory_chapter_plate.png",
-      "parallaxBg": "new_dawn_hall_parallax_background.png"
+      "parallaxBg": "new_dawn_hall_parallax_background.png",
+      "levelData": "chapter-9.json"
     }
   }
 ]

@@ -1,0 +1,463 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 7,
+  "chapterId": 7,
+  "name": "Bell Tower",
+  "description": "Climb the highest spire against fierce winds and sound the alarm to rally all of Willowmere.",
+  "bounds": {
+    "width": 1600,
+    "height": 1800
+  },
+  "spawn": {
+    "x": 100,
+    "y": 200
+  },
+  "exit": {
+    "x": 1500,
+    "y": 1650,
+    "width": 100,
+    "height": 150,
+    "targetChapter": 8
+  },
+  "platforms": [
+    {
+      "id": "tower_base",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_1",
+      "x": 300,
+      "y": 200,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_2",
+      "x": 500,
+      "y": 280,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "first_landing",
+      "x": 600,
+      "y": 0,
+      "width": 400,
+      "height": 350,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "arrow_slit_ledge_1",
+      "x": 550,
+      "y": 420,
+      "width": 100,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_3",
+      "x": 700,
+      "y": 480,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_4",
+      "x": 900,
+      "y": 550,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wind_platform_1",
+      "x": 750,
+      "y": 650,
+      "width": 120,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wind_platform_2",
+      "x": 950,
+      "y": 720,
+      "width": 120,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "second_landing",
+      "x": 1000,
+      "y": 350,
+      "width": 350,
+      "height": 400,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "rafter_1",
+      "x": 800,
+      "y": 850,
+      "width": 200,
+      "height": 20,
+      "type": "passthrough",
+      "material": "wood"
+    },
+    {
+      "id": "rafter_2",
+      "x": 1050,
+      "y": 920,
+      "width": 200,
+      "height": 20,
+      "type": "passthrough",
+      "material": "wood"
+    },
+    {
+      "id": "spiral_5",
+      "x": 1150,
+      "y": 1000,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wind_platform_3",
+      "x": 900,
+      "y": 1080,
+      "width": 120,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wind_platform_4",
+      "x": 1100,
+      "y": 1150,
+      "width": 120,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_6",
+      "x": 1250,
+      "y": 1220,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_7",
+      "x": 1050,
+      "y": 1300,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bell_chamber_floor",
+      "x": 900,
+      "y": 750,
+      "width": 600,
+      "height": 600,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bell_platform",
+      "x": 1100,
+      "y": 1450,
+      "width": 300,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bell_rope_ledge",
+      "x": 1200,
+      "y": 1550,
+      "width": 100,
+      "height": 25,
+      "type": "solid",
+      "material": "wood"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "tower_base_torch",
+      "x": 200,
+      "y": 180,
+      "isStart": true
+    },
+    {
+      "id": "first_landing_torch",
+      "x": 750,
+      "y": 380
+    },
+    {
+      "id": "second_landing_torch",
+      "x": 1150,
+      "y": 780
+    }
+  ],
+  "enemies": [
+    {
+      "id": "flyer_tower_1",
+      "type": "flyer",
+      "x": 600,
+      "y": 500,
+      "patrolPath": [
+        { "x": 500, "y": 500 },
+        { "x": 700, "y": 550 },
+        { "x": 600, "y": 500 }
+      ]
+    },
+    {
+      "id": "flyer_tower_2",
+      "type": "flyer",
+      "x": 900,
+      "y": 800,
+      "patrolPath": [
+        { "x": 800, "y": 800 },
+        { "x": 1000, "y": 850 },
+        { "x": 900, "y": 800 }
+      ]
+    },
+    {
+      "id": "flyer_tower_3",
+      "type": "flyer",
+      "x": 1000,
+      "y": 1100,
+      "patrolPath": [
+        { "x": 900, "y": 1100 },
+        { "x": 1100, "y": 1150 },
+        { "x": 1000, "y": 1100 }
+      ]
+    },
+    {
+      "id": "ranged_rafter",
+      "type": "ranged",
+      "x": 1150,
+      "y": 960,
+      "patrolPath": []
+    }
+  ],
+  "boss": {
+    "id": "bell_tower_sentinel",
+    "name": "Bell Tower Sentinel",
+    "type": "elite",
+    "x": 1250,
+    "y": 1530,
+    "health": 22,
+    "phases": [
+      {
+        "healthThreshold": 1.0,
+        "patterns": ["diving_strike", "wing_buffet"],
+        "speed": 1.2
+      },
+      {
+        "healthThreshold": 0.5,
+        "patterns": ["diving_strike", "wing_buffet", "summon_flyers"],
+        "speed": 1.4
+      }
+    ],
+    "arena": {
+      "x": 900,
+      "y": 1350,
+      "width": 600,
+      "height": 450
+    }
+  },
+  "collectibles": [
+    {
+      "id": "shard_spiral_1",
+      "type": "shard",
+      "x": 425,
+      "y": 250,
+      "value": 1
+    },
+    {
+      "id": "shard_landing_1",
+      "type": "shard",
+      "x": 800,
+      "y": 380,
+      "value": 1
+    },
+    {
+      "id": "health_rafter",
+      "type": "health",
+      "x": 900,
+      "y": 890,
+      "value": 1
+    },
+    {
+      "id": "shard_wind_1",
+      "type": "shard",
+      "x": 1010,
+      "y": 760,
+      "value": 1
+    },
+    {
+      "id": "shard_spiral_upper",
+      "type": "shard",
+      "x": 1125,
+      "y": 1340,
+      "value": 1
+    },
+    {
+      "id": "secret_hidden_ledge",
+      "type": "secret",
+      "x": 600,
+      "y": 470,
+      "value": 5
+    }
+  ],
+  "triggers": [
+    {
+      "id": "chapter_7_opening",
+      "x": 50,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "chapter_7_opening"
+      }
+    },
+    {
+      "id": "wind_warning",
+      "x": 700,
+      "y": 600,
+      "width": 100,
+      "height": 200,
+      "type": "tutorial",
+      "once": true,
+      "data": {
+        "message": "Strong winds! Time your jumps carefully.",
+        "highlight": "wind_mechanics"
+      }
+    },
+    {
+      "id": "boss_intro",
+      "x": 1100,
+      "y": 1400,
+      "width": 50,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "boss_start",
+        "bossId": "bell_tower_sentinel"
+      }
+    },
+    {
+      "id": "sound_the_bells",
+      "x": 1200,
+      "y": 1500,
+      "width": 100,
+      "height": 150,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "sound_bells",
+        "effect": "bells_ring"
+      }
+    },
+    {
+      "id": "chapter_complete",
+      "x": 1400,
+      "y": 1550,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "data": {
+        "event": "chapter_complete",
+        "nextChapter": 8
+      }
+    }
+  ],
+  "hazards": [
+    {
+      "id": "wind_zone_1",
+      "x": 700,
+      "y": 600,
+      "width": 300,
+      "height": 200,
+      "type": "wind",
+      "direction": { "x": -1, "y": 0 },
+      "strength": 3
+    },
+    {
+      "id": "wind_zone_2",
+      "x": 850,
+      "y": 1000,
+      "width": 350,
+      "height": 250,
+      "type": "wind",
+      "direction": { "x": 1, "y": -0.3 },
+      "strength": 4
+    }
+  ],
+  "decorations": [
+    {
+      "id": "arrow_slit_1",
+      "type": "prop",
+      "x": 550,
+      "y": 400,
+      "layer": "background",
+      "sprite": "arrow_slit"
+    },
+    {
+      "id": "great_bell",
+      "type": "prop",
+      "x": 1200,
+      "y": 1480,
+      "layer": "foreground",
+      "sprite": "great_bell",
+      "animated": true
+    },
+    {
+      "id": "rope_coil",
+      "type": "prop",
+      "x": 1225,
+      "y": 1580,
+      "layer": "foreground",
+      "sprite": "bell_rope"
+    },
+    {
+      "id": "storm_clouds",
+      "type": "effect",
+      "x": 0,
+      "y": 1200,
+      "layer": "far_background",
+      "sprite": "storm_clouds",
+      "animated": true
+    }
+  ],
+  "ambiance": {
+    "music": "bell_tower",
+    "ambientSounds": ["howling_wind", "distant_thunder", "creaking_wood", "bird_cries"],
+    "lighting": "storm_dramatic",
+    "weather": "stormy"
+  }
+}

@@ -1,0 +1,412 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 6,
+  "chapterId": 6,
+  "name": "Kitchen Gardens",
+  "description": "Rally the defenders of Willowmere in the sunlit gardens and prepare for the final push.",
+  "bounds": {
+    "width": 3000,
+    "height": 700
+  },
+  "spawn": {
+    "x": 100,
+    "y": 200
+  },
+  "exit": {
+    "x": 2900,
+    "y": 150,
+    "width": 100,
+    "height": 250,
+    "targetChapter": 7
+  },
+  "platforms": [
+    {
+      "id": "garden_entrance",
+      "x": 0,
+      "y": 0,
+      "width": 500,
+      "height": 150,
+      "type": "solid",
+      "material": "grass"
+    },
+    {
+      "id": "vegetable_plot_1",
+      "x": 500,
+      "y": 0,
+      "width": 400,
+      "height": 150,
+      "type": "solid",
+      "material": "soil"
+    },
+    {
+      "id": "herb_spiral",
+      "x": 700,
+      "y": 180,
+      "width": 150,
+      "height": 60,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "training_yard",
+      "x": 900,
+      "y": 0,
+      "width": 600,
+      "height": 150,
+      "type": "solid",
+      "material": "dirt"
+    },
+    {
+      "id": "training_platform_1",
+      "x": 1000,
+      "y": 200,
+      "width": 120,
+      "height": 30,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "training_platform_2",
+      "x": 1200,
+      "y": 250,
+      "width": 120,
+      "height": 30,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "training_platform_3",
+      "x": 1400,
+      "y": 200,
+      "width": 120,
+      "height": 30,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "fountain_plaza",
+      "x": 1500,
+      "y": 0,
+      "width": 500,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "fountain_rim",
+      "x": 1700,
+      "y": 150,
+      "width": 150,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "trellis_walkway",
+      "x": 2000,
+      "y": 0,
+      "width": 400,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "trellis_beam_1",
+      "x": 2100,
+      "y": 280,
+      "width": 100,
+      "height": 20,
+      "type": "passthrough",
+      "material": "wood"
+    },
+    {
+      "id": "trellis_beam_2",
+      "x": 2250,
+      "y": 320,
+      "width": 100,
+      "height": 20,
+      "type": "passthrough",
+      "material": "wood"
+    },
+    {
+      "id": "tower_approach",
+      "x": 2400,
+      "y": 0,
+      "width": 600,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "garden_entrance_fire",
+      "x": 200,
+      "y": 180,
+      "isStart": true
+    },
+    {
+      "id": "training_yard_fire",
+      "x": 1100,
+      "y": 180
+    },
+    {
+      "id": "fountain_fire",
+      "x": 1750,
+      "y": 230
+    }
+  ],
+  "enemies": [
+    {
+      "id": "flyer_garden_1",
+      "type": "flyer",
+      "x": 600,
+      "y": 350,
+      "patrolPath": [
+        { "x": 500, "y": 350 },
+        { "x": 700, "y": 400 },
+        { "x": 600, "y": 350 }
+      ]
+    },
+    {
+      "id": "skirmisher_yard_1",
+      "type": "skirmisher",
+      "x": 1050,
+      "y": 180,
+      "patrolPath": [
+        { "x": 950, "y": 180 },
+        { "x": 1150, "y": 180 }
+      ]
+    },
+    {
+      "id": "skirmisher_yard_2",
+      "type": "skirmisher",
+      "x": 1350,
+      "y": 180,
+      "patrolPath": [
+        { "x": 1250, "y": 180 },
+        { "x": 1450, "y": 180 }
+      ]
+    },
+    {
+      "id": "ranged_trellis",
+      "type": "ranged",
+      "x": 2175,
+      "y": 320,
+      "patrolPath": []
+    },
+    {
+      "id": "shielded_approach",
+      "type": "shielded",
+      "x": 2600,
+      "y": 180,
+      "patrolPath": [
+        { "x": 2500, "y": 180 },
+        { "x": 2700, "y": 180 }
+      ]
+    }
+  ],
+  "allies": [
+    {
+      "id": "recruit_mouse_1",
+      "species": "mouse",
+      "name": "Pip",
+      "x": 1050,
+      "y": 180,
+      "role": "trainee",
+      "joinsTrigger": "rally_complete"
+    },
+    {
+      "id": "recruit_squirrel_1",
+      "species": "squirrel",
+      "name": "Nutkin",
+      "x": 1250,
+      "y": 280,
+      "role": "scout",
+      "joinsTrigger": "rally_complete"
+    },
+    {
+      "id": "recruit_badger_1",
+      "species": "badger",
+      "name": "Thornback",
+      "x": 1775,
+      "y": 230,
+      "role": "defender",
+      "joinsTrigger": "rally_complete"
+    }
+  ],
+  "collectibles": [
+    {
+      "id": "shard_plot",
+      "type": "shard",
+      "x": 650,
+      "y": 180,
+      "value": 1
+    },
+    {
+      "id": "shard_herb",
+      "type": "shard",
+      "x": 775,
+      "y": 270,
+      "value": 1
+    },
+    {
+      "id": "health_training",
+      "type": "health",
+      "x": 1260,
+      "y": 300,
+      "value": 1
+    },
+    {
+      "id": "shard_fountain",
+      "type": "shard",
+      "x": 1775,
+      "y": 230,
+      "value": 1
+    },
+    {
+      "id": "shard_trellis",
+      "type": "shard",
+      "x": 2300,
+      "y": 370,
+      "value": 1
+    },
+    {
+      "id": "secret_hidden_garden",
+      "type": "secret",
+      "x": 2150,
+      "y": 320,
+      "value": 5
+    }
+  ],
+  "triggers": [
+    {
+      "id": "chapter_6_opening",
+      "x": 50,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "chapter_6_opening"
+      }
+    },
+    {
+      "id": "rally_start",
+      "x": 1000,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Finn",
+        "lines": [
+          "The Hearthhold needs every paw that can hold a blade.",
+          "Will you stand with me?"
+        ]
+      }
+    },
+    {
+      "id": "rally_complete",
+      "x": 1600,
+      "y": 100,
+      "width": 200,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "rally_defenders",
+        "allies": ["recruit_mouse_1", "recruit_squirrel_1", "recruit_badger_1"]
+      }
+    },
+    {
+      "id": "thornback_speech",
+      "x": 1700,
+      "y": 100,
+      "width": 200,
+      "height": 200,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Thornback",
+        "npcSpecies": "badger",
+        "lines": [
+          "Young otter, I've seen the cold ones massing beyond the walls.",
+          "We'll need to sound the bells. To the tower!"
+        ]
+      }
+    },
+    {
+      "id": "chapter_complete",
+      "x": 2800,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "data": {
+        "event": "chapter_complete",
+        "nextChapter": 7
+      }
+    }
+  ],
+  "hazards": [],
+  "decorations": [
+    {
+      "id": "vegetable_rows",
+      "type": "prop",
+      "x": 550,
+      "y": 150,
+      "layer": "background",
+      "sprite": "vegetable_garden"
+    },
+    {
+      "id": "training_dummy_1",
+      "type": "prop",
+      "x": 1050,
+      "y": 150,
+      "layer": "foreground",
+      "sprite": "training_dummy"
+    },
+    {
+      "id": "training_dummy_2",
+      "type": "prop",
+      "x": 1350,
+      "y": 150,
+      "layer": "foreground",
+      "sprite": "training_dummy"
+    },
+    {
+      "id": "fountain",
+      "type": "prop",
+      "x": 1725,
+      "y": 150,
+      "layer": "background",
+      "sprite": "garden_fountain",
+      "animated": true
+    },
+    {
+      "id": "rose_trellis",
+      "type": "prop",
+      "x": 2100,
+      "y": 150,
+      "layer": "background",
+      "sprite": "rose_trellis"
+    },
+    {
+      "id": "banner_rally",
+      "type": "prop",
+      "x": 1750,
+      "y": 300,
+      "layer": "foreground",
+      "sprite": "hearthhold_banner"
+    }
+  ],
+  "ambiance": {
+    "music": "kitchen_gardens",
+    "ambientSounds": ["birdsong_bright", "fountain_splash", "training_strikes", "wind_leaves"],
+    "lighting": "bright_daylight",
+    "weather": "clear"
+  }
+}

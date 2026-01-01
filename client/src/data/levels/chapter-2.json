@@ -1,0 +1,369 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 2,
+  "chapterId": 2,
+  "name": "The Gatehouse",
+  "description": "Cross the ancient bridge and prove yourself worthy to enter Willowmere Hearthhold.",
+  "bounds": {
+    "width": 2800,
+    "height": 900
+  },
+  "spawn": {
+    "x": 100,
+    "y": 300
+  },
+  "exit": {
+    "x": 2700,
+    "y": 400,
+    "width": 100,
+    "height": 300,
+    "targetChapter": 3
+  },
+  "platforms": [
+    {
+      "id": "approach_ground",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 250,
+      "type": "solid",
+      "material": "grass"
+    },
+    {
+      "id": "bridge_section_1",
+      "x": 400,
+      "y": 200,
+      "width": 300,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bridge_section_2",
+      "x": 700,
+      "y": 200,
+      "width": 300,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bridge_section_3",
+      "x": 1000,
+      "y": 200,
+      "width": 300,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "gatehouse_platform",
+      "x": 1300,
+      "y": 0,
+      "width": 800,
+      "height": 250,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wall_ledge_1",
+      "x": 1400,
+      "y": 350,
+      "width": 150,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wall_ledge_2",
+      "x": 1600,
+      "y": 420,
+      "width": 150,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "wall_ledge_3",
+      "x": 1800,
+      "y": 500,
+      "width": 150,
+      "height": 25,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "tower_base",
+      "x": 2000,
+      "y": 0,
+      "width": 400,
+      "height": 550,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "tower_platform",
+      "x": 2050,
+      "y": 580,
+      "width": 300,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "gate_landing",
+      "x": 2400,
+      "y": 0,
+      "width": 400,
+      "height": 350,
+      "type": "solid",
+      "material": "stone"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "approach_fire",
+      "x": 200,
+      "y": 280,
+      "isStart": true
+    },
+    {
+      "id": "bridge_mid_fire",
+      "x": 850,
+      "y": 280
+    },
+    {
+      "id": "gatehouse_fire",
+      "x": 1500,
+      "y": 280
+    }
+  ],
+  "enemies": [
+    {
+      "id": "skirmisher_bridge_1",
+      "type": "skirmisher",
+      "x": 550,
+      "y": 280,
+      "patrolPath": [
+        { "x": 450, "y": 280 },
+        { "x": 650, "y": 280 }
+      ]
+    },
+    {
+      "id": "skirmisher_bridge_2",
+      "type": "skirmisher",
+      "x": 1100,
+      "y": 280,
+      "patrolPath": [
+        { "x": 1050, "y": 280 },
+        { "x": 1200, "y": 280 }
+      ]
+    },
+    {
+      "id": "ranged_gatehouse",
+      "type": "ranged",
+      "x": 1700,
+      "y": 280,
+      "patrolPath": []
+    }
+  ],
+  "boss": {
+    "id": "gatehouse_guardian",
+    "name": "Gatehouse Guardian",
+    "type": "elite",
+    "x": 2200,
+    "y": 400,
+    "health": 15,
+    "phases": [
+      {
+        "healthThreshold": 1.0,
+        "patterns": ["charge", "ground_slam"],
+        "speed": 1.0
+      },
+      {
+        "healthThreshold": 0.5,
+        "patterns": ["charge", "ground_slam", "summon_skirmishers"],
+        "speed": 1.2
+      }
+    ],
+    "arena": {
+      "x": 2000,
+      "y": 350,
+      "width": 600,
+      "height": 400
+    }
+  },
+  "collectibles": [
+    {
+      "id": "shard_bridge_1",
+      "type": "shard",
+      "x": 500,
+      "y": 280,
+      "value": 1
+    },
+    {
+      "id": "shard_bridge_2",
+      "type": "shard",
+      "x": 800,
+      "y": 280,
+      "value": 1
+    },
+    {
+      "id": "shard_bridge_3",
+      "type": "shard",
+      "x": 1150,
+      "y": 280,
+      "value": 1
+    },
+    {
+      "id": "health_wall",
+      "type": "health",
+      "x": 1675,
+      "y": 470,
+      "value": 1
+    },
+    {
+      "id": "shard_tower",
+      "type": "shard",
+      "x": 2200,
+      "y": 630,
+      "value": 1
+    },
+    {
+      "id": "secret_battlement",
+      "type": "secret",
+      "x": 1875,
+      "y": 550,
+      "value": 5
+    }
+  ],
+  "triggers": [
+    {
+      "id": "chapter_2_opening",
+      "x": 50,
+      "y": 200,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "chapter_2_opening"
+      }
+    },
+    {
+      "id": "tutorial_parry",
+      "x": 450,
+      "y": 200,
+      "width": 100,
+      "height": 200,
+      "type": "tutorial",
+      "once": true,
+      "data": {
+        "message": "Time your ATTACK just before an enemy strikes to parry",
+        "highlight": "parry"
+      }
+    },
+    {
+      "id": "boss_intro",
+      "x": 2000,
+      "y": 350,
+      "width": 50,
+      "height": 200,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "boss_start",
+        "bossId": "gatehouse_guardian"
+      }
+    },
+    {
+      "id": "gatekeeper_dialogue",
+      "x": 2500,
+      "y": 350,
+      "width": 200,
+      "height": 200,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Bramble the Gatekeeper",
+        "npcSpecies": "hedgehog",
+        "lines": [
+          "You carry the Otterblade... I've been expecting you.",
+          "The Hearthhold awaits. Enter, young guardian."
+        ]
+      }
+    },
+    {
+      "id": "chapter_complete",
+      "x": 2650,
+      "y": 350,
+      "width": 100,
+      "height": 300,
+      "type": "event",
+      "data": {
+        "event": "chapter_complete",
+        "nextChapter": 3
+      }
+    }
+  ],
+  "hazards": [
+    {
+      "id": "moat",
+      "x": 400,
+      "y": -100,
+      "width": 900,
+      "height": 200,
+      "type": "water",
+      "damage": 1,
+      "respawnPoint": { "x": 350, "y": 280 }
+    }
+  ],
+  "decorations": [
+    {
+      "id": "gatehouse_structure",
+      "type": "building",
+      "x": 1300,
+      "y": 250,
+      "layer": "background",
+      "sprite": "gatehouse_exterior"
+    },
+    {
+      "id": "banner_1",
+      "type": "prop",
+      "x": 1350,
+      "y": 400,
+      "layer": "foreground",
+      "sprite": "hearthhold_banner"
+    },
+    {
+      "id": "banner_2",
+      "type": "prop",
+      "x": 1650,
+      "y": 400,
+      "layer": "foreground",
+      "sprite": "hearthhold_banner"
+    },
+    {
+      "id": "lantern_1",
+      "type": "light",
+      "x": 550,
+      "y": 320,
+      "layer": "foreground",
+      "sprite": "bridge_lantern"
+    },
+    {
+      "id": "lantern_2",
+      "type": "light",
+      "x": 950,
+      "y": 320,
+      "layer": "foreground",
+      "sprite": "bridge_lantern"
+    }
+  ],
+  "ambiance": {
+    "music": "gatehouse_approach",
+    "ambientSounds": ["wind_stone", "chains_creak", "distant_bells"],
+    "lighting": "evening",
+    "weather": "overcast"
+  }
+}

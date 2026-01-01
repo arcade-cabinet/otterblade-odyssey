@@ -1,0 +1,373 @@
+{
+  "$schema": "./level-schema.json",
+  "id": 4,
+  "chapterId": 4,
+  "name": "The Archives",
+  "description": "Climb the Library Spire and find the ancient map that reveals Zephyros's approach.",
+  "bounds": {
+    "width": 2000,
+    "height": 1200
+  },
+  "spawn": {
+    "x": 100,
+    "y": 200
+  },
+  "exit": {
+    "x": 1900,
+    "y": 1050,
+    "width": 100,
+    "height": 150,
+    "targetChapter": 5
+  },
+  "platforms": [
+    {
+      "id": "entrance_floor",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 150,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_stair_1",
+      "x": 350,
+      "y": 200,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bookshelf_ledge_1",
+      "x": 150,
+      "y": 300,
+      "width": 200,
+      "height": 25,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "spiral_stair_2",
+      "x": 400,
+      "y": 380,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "reading_alcove",
+      "x": 600,
+      "y": 280,
+      "width": 300,
+      "height": 100,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "spiral_stair_3",
+      "x": 500,
+      "y": 480,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "bookshelf_ledge_2",
+      "x": 200,
+      "y": 550,
+      "width": 250,
+      "height": 25,
+      "type": "solid",
+      "material": "wood"
+    },
+    {
+      "id": "spiral_stair_4",
+      "x": 450,
+      "y": 630,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "moving_ladder",
+      "x": 700,
+      "y": 600,
+      "width": 60,
+      "height": 200,
+      "type": "moving",
+      "material": "wood",
+      "movementPath": [
+        { "x": 700, "y": 600 },
+        { "x": 900, "y": 600 }
+      ],
+      "movementSpeed": 50
+    },
+    {
+      "id": "upper_gallery",
+      "x": 900,
+      "y": 550,
+      "width": 500,
+      "height": 50,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_stair_5",
+      "x": 1200,
+      "y": 700,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "spiral_stair_6",
+      "x": 1000,
+      "y": 800,
+      "width": 150,
+      "height": 30,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "map_room_floor",
+      "x": 1100,
+      "y": 900,
+      "width": 600,
+      "height": 100,
+      "type": "solid",
+      "material": "stone"
+    },
+    {
+      "id": "map_table_platform",
+      "x": 1400,
+      "y": 1000,
+      "width": 200,
+      "height": 50,
+      "type": "solid",
+      "material": "wood"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "entrance_candle",
+      "x": 200,
+      "y": 180,
+      "isStart": true
+    },
+    {
+      "id": "reading_alcove_lamp",
+      "x": 750,
+      "y": 410
+    },
+    {
+      "id": "map_room_sconce",
+      "x": 1300,
+      "y": 1030
+    }
+  ],
+  "enemies": [
+    {
+      "id": "flyer_library_1",
+      "type": "flyer",
+      "x": 400,
+      "y": 450,
+      "patrolPath": [
+        { "x": 300, "y": 450 },
+        { "x": 500, "y": 500 },
+        { "x": 400, "y": 450 }
+      ]
+    },
+    {
+      "id": "flyer_library_2",
+      "type": "flyer",
+      "x": 800,
+      "y": 700,
+      "patrolPath": [
+        { "x": 700, "y": 700 },
+        { "x": 900, "y": 750 },
+        { "x": 800, "y": 700 }
+      ]
+    },
+    {
+      "id": "skirmisher_gallery",
+      "type": "skirmisher",
+      "x": 1100,
+      "y": 630,
+      "patrolPath": [
+        { "x": 950, "y": 630 },
+        { "x": 1300, "y": 630 }
+      ]
+    }
+  ],
+  "collectibles": [
+    {
+      "id": "shard_stair_1",
+      "type": "shard",
+      "x": 425,
+      "y": 250,
+      "value": 1
+    },
+    {
+      "id": "shard_bookshelf",
+      "type": "shard",
+      "x": 250,
+      "y": 350,
+      "value": 1
+    },
+    {
+      "id": "health_alcove",
+      "type": "health",
+      "x": 750,
+      "y": 330,
+      "value": 1
+    },
+    {
+      "id": "shard_gallery",
+      "type": "shard",
+      "x": 1050,
+      "y": 640,
+      "value": 1
+    },
+    {
+      "id": "shard_upper",
+      "type": "shard",
+      "x": 1275,
+      "y": 750,
+      "value": 1
+    },
+    {
+      "id": "secret_hidden_tome",
+      "type": "secret",
+      "x": 325,
+      "y": 600,
+      "value": 5
+    }
+  ],
+  "triggers": [
+    {
+      "id": "chapter_4_opening",
+      "x": 50,
+      "y": 100,
+      "width": 100,
+      "height": 200,
+      "type": "cutscene",
+      "once": true,
+      "data": {
+        "cinematicId": "chapter_4_opening"
+      }
+    },
+    {
+      "id": "librarian_greeting",
+      "x": 550,
+      "y": 280,
+      "width": 100,
+      "height": 150,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Sage Featherquill",
+        "npcSpecies": "owl",
+        "lines": [
+          "Ah, the new bearer of the Otterblade.",
+          "The map you seek is in the upper chamber.",
+          "Beware—the Galeborn have sent scouts even here."
+        ]
+      }
+    },
+    {
+      "id": "map_discovery",
+      "x": 1400,
+      "y": 1000,
+      "width": 200,
+      "height": 100,
+      "type": "event",
+      "once": true,
+      "data": {
+        "event": "map_discovery",
+        "item": "ancient_map"
+      }
+    },
+    {
+      "id": "map_reading",
+      "x": 1450,
+      "y": 1000,
+      "width": 100,
+      "height": 100,
+      "type": "dialogue",
+      "once": true,
+      "data": {
+        "speaker": "Finn",
+        "lines": [
+          "This map... it shows the old passages beneath the Hearthhold.",
+          "Zephyros's forces are using them. I must warn the others!"
+        ]
+      }
+    },
+    {
+      "id": "chapter_complete",
+      "x": 1800,
+      "y": 900,
+      "width": 100,
+      "height": 200,
+      "type": "event",
+      "data": {
+        "event": "chapter_complete",
+        "nextChapter": 5
+      }
+    }
+  ],
+  "hazards": [],
+  "decorations": [
+    {
+      "id": "bookshelf_tall_1",
+      "type": "prop",
+      "x": 100,
+      "y": 150,
+      "layer": "background",
+      "sprite": "bookshelf_tall"
+    },
+    {
+      "id": "bookshelf_tall_2",
+      "type": "prop",
+      "x": 300,
+      "y": 150,
+      "layer": "background",
+      "sprite": "bookshelf_tall"
+    },
+    {
+      "id": "reading_desk",
+      "type": "prop",
+      "x": 700,
+      "y": 380,
+      "layer": "foreground",
+      "sprite": "reading_desk"
+    },
+    {
+      "id": "map_table",
+      "type": "prop",
+      "x": 1450,
+      "y": 1050,
+      "layer": "foreground",
+      "sprite": "map_table"
+    },
+    {
+      "id": "scroll_rack",
+      "type": "prop",
+      "x": 1600,
+      "y": 1000,
+      "layer": "background",
+      "sprite": "scroll_rack"
+    }
+  ],
+  "ambiance": {
+    "music": "library_spire",
+    "ambientSounds": ["page_turning", "quill_scratching", "owl_hoot", "wind_through_windows"],
+    "lighting": "candlelit",
+    "weather": "indoor"
+  }
+}
