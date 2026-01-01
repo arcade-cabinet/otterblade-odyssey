@@ -10,8 +10,8 @@
  * This is like enemy AI, but with player capabilities.
  */
 
-import type { NavigationNode, LevelGeometry } from './level-parser';
-import { findPath, findNearestPlatform } from './level-parser';
+import type { LevelGeometry, NavigationNode } from './level-parser';
+import { findNearestPlatform, findPath } from './level-parser';
 
 export type PlayerAction =
   | 'idle'
@@ -97,11 +97,7 @@ export class AIPlayer {
     }
 
     // Use A* to find path
-    const path = findPath(
-      this.config.geometry.navigationGraph,
-      startPlatform.id,
-      endPlatform.id
-    );
+    const path = findPath(this.config.geometry.navigationGraph, startPlatform.id, endPlatform.id);
 
     if (path) {
       this.path = path;
@@ -139,8 +135,7 @@ export class AIPlayer {
 
     // Check if we've reached current waypoint
     const distToTarget = Math.sqrt(
-      Math.pow(targetNode.x - this.state.x, 2) +
-      Math.pow(targetNode.y - this.state.y, 2)
+      (targetNode.x - this.state.x) ** 2 + (targetNode.y - this.state.y) ** 2
     );
 
     if (distToTarget < 50) {
@@ -180,7 +175,7 @@ export class AIPlayer {
 
     // Get the edge to current target
     const prevNode = this.currentPathIndex > 0 ? this.path[this.currentPathIndex - 1] : null;
-    const edge = prevNode?.connections.find(c => c.to === target.platform.id);
+    const edge = prevNode?.connections.find((c) => c.to === target.platform.id);
 
     // Execute action based on edge type
     if (edge) {
@@ -199,7 +194,7 @@ export class AIPlayer {
 
         case 'walk':
           // Simple horizontal movement
-          return Math.abs(dx) < 10 ? 'idle' : (dx > 0 ? 'move_right' : 'move_left');
+          return Math.abs(dx) < 10 ? 'idle' : dx > 0 ? 'move_right' : 'move_left';
       }
     }
 
@@ -252,8 +247,7 @@ export class AIPlayer {
    */
   public isGoalReached(): boolean {
     const distToGoal = Math.sqrt(
-      Math.pow(this.config.goalX - this.state.x, 2) +
-      Math.pow(this.config.goalY - this.state.y, 2)
+      (this.config.goalX - this.state.x) ** 2 + (this.config.goalY - this.state.y) ** 2
     );
     return distToGoal < 100;
   }
@@ -279,7 +273,6 @@ export function actionToKeyboard(action: PlayerAction): {
       return { press: ['KeyC'] };
     case 'slink':
       return { press: ['ArrowDown'] };
-    case 'idle':
     default:
       return { release: ['ArrowLeft', 'ArrowRight', 'ArrowDown'] };
   }
