@@ -439,15 +439,15 @@
         
         World.add(engine.world, [player, ground]);
         
-        // Biome colors (warm abbey stone to cold outer ramparts)
+        // Biome colors (warm Hearthhold stone to cold outer ramparts)
         const biomes = [
             { name: 'gatehouse', colors: ['#D4A574', '#8B7355', '#6B5D4F'], warmth: 0.8 },
             { name: 'ramparts', colors: ['#7F8C8D', '#5D6D7E', '#455A64'], warmth: 0.5 },
             { name: 'frozen', colors: ['#5DADE2', '#3498DB', '#2C3E50'], warmth: 0.2 }
         ];
         
-        // Generate abbey platform
-        function generateAbbeyPlatform(x, minY, maxY) {
+        // Generate Hearthhold platform
+        function generateHearthholdPlatform(x, minY, maxY) {
             const y = minY + Math.random() * (maxY - minY);
             const width = 120 + Math.random() * 180;
             const height = 25;
@@ -533,10 +533,10 @@
             const biomeTransition = Math.floor(startX / 2000);
             gameState.currentBiome = Math.min(biomeTransition, biomes.length - 1);
             
-            // Abbey platforms
+            // Hearthhold platforms
             for (let i = 0; i < 6; i++) {
                 const x = startX + 250 + i * 320;
-                generateAbbeyPlatform(x, canvas.height - 450, canvas.height - 180);
+                generateHearthholdPlatform(x, canvas.height - 450, canvas.height - 180);
             }
             
             // Galeborn enemies
@@ -1196,7 +1196,7 @@
                 ctx.restore();
                 
             } else if (item.itemType === 'lantern') {
-                // Abbey lantern
+                // Hearthhold lantern
                 const lanternGlow = item.lit ? 0.8 : 0.3;
                 
                 if (item.lit) {
@@ -1287,8 +1287,8 @@
             ctx.restore();
         }
         
-        // Draw abbey platform with detail
-        function drawAbbeyPlatform(ctx, platform) {
+        // Draw Hearthhold platform with detail
+        function drawHearthholdPlatform(ctx, platform) {
             const width = platform.bounds.max.x - platform.bounds.min.x;
             const height = platform.bounds.max.y - platform.bounds.min.y;
             const x = platform.position.x - width / 2;
@@ -1619,7 +1619,7 @@
             ctx.fillStyle = skyGradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Distant abbey walls
+            // Distant Hearthhold walls
             for (let x = 0; x < canvas.width; x += 20) {
                 const worldX = x + bgOffset;
                 const noiseValue = noise.noise(worldX * 0.0008, gameState.currentBiome * 5);
@@ -1639,7 +1639,7 @@
             }
             ctx.globalAlpha = 1;
             
-            // Abbey features (arches, windows)
+            // Hearthhold features (arches, windows)
             const archOffset = cameraX * 0.35;
             for (let i = 0; i < 6; i++) {
                 const wx = (i * 500 - archOffset) % (canvas.width + 500) - 250;
@@ -1678,7 +1678,7 @@
             
             // Platforms
             platforms.forEach(platform => {
-                drawAbbeyPlatform(ctx, platform);
+                drawHearthholdPlatform(ctx, platform);
             });
             
             // Ground
