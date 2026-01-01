@@ -36,10 +36,20 @@ test.describe('Otterblade Odyssey', () => {
     // Reload to apply the cleared state
     await page.reload();
 
-    // Skip intro cinematic if it appears
-    // Wait for the page to settle
-    await page.waitForTimeout(1000);
+    // CRITICAL: Wait for Zustand to rehydrate from cleared storage
+    // The store uses async capacitorStorage which needs time to initialize
+    // We check that gameStarted is false (the default runtime state)
+    await page.waitForFunction(
+      () => {
+        // Access the Zustand store state via window.__ZUSTAND_STORE__ if exposed,
+        // or check DOM state (start menu visible means gameStarted is false)
+        const startMenu = document.querySelector('[data-testid="start-menu"]');
+        return startMenu !== null;
+      },
+      { timeout: 10000 }
+    );
 
+    // Skip intro cinematic if it appears
     // If cinematic player is showing, skip it
     const cinematicPlayer = page.getByTestId('cinematic-player');
     if (await cinematicPlayer.isVisible().catch(() => false)) {
@@ -55,6 +65,7 @@ test.describe('Otterblade Odyssey', () => {
     await expect(startMenu).toBeVisible({ timeout: 5000 });
 
     // Wait for the start button to be visible (inside the Fade component)
+    // The button is inside a Fade with 1000ms duration, so it needs extra time
     const startButton = page.getByTestId('button-start-game');
     await expect(startButton).toBeVisible({ timeout: 5000 });
   });
