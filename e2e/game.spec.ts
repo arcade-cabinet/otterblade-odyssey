@@ -24,6 +24,50 @@ test.describe('Otterblade Odyssey', () => {
     });
 
     await page.goto('/');
+
+    // Reset game state by clearing localStorage (which Zustand persists to)
+    // This ensures gameStarted is false for each test
+    await page.evaluate(() => {
+      localStorage.clear();
+      // Force Zustand to reset by triggering a storage event
+      window.dispatchEvent(new Event('storage'));
+    });
+
+    // Reload to apply the cleared state
+    await page.reload();
+
+    // CRITICAL: Wait for Zustand to rehydrate from cleared storage
+    // The store uses async capacitorStorage which needs time to initialize
+    // We check that gameStarted is false (the default runtime state)
+    await page.waitForFunction(
+      () => {
+        // Access the Zustand store state via window.__ZUSTAND_STORE__ if exposed,
+        // or check DOM state (start menu visible means gameStarted is false)
+        const startMenu = document.querySelector('[data-testid="start-menu"]');
+        return startMenu !== null;
+      },
+      { timeout: 10000 }
+    );
+
+    // Skip intro cinematic if it appears
+    // If cinematic player is showing, skip it
+    const cinematicPlayer = page.getByTestId('cinematic-player');
+    if (await cinematicPlayer.isVisible().catch(() => false)) {
+      // Wait for the "tap to skip" state (2 seconds)
+      await page.waitForTimeout(2500);
+      await page.keyboard.press('Space');
+      await expect(cinematicPlayer).not.toBeVisible({ timeout: 5000 });
+    }
+
+    // Wait for start menu to be visible and fully faded in
+    // The Fade component has a 1000ms timeout, so we need to ensure it's fully visible
+    const startMenu = page.getByTestId('start-menu');
+    await expect(startMenu).toBeVisible({ timeout: 5000 });
+
+    // Wait for the start button to be visible (inside the Fade component)
+    // The button is inside a Fade with 1000ms duration, so it needs extra time
+    const startButton = page.getByTestId('button-start-game');
+    await expect(startButton).toBeVisible({ timeout: 5000 });
   });
 
   // ============================================
@@ -75,13 +119,12 @@ test.describe('Otterblade Odyssey', () => {
   });
 
   test('should display start menu', async ({ page }) => {
-    await page.waitForTimeout(hasMcpSupport ? 3000 : 2000);
-
+    // beforeEach already handles skipping the intro cinematic
     const startMenu = page.getByTestId('start-menu');
     await expect(startMenu).toBeVisible({ timeout: 15000 });
 
-    // Check for game title
-    await expect(page.getByText('Otterblade Odyssey')).toBeVisible();
+    // Check for game title - use specific locator within start-menu
+    await expect(startMenu.getByText('Otterblade Odyssey')).toBeVisible();
 
     // Check for start button
     await expect(page.getByTestId('button-start-game')).toBeVisible();
@@ -92,8 +135,7 @@ test.describe('Otterblade Odyssey', () => {
   // ============================================
 
   test('should start game when clicking begin button', async ({ page }) => {
-    await page.waitForTimeout(hasMcpSupport ? 3000 : 2000);
-
+    // beforeEach already handles skipping the intro cinematic
     const startMenu = page.getByTestId('start-menu');
     await expect(startMenu).toBeVisible({ timeout: 15000 });
 
@@ -185,6 +227,33 @@ test.describe('Otterblade Odyssey', () => {
       expect(webglInfo.available).toBe(true);
     }
   });
+
+  // ============================================
+  // Accessibility Tests
+  // ============================================
+
+  test('should have accessible start button', async ({ page }) => {
+    const startButton = page.getByTestId('button-start-game');
+    await expect(startButton).toBeVisible();
+
+    // Button should be focusable
+    await startButton.focus();
+    await expect(startButton).toBeFocused();
+
+    // Should be activatable with Enter
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('start-menu')).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('should maintain focus visibility', async ({ page }) => {
+
+    // Tab to start button
+    await page.keyboard.press('Tab');
+
+    // Should have visible focus indicator (checking the button is focused)
+    const startButton = page.getByTestId('button-start-game');
+    await expect(startButton).toBeFocused();
+  });
 });
 
 test.describe('Game Over Flow', () => {
@@ -244,35 +313,5 @@ test.describe('Touch Controls', () => {
       await expect(page.getByTestId('button-right')).toBeVisible();
       await expect(page.getByTestId('button-jump')).toBeVisible();
     }
-  });
-});
-
-test.describe('Accessibility', () => {
-  test('should have accessible start button', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
-
-    const startButton = page.getByTestId('button-start-game');
-    await expect(startButton).toBeVisible();
-
-    // Button should be focusable
-    await startButton.focus();
-    await expect(startButton).toBeFocused();
-
-    // Should be activatable with Enter
-    await page.keyboard.press('Enter');
-    await expect(page.getByTestId('start-menu')).not.toBeVisible({ timeout: 5000 });
-  });
-
-  test('should maintain focus visibility', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
-
-    // Tab to start button
-    await page.keyboard.press('Tab');
-
-    // Should have visible focus indicator (checking the button is focused)
-    const startButton = page.getByTestId('button-start-game');
-    await expect(startButton).toBeFocused();
   });
 });

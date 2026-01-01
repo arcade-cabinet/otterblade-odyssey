@@ -48,7 +48,9 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 
 ## Architecture Overview
 
-### Technology Stack
+> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. Current production code uses React Three Fiber.
+
+### Current Technology Stack (Production)
 | Layer | Technology |
 |-------|------------|
 | 3D Rendering | @react-three/fiber (React Three Fiber) |
@@ -58,6 +60,8 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 | Procedural Graphics | @jbcom/strata |
 | Styling | Tailwind CSS v4 |
 | UI Components | shadcn/ui + Radix |
+| Mobile | Capacitor (native features, haptics) |
+| Audio | Howler.js (spatial audio, music) |
 
 ### Key Directories
 ```
@@ -171,10 +175,14 @@ All game assets are managed through JSON manifests in `client/src/data/manifests
 
 | Manifest | Assets | Provider |
 |----------|--------|----------|
-| `sprites.json` | Player sprite sheet | OpenAI GPT-Image-1 |
-| `enemies.json` | 5 enemy types | OpenAI GPT-Image-1 |
-| `cinematics.json` | 10 chapter videos | Google Veo 3.1 |
+| `sprites.json` | Finn (12 animations) + 5 NPCs | OpenAI GPT-Image-1 |
+| `enemies.json` | 6 enemy types + Zephyros boss | OpenAI GPT-Image-1 |
+| `cinematics.json` | 18 cinematics (intro, chapters, boss, outro) | Google Veo 3.1 |
+| `chapter-plates.json` | 10 storybook chapter plates | Google Imagen 3 |
 | `scenes.json` | 8 parallax backgrounds | Google Imagen 3 |
+| `items.json` | Collectibles, doors, platforms, hazards | OpenAI GPT-Image-1 |
+| `effects.json` | Particles, combat effects, weather | OpenAI GPT-Image-1 |
+| `sounds.json` | 18 ambient, SFX, and music tracks | Freesound/Custom |
 
 ### dev-tools Package
 
@@ -216,6 +224,35 @@ All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
 | `pending` | Not yet generated |
 | `complete` | Valid and ready to use |
 | `needs_regeneration` | Has issues, will be regenerated |
+| `approved` | Reviewed and locked (IDEMPOTENT) |
+| `rejected` | Reviewed and marked for regeneration |
+
+### Asset Approval Workflow (CRITICAL)
+
+**Approved assets are NEVER regenerated.** This is how we achieve idempotency.
+
+**Review Gallery URL:** `https://jbdevprimary.github.io/otterblade-odyssey/assets`
+
+**Workflow:**
+```
+1. Generate assets → pnpm --filter @otterblade/dev-tools cli
+2. Push to main → CD deploys to GitHub Pages
+3. Visit /assets → Review in gallery
+4. Select + Approve assets
+5. Click "🚀 Create PR on GitHub" → Opens GitHub with content pre-filled
+6. Commit on new branch → PR created automatically
+7. Merge → Assets locked as idempotent
+```
+
+**Approval Storage:** `client/src/data/approvals.json`
+
+**Before generating, respect approvals:**
+```typescript
+// Skip approved assets
+if (approvalsJson.approvals.find(a => a.id === asset.id)) {
+  continue; // Don't regenerate
+}
+```
 
 ## Testing Commands
 

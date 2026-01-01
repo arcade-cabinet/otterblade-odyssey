@@ -1,0 +1,424 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otterblade-odyssey.game/schemas/procedural.json",
+  "title": "Procedural Generation Schema",
+  "description": "Declarative procedural generation instructions for custom level elements, effects, and visuals",
+  "type": "object",
+
+  "definitions": {
+    "color": {
+      "oneOf": [
+        { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        { 
+          "type": "object",
+          "properties": {
+            "r": { "type": "number", "minimum": 0, "maximum": 255 },
+            "g": { "type": "number", "minimum": 0, "maximum": 255 },
+            "b": { "type": "number", "minimum": 0, "maximum": 255 },
+            "a": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      ]
+    },
+
+    "gradient": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["linear", "radial"] },
+        "stops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "offset": { "type": "number", "minimum": 0, "maximum": 1 },
+              "color": { "$ref": "#/definitions/color" }
+            }
+          }
+        },
+        "angle": { "type": "number", "description": "For linear gradients, in degrees" }
+      }
+    },
+
+    "noiseConfig": {
+      "type": "object",
+      "description": "Simplex/Perlin noise configuration for procedural variation",
+      "properties": {
+        "type": { "type": "string", "enum": ["simplex", "perlin", "fbm", "ridged"] },
+        "scale": { "type": "number", "default": 1.0 },
+        "octaves": { "type": "integer", "default": 1 },
+        "persistence": { "type": "number", "default": 0.5 },
+        "lacunarity": { "type": "number", "default": 2.0 },
+        "seed": { "type": "integer" },
+        "offset": { 
+          "type": "object",
+          "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+        }
+      }
+    },
+
+    "drawInstruction": {
+      "type": "object",
+      "description": "A single Canvas 2D drawing instruction",
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "beginPath", "closePath", "moveTo", "lineTo", "arc", "arcTo",
+            "quadraticCurveTo", "bezierCurveTo", "rect", "ellipse",
+            "fill", "stroke", "clip", "save", "restore",
+            "translate", "rotate", "scale", "transform", "setTransform",
+            "fillRect", "strokeRect", "clearRect",
+            "fillText", "strokeText",
+            "drawImage", "createPattern", "createLinearGradient", "createRadialGradient",
+            "setLineDash", "shadow", "globalAlpha", "globalCompositeOperation",
+            "custom"
+          ]
+        },
+        "args": { "type": "array" },
+        "style": {
+          "type": "object",
+          "properties": {
+            "fillStyle": { "oneOf": [{ "$ref": "#/definitions/color" }, { "$ref": "#/definitions/gradient" }] },
+            "strokeStyle": { "oneOf": [{ "$ref": "#/definitions/color" }, { "$ref": "#/definitions/gradient" }] },
+            "lineWidth": { "type": "number" },
+            "lineCap": { "type": "string", "enum": ["butt", "round", "square"] },
+            "lineJoin": { "type": "string", "enum": ["miter", "round", "bevel"] },
+            "shadowColor": { "$ref": "#/definitions/color" },
+            "shadowBlur": { "type": "number" },
+            "shadowOffsetX": { "type": "number" },
+            "shadowOffsetY": { "type": "number" }
+          }
+        },
+        "condition": {
+          "type": "object",
+          "description": "Conditional rendering based on state",
+          "properties": {
+            "flag": { "type": "string" },
+            "comparison": { "type": "string", "enum": ["equals", "notEquals", "greaterThan", "lessThan"] },
+            "value": {}
+          }
+        },
+        "noise": {
+          "type": "object",
+          "description": "Apply noise-based variation",
+          "properties": {
+            "config": { "$ref": "#/definitions/noiseConfig" },
+            "affects": { 
+              "type": "array", 
+              "items": { "type": "string", "enum": ["x", "y", "width", "height", "radius", "angle", "alpha"] }
+            },
+            "amplitude": { "type": "number" }
+          }
+        }
+      },
+      "required": ["op"]
+    },
+
+    "proceduralShape": {
+      "type": "object",
+      "description": "A complete procedural shape definition",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { 
+          "type": "string",
+          "enum": ["static", "animated", "reactive", "generative"]
+        },
+        "baseSize": {
+          "type": "object",
+          "properties": { "width": { "type": "number" }, "height": { "type": "number" } }
+        },
+        "origin": {
+          "type": "object",
+          "properties": { "x": { "type": "number" }, "y": { "type": "number" } },
+          "default": { "x": 0.5, "y": 1.0 }
+        },
+        "layers": {
+          "type": "array",
+          "description": "Draw layers from back to front",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "zIndex": { "type": "integer" },
+              "visible": { "type": "boolean", "default": true },
+              "opacity": { "type": "number", "default": 1.0 },
+              "blendMode": { "type": "string" },
+              "instructions": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/drawInstruction" }
+              }
+            }
+          }
+        },
+        "animations": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/animation"
+          }
+        },
+        "variants": {
+          "type": "object",
+          "description": "Named variants with property overrides",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "layerOverrides": { "type": "object" },
+              "colorOverrides": { "type": "object" }
+            }
+          }
+        }
+      },
+      "required": ["id", "layers"]
+    },
+
+    "animation": {
+      "type": "object",
+      "properties": {
+        "frames": { "type": "integer" },
+        "fps": { "type": "number", "default": 12 },
+        "loop": { "type": "boolean", "default": true },
+        "pingPong": { "type": "boolean", "default": false },
+        "keyframes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "frame": { "type": "integer" },
+              "properties": {
+                "type": "object",
+                "description": "Property values at this keyframe"
+              },
+              "easing": { "type": "string" }
+            }
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "frame": { "type": "integer" },
+              "event": { "type": "string" },
+              "data": {}
+            }
+          }
+        }
+      }
+    },
+
+    "proceduralBackground": {
+      "type": "object",
+      "description": "Procedurally generated background layer",
+      "properties": {
+        "id": { "type": "string" },
+        "layer": { "type": "string", "enum": ["sky", "far", "mid", "near", "foreground"] },
+        "parallaxFactor": { "type": "number", "default": 1.0 },
+        "generator": {
+          "type": "string",
+          "enum": [
+            "solid",
+            "gradient",
+            "noise_texture",
+            "tiled_pattern",
+            "scrolling_clouds",
+            "starfield",
+            "rain",
+            "snow",
+            "fog_layers",
+            "water_reflection",
+            "custom"
+          ]
+        },
+        "config": {
+          "type": "object",
+          "description": "Generator-specific configuration"
+        },
+        "customInstructions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/drawInstruction" }
+        }
+      },
+      "required": ["id", "layer", "generator"]
+    },
+
+    "proceduralPlatform": {
+      "type": "object",
+      "description": "Procedurally styled platform",
+      "properties": {
+        "style": {
+          "type": "string",
+          "enum": [
+            "stone_rough",
+            "stone_smooth",
+            "wood_plank",
+            "wood_log",
+            "moss_covered",
+            "ice_slick",
+            "brick",
+            "cobblestone",
+            "grass_top",
+            "root_bridge",
+            "chain_platform",
+            "custom"
+          ]
+        },
+        "baseColor": { "$ref": "#/definitions/color" },
+        "accentColor": { "$ref": "#/definitions/color" },
+        "weathering": { "type": "number", "minimum": 0, "maximum": 1 },
+        "mossAmount": { "type": "number", "minimum": 0, "maximum": 1 },
+        "crackDensity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "edgeStyle": { "type": "string", "enum": ["sharp", "rounded", "rough", "crumbling"] },
+        "noise": { "$ref": "#/definitions/noiseConfig" },
+        "customDraw": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/drawInstruction" }
+        }
+      }
+    },
+
+    "particleSystem": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "ember_motes",
+            "dust",
+            "leaves",
+            "snow",
+            "rain",
+            "mist",
+            "fireflies",
+            "sparks",
+            "ice_crystals",
+            "pollen",
+            "smoke",
+            "splash",
+            "blood",
+            "magic_trail",
+            "custom"
+          ]
+        },
+        "emitter": {
+          "type": "object",
+          "properties": {
+            "shape": { "type": "string", "enum": ["point", "line", "rect", "circle"] },
+            "position": { "type": "object" },
+            "size": { "type": "object" }
+          }
+        },
+        "particle": {
+          "type": "object",
+          "properties": {
+            "count": { "type": "integer" },
+            "lifetime": { "type": "object", "properties": { "min": {}, "max": {} } },
+            "size": { "type": "object", "properties": { "start": {}, "end": {} } },
+            "color": { "type": "object", "properties": { "start": {}, "end": {} } },
+            "velocity": { "type": "object" },
+            "gravity": { "type": "number" },
+            "drag": { "type": "number" },
+            "rotation": { "type": "object" },
+            "fadeIn": { "type": "number" },
+            "fadeOut": { "type": "number" }
+          }
+        },
+        "customDraw": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/drawInstruction" },
+          "description": "Custom particle drawing - receives particle state as context"
+        }
+      }
+    },
+
+    "lightingEffect": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["ambient", "point", "spotlight", "area", "flicker", "pulsing"]
+        },
+        "position": { "type": "object" },
+        "color": { "$ref": "#/definitions/color" },
+        "intensity": { "type": "number" },
+        "radius": { "type": "number" },
+        "falloff": { "type": "string", "enum": ["linear", "quadratic", "none"] },
+        "flicker": {
+          "type": "object",
+          "properties": {
+            "speed": { "type": "number" },
+            "amount": { "type": "number" },
+            "noise": { "$ref": "#/definitions/noiseConfig" }
+          }
+        },
+        "castsWarmth": { "type": "boolean", "default": false },
+        "warmthRadius": { "type": "number" }
+      }
+    },
+
+    "postProcessEffect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "vignette",
+            "color_grade",
+            "blur",
+            "chromatic_aberration",
+            "film_grain",
+            "scanlines",
+            "frost_overlay",
+            "heat_distortion",
+            "underwater",
+            "damage_flash",
+            "warmth_warning",
+            "custom"
+          ]
+        },
+        "intensity": { "type": "number" },
+        "config": { "type": "object" },
+        "condition": {
+          "type": "object",
+          "description": "When to apply this effect",
+          "properties": {
+            "always": { "type": "boolean" },
+            "warmthBelow": { "type": "number" },
+            "healthBelow": { "type": "number" },
+            "inRegion": { "type": "object" },
+            "duringSequence": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "shapes": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/proceduralShape" }
+    },
+    "backgrounds": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/proceduralBackground" }
+    },
+    "platformStyles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/proceduralPlatform" }
+    },
+    "particles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/particleSystem" }
+    },
+    "lighting": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/lightingEffect" }
+    },
+    "postProcess": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/postProcessEffect" }
+    }
+  }
+}

@@ -22,6 +22,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
+import {
+  AUDIO_CATEGORIES,
+  type AudioCategory,
+  generateAllSFX,
+  searchGameSounds,
+} from './audio/index.js';
 import { type AssetManifest, generateAsset } from './manifest-generator.js';
 import { log, logError } from './shared/config.js';
 
@@ -32,6 +38,10 @@ const ArgsSchema = z.object({
   force: z.boolean().default(false),
   id: z.string().optional(),
   maxItems: z.number().optional(),
+  // Audio generation options
+  audio: z.boolean().default(false),
+  audioSearch: z.string().optional(),
+  audioCategories: z.array(z.string()).optional(),
 });
 
 type Args = z.infer<typeof ArgsSchema>;
@@ -41,7 +51,7 @@ type Args = z.infer<typeof ArgsSchema>;
  */
 function parseArgs(): Args {
   const args = process.argv.slice(2);
-  const result: Args = { dryRun: false, force: false };
+  const result: Args = { dryRun: false, force: false, audio: false };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -58,6 +68,12 @@ function parseArgs(): Args {
       if (!Number.isNaN(num) && num > 0) {
         result.maxItems = num;
       }
+    } else if (arg === '--audio') {
+      result.audio = true;
+    } else if (arg === '--audio-search' && args[i + 1]) {
+      result.audioSearch = args[++i];
+    } else if (arg === '--audio-categories' && args[i + 1]) {
+      result.audioCategories = args[++i].split(',');
     } else if (arg === '--help') {
       printHelp();
       process.exit(0);
@@ -71,6 +87,7 @@ function parseArgs(): Args {
  * Prints CLI help.
  */
 function printHelp(): void {
+  const audioCategories = Object.keys(AUDIO_CATEGORIES).join(', ');
   console.log(`
 Otterblade Odyssey Asset Generator CLI
 
@@ -85,12 +102,24 @@ Options:
   --max-items <n>    Limit generation to n items (rate limiting)
   --help             Show this help message
 
+Audio Options (Freesound.org integration):
+  --audio                       Acquire all sound effects from Freesound
+  --audio-search "<query>"      Search Freesound for specific sounds
+  --audio-categories <list>     Comma-separated audio categories to acquire
+
+Audio Categories:
+  ${audioCategories}
+
 Examples:
   pnpm cli                           # Generate all missing assets
   pnpm cli --category sprites        # Generate missing sprites only
   pnpm cli --dry-run                 # Preview what would be generated
   pnpm cli --force --id intro_cinematic  # Force regenerate intro
   pnpm cli --max-items 3             # Generate at most 3 items
+  pnpm cli --audio                   # Acquire all sound effects
+  pnpm cli --audio --dry-run         # Preview audio acquisition
+  pnpm cli --audio-search "sword swing"  # Search for specific sounds
+  pnpm cli --audio-categories player_footstep,player_jump
 `);
 }
 
@@ -158,6 +187,34 @@ async function main(): Promise<void> {
 
   const args = parseArgs();
   const basePath = path.resolve(process.cwd(), '..', '..');
+
+  // Handle audio search mode
+  if (args.audioSearch) {
+    log('🔍', `Searching Freesound for: "${args.audioSearch}"`);
+    await searchGameSounds(args.audioSearch, {
+      maxResults: 20,
+      minRating: 3.5,
+      maxDuration: 10,
+    });
+    return;
+  }
+
+  // Handle audio acquisition mode
+  if (args.audio) {
+    log('🎵', 'Audio acquisition mode (Freesound.org)');
+    log('', '');
+
+    const categories = args.audioCategories?.filter(
+      (c): c is AudioCategory => c in AUDIO_CATEGORIES
+    );
+
+    await generateAllSFX({
+      dryRun: args.dryRun,
+      categories,
+      maxPerCategory: args.maxItems || 5,
+    });
+    return;
+  }
 
   // Load all manifests
   const manifests = loadManifests(basePath);

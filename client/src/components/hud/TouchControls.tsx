@@ -11,7 +11,7 @@ export default function TouchControls() {
   const gameStarted = useStore((s) => s.gameStarted);
 
   const handleTouchStart = useCallback(
-    (control: 'left' | 'right' | 'jump' | 'attack' | 'crouch') => (e: React.TouchEvent) => {
+    (control: 'left' | 'right' | 'jump' | 'attack' | 'slink') => (e: React.TouchEvent) => {
       e.preventDefault();
       setControl(control, true);
     },
@@ -19,7 +19,7 @@ export default function TouchControls() {
   );
 
   const handleTouchEnd = useCallback(
-    (control: 'left' | 'right' | 'jump' | 'attack' | 'crouch') => (e: React.TouchEvent) => {
+    (control: 'left' | 'right' | 'jump' | 'attack' | 'slink') => (e: React.TouchEvent) => {
       e.preventDefault();
       setControl(control, false);
     },
@@ -27,7 +27,7 @@ export default function TouchControls() {
   );
 
   const handleTouchCancel = useCallback(
-    (control: 'left' | 'right' | 'jump' | 'attack' | 'crouch') => (e: React.TouchEvent) => {
+    (control: 'left' | 'right' | 'jump' | 'attack' | 'slink') => (e: React.TouchEvent) => {
       e.preventDefault();
       setControl(control, false);
     },
@@ -161,18 +161,18 @@ export default function TouchControls() {
           ATK
         </button>
 
-        {/* Crouch - Bottom */}
+        {/* Slink (go low on all fours) - Bottom */}
         <button
           type="button"
-          data-testid="button-crouch"
-          data-touch-control="crouch"
-          onTouchStart={handleTouchStart('crouch')}
-          onTouchEnd={handleTouchEnd('crouch')}
-          onTouchCancel={handleTouchCancel('crouch')}
+          data-testid="button-slink"
+          data-touch-control="slink"
+          onTouchStart={handleTouchStart('slink')}
+          onTouchEnd={handleTouchEnd('slink')}
+          onTouchCancel={handleTouchCancel('slink')}
           className={`${actionButton} absolute bottom-0 left-1/2 -translate-x-1/2 bg-stone-800/60 border-2 border-stone-500/70 text-stone-300 active:bg-stone-600/50 active:border-stone-400`}
           style={{ touchAction: 'none' }}
         >
-          DUCK
+          LOW
         </button>
 
         {/* Special/Interact - Left */}

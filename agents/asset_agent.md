@@ -11,6 +11,61 @@ Focus on generating, validating, and maintaining all visual assets for Otterblad
 - Update manifest status fields after generation
 - Audit cinematics for brand violations
 - Maintain consistency across all visual content
+- **Respect approved assets** - never regenerate assets marked as approved
+
+---
+
+## Asset Approval Workflow (CRITICAL)
+
+### How Idempotency Works
+
+Assets are considered **idempotent** (won't regenerate) when:
+1. The asset exists AND has `approval.approved: true` in the manifest
+2. OR the asset ID appears in `client/src/data/approvals.json`
+
+### Workflow Steps
+
+```
+1. GENERATE  → pnpm --filter @otterblade/dev-tools cli
+2. DEPLOY    → Push to main, CD builds and deploys to GitHub Pages
+3. REVIEW    → Visit https://jbdevprimary.github.io/otterblade-odyssey/assets
+4. APPROVE   → Select assets, click "Approve Selected"
+5. CREATE PR → Click "🚀 Create PR on GitHub" (opens GitHub with content pre-filled)
+6. COMMIT    → Create new branch, commit → PR is created automatically
+7. MERGE     → Approved assets are now locked (idempotent)
+```
+
+### Before Generating Assets
+
+Always check approval status:
+
+```typescript
+// Pseudo-code for generation logic
+if (asset.approval?.approved === true) {
+  console.log(`Skipping ${asset.id} - already approved`);
+  continue;
+}
+
+if (approvalsJson.approvals.find(a => a.id === asset.id)) {
+  console.log(`Skipping ${asset.id} - in approvals.json`);
+  continue;
+}
+
+// Only generate if not approved
+await generateAsset(asset);
+```
+
+### Asset Review Gallery
+
+Available at: `https://jbdevprimary.github.io/otterblade-odyssey/assets`
+
+Features:
+- Grid view of all assets by category
+- Click to preview (video player, sprite animator)
+- Checkbox selection (single, batch, all)
+- Approve/Reject buttons
+- **"Create PR on GitHub"** button → Opens GitHub with approvals pre-filled
+- LocalStorage persistence for selections
 
 ## Critical Brand Rules (ENFORCE ALWAYS)
 

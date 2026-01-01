@@ -1,4 +1,20 @@
+/**
+ * GameOver Menu - Brand-aligned game over screen
+ *
+ * Follows BRAND.md guidelines:
+ * - Warm, woodland-epic aesthetic (NOT neon sci-fi)
+ * - Storybook art style
+ */
+
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Fade from '@mui/material/Fade';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 import { useStore } from '@/game/store';
+import { hapticError, hapticMedium } from '@/lib/capacitor';
+import { brandColors } from '@/lib/theme';
 
 export default function GameOverMenu() {
   const gameOver = useStore((s) => s.gameOver);
@@ -13,61 +29,218 @@ export default function GameOverMenu() {
 
   const canRespawn = checkpointSeen >= 0;
 
+  const handleRespawn = async () => {
+    await hapticMedium();
+    respawn();
+  };
+
+  const handleNewRun = async () => {
+    await hapticError(); // Intentional - emphasizes starting fresh
+    startGame();
+  };
+
   return (
-    <div
-      className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-20 px-6"
-      data-testid="game-over-menu"
-    >
-      <h1
-        className="text-4xl md:text-5xl font-bold text-sky-400 mb-2 tracking-wider"
-        style={{ textShadow: '0 0 20px rgba(14,165,233,0.9)' }}
+    <Fade in timeout={500}>
+      <Box
+        data-testid="game-over-menu"
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: `${brandColors.nightSky}f0`,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 20,
+          px: 3,
+        }}
       >
-        BLADE BROKEN
-      </h1>
-      <p className="text-slate-400 mb-4 text-center max-w-2xl leading-relaxed">
-        The otter warrior has fallen. Will you rise again?
-      </p>
-      <div className="text-white/50 text-xs tracking-widest uppercase mb-4">RUN COMPLETE</div>
-
-      <div className="border border-white/15 px-4 py-3 w-full max-w-2xl text-white/80 text-sm leading-relaxed bg-white/5 rounded-xl backdrop-blur-md mb-6">
-        <div className="flex justify-between mb-1">
-          <span>Score:</span>
-          <span className="font-bold">{score.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between mb-1">
-          <span>Distance:</span>
-          <span className="font-bold">{Math.floor(distance)}m</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Shards Banked:</span>
-          <span className="font-bold text-amber-400">{bankedShards}</span>
-        </div>
-      </div>
-
-      <div className="flex gap-4 flex-wrap justify-center">
-        {canRespawn && (
-          <button
-            type="button"
-            onClick={respawn}
-            data-testid="button-respawn"
-            className="px-10 py-3 bg-transparent border-2 border-emerald-500 text-emerald-500 font-bold cursor-pointer transition-all duration-200 uppercase tracking-widest hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_22px_rgba(52,211,153,0.8)]"
-          >
-            Respawn at Shrine
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={startGame}
-          data-testid="button-restart"
-          className="px-10 py-3 bg-transparent border-2 border-sky-400 text-sky-400 font-bold cursor-pointer transition-all duration-200 uppercase tracking-widest hover:bg-sky-400 hover:text-black hover:shadow-[0_0_22px_rgba(56,189,248,0.8)]"
+        <Container
+          maxWidth="sm"
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
         >
-          New Run
-        </button>
-      </div>
+          {/* Title */}
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+              textAlign: 'center',
+              color: brandColors.crimson,
+              textShadow: `
+                0 0 20px ${brandColors.crimson}80,
+                0 2px 4px rgba(0,0,0,0.8)
+              `,
+              mb: 1,
+            }}
+          >
+            Blade Broken
+          </Typography>
 
-      {canRespawn && (
-        <p className="text-rose-500 mt-4 tracking-widest uppercase text-xs">-900 Score Penalty</p>
-      )}
-    </div>
+          {/* Subtitle */}
+          <Typography
+            variant="body1"
+            sx={{
+              color: brandColors.stoneBeige.main,
+              textAlign: 'center',
+              mb: 1,
+            }}
+          >
+            The otter warrior has fallen. Will you rise again?
+          </Typography>
+
+          <Typography
+            variant="caption"
+            sx={{
+              color: brandColors.stoneBeige.dark,
+              letterSpacing: '0.2em',
+              mb: 3,
+            }}
+          >
+            Journey Complete
+          </Typography>
+
+          {/* Stats Card */}
+          <Paper
+            elevation={0}
+            sx={{
+              px: 3,
+              py: 2.5,
+              backgroundColor: `${brandColors.darkStone}90`,
+              backdropFilter: 'blur(8px)',
+              border: `1px solid ${brandColors.stoneBeige.dark}40`,
+              borderRadius: 2,
+              width: '100%',
+              maxWidth: '24rem',
+              mb: 4,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                mb: 1.5,
+              }}
+            >
+              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
+                Score
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: brandColors.honeyGold.main,
+                  fontWeight: 600,
+                }}
+              >
+                {score.toLocaleString()}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                mb: 1.5,
+              }}
+            >
+              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
+                Distance Traveled
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: brandColors.honeyGold.main,
+                  fontWeight: 600,
+                }}
+              >
+                {Math.floor(distance)}m
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
+                Shards Preserved
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: brandColors.lanternGlow,
+                  fontWeight: 600,
+                }}
+              >
+                {bankedShards}
+              </Typography>
+            </Box>
+          </Paper>
+
+          {/* Action Buttons */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 2,
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
+            {canRespawn && (
+              <Button
+                variant="contained"
+                onClick={handleRespawn}
+                data-testid="button-respawn"
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  backgroundColor: brandColors.forestGreen.main,
+                  borderColor: brandColors.forestGreen.light,
+                  '&:hover': {
+                    backgroundColor: brandColors.forestGreen.light,
+                    boxShadow: `0 0 20px ${brandColors.forestGreen.main}60`,
+                  },
+                }}
+              >
+                Return to Shrine
+              </Button>
+            )}
+
+            <Button
+              variant="outlined"
+              onClick={handleNewRun}
+              data-testid="button-restart"
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderColor: brandColors.honeyGold.main,
+                color: brandColors.honeyGold.main,
+                '&:hover': {
+                  borderColor: brandColors.honeyGold.light,
+                  backgroundColor: `${brandColors.honeyGold.main}15`,
+                  boxShadow: `0 0 20px ${brandColors.honeyGold.main}40`,
+                },
+              }}
+            >
+              Begin Anew
+            </Button>
+          </Box>
+
+          {/* Penalty notice */}
+          {canRespawn && (
+            <Typography
+              variant="caption"
+              sx={{
+                mt: 3,
+                color: brandColors.crimson,
+                opacity: 0.8,
+              }}
+            >
+              Shrine restoration costs 900 score
+            </Typography>
+          )}
+        </Container>
+      </Box>
+    </Fade>
   );
 }

@@ -17,21 +17,25 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ---
 
-## Technology Stack (Updated)
+## Technology Stack (Current Production)
+
+> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. This table reflects CURRENT production code.
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
 | **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
-| Rendering | @react-three/fiber | Orthographic 2D mode |
-| Physics | @dimforge/rapier2d-compat | 2D physics only |
+| Rendering | @react-three/fiber | 3D renderer in orthographic mode |
+| Physics | @react-three/rapier | Rapier WASM physics |
 | Entity Management | Miniplex + miniplex-react | Resources for state |
 | State | Zustand | Gameplay state |
+| Mobile | Capacitor | Native features, haptics |
+| Audio | Howler.js | Spatial audio, music |
 | Styling | Tailwind CSS v4 | HUD/UI only |
 | UI Components | shadcn/ui + Radix | Menus, dialogs |
 | Package Manager | **pnpm 10.x** (never npm/yarn) | |
 | Linting | Biome | Strict mode |
 
-**Removed**: @react-three/rapier, @jbcom/strata (3D not needed for 2D side-scroller)
+**Planned Migration**: Canvas 2D API + Matter.js physics + Yuka AI (see IMPLEMENTATION.md for details)
 
 ---
 
@@ -70,15 +74,32 @@ client/src/
 ## Data Architecture
 
 ### Static Content (JSON files in `client/src/data/`)
-- Chapter definitions → `chapters.json`
+- Legacy chapter definitions → `chapters.json`
 - Biome configurations → `biomes.json`
-- Animation specs → `animations.json` (future)
-- Dialogue trees → `dialogue.json` (future)
+- **Chapter manifests** → `manifests/chapters/chapter-*.json` (comprehensive)
+- **NPC definitions** → `manifests/npcs.json`
+- Asset manifests → `manifests/sprites.json`, `cinematics.json`, etc.
+
+### Typed Data Loaders (in `client/src/game/data/`)
+
+```typescript
+// Load chapter manifests with full type safety
+import { loadChapterManifest, getChapterBoss } from '@/game/data';
+
+const chapter0 = loadChapterManifest(0);
+const boss = getChapterBoss(8); // Returns Zephyros data
+
+// Load NPC data
+import { getCharacterById, getCharacterDrawFunction } from '@/game/data';
+
+const finn = getCharacterById('finn_otterblade');
+const drawFn = getCharacterDrawFunction('finn_otterblade'); // "drawFinn"
+```
 
 ### Runtime State (ECS/Zustand)
-- Current chapter progress → Miniplex resources
-- Player state → Zustand store
-- Physics bodies → Rapier2D world
+- Current chapter progress → Zustand store (persisted)
+- Player state → Zustand store (persisted)
+- Physics bodies → Matter.js world
 - Active entities → Miniplex world
 
 ### Critical Rules
@@ -86,6 +107,7 @@ client/src/
 - **NEVER** put authored content in TypeScript constants
 - **NEVER** import JSON directly - always use typed loaders
 - **ALWAYS** validate JSON via Zod schemas
+- **Schemas are flexible** - use `.passthrough()` for evolving content
 
 ---
 
@@ -263,10 +285,14 @@ All visual assets are managed through JSON manifests in `client/src/data/manifes
 
 ```
 client/src/data/manifests/
-├── sprites.json      # Player sprite sheet (OpenAI)
-├── enemies.json      # 5 enemy types (OpenAI)
-├── cinematics.json   # 10 chapter videos (Google Veo 3.1)
-└── scenes.json       # 8 parallax backgrounds (Google Imagen 3)
+├── sprites.json        # Finn + NPCs (OpenAI GPT-Image-1)
+├── enemies.json        # 6 enemies + Zephyros boss (OpenAI)
+├── cinematics.json     # 18 story/boss cinematics (Google Veo 3.1)
+├── chapter-plates.json # 10 storybook chapter plates (Google Imagen 3)
+├── scenes.json         # 8 parallax backgrounds (Google Imagen 3)
+├── items.json          # Collectibles, platforms, hazards (OpenAI)
+├── effects.json        # Particles, combat, weather (OpenAI)
+└── sounds.json         # 18 ambient, SFX, music (Freesound)
 ```
 
 ### dev-tools Package
@@ -293,9 +319,9 @@ pnpm --filter @otterblade/dev-tools cli -- --force
 ### Asset Status Workflow
 
 ```
-pending → [generate] → complete
-                ↓
-         needs_regeneration → [regenerate] → complete
+pending → [generate] → complete → [review] → approved
+                ↓                      ↓
+        needs_regeneration ←──── rejected
 ```
 
 | Status | Description |
@@ -303,6 +329,35 @@ pending → [generate] → complete
 | `pending` | Asset defined but not yet generated |
 | `complete` | Asset exists and passes validation |
 | `needs_regeneration` | Asset exists but has brand violations |
+| `approved` | Asset reviewed and locked (IDEMPOTENT) |
+| `rejected` | Asset reviewed and marked for regeneration |
+
+### Asset Approval Workflow (CRITICAL)
+
+**Idempotency Rule**: Approved assets are NEVER regenerated.
+
+```
+1. GENERATE  → pnpm --filter @otterblade/dev-tools cli
+2. DEPLOY    → Push to main → CD deploys to GitHub Pages
+3. REVIEW    → Visit /assets on GitHub Pages
+4. APPROVE   → Select assets → Click "Approve Selected"
+5. CREATE PR → Click "🚀 Create PR on GitHub" (opens GitHub directly)
+6. COMMIT    → Create branch, commit → PR created automatically
+7. MERGE     → Assets locked as idempotent
+```
+
+**Asset Review Gallery URL:**
+`https://jbdevprimary.github.io/otterblade-odyssey/assets`
+
+**Approval Storage:**
+- `client/src/data/approvals.json` - Production approvals (committed)
+- `localStorage` - Working selections (browser-local)
+
+**Before generating, check:**
+```bash
+# Check if asset is approved
+jq '.approvals[] | select(.id == "intro_cinematic")' client/src/data/approvals.json
+```
 
 ### Brand Compliance (CRITICAL)
 
