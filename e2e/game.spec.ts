@@ -259,18 +259,7 @@ test.describe('Touch Controls', () => {
 });
 
 test.describe('Accessibility', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-
-    // Skip intro cinematic if it appears
-    await page.waitForTimeout(1000);
-    const cinematicPlayer = page.getByTestId('cinematic-player');
-    if (await cinematicPlayer.isVisible().catch(() => false)) {
-      await page.waitForTimeout(2500);
-      await page.keyboard.press('Space');
-      await expect(cinematicPlayer).not.toBeVisible({ timeout: 5000 });
-    }
-  });
+  // Note: Uses top-level beforeEach which handles page navigation and cinematic skip
 
   test('should have accessible start button', async ({ page }) => {
     const startButton = page.getByTestId('button-start-game');

@@ -9,6 +9,8 @@
 import { describe, expect, it } from 'vitest';
 // Import the raw JSON directly for testing
 import npcData from '@/data/manifests/npcs.json';
+// Import typed loaders for function tests
+import { getAllSpecies, getGesture, getGestureLibrary, getSpecies } from '@/game/data';
 
 describe('NPC Manifest Structure', () => {
   describe('manifest metadata', () => {
@@ -177,28 +179,26 @@ describe('NPC Manifest Structure', () => {
       }
     });
 
-    it('should include common gestures', () => {
+    it('should include common gestures in categories', () => {
       const gestures = getGestureLibrary();
-      expect(gestures).toHaveProperty('nod');
-      expect(gestures).toHaveProperty('wave');
-      expect(gestures).toHaveProperty('bow');
+      // Gesture library is organized by category with arrays of gesture names
+      expect(gestures.greetings).toContain('wave');
+      expect(gestures.greetings).toContain('nod');
+      expect(gestures.greetings).toContain('bow');
     });
 
-    it('getGesture should return specific gesture', () => {
-      const nod = getGesture('nod');
-      expect(nod).toBeDefined();
-      expect(typeof nod?.duration).toBe('number');
-      expect(typeof nod?.frames).toBe('number');
-      expect(typeof nod?.loop).toBe('boolean');
-      expect(Array.isArray(nod?.meaning)).toBe(true);
+    it('getGesture should return gesture category array', () => {
+      // getGesture returns a category array (greetings, directions, etc.)
+      const greetings = getGesture('greetings');
+      expect(greetings).toBeDefined();
+      expect(Array.isArray(greetings)).toBe(true);
+      expect(greetings).toContain('wave');
     });
 
-    it('gestures should have valid structure', () => {
+    it('all gesture categories should have at least one gesture', () => {
       const gestures = getGestureLibrary();
-      for (const [_name, gesture] of Object.entries(gestures)) {
-        expect(gesture.duration).toBeGreaterThan(0);
-        expect(gesture.frames).toBeGreaterThan(0);
-        expect(gesture.meaning.length).toBeGreaterThan(0);
+      for (const [category, gestureList] of Object.entries(gestures)) {
+        expect(gestureList.length, `${category} should have gestures`).toBeGreaterThan(0);
       }
     });
   });

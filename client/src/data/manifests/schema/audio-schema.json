@@ -39,7 +39,7 @@
         "brandKeywords": {
           "type": "array",
           "items": { "type": "string" },
-          "default": ["woodland", "medieval", "warm", "storybook", "Redwall-inspired", "cozy-heroic"]
+          "default": ["woodland", "medieval", "warm", "storybook", "Willowmere-inspired", "cozy-heroic"]
         }
       },
       "required": ["provider", "prompt"]
@@ -343,7 +343,7 @@
         "defaultProvider": { "type": "string", "default": "stable_audio" },
         "brandPromptPrefix": {
           "type": "string",
-          "default": "Warm, orchestral, medieval fantasy. Redwall-inspired woodland adventure. Cozy but heroic. Acoustic instruments, gentle brass, soft strings."
+          "default": "Warm, orchestral, medieval fantasy. Willowmere Hearthhold woodland adventure. Cozy but heroic. Acoustic instruments, gentle brass, soft strings."
         },
         "brandPromptSuffix": {
           "type": "string",
