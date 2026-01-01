@@ -33,43 +33,74 @@ jobs:
           PR_NUMBER: ${{ github.event.client_payload.pr_number }}
           ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
           AGENT_TYPE: ${{ github.event.client_payload.agent_type }}
+          PR_URL: ${{ github.event.client_payload.pr_url }}
           REPO: ${{ github.repository }}
         run: |
           set -eo pipefail
 
           # Determine emoji based on agent type
           case "${AGENT_TYPE}" in
-            "bolt") EMOJI="⚡" ;;
-            "palette") EMOJI="🎨" ;;
-            "scribe") EMOJI="📚" ;;
-            "sentinel") EMOJI="🛡️" ;;
-            "bug-fixer") EMOJI="🐛" ;;
-            "cleanup") EMOJI="🧹" ;;
-            *) EMOJI="🤖" ;;
+            "bolt") EMOJI="⚡"; AGENT_NAME="Bolt (Performance)" ;;
+            "palette") EMOJI="🎨"; AGENT_NAME="Palette (UX)" ;;
+            "scribe") EMOJI="📚"; AGENT_NAME="Scribe (Docs)" ;;
+            "sentinel") EMOJI="🛡️"; AGENT_NAME="Sentinel (Security)" ;;
+            "bug-fixer") EMOJI="🐛"; AGENT_NAME="Bug Fixer" ;;
+            "cleanup") EMOJI="🧹"; AGENT_NAME="Cleanup" ;;
+            *) EMOJI="🤖"; AGENT_NAME="General" ;;
           esac
 
-          # Determine status icon
+          # Determine status icon and action
           case "${OUTCOME}" in
-            "success") STATUS_ICON="✅" ;;
-            "failure") STATUS_ICON="❌" ;;
-            "no_changes") STATUS_ICON="ℹ️" ;;
-            *) STATUS_ICON="❓" ;;
+            "success") 
+              STATUS_ICON="✅"
+              STATUS_TEXT="Completed successfully"
+              ;;
+            "failure") 
+              STATUS_ICON="❌"
+              STATUS_TEXT="Failed - manual review needed"
+              ;;
+            "no_changes") 
+              STATUS_ICON="ℹ️"
+              STATUS_TEXT="No changes needed"
+              ;;
+            "pr_created")
+              STATUS_ICON="🎉"
+              STATUS_TEXT="Pull request created"
+              ;;
+            *) 
+              STATUS_ICON="❓"
+              STATUS_TEXT="Unknown outcome"
+              ;;
           esac
 
           # Construct the comment body
-          COMMENT_BODY="### ${EMOJI} Jules Session Complete
+          COMMENT_BODY="### ${EMOJI} Jules ${AGENT_NAME} Session Complete
 
-          **Session ID:** \`${SESSION_ID}\`
-          **Agent:** ${AGENT_TYPE:-General}
-          **Outcome:** ${STATUS_ICON} ${OUTCOME}
+          | Field | Value |
+          |-------|-------|
+          | **Session ID** | \`${SESSION_ID}\` |
+          | **Agent** | ${AGENT_NAME} |
+          | **Outcome** | ${STATUS_ICON} ${STATUS_TEXT} |
+          "
 
+          # Add PR link if available
+          if [[ -n "${PR_URL}" ]]; then
+            COMMENT_BODY="${COMMENT_BODY}
+          | **Pull Request** | [View PR](${PR_URL}) |
+          "
+          fi
+
+          COMMENT_BODY="${COMMENT_BODY}
           ---
-          *Otterblade Odyssey - Automated by Jules*
+          > 🎮 *Otterblade Odyssey - Automated by Jules*
+          > 
+          > This PR will be automatically reviewed by Claude and merged if approved.
           "
 
           if [[ -n "${PR_NUMBER}" ]]; then
-            # Comment on PR
+            # Comment on PR and add labels for triage
             gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "$COMMENT_BODY"
+            gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "jules-pr,auto-triage" || true
             echo "Posted completion comment to PR #${PR_NUMBER}"
           elif [[ -n "${ISSUE_NUMBER}" ]]; then
             # Comment on Issue
@@ -77,4 +108,5 @@ jobs:
             echo "Posted completion comment to Issue #${ISSUE_NUMBER}"
           else
             echo "::notice::No PR or issue number provided - completion logged only"
+            echo "Session completed: ${SESSION_ID} - ${OUTCOME}"
           fi

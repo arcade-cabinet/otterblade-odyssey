@@ -21,69 +21,98 @@ jobs:
         uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
         with:
           prompt: |
+            # 🧹 WEEKLY CLEANUP AGENT - PULL REQUEST REQUIRED
+
+            ## ⚠️ CRITICAL REQUIREMENT
+            **YOU MUST CREATE A PULL REQUEST.** This is not optional.
+            - If you find cleanup opportunities, create a PR with the improvements
+            - If the codebase is already clean, create a PR with a health report markdown file
+            - NEVER exit without creating a PR
+
+            ---
+
             You are performing weekly maintenance on **Otterblade Odyssey: Zephyros Rising**.
 
             ## Project Context
             - **Tech Stack:** React Three Fiber, Rapier2D, Miniplex ECS, Zustand, Tailwind CSS v4
             - **Package Manager:** pnpm ONLY
             - **Linter:** Biome (strict mode)
-            - **Key Directories:**
-              - `client/src/game/` - Game logic
-              - `client/src/components/` - UI components
-              - `client/src/data/` - JSON content files
-              - `server/` - Express server
+
+            ## Key Directories
+            - `client/src/game/` - Game logic
+            - `client/src/components/` - UI components
+            - `client/src/data/` - JSON content files
+            - `server/` - Express server
 
             ## Focus Areas
 
             ### 1. Dead Code Removal
-            - Find unused variables, functions, and components
-            - Remove commented-out code blocks
-            - Clean up unreachable code paths
-            - Remove unused imports (Biome should catch these)
+            - Unused variables, functions, and components
+            - Commented-out code blocks
+            - Unreachable code paths
 
-            ### 2. Code Duplication (DRY Principle)
-            - Identify duplicated code blocks
-            - Refactor into reusable functions/hooks
-            - Look for repeated patterns in ECS systems
+            ### 2. Code Duplication (DRY)
+            - Duplicated code blocks → refactor into reusable functions
+            - Repeated patterns in ECS systems
 
             ### 3. Complexity Reduction
-            - Simplify overly complex functions
-            - Break down large components (>200 lines)
-            - Reduce nested conditionals
-            - Extract custom hooks where appropriate
+            - Functions over 50 lines → break down
+            - Components over 200 lines → split
+            - Nested conditionals → simplify
 
             ### 4. Naming Improvements
-            - Find unclear variable/function names
-            - Apply consistent naming conventions:
-              - Components: PascalCase
-              - Functions: camelCase
-              - Constants: UPPER_SNAKE_CASE
-              - Types/Interfaces: PascalCase
+            - Unclear names → descriptive names
+            - Inconsistent conventions → standardize
 
             ### 5. Type Safety
-            - Find any `any` types and add proper typing
-            - Add missing JSDoc comments to exports
-            - Ensure Zod schemas match TypeScript types
+            - `any` types → proper typing
+            - Missing JSDoc → add documentation
 
-            ## File Size Limits (from AGENTS.md)
+            ## File Size Limits
             - Components: Max 200 lines
             - Utilities: Max 150 lines
             - Systems: Max 300 lines
-            - Constants: Max 100 lines (move to JSON data files)
+
+            ## MANDATORY PULL REQUEST FORMAT
+
+            **Branch Name:** `jules/cleanup-week-{{week-number}}`
+
+            **PR Title:** `🧹 Cleanup: Weekly maintenance (Week {{week}})`
+
+            **PR Body MUST include:**
+            ```markdown
+            ## Summary
+            Weekly codebase cleanup and maintenance.
+
+            ## Changes Made
+            - [ ] Dead code removal
+            - [ ] Duplication reduction
+            - [ ] Complexity improvements
+            - [ ] Naming fixes
+            - [ ] Type safety improvements
+
+            ## Files Changed
+            [List of files with brief descriptions]
 
             ## Verification
+            - [ ] Ran `pnpm biome check .`
+            - [ ] Ran `pnpm tsc --noEmit`
+            - [ ] No functionality changes
 
-            Before creating PR, run:
-            ```bash
-            pnpm biome check .
-            pnpm tsc --noEmit
+            ## Labels
+            - `jules-pr`
+            - `maintenance`
+            - `auto-triage`
             ```
 
-            ## Guidelines
+            **PR Labels:** `jules-pr`, `maintenance`, `auto-triage`
 
-            - Make incremental, safe refactorings
-            - Preserve existing functionality
-            - Group related changes logically
-            - Do not open a PR if you do not have a validated and impactful change
+            ## If Codebase Is Clean
+
+            Create a PR adding `docs/health-report-{{date}}.md` with:
+            - Codebase health score
+            - Areas reviewed
+            - Metrics (file sizes, complexity)
+            - Recommendations for next week
           jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
           include_commit_log: true

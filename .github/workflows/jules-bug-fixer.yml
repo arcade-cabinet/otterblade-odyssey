@@ -22,7 +22,17 @@ jobs:
         uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
         with:
           prompt: |
-            You are working on **Otterblade Odyssey: Zephyros Rising**, a React 2.5D platformer game.
+            # 🐛 BUG FIX TASK - PULL REQUEST REQUIRED
+
+            ## ⚠️ CRITICAL REQUIREMENT
+            **YOU MUST CREATE A PULL REQUEST.** This is not optional.
+            - If you cannot fix the bug, create a PR with diagnostic information
+            - If you need more info, create a PR with what you found and questions
+            - NEVER exit without creating a PR
+
+            ---
+
+            You are fixing a bug in **Otterblade Odyssey: Zephyros Rising**, a React 2.5D platformer game.
 
             ## Project Context
             - **Tech Stack:** React Three Fiber, Rapier2D physics, Miniplex ECS, Zustand, Tailwind CSS v4
@@ -32,7 +42,8 @@ jobs:
 
             ## Bug Report
 
-            ### ${{ github.event.issue.title }}
+            **Issue:** #${{ github.event.issue.number }}
+            **Title:** ${{ github.event.issue.title }}
 
             ${{ github.event.issue.body }}
 
@@ -44,20 +55,43 @@ jobs:
                - Check physics in `client/src/game/Physics2D.tsx`
                - Check state in `client/src/game/store.ts`
             3. **Fix** - Implement a minimal, targeted fix
-            4. **Testing** - Add a regression test that would have caught this bug
+            4. **Testing** - Add a regression test if possible
             5. **Verification** - Run `pnpm biome check .` and `pnpm tsc --noEmit`
 
-            ## Code Quality Rules
+            ## MANDATORY PULL REQUEST FORMAT
 
-            - Follow patterns in AGENTS.md and CLAUDE.md
-            - Max 200 lines per component, 150 per utility
-            - Use typed data loaders for JSON (see `client/src/game/data/`)
+            **Branch Name:** `jules/fix-issue-${{ github.event.issue.number }}`
+
+            **PR Title:** `🐛 Fix: [Brief description of fix]`
+
+            **PR Body MUST include:**
+            ```markdown
+            ## Summary
+            Fixes #${{ github.event.issue.number }}
+
+            ## Root Cause
+            [Explain what caused the bug]
+
+            ## Solution
+            [Explain the fix]
+
+            ## Testing
+            - [ ] Ran `pnpm biome check .`
+            - [ ] Ran `pnpm tsc --noEmit`
+            - [ ] Manual testing performed
+
+            ## Labels
+            - `jules-pr`
+            - `bug-fix`
+            - `auto-triage`
+            ```
+
+            **PR Labels:** `jules-pr`, `bug-fix`, `auto-triage`
+
+            ## Code Quality Rules
+            - Follow patterns in AGENTS.md
+            - Max 200 lines per component
             - JSDoc on all exports
             - No console.log in production code
-
-            Please provide:
-            - Clear explanation of the root cause
-            - The complete fix with all necessary changes
-            - Test cases to prevent regression
           jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
           starting_branch: 'main'
