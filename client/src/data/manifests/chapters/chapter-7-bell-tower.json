@@ -1,0 +1,668 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 7,
+  "name": "Bell Tower",
+  "location": "Highest Spire",
+
+  "narrative": {
+    "theme": "Rising above - the call to action",
+    "quest": "Sound the Alarm",
+    
+    "emotionalArc": {
+      "opening": "The Bell Tower rises against the storm-dark sky. Up there, the great bells. Ring them, and all of Willowmere will hear.",
+      "midpoint": "The ascent is treacherous. Galeborn patrol every level. Nutkin Swift knows the secret ways, but can they reach the top in time?",
+      "climax": "At the peak, the mechanism is frozen. Finn must thaw it while fighting off the wind-riders. One chance to ring the bells.",
+      "resolution": "The bells RING! Across Willowmere, heads lift. Hope returns. The final battle approaches. From this height, Zephyros's army is visible on the horizon."
+    },
+
+    "storyBeats": [
+      {
+        "id": "tower_base",
+        "moment": "The tower stretches impossibly high. Somewhere above, the bells wait silent.",
+        "triggeredBy": "chapter_start",
+        "expression": "determination"
+      },
+      {
+        "id": "meeting_nutkin",
+        "moment": "Nutkin Swift, young squirrel scout. She knows every beam, every rafter, every secret way up.",
+        "triggeredBy": "meet_nutkin",
+        "expression": "hope"
+      },
+      {
+        "id": "the_climb",
+        "moment": "Hand over hand, platform to platform. The wind howls. Below, the world shrinks.",
+        "triggeredBy": "midway_point",
+        "expression": "fear"
+      },
+      {
+        "id": "wind_riders",
+        "moment": "Icebats! They ride the storm winds, diving at anything that moves. No cover up here.",
+        "triggeredBy": "wind_riders_attack",
+        "expression": "determination"
+      },
+      {
+        "id": "frozen_mechanism",
+        "moment": "The bell mechanism is encased in ice. It must be freed before the bells can ring.",
+        "triggeredBy": "reach_bells",
+        "expression": "sorrow"
+      },
+      {
+        "id": "the_ringing",
+        "moment": "The mechanism breaks free! Finn pulls the rope. The bells SING! Across the land, hope is reborn!",
+        "triggeredBy": "bells_ring",
+        "expression": "hope"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 6,
+    "nextChapter": 8,
+    
+    "transitionIn": {
+      "type": "walk_in",
+      "cinematicId": null,
+      "playerSpawnPoint": { "x": 100, "y": 450 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_7_bells_ring",
+      "exitPoint": { "x": 200, "y": 150 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 6 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "nutkin_swift",
+      "characterId": "nutkin_swift",
+      "name": "Nutkin Swift",
+      "role": "guide",
+      "position": { "x": 400, "y": 430 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "waiting",
+        "states": {
+          "waiting": { "animation": "looking_up", "expression": "eager", "canInteract": true },
+          "guiding": { "animation": "climbing", "expression": "focused", "canInteract": false },
+          "celebrating": { "animation": "jumping_joy", "expression": "joy", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "beckon",
+          "finnResponse": "nod",
+          "actions": [
+            { "type": "show_toast", "value": "Nutkin knows the way. Follow her!" },
+            { "type": "npc_action", "target": "nutkin_swift", "value": "guiding" },
+            { "type": "start_sequence", "target": "escort_up_tower" }
+          ]
+        }
+      ],
+      
+      "givesQuest": "quest_ring_bells"
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_ring_bells",
+      "name": "Sound the Alarm",
+      "type": "main",
+      "giver": "nutkin_swift",
+      
+      "objectives": [
+        {
+          "id": "obj_meet_nutkin",
+          "description": "Meet Nutkin Swift",
+          "type": "interact",
+          "target": "nutkin_swift"
+        },
+        {
+          "id": "obj_reach_bells",
+          "description": "Climb to the bell chamber",
+          "type": "reach_location",
+          "target": "bell_chamber"
+        },
+        {
+          "id": "obj_thaw_mechanism",
+          "description": "Thaw the frozen mechanism",
+          "type": "interact",
+          "target": "frozen_mechanism"
+        },
+        {
+          "id": "obj_ring_bells",
+          "description": "Ring the great bells",
+          "type": "interact",
+          "target": "bell_rope"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 100,
+        "achievement": "Bell Ringer"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 800,
+      "minY": 0,
+      "maxY": 2000
+    },
+    
+    "biome": "rooftop",
+    "spawnPoint": { "x": 100, "y": 450 },
+    
+    "segments": [
+      {
+        "id": "tower_base",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 0, "y": 480, "width": 800, "type": "stone", "asset": "platform_tower_base" },
+          { "x": 100, "y": 400, "width": 150, "type": "wood", "asset": "platform_scaffold" },
+          { "x": 350, "y": 320, "width": 120, "type": "stone", "asset": "platform_ledge" },
+          { "x": 550, "y": 380, "width": 100, "type": "wood", "asset": "platform_beam" },
+          { "x": 650, "y": 300, "width": 120, "type": "stone", "asset": "platform_ledge" }
+        ],
+        
+        "ladders": [
+          { "x": 200, "y": 320, "height": 80, "type": "wood", "asset": "ladder_tower" }
+        ],
+        
+        "walls": [
+          { "x": 0, "y": 0, "width": 30, "height": 480, "asset": "wall_tower_exterior" },
+          { "x": 770, "y": 0, "width": 30, "height": 480, "asset": "wall_tower_exterior" }
+        ]
+      },
+      {
+        "id": "first_landing",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 50, "y": 220, "width": 200, "type": "stone", "asset": "platform_landing" },
+          { "x": 300, "y": 180, "width": 100, "type": "wood", "asset": "platform_beam" },
+          { "x": 450, "y": 140, "width": 150, "type": "stone", "asset": "platform_landing" },
+          { "x": 650, "y": 180, "width": 120, "type": "wood", "asset": "platform_scaffold" }
+        ],
+        
+        "ladders": [
+          { "x": 480, "y": 60, "height": 80, "type": "wood", "asset": "ladder_tower" }
+        ]
+      },
+      {
+        "id": "second_landing",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 350, "y": 60, "width": 200, "type": "stone", "asset": "platform_landing" },
+          { "x": 100, "y": 0, "width": 150, "type": "wood", "asset": "platform_beam" },
+          { "x": 600, "y": -40, "width": 150, "type": "stone", "asset": "platform_ledge" }
+        ],
+        
+        "ladders": [
+          { "x": 150, "y": -80, "height": 80, "type": "rope", "asset": "climbable_rope" }
+        ]
+      },
+      {
+        "id": "wind_passage",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 50, "y": -80, "width": 120, "type": "stone", "asset": "platform_exposed" },
+          { "x": 250, "y": -120, "width": 80, "type": "wood", "asset": "platform_narrow_beam",
+            "properties": { "swaying": true } },
+          { "x": 400, "y": -160, "width": 100, "type": "stone", "asset": "platform_exposed" },
+          { "x": 550, "y": -200, "width": 80, "type": "wood", "asset": "platform_narrow_beam",
+            "properties": { "swaying": true } },
+          { "x": 680, "y": -240, "width": 100, "type": "stone", "asset": "platform_landing" }
+        ],
+        
+        "killZones": [
+          { "x": 0, "y": 600, "width": 800 }
+        ]
+      },
+      {
+        "id": "bell_chamber",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 200, "y": -320, "width": 400, "type": "stone", "asset": "platform_bell_chamber" }
+        ],
+        
+        "walls": [
+          { "x": 180, "y": -450, "width": 20, "height": 130, "asset": "wall_bell_frame" },
+          { "x": 600, "y": -450, "width": 20, "height": 130, "asset": "wall_bell_frame" }
+        ],
+        
+        "ceilings": [
+          { "x": 180, "y": -460, "width": 440, "height": 20, "asset": "ceiling_bell_housing" }
+        ]
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_base", "position": { "x": 200, "y": 450 }, "type": "brazier" },
+      { "id": "checkpoint_landing1", "position": { "x": 150, "y": 190 }, "type": "brazier", "requiresTrigger": "first_landing_reached" },
+      { "id": "checkpoint_landing2", "position": { "x": 400, "y": 30 }, "type": "brazier", "requiresTrigger": "second_landing_reached" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "tower_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 500, "y": 350 },
+      "behavior": { "type": "patrol", "aggroRadius": 120 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "tower_icebat_1",
+      "enemyType": "icebat",
+      "position": { "x": 400, "y": 100 },
+      "behavior": { "type": "patrol", "aggroRadius": 180 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "wind_icebat_1",
+      "enemyType": "icebat",
+      "position": { "x": 300, "y": -100 },
+      "behavior": { "type": "patrol", "aggroRadius": 200 },
+      "spawnedByTrigger": "wind_riders_attack",
+      "difficulty": "hard"
+    },
+    {
+      "id": "wind_icebat_2",
+      "enemyType": "icebat",
+      "position": { "x": 500, "y": -150 },
+      "behavior": { "type": "patrol", "aggroRadius": 200 },
+      "spawnedByTrigger": "wind_riders_attack",
+      "difficulty": "hard"
+    },
+    {
+      "id": "wind_icebat_3",
+      "enemyType": "icebat",
+      "position": { "x": 600, "y": -200 },
+      "behavior": { "type": "chase", "aggroRadius": 220 },
+      "spawnedByTrigger": "wind_riders_attack",
+      "difficulty": "hard"
+    },
+    {
+      "id": "bell_guardian",
+      "enemyType": "frost_specter",
+      "position": { "x": 400, "y": -350 },
+      "behavior": { "type": "guard", "guardRadius": 150, "aggroRadius": 180 },
+      "spawnedByTrigger": "reach_bells",
+      "difficulty": "boss",
+      "isMiniboss": true
+    }
+  ],
+
+  "boss": null,
+
+  "motionChallenges": [
+    {
+      "id": "balance_beam_1",
+      "type": "balance_beam",
+      "position": { "x": 250, "y": -120 },
+      "description": "Balance across the swaying beam in the wind",
+      
+      "motionInput": {
+        "primaryAxis": "gamma",
+        "sensitivity": 0.8,
+        "deadzone": 0.1,
+        "smoothing": 0.6,
+        "calibrationRequired": true
+      },
+      
+      "alternativeInput": {
+        "type": "arrow_keys",
+        "config": {
+          "leftKey": "ArrowLeft",
+          "rightKey": "ArrowRight",
+          "sensitivity": 0.4
+        }
+      },
+      
+      "beam": {
+        "length": 80,
+        "width": 20,
+        "wobble": 0.3,
+        "wind": {
+          "direction": 90,
+          "strength": 0.4,
+          "gusts": true
+        }
+      },
+      
+      "visualFeedback": {
+        "indicator": "balance_bar",
+        "showGuides": true
+      },
+      
+      "hapticFeedback": {
+        "onSuccess": "haptic_success",
+        "onFail": "haptic_fail",
+        "continuous": {
+          "patternId": "haptic_balance",
+          "modulatedBy": "danger"
+        }
+      },
+      
+      "failCondition": {
+        "type": "fall",
+        "penalty": {
+          "damage": 30,
+          "warmthDrain": 10,
+          "restart": false
+        }
+      },
+      
+      "successReward": {
+        "emberShards": 10
+      }
+    }
+  ],
+
+  "interactions": [
+    {
+      "id": "frozen_mechanism",
+      "type": "shrine",
+      "position": { "x": 400, "y": -380 },
+      "asset": "bell_mechanism_frozen",
+      "activateRadius": 60,
+      "initialState": "frozen",
+      "states": {
+        "frozen": { "asset": "bell_mechanism_frozen", "solid": true },
+        "thawing": { "asset": "bell_mechanism_thawing", "solid": true },
+        "thawed": { "asset": "bell_mechanism_ready", "solid": false, "actions": [
+          { "type": "show_toast", "value": "The mechanism is free!" },
+          { "type": "play_sound", "target": "ice_crack_large" }
+        ]}
+      },
+      "requires": { "trigger": "guardian_defeated" }
+    },
+    {
+      "id": "bell_rope",
+      "type": "lever",
+      "position": { "x": 400, "y": -340 },
+      "asset": "bell_rope",
+      "activateRadius": 50,
+      "initialState": "ready",
+      "states": {
+        "ready": { "asset": "bell_rope_ready" },
+        "pulled": { "asset": "bell_rope_pulled", "actions": [
+          { "type": "play_sound", "target": "bells_ringing_massive" },
+          { "type": "shake_screen", "value": 0.7 },
+          { "type": "slow_motion", "value": 2000 }
+        ]}
+      },
+      "requires": { "trigger": "mechanism_thawed" }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 400, "width": 200, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_tower_climb" },
+        { "type": "show_toast", "value": "The Bell Tower" }
+      ]
+    },
+    {
+      "id": "meet_nutkin",
+      "type": "enter_region",
+      "region": { "x": 350, "y": 380, "width": 100, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "Nutkin Swift, Rooftop Scout" }
+      ]
+    },
+    {
+      "id": "first_landing_reached",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 180, "width": 300, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "second_landing_reached",
+      "type": "enter_region",
+      "region": { "x": 300, "y": 20, "width": 250, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "midway_point",
+      "type": "enter_region",
+      "region": { "x": 0, "y": -50, "width": 200, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "Halfway there. The wind grows fierce." },
+        { "type": "drain_warmth", "value": 10 }
+      ]
+    },
+    {
+      "id": "wind_riders_attack",
+      "type": "enter_region",
+      "region": { "x": 200, "y": -150, "width": 200, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "spawn_enemies", "value": ["wind_icebat_1", "wind_icebat_2", "wind_icebat_3"] },
+        { "type": "change_music", "target": "music_tower_combat" },
+        { "type": "show_toast", "value": "Wind-riders!" }
+      ]
+    },
+    {
+      "id": "reach_bells",
+      "type": "enter_region",
+      "region": { "x": 200, "y": -360, "width": 400, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "spawn_enemies", "value": ["bell_guardian"] },
+        { "type": "change_music", "target": "music_miniboss" },
+        { "type": "show_toast", "value": "The bell mechanism is frozen!" }
+      ]
+    },
+    {
+      "id": "guardian_defeated",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["reach_bells"],
+      "actions": [
+        { "type": "show_toast", "value": "Thaw the mechanism!" },
+        { "type": "change_music", "target": "music_tower_climb" }
+      ]
+    },
+    {
+      "id": "mechanism_thawed",
+      "type": "interact",
+      "targetId": "frozen_mechanism",
+      "once": true,
+      "requires": ["guardian_defeated"],
+      "actions": []
+    },
+    {
+      "id": "bells_ring",
+      "type": "interact",
+      "targetId": "bell_rope",
+      "once": true,
+      "requires": ["mechanism_thawed"],
+      "actions": [
+        { "type": "start_sequence", "target": "bells_ringing_sequence" }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "timer",
+      "delay": 8000,
+      "requires": ["bells_ring"],
+      "once": true,
+      "actions": [
+        { "type": "complete_quest", "target": "quest_ring_bells" },
+        { "type": "unlock_achievement", "target": "Bell Ringer" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_7_bells_ring" }
+      ]
+    }
+  ],
+
+  "sequences": [
+    {
+      "id": "escort_up_tower",
+      "name": "Climbing with Nutkin",
+      "description": "Nutkin leads the way up the tower",
+      "playerControl": "full",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "actor_gesture", "target": "nutkin_swift", "value": "point_up" },
+        { 
+          "type": "move_actor",
+          "target": "nutkin_swift",
+          "value": {
+            "path": {
+              "waypoints": [
+                { "x": 400, "y": 430 },
+                { "x": 350, "y": 320 },
+                { "x": 200, "y": 220 }
+              ],
+              "navigationMode": "jump",
+              "speed": 1.2
+            },
+            "animation": "climbing"
+          },
+          "async": true
+        }
+      ]
+    },
+    {
+      "id": "bells_ringing_sequence",
+      "name": "The Bells Ring",
+      "description": "The great bells sound across Willowmere",
+      "playerControl": "none",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "change_music", "target": "music_bells_triumph" },
+        { "type": "slow_motion", "value": 1500 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 0.5, "duration": 2000 } },
+        { "type": "play_sound", "target": "bells_ringing_massive" },
+        { "type": "shake_screen", "value": 0.8 },
+        { "type": "show_toast", "value": "The bells ring out across Willowmere!", "delay": 1500 },
+        { "type": "particle_effect", "target": "bell_vibration", "value": {}, "delay": 500 },
+        { "type": "npc_action", "target": "nutkin_swift", "value": "celebrating", "delay": 2000 },
+        { "type": "show_toast", "value": "Hope is reborn!", "delay": 4000 },
+        { "type": "restore_warmth", "value": 50, "delay": 3000 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.0, "duration": 1500 }, "delay": 6000 }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_base_1", "type": "ember_shard", "position": { "x": 600, "y": 350 } },
+    { "id": "shard_landing1_1", "type": "ember_shard", "position": { "x": 500, "y": 110 } },
+    { "id": "shard_wind_1", "type": "ember_shard", "position": { "x": 400, "y": -130 } },
+    { "id": "shard_wind_2", "type": "ember_shard", "position": { "x": 650, "y": -210 } },
+    { "id": "hearthstone_tower", "type": "hearthstone", "position": { "x": 150, "y": 190 } },
+    { "id": "lore_bells", "type": "lore_fragment", "position": { "x": 350, "y": 30 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_bell_masters_cache",
+      "name": "The Bell Master's Cache",
+      "type": "hidden_room",
+      "entrance": { "x": 750, "y": -280, "width": 30, "height": 50 },
+      "hint": "A hidden compartment in the bell frame, where the old bell master kept his treasures",
+      "rewards": {
+        "emberShards": 40,
+        "hearthstones": 2,
+        "achievement": "Highest Point"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "rooftop_wind_chapter_plate",
+    "parallaxBackground": "rooftops_parallax_background",
+    "introCinematic": null,
+    "outroCinematic": "chapter_7_bells_ring",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_tower_climb",
+      "tension": "music_tower_wind",
+      "combat": "music_tower_combat",
+      "boss": "music_miniboss",
+      "victory": "music_bells_triumph"
+    },
+    
+    "ambientSounds": [
+      "ambient_wind_howling",
+      "ambient_creaking_wood",
+      "ambient_distant_bells"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#4A5568",
+      "ambientIntensity": 0.5,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "wind",
+      "intensity": 0.8,
+      "affectsGameplay": true
+    },
+    
+    "warmthDrain": 0.8,
+    
+    "particles": [
+      {
+        "type": "wind_streaks",
+        "density": 0.6,
+        "region": { "x": 0, "y": -400, "width": 800, "height": 900 }
+      },
+      {
+        "type": "snow",
+        "density": 0.4,
+        "region": { "x": 0, "y": -400, "width": 800, "height": 900 }
+      }
+    ]
+  }
+}

@@ -3,6 +3,21 @@
  * Exports shared configuration and utilities for use in scripts.
  */
 
+// Audio generation (Freesound integration)
+export {
+  AUDIO_CATEGORIES,
+  type AudioCategory,
+  createFreesoundClient,
+  downloadPreview,
+  downloadSoundsByIds,
+  type FreesoundResult,
+  generateAllSFX,
+  generateAttributionFile,
+  getAttribution,
+  searchGameSounds,
+  searchSounds,
+  soundToManifestEntry,
+} from './audio/index.js';
 // Shared configuration
 export {
   CINEMATICS,
@@ -18,7 +33,6 @@ export {
   PLAYER_SPRITE_CONFIG,
   VIDEO_OUTPUT_DIR,
 } from './shared/config.js';
-
 // Prompts
 export {
   FINN_DESCRIPTION,

@@ -3,8 +3,8 @@
  * Uses Capacitor Preferences on native, falls back to localStorage on web
  */
 
-import { Preferences } from '@capacitor/preferences';
 import { Capacitor } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
 import type { StateStorage } from 'zustand/middleware';
 
 /**
@@ -14,10 +14,10 @@ const isNative = Capacitor.isNativePlatform();
 
 /**
  * Custom storage adapter for Zustand's persist middleware
- * 
+ *
  * On native (iOS/Android): Uses Capacitor Preferences (UserDefaults/SharedPreferences)
  * On web: Uses localStorage (Preferences falls back to this automatically on web PWAs)
- * 
+ *
  * This is ASYNC storage, so Zustand will handle hydration properly
  */
 export const capacitorStorage: StateStorage = {
@@ -153,7 +153,7 @@ export async function clearAllGameData(): Promise<void> {
   } catch (error) {
     console.warn('[Storage] Failed to clear Preferences:', error);
   }
-  
+
   // Also clear any localStorage items with our prefix
   try {
     const keysToRemove: string[] = [];
