@@ -10,7 +10,7 @@
     },
     "category": {
       "type": "string",
-      "enum": ["sprites", "enemies", "cinematics", "scenes", "sounds"],
+      "enum": ["sprites", "enemies", "cinematics", "scenes", "sounds", "chapter-plates", "items", "effects"],
       "description": "Asset category for grouping"
     },
     "provider": {

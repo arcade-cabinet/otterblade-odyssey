@@ -4,6 +4,8 @@
 
 Otterblade Odyssey is a React 2.5D platformer with Redwall-inspired woodland-epic aesthetics. This document configures Copilot for optimal code suggestions.
 
+> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. Current production code uses React Three Fiber + Rapier physics.
+
 ## Package Manager
 
 **Use pnpm exclusively.** Never suggest npm or yarn commands.
