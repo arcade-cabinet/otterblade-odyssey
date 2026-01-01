@@ -155,6 +155,12 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       # Download build artifact from build job
       - name: Download build artifact
@@ -163,18 +169,14 @@ jobs:
           name: build-dist
           path: dist/public
 
-      # Release to crates.io (only on release event)
-      - name: Publish to crates.io
-        if: needs.detect.outputs.has_release == 'true'
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-        run: cargo publish || echo "Already published or no token"
-
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
-          name: docs-rust
-          path: docs-output/
+          path: dist/public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
   # ==========================================================================
   # Go: Build, Test, Release, Docs
