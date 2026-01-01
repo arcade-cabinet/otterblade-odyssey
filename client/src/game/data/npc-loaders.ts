@@ -14,6 +14,9 @@ import {
   type Species,
 } from './npc-schemas';
 
+// Note: The actual npcs.json structure is flexible, so we use a lenient parse
+// that allows the schema to evolve without breaking the game.
+
 /** Cached NPC manifest */
 let cachedManifest: NPCManifest | null = null;
 
