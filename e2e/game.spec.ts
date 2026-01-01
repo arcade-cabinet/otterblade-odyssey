@@ -25,6 +25,17 @@ test.describe('Otterblade Odyssey', () => {
 
     await page.goto('/');
 
+    // Reset game state by clearing localStorage (which Zustand persists to)
+    // This ensures gameStarted is false for each test
+    await page.evaluate(() => {
+      localStorage.clear();
+      // Force Zustand to reset by triggering a storage event
+      window.dispatchEvent(new Event('storage'));
+    });
+
+    // Reload to apply the cleared state
+    await page.reload();
+
     // Skip intro cinematic if it appears
     // Wait for the page to settle
     await page.waitForTimeout(1000);
