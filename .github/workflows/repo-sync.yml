@@ -1,15 +1,14 @@
 # Repository Sync - Idempotent configuration for otterblade-odyssey
-# Ensures branch protection, environments, and settings stay in sync
+# Maintains SUPPLEMENTARY settings that enhance (not conflict with) enterprise rules
 name: Repository Sync
 
 on:
   push:
     branches: [main]
     paths:
-      - '.github/repo-config/**'
       - '.github/workflows/repo-sync.yml'
   schedule:
-    - cron: '0 4 * * *'  # Daily at 4 AM UTC
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
@@ -27,59 +26,110 @@ jobs:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          echo "🔧 Configuring $REPO..."
+          echo "🔧 Syncing $REPO settings..."
           
           # ════════════════════════════════════════════════════════════════
-          # LABELS - Ensure required labels exist
+          # ENVIRONMENT: Ensure 'release' environment exists
+          # ════════════════════════════════════════════════════════════════
+          echo "🌍 Configuring release environment..."
+          
+          gh api --method PUT "repos/$REPO/environments/release" \
+            --input - << 'ENVJSON'
+          {
+            "wait_timer": 0,
+            "prevent_self_review": false,
+            "deployment_branch_policy": {
+              "protected_branches": false,
+              "custom_branch_policies": true
+            }
+          }
+          ENVJSON
+          
+          # Allow any branch to deploy to release environment
+          gh api --method POST "repos/$REPO/environments/release/deployment-branch-policies" \
+            --input - << 'BRANCHJSON' 2>/dev/null || true
+          {"name": "*"}
+          BRANCHJSON
+          
+          # ════════════════════════════════════════════════════════════════
+          # RULESET: Supplementary Release Gate (repo-level, adds to enterprise)
+          # ════════════════════════════════════════════════════════════════
+          echo "📋 Configuring Release Gate ruleset..."
+          
+          # Check if ruleset exists
+          RULESET_ID=$(gh api "repos/$REPO/rulesets" --jq '.[] | select(.name == "Release Gate" and .source_type == "Repository") | .id' 2>/dev/null || echo "")
+          
+          RULESET_JSON=$(cat << 'RULESETJSON'
+          {
+            "name": "Release Gate",
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+              "ref_name": {
+                "include": ["~DEFAULT_BRANCH"],
+                "exclude": []
+              }
+            },
+            "rules": [
+              {
+                "type": "required_status_checks",
+                "parameters": {
+                  "strict_required_status_checks_policy": false,
+                  "required_status_checks": [
+                    {"context": "E2E Tests"}
+                  ]
+                }
+              },
+              {
+                "type": "required_deployments",
+                "parameters": {
+                  "required_deployment_environments": ["release"]
+                }
+              }
+            ],
+            "bypass_actors": [
+              {
+                "actor_id": 5,
+                "actor_type": "RepositoryRole",
+                "bypass_mode": "always"
+              }
+            ]
+          }
+          RULESETJSON
+          )
+          
+          if [ -n "$RULESET_ID" ]; then
+            echo "  Updating existing ruleset #$RULESET_ID"
+            echo "$RULESET_JSON" | gh api --method PUT "repos/$REPO/rulesets/$RULESET_ID" --input - > /dev/null
+          else
+            echo "  Creating new ruleset"
+            echo "$RULESET_JSON" | gh api --method POST "repos/$REPO/rulesets" --input - > /dev/null
+          fi
+          
+          # ════════════════════════════════════════════════════════════════
+          # LABELS: Game-specific labels
           # ════════════════════════════════════════════════════════════════
           echo "📌 Configuring labels..."
           
-          LABELS=(
-            "bug:d73a4a:Bug report"
-            "enhancement:a2eeef:Feature request"
-            "documentation:0075ca:Documentation"
-            "jules-pr:7057ff:Created by Jules"
-            "auto-triage:fbca04:Needs automated triage"
-            "release-gate:0e8a16:Release gate status"
-            "e2e-failed:b60205:E2E tests failed"
+          declare -A LABELS=(
+            ["jules-pr"]="7057ff:Created by Jules"
+            ["e2e-failed"]="b60205:E2E tests failed"
+            ["release-gate"]="0e8a16:Passed release gate"
+            ["game/physics"]="1d76db:Physics system"
+            ["game/ecs"]="1d76db:Entity Component System"
+            ["game/rendering"]="1d76db:Rendering/graphics"
+            ["game/audio"]="1d76db:Audio system"
           )
           
-          for LABEL_DEF in "${LABELS[@]}"; do
-            IFS=':' read -r NAME COLOR DESC <<< "$LABEL_DEF"
+          for NAME in "${!LABELS[@]}"; do
+            IFS=':' read -r COLOR DESC <<< "${LABELS[$NAME]}"
             gh label create "$NAME" --color "$COLOR" --description "$DESC" --repo "$REPO" 2>/dev/null || \
             gh label edit "$NAME" --color "$COLOR" --description "$DESC" --repo "$REPO" 2>/dev/null || true
           done
           
-          # ════════════════════════════════════════════════════════════════
-          # ENVIRONMENTS - Create release environment if not exists
-          # ════════════════════════════════════════════════════════════════
-          echo "🌍 Configuring environments..."
-          
-          # Create release environment with protection rules
-          gh api --method PUT "repos/$REPO/environments/release" \
-            -f "wait_timer=0" \
-            -f "prevent_self_review=false" \
-            --input - <<< '{
-              "deployment_branch_policy": {
-                "protected_branches": false,
-                "custom_branch_policies": true
-              }
-            }' 2>/dev/null || echo "Environment exists or API error"
-          
-          # Add branch policy for PRs
-          gh api --method POST "repos/$REPO/environments/release/deployment-branch-policies" \
-            --input - <<< '{"name": "*"}' 2>/dev/null || true
-          
-          # ════════════════════════════════════════════════════════════════
-          # REPO SETTINGS - Basic configuration
-          # ════════════════════════════════════════════════════════════════
-          echo "⚙️ Configuring repository settings..."
-          
-          gh api --method PATCH "repos/$REPO" \
-            -f "delete_branch_on_merge=true" \
-            -f "allow_squash_merge=true" \
-            -f "allow_merge_commit=false" \
-            -f "allow_rebase_merge=true" \
-            -f "allow_auto_merge=true" 2>/dev/null || true
-          
           echo "✅ Repository sync complete"
+          
+          # Show current rulesets
+          echo ""
+          echo "📋 Active rulesets:"
+          gh api "repos/$REPO/rulesets" --jq '.[] | "  - \(.name) (\(.source_type): \(.source))"'
