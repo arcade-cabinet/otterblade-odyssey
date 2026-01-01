@@ -10,11 +10,55 @@ on:
 permissions: {}
 
 jobs:
-  auto-fix:
+  # First job: Security validation (runs with minimal permissions)
+  validate-source:
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.pull_requests[0] &&
       !startsWith(github.event.workflow_run.head_branch, 'claude-auto-fix-ci-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      is_trusted: ${{ steps.check.outputs.is_trusted }}
+      head_branch: ${{ steps.check.outputs.head_branch }}
+      fix_branch: ${{ steps.check.outputs.fix_branch }}
+      workflow_run_id: ${{ steps.check.outputs.workflow_run_id }}
+    steps:
+      - name: Check if PR is from trusted source
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          BASE_REPO: ${{ github.event.workflow_run.repository.full_name }}
+          RUN_ID: ${{ github.run_id }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          # Security: Reject PRs from forks (untrusted code)
+          if [[ "$HEAD_REPO" != "$BASE_REPO" ]]; then
+            echo "::warning::PR is from a fork ($HEAD_REPO). Skipping auto-fix for security."
+            echo "is_trusted=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Validate branch name contains only safe characters
+          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
+            echo "::error::Invalid branch name detected, aborting for security"
+            echo "is_trusted=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "is_trusted=true" >> $GITHUB_OUTPUT
+          echo "head_branch=$HEAD_BRANCH" >> $GITHUB_OUTPUT
+          echo "fix_branch=claude-auto-fix-ci-${HEAD_BRANCH}-${RUN_ID}" >> $GITHUB_OUTPUT
+          echo "workflow_run_id=$WORKFLOW_RUN_ID" >> $GITHUB_OUTPUT
+
+  # Second job: Auto-fix (only runs for trusted sources)
+  auto-fix:
+    needs: validate-source
+    if: needs.validate-source.outputs.is_trusted == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
@@ -27,28 +71,10 @@ jobs:
       issues: write
       id-token: write
     steps:
-      # Security: Validate branch name to prevent injection attacks
-      - name: Validate branch name
-        id: validate
-        env:
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          RUN_ID: ${{ github.run_id }}
-          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
-        run: |
-          # Validate branch name contains only safe characters
-          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
-            echo "::error::Invalid branch name detected, aborting for security"
-            exit 1
-          fi
-          # Export validated values
-          echo "head_branch=$HEAD_BRANCH" >> $GITHUB_OUTPUT
-          echo "fix_branch=claude-auto-fix-ci-${HEAD_BRANCH}-${RUN_ID}" >> $GITHUB_OUTPUT
-          echo "workflow_run_id=$WORKFLOW_RUN_ID" >> $GITHUB_OUTPUT
-
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ steps.validate.outputs.head_branch }}
+          ref: ${{ needs.validate-source.outputs.head_branch }}
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN }}
 
@@ -60,7 +86,7 @@ jobs:
       - name: Create fix branch
         id: branch
         env:
-          BRANCH_NAME: ${{ steps.validate.outputs.fix_branch }}
+          BRANCH_NAME: ${{ needs.validate-source.outputs.fix_branch }}
         run: |
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
@@ -69,7 +95,7 @@ jobs:
         id: failure_details
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          WORKFLOW_RUN_ID: ${{ steps.validate.outputs.workflow_run_id }}
+          WORKFLOW_RUN_ID: ${{ needs.validate-source.outputs.workflow_run_id }}
         with:
           github-token: ${{ secrets.CI_GITHUB_TOKEN }}
           script: |
