@@ -54,13 +54,21 @@ describe('NPC Manifest Structure', () => {
       }
     });
 
-    it('species colors should be valid hex codes', () => {
-      const hexRegex = /^#[0-9a-fA-F]{6}$/;
-      for (const [name, species] of Object.entries(npcData.species)) {
-        const spec = species as { colors: Record<string, string[]> };
-        for (const [colorGroup, colors] of Object.entries(spec.colors)) {
-          for (const color of colors) {
-            expect(color, `${name}.${colorGroup} has invalid color`).toMatch(hexRegex);
+    it('getSpecies should return undefined for unknown species', () => {
+      const unknown = getSpecies('dragon');
+      expect(unknown).toBeUndefined();
+    });
+
+    it('species should have valid color definitions', () => {
+      const species = getAllSpecies();
+      for (const [_name, spec] of Object.entries(species)) {
+        expect(spec.colors).toBeDefined();
+        expect(typeof spec.colors).toBe('object');
+        // Each color group should be an array of hex colors
+        for (const colorGroup of Object.values(spec.colors)) {
+          expect(Array.isArray(colorGroup)).toBe(true);
+          for (const color of colorGroup) {
+            expect(color).toMatch(/^#[0-9a-fA-F]{6}$/);
           }
         }
       }
@@ -170,10 +178,28 @@ describe('NPC Manifest Structure', () => {
     });
 
     it('should include common gestures', () => {
-      const gestures = npcData.gestureLibrary as Record<string, string[]>;
-      expect(gestures.greetings).toContain('wave');
-      expect(gestures.greetings).toContain('nod');
-      expect(gestures.greetings).toContain('bow');
+      const gestures = getGestureLibrary();
+      expect(gestures).toHaveProperty('nod');
+      expect(gestures).toHaveProperty('wave');
+      expect(gestures).toHaveProperty('bow');
+    });
+
+    it('getGesture should return specific gesture', () => {
+      const nod = getGesture('nod');
+      expect(nod).toBeDefined();
+      expect(typeof nod?.duration).toBe('number');
+      expect(typeof nod?.frames).toBe('number');
+      expect(typeof nod?.loop).toBe('boolean');
+      expect(Array.isArray(nod?.meaning)).toBe(true);
+    });
+
+    it('gestures should have valid structure', () => {
+      const gestures = getGestureLibrary();
+      for (const [_name, gesture] of Object.entries(gestures)) {
+        expect(gesture.duration).toBeGreaterThan(0);
+        expect(gesture.frames).toBeGreaterThan(0);
+        expect(gesture.meaning.length).toBeGreaterThan(0);
+      }
     });
   });
 });

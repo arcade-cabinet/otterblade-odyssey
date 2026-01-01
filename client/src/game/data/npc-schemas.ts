@@ -117,5 +117,7 @@ export type CharacterDefinition = z.infer<typeof CharacterDefinitionSchema>;
 export type ProceduralConfig = z.infer<typeof ProceduralConfigSchema>;
 export type DialogueConfig = z.infer<typeof DialogueConfigSchema>;
 export type NPCBehaviors = z.infer<typeof NPCBehaviorsSchema>;
-export type GestureLibrary = z.infer<typeof GestureLibrarySchema>;
+export type GestureLibrary = z.infer<typeof GestureLibrarySchema> & {
+  [key: string]: string[];
+};
 export type NPCManifest = z.infer<typeof NPCManifestSchema>;
