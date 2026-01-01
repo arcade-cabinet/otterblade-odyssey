@@ -37,6 +37,15 @@ test.describe('Otterblade Odyssey', () => {
       await page.keyboard.press('Space');
       await expect(cinematicPlayer).not.toBeVisible({ timeout: 5000 });
     }
+
+    // Wait for start menu to be visible and fully faded in
+    // The Fade component has a 1000ms timeout, so we need to ensure it's fully visible
+    const startMenu = page.getByTestId('start-menu');
+    await expect(startMenu).toBeVisible({ timeout: 5000 });
+
+    // Wait for the start button to be visible (inside the Fade component)
+    const startButton = page.getByTestId('button-start-game');
+    await expect(startButton).toBeVisible({ timeout: 5000 });
   });
 
   // ============================================
