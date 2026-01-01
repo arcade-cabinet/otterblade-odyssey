@@ -1,0 +1,51 @@
+name: Claude Commit Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      analysis_type:
+        description: "Type of analysis to perform"
+        required: true
+        type: choice
+        options:
+          - summarize-commit
+          - security-review
+        default: "summarize-commit"
+
+# No workflow-level permissions - all permissions defined at job level
+permissions: {}
+
+jobs:
+  analyze-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 2 # Need at least 2 commits to analyze the latest
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - name: Run Claude Analysis
+        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          # Allowlist of trusted bots
+          allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
+          prompt: |
+            REPO: ${{ github.repository }}
+            BRANCH: ${{ github.ref_name }}
+
+            Analyze the latest commit in this repository.
+
+            ${{ github.event.inputs.analysis_type == 'summarize-commit' && 'Task: Provide a clear, concise summary of what changed in the latest commit. Include the commit message, files changed, and the purpose of the changes.' || '' }}
+
+            ${{ github.event.inputs.analysis_type == 'security-review' && 'Task: Review the latest commit for potential security vulnerabilities. Check for exposed secrets, insecure coding patterns, dependency vulnerabilities, or any other security concerns. Provide specific recommendations if issues are found.' || '' }}
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,LS,Bash(git:*),mcp__github__get_commit,mcp__github__list_commits,mcp__github__get_file_contents,mcp__github__get_pull_request,mcp__github__get_pull_request_diff,mcp__github__create_issue_comment,mcp__github__create_issue"

@@ -55,8 +55,16 @@ jobs:
 
       - name: Get diff
         id: diff
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          DIFF=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- \
+          # Validate base ref contains only safe characters
+          if [[ ! "$BASE_REF" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
+            echo "::error::Invalid base ref"
+            exit 1
+          fi
+          
+          DIFF=$(git diff "origin/${BASE_REF}...HEAD" -- \
             '*.py' '*.ts' '*.js' '*.tsx' '*.jsx' '*.go' '*.rs' '*.tf' \
             ':!*.lock' ':!*-lock.*' ':!*.min.*' | head -5000)
           
@@ -71,22 +79,21 @@ jobs:
         if: steps.diff.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          PR_NUM=${{ github.event.pull_request.number }}
-          TITLE="${{ github.event.pull_request.title }}"
-          
           # Check for existing review comment
-          EXISTING=$(gh pr view $PR_NUM --json comments --jq '.comments[] | select(.body | contains("🤖 **Ecosystem Review**")) | .id' | head -1)
+          EXISTING=$(gh pr view "$PR_NUM" --json comments --jq '.comments[] | select(.body | contains("🤖 **Ecosystem Review**")) | .id' | head -1)
           
           if [ -n "$EXISTING" ]; then
             echo "Review already posted, skipping"
             exit 0
           fi
           
-          # Post initial review acknowledgment
-          gh pr comment $PR_NUM --body "🤖 **Ecosystem Review**
+          # Post initial review acknowledgment (title sanitized via env var)
+          gh pr comment "$PR_NUM" --body "🤖 **Ecosystem Review**
 
-          Reviewing PR: **$TITLE**
+          Reviewing PR: **${PR_TITLE}**
 
           ✅ Code diff captured
           ⏳ Analysis pending (manual review recommended)
@@ -317,11 +324,10 @@ jobs:
       - name: Check and merge
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
         run: |
-          PR_NUM=${{ github.event.pull_request.number }}
-          
           # Check if auto-merge label exists
-          HAS_AUTO=$(gh pr view $PR_NUM --json labels --jq '.labels[].name' | grep -c "auto-merge" || true)
+          HAS_AUTO=$(gh pr view "$PR_NUM" --json labels --jq '.labels[].name' | grep -c "auto-merge" || true)
           
           if [ "$HAS_AUTO" -eq 0 ]; then
             echo "No auto-merge label, skipping"
@@ -329,7 +335,7 @@ jobs:
           fi
           
           # Check all status checks
-          STATUS=$(gh pr checks $PR_NUM --json state --jq '.[] | select(.state != "SUCCESS" and .state != "SKIPPED") | .state' | head -1)
+          STATUS=$(gh pr checks "$PR_NUM" --json state --jq '.[] | select(.state != "SUCCESS" and .state != "SKIPPED") | .state' | head -1)
           
           if [ -n "$STATUS" ]; then
             echo "Checks not all passing, waiting..."
@@ -337,9 +343,9 @@ jobs:
           fi
           
           # Merge
-          gh pr merge $PR_NUM --squash --delete-branch --body "Auto-merged after approval"
+          gh pr merge "$PR_NUM" --squash --delete-branch --body "Auto-merged after approval"
           
-          echo "✅ PR #$PR_NUM merged"
+          echo "✅ PR #${PR_NUM} merged"
 
   # ============================================================
   # SYNC-TRIAGE: Handle sync PRs from control center
@@ -355,15 +361,13 @@ jobs:
       - name: Auto-approve sync PRs
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          PR_NUM=${{ github.event.pull_request.number }}
-          
           # Add label for tracking
-          gh pr edit $PR_NUM --add-label "sync,auto-merge"
+          gh pr edit "$PR_NUM" --add-label "sync,auto-merge"
           
-          # Approve if from trusted source
-          AUTHOR="${{ github.event.pull_request.user.login }}"
-          
-          if [[ "$AUTHOR" == *"[bot]"* ]] || [ "$AUTHOR" = "jbcom" ]; then
-            gh pr review $PR_NUM --approve --body "✅ Approved: Sync from control center"
+          # Approve if from trusted source (author via env var to prevent injection)
+          if [[ "$PR_AUTHOR" == *"[bot]"* ]] || [ "$PR_AUTHOR" = "jbcom" ]; then
+            gh pr review "$PR_NUM" --approve --body "✅ Approved: Sync from control center"
           fi

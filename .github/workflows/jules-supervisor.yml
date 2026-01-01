@@ -2,14 +2,26 @@ name: Jules Supervisor
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+
+# No workflow-level permissions - all permissions defined at job level
+permissions: {}
 
 jobs:
   supervise:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
@@ -18,6 +30,12 @@ jobs:
 
       - name: Run Jules Supervisor
         env:
-          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-          CURSOR_GITHUB_TOKEN: ${{ secrets.CURSOR_GITHUB_TOKEN }}
-        run: node scripts/cursor-jules-orchestrator.mjs
+          GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        run: |
+          if [ -f scripts/cursor-jules-orchestrator.mjs ]; then
+            node scripts/cursor-jules-orchestrator.mjs
+          else
+            echo "::notice::Orchestrator script not found, skipping"
+          fi
