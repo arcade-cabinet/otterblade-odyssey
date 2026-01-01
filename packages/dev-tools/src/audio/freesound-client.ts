@@ -367,12 +367,13 @@ export async function downloadPreview(
  * For now, we use previews which are sufficient for most game SFX.
  */
 export async function downloadFullSound(
-  client: Freesound,
+  _client: Freesound,
   sound: FreesoundResult,
   outputDir: string
 ): Promise<string | null> {
   // OAuth flow required for full downloads
   // For MVP, we'll use previews which are 128kbps MP3 - good enough for games
+  // The _client parameter is reserved for future OAuth implementation
   log('⚠️', 'Full downloads require OAuth. Using preview instead.');
   return downloadPreview(sound, outputDir, 'hq');
 }
