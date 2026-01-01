@@ -308,13 +308,13 @@ function PreviewModal({ open, asset, outputDir, onClose }: PreviewModalProps) {
                     mx: 'auto',
                     backgroundImage: `url(${assetPath})`,
                     backgroundSize: 'auto 100%',
-                    animation: 'spritePlay 0.8s steps(8) infinite',
+                    animation: `spritePlay 0.8s steps(${(asset.config?.columns as number) || 8}) infinite`,
                   }}
                 />
                 <style>{`
                   @keyframes spritePlay {
                     from { background-position: 0 0; }
-                    to { background-position: -1024px 0; }
+                    to { background-position: -${((asset.config?.columns as number) || 8) * ((asset.config?.frameWidth as number) || 128)}px 0; }
                   }
                 `}</style>
               </Box>
