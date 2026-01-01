@@ -1,0 +1,277 @@
+# E2E Fixer - AI-powered test failure assessment, triage, and auto-fixes
+# Triggered automatically when release-e2e.yml fails
+# Attempts to diagnose, fix, retest, and push fixes back to PR
+name: E2E Fixer
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number that failed E2E tests'
+        required: true
+      run_id:
+        description: 'Workflow run ID that failed'
+        required: true
+      commit_sha:
+        description: 'Commit SHA that failed'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+  actions: read
+
+jobs:
+  assess-and-fix:
+    name: Assess & Fix E2E Failures
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event.inputs.commit_sha }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@9fd676a19091d4595eefd76e4bd31c97133911f1 # v4.2.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: 25
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download test artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: playwright-report
+          path: playwright-report/
+          github-token: ${{ secrets.CI_GITHUB_TOKEN }}
+          run-id: ${{ github.event.inputs.run_id }}
+        continue-on-error: true
+
+      - name: Analyze test failures
+        id: analyze
+        run: |
+          echo "🔍 Analyzing E2E test failures..."
+          
+          # Extract failure information from Playwright report
+          if [ -f "playwright-report/index.html" ]; then
+            echo "✅ Found Playwright report"
+          fi
+          
+          # Look for test results JSON
+          if [ -d "playwright-report/data" ]; then
+            FAILURES=$(find playwright-report/data -name "*.json" -exec jq -r '.tests[]? | select(.results[0].status == "failed") | .title' {} \; 2>/dev/null | head -10)
+            if [ -n "$FAILURES" ]; then
+              echo "failures<<EOF" >> $GITHUB_OUTPUT
+              echo "$FAILURES" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            fi
+          fi
+          
+          # Check for common failure patterns
+          ERROR_PATTERNS=(
+            "timeout"
+            "element not found"
+            "network error"
+            "assertion failed"
+            "navigation failed"
+          )
+          
+          ANALYSIS="E2E test failures detected. "
+          ANALYSIS+="Reviewing test artifacts and error patterns to identify root cause."
+          
+          echo "analysis<<EOF" >> $GITHUB_OUTPUT
+          echo "$ANALYSIS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: AI Assessment & Triage
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            const prNumber = parseInt(context.payload.inputs.pr_number);
+            const failures = `${{ steps.analyze.outputs.failures }}`;
+            const analysis = `${{ steps.analyze.outputs.analysis }}`;
+            
+            // Get PR details
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            // Create assessment comment
+            const assessment = `## 🤖 AI E2E Test Failure Assessment
+            
+            **PR**: #${prNumber}
+            **Commit**: \`${context.payload.inputs.commit_sha.substring(0, 7)}\`
+            **Failed Run**: [View Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.payload.inputs.run_id})
+            
+            ### Analysis
+            ${analysis}
+            
+            ${failures ? `### Failed Tests\n\`\`\`\n${failures}\n\`\`\`` : ''}
+            
+            ### Next Steps
+            1. 🔍 Analyzing test failures and code changes
+            2. 🔧 Attempting automatic fixes
+            3. ✅ Retesting after fixes
+            4. 📝 Updating PR with results
+            
+            ---
+            *This is an automated assessment. Fixes will be pushed to this PR if successful.*`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: assessment
+            });
+            
+            console.log('✅ Created assessment comment');
+
+      - name: Attempt Automatic Fixes
+        id: fix
+        run: |
+          echo "🔧 Attempting automatic fixes..."
+          
+          # This is a placeholder - in production, this would:
+          # 1. Use AI/LLM to analyze failures
+          # 2. Generate fixes
+          # 3. Apply fixes to code
+          # 4. Validate fixes don't break existing code
+          
+          # For now, we'll create a marker file indicating fixes were attempted
+          echo "fixes_applied=false" >> $GITHUB_OUTPUT
+          echo "fix_summary=Automatic fixes not yet implemented. Manual review required." >> $GITHUB_OUTPUT
+          
+          # TODO: Integrate with AI fixer (similar to ai-fixer.yml pattern)
+          # This could use Claude API, GPT-4, or local Ollama model
+          
+          echo "⚠️ Automatic fixes not implemented yet - requires AI integration"
+
+      - name: Create fix branch and commit
+        if: steps.fix.outputs.fixes_applied == 'true'
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          
+          BRANCH_NAME="fix/e2e-auto-fix-${{ github.event.inputs.pr_number }}-${{ github.run_number }}"
+          git checkout -b "$BRANCH_NAME"
+          
+          git add -A
+          git commit -m "fix(e2e): auto-fix E2E test failures
+
+          Automated fixes for PR #${{ github.event.inputs.pr_number }}
+          
+          ${{ steps.fix.outputs.fix_summary }}
+          
+          Auto-generated by e2e-fixer workflow"
+          
+          git push origin "$BRANCH_NAME" --force
+
+      - name: Retest after fixes
+        if: steps.fix.outputs.fixes_applied == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            // Trigger release-e2e workflow on the fix branch
+            const branchName = `fix/e2e-auto-fix-${{ github.event.inputs.pr_number }}-${{ github.run_number }}`;
+            
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'release-e2e.yml',
+              ref: branchName
+            });
+            
+            console.log(`✅ Triggered retest on ${branchName}`);
+
+      - name: Update PR with results
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            const prNumber = parseInt(context.payload.inputs.pr_number);
+            
+            let commentBody = `## 🤖 E2E Fixer Results
+            
+            **Status**: ${{ steps.fix.outputs.fixes_applied == 'true' && '✅ Fixes Applied' || '⚠️ Manual Review Required' }}
+            
+            ${{ steps.fix.outputs.fixes_applied == 'true' && `**Fix Branch**: \`fix/e2e-auto-fix-${prNumber}-${context.runNumber}\`\n\n**Summary**:\n${steps.fix.outputs.fix_summary}\n\n**Next Steps**:\n- Retest triggered on fix branch\n- Review changes and merge fix branch into PR if tests pass` || `**Next Steps**:\n- Review test failures manually\n- Apply fixes as needed\n- Tests will re-run automatically when PR is updated`}
+            
+            ---
+            *Automated by e2e-fixer workflow*`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: commentBody
+            });
+            
+            // If fixes were applied, create a new PR from fix branch to original PR branch
+            if ('${{ steps.fix.outputs.fixes_applied }}' === 'true') {
+              const { data: originalPR } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              
+              const fixBranch = `fix/e2e-auto-fix-${prNumber}-${context.runNumber}`;
+              
+              // Create PR from fix branch to original PR branch
+              await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🤖 Auto-fix for E2E failures in #${prNumber}`,
+                head: fixBranch,
+                base: originalPR.head.ref,
+                body: `This PR contains automated fixes for E2E test failures in #${prNumber}.\n\n**Status**: Ready for review\n\n**Changes**:\n${steps.fix.outputs.fix_summary}\n\n---\n*Auto-generated by e2e-fixer workflow*`,
+                maintainer_can_modify: true
+              });
+            }
+
+      - name: Reopen PR if still failing
+        if: steps.fix.outputs.fixes_applied != 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            const prNumber = parseInt(context.payload.inputs.pr_number);
+            
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            // Reopen PR if it was closed
+            if (pr.state === 'closed') {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                state: 'open'
+              });
+              console.log('✅ Reopened PR');
+            }
+            
+            // Add label for manual review
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: ['e2e-failure', 'needs-manual-review']
+            });

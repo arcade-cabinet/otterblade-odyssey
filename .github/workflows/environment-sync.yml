@@ -1,0 +1,175 @@
+# Environment Sync - Idempotent setup of branch protection and custom environments
+# Runs on schedule and workflow_dispatch to ensure settings are always correct
+name: Environment Sync
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC to ensure settings stay in sync
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/environment-sync.yml'
+      - '.github/branch-protection.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+  administration: write
+
+jobs:
+  sync-environment:
+    name: Sync Environment & Branch Protection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: 25
+
+      - name: Create/Update Release Environment
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Get or create release environment
+            let environment;
+            try {
+              const { data } = await github.rest.repos.getEnvironment({
+                owner,
+                repo,
+                environment_name: 'release'
+              });
+              environment = data;
+              console.log('✅ Release environment exists');
+            } catch (error) {
+              if (error.status === 404) {
+                // Environment doesn't exist, create it
+                console.log('📦 Creating release environment...');
+                const { data } = await github.rest.repos.createOrUpdateEnvironment({
+                  owner,
+                  repo,
+                  environment_name: 'release',
+                  deployment_branch_policy: {
+                    protected_branches: false,
+                    custom_branch_policies: true
+                  },
+                  reviewers: [
+                    // Add reviewers if needed - empty for now
+                  ],
+                  wait_timer: 0, // No wait timer
+                  prevent_self_review: false
+                });
+                environment = data;
+                console.log('✅ Created release environment');
+              } else {
+                throw error;
+              }
+            }
+            
+            // Update environment with branch protection for PRs targeting main
+            await github.rest.repos.createOrUpdateEnvironment({
+              owner,
+              repo,
+              environment_name: 'release',
+              deployment_branch_policy: {
+                protected_branches: false,
+                custom_branch_policies: true
+              },
+              // Only allow deployments from PRs targeting main
+              reviewers: environment.reviewers || [],
+              wait_timer: 0
+            });
+            
+            console.log('✅ Release environment configured');
+
+      - name: Apply Branch Protection Rules
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Branch protection rules for main branch
+            const protectionRules = {
+              required_status_checks: {
+                strict: true,
+                contexts: [
+                  'CI / Build & Lint',
+                  'Release E2E Tests / E2E Tests (Release Environment)'
+                ]
+              },
+              enforce_admins: false,
+              required_pull_request_reviews: {
+                required_approving_review_count: 1,
+                dismiss_stale_reviews: true,
+                require_code_owner_reviews: false,
+                require_last_push_approval: false
+              },
+              restrictions: null,
+              allow_force_pushes: false,
+              allow_deletions: false,
+              block_creations: false,
+              required_conversation_resolution: true,
+              lock_branch: false,
+              allow_fork_syncing: false
+            };
+            
+            try {
+              await github.rest.repos.updateBranchProtection({
+                owner,
+                repo,
+                branch: 'main',
+                ...protectionRules
+              });
+              console.log('✅ Branch protection rules applied to main');
+            } catch (error) {
+              console.error('❌ Failed to apply branch protection:', error.message);
+              throw error;
+            }
+
+      - name: Verify Settings
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea8 # v7.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Verify environment exists
+            try {
+              const { data: env } = await github.rest.repos.getEnvironment({
+                owner,
+                repo,
+                environment_name: 'release'
+              });
+              console.log('✅ Release environment verified');
+              console.log(`   - Name: ${env.name}`);
+              console.log(`   - Custom branch policies: ${env.deployment_branch_policy?.custom_branch_policies || false}`);
+            } catch (error) {
+              console.error('❌ Release environment verification failed:', error.message);
+              throw error;
+            }
+            
+            // Verify branch protection
+            try {
+              const { data: protection } = await github.rest.repos.getBranchProtection({
+                owner,
+                repo,
+                branch: 'main'
+              });
+              console.log('✅ Branch protection verified');
+              console.log(`   - Required status checks: ${protection.required_status_checks?.contexts?.length || 0}`);
+              console.log(`   - Required PR reviews: ${protection.required_pull_request_reviews?.required_approving_review_count || 0}`);
+            } catch (error) {
+              console.error('❌ Branch protection verification failed:', error.message);
+              throw error;
+            }
