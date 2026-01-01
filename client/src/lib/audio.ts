@@ -152,7 +152,7 @@ export function registerSound(id: string, config: SoundConfig): void {
     html5: config.category === 'music', // Stream music to save memory
   });
 
-  sounds.set(id, howl);
+  sounds.set(id, { howl, category: config.category });
 }
 
 /**
@@ -167,14 +167,14 @@ export function playSound(id: string, options?: { volume?: number; fade?: number
 
   if (isMuted) return null;
 
-  const playId = sound.play();
+  const playId = sound.howl.play();
 
   if (options?.volume !== undefined) {
-    sound.volume(options.volume * masterVolume, playId);
+    sound.howl.volume(options.volume * masterVolume, playId);
   }
 
   if (options?.fade) {
-    sound.fade(0, sound.volume(), options.fade, playId);
+    sound.howl.fade(0, sound.howl.volume(), options.fade, playId);
   }
 
   activeSounds.set(id, playId);
@@ -191,13 +191,13 @@ export function stopSound(id: string, fadeOut?: number): void {
   if (!sound) return;
 
   if (fadeOut && playId !== undefined) {
-    sound.fade(sound.volume(), 0, fadeOut, playId);
+    sound.howl.fade(sound.howl.volume(), 0, fadeOut, playId);
     setTimeout(() => {
-      sound.stop(playId);
+      sound.howl.stop(playId);
       activeSounds.delete(id);
     }, fadeOut);
   } else {
-    sound.stop();
+    sound.howl.stop();
     activeSounds.delete(id);
   }
 }
@@ -251,7 +251,7 @@ export function stopMusic(fadeOut = 2000): void {
 export function pauseMusic(): void {
   if (currentMusic) {
     const sound = sounds.get(currentMusic);
-    sound?.pause();
+    sound?.howl.pause();
   }
 }
 
@@ -261,7 +261,7 @@ export function pauseMusic(): void {
 export function resumeMusic(): void {
   if (currentMusic) {
     const sound = sounds.get(currentMusic);
-    sound?.play();
+    sound?.howl.play();
   }
 }
 
@@ -313,7 +313,7 @@ export function createSilence(duration: number): Promise<void> {
     if (currentMusic) {
       const sound = sounds.get(currentMusic);
       if (sound) {
-        sound.fade(sound.volume(), 0.05, 500);
+        sound.howl.fade(sound.howl.volume(), 0.05, 500);
       }
     }
 
@@ -351,7 +351,7 @@ export function setMusicVolume(volume: number): void {
   // Update currently playing music
   if (currentMusic) {
     const sound = sounds.get(currentMusic);
-    sound?.volume(musicVolume * masterVolume);
+    sound?.howl.volume(musicVolume * masterVolume);
   }
 }
 
@@ -364,7 +364,7 @@ export function setAmbientVolume(volume: number): void {
   // Update active ambient sounds
   for (const id of activeAmbient) {
     const sound = sounds.get(id);
-    sound?.volume(ambientVolume * masterVolume);
+    sound?.howl.volume(ambientVolume * masterVolume);
   }
 }
 

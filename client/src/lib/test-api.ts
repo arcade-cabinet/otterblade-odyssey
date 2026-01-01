@@ -23,11 +23,10 @@ export interface GameTestAPI {
   };
   getGameState: () => {
     gameStarted: boolean;
-    paused: boolean;
     gameOver: boolean;
-    currentBiome: number;
+    biomeIndex: number;
     score: number;
-    emberShards: number;
+    shards: number;
   };
   isReady: () => boolean;
 }
@@ -64,11 +63,10 @@ export function initializeTestAPI(): void {
       const store = useStore.getState();
       return {
         gameStarted: store.gameStarted,
-        paused: store.paused,
         gameOver: store.gameOver,
-        currentBiome: store.currentBiome,
+        biomeIndex: store.biomeIndex,
         score: store.score,
-        emberShards: store.emberShards,
+        shards: store.shards,
       };
     },
 
