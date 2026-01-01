@@ -17,21 +17,25 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ---
 
-## Technology Stack (Updated)
+## Technology Stack (Current Production)
+
+> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. This table reflects CURRENT production code.
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
 | **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
-| Rendering | @react-three/fiber | Orthographic 2D mode |
-| Physics | @dimforge/rapier2d-compat | 2D physics only |
+| Rendering | @react-three/fiber | 3D renderer in orthographic mode |
+| Physics | @react-three/rapier | Rapier WASM physics |
 | Entity Management | Miniplex + miniplex-react | Resources for state |
 | State | Zustand | Gameplay state |
+| Mobile | Capacitor | Native features, haptics |
+| Audio | Howler.js | Spatial audio, music |
 | Styling | Tailwind CSS v4 | HUD/UI only |
 | UI Components | shadcn/ui + Radix | Menus, dialogs |
 | Package Manager | **pnpm 10.x** (never npm/yarn) | |
 | Linting | Biome | Strict mode |
 
-**Removed**: @react-three/rapier, @jbcom/strata (3D not needed for 2D side-scroller)
+**Planned Migration**: Canvas 2D API + Matter.js physics + Yuka AI (see IMPLEMENTATION.md for details)
 
 ---
 

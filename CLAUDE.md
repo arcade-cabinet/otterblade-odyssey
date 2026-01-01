@@ -48,7 +48,9 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 
 ## Architecture Overview
 
-### Technology Stack
+> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. Current production code uses React Three Fiber.
+
+### Current Technology Stack (Production)
 | Layer | Technology |
 |-------|------------|
 | 3D Rendering | @react-three/fiber (React Three Fiber) |
@@ -58,6 +60,8 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 | Procedural Graphics | @jbcom/strata |
 | Styling | Tailwind CSS v4 |
 | UI Components | shadcn/ui + Radix |
+| Mobile | Capacitor (native features, haptics) |
+| Audio | Howler.js (spatial audio, music) |
 
 ### Key Directories
 ```
