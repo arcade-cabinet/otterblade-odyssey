@@ -4,12 +4,13 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
-      # Only run when specific paths are modified
-      - "src/**/*.js"
-      - "src/**/*.ts"
+      # Only run when game/server code is modified
+      - "client/**/*.ts"
       - "client/**/*.tsx"
       - "server/**/*.ts"
-      # You can add more specific patterns as needed
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "shared/**/*.ts"
 
 # No workflow-level permissions - all permissions defined at job level
 permissions: {}
@@ -17,6 +18,10 @@ permissions: {}
 jobs:
   claude-review-paths:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: claude-path-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write
@@ -34,7 +39,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "*"
+          # Allowlist of trusted bots
+          allowed_bots: "dependabot[bot],renovate[bot],github-actions[bot],jules[bot],google-labs-jules[bot]"
           additional_permissions: |
             actions: read
           prompt: |

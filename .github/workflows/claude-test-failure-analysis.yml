@@ -16,13 +16,36 @@ permissions: {}
 jobs:
   detect-flaky:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    concurrency:
+      group: claude-flaky-${{ github.event.workflow_run.id }}
+      cancel-in-progress: false
     permissions:
       contents: read
       actions: write
       pull-requests: write
       id-token: write
     steps:
+      # Security: Validate and sanitize branch name
+      - name: Validate inputs
+        id: validate
+        env:
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          WORKFLOW_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          # Validate branch name contains only safe characters
+          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
+            echo "::error::Invalid branch name detected"
+            exit 1
+          fi
+          echo "head_branch=$HEAD_BRANCH" >> $GITHUB_OUTPUT
+          echo "workflow_name=$WORKFLOW_NAME" >> $GITHUB_OUTPUT
+          echo "workflow_url=$WORKFLOW_URL" >> $GITHUB_OUTPUT
+          echo "workflow_id=$WORKFLOW_ID" >> $GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -31,14 +54,18 @@ jobs:
       - name: Detect flaky test failures
         id: detect
         uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        env:
+          WORKFLOW_URL: ${{ steps.validate.outputs.workflow_url }}
+          WORKFLOW_ID: ${{ steps.validate.outputs.workflow_id }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "*"
+          # Allowlist of trusted bots
+          allowed_bots: "dependabot[bot],renovate[bot],github-actions[bot],jules[bot],google-labs-jules[bot]"
           prompt: |
-            The CI workflow failed: ${{ github.event.workflow_run.html_url }}
+            The CI workflow failed: ${{ env.WORKFLOW_URL }}
 
-            Check the logs: gh run view ${{ github.event.workflow_run.id }} --log-failed
+            Check the logs: gh run view ${{ env.WORKFLOW_ID }} --log-failed
 
             Determine if this looks like a flaky test failure by checking for:
             - Timeout errors
@@ -55,13 +82,28 @@ jobs:
             --json-schema '{"type":"object","properties":{"is_flaky":{"type":"boolean","description":"Whether this appears to be a flaky test failure"},"confidence":{"type":"number","minimum":0,"maximum":1,"description":"Confidence level in the determination"},"summary":{"type":"string","description":"One-sentence explanation of the failure"}},"required":["is_flaky","confidence","summary"]}'
             --allowedTools "Read,Glob,Grep,LS,Bash(gh:*),mcp__github_ci__get_ci_status,mcp__github_ci__get_workflow_run_details,mcp__github_ci__download_job_log"
 
+      # Validate structured output before using
+      - name: Validate structured output
+        id: validate_output
+        run: |
+          OUTPUT='${{ steps.detect.outputs.structured_output }}'
+          if ! echo "$OUTPUT" | jq empty 2>/dev/null; then
+            echo "::error::Invalid structured output from Claude"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "valid=true" >> $GITHUB_OUTPUT
+
       # Auto-retry only if flaky AND high confidence (>= 0.7)
       - name: Retry flaky tests
         if: |
+          steps.validate_output.outputs.valid == 'true' &&
           fromJSON(steps.detect.outputs.structured_output).is_flaky == true &&
           fromJSON(steps.detect.outputs.structured_output).confidence >= 0.7
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ steps.validate.outputs.head_branch }}
+          WORKFLOW_NAME: ${{ steps.validate.outputs.workflow_name }}
         run: |
           OUTPUT='${{ steps.detect.outputs.structured_output }}'
           CONFIDENCE=$(echo "$OUTPUT" | jq -r '.confidence')
@@ -72,12 +114,12 @@ jobs:
           echo ""
           echo "Triggering automatic retry..."
 
-          gh workflow run "${{ github.event.workflow_run.name }}" \
-            --ref "${{ github.event.workflow_run.head_branch }}"
+          gh workflow run "$WORKFLOW_NAME" --ref "$HEAD_BRANCH"
 
       # Low confidence flaky detection - skip retry
       - name: Low confidence detection
         if: |
+          steps.validate_output.outputs.valid == 'true' &&
           fromJSON(steps.detect.outputs.structured_output).is_flaky == true &&
           fromJSON(steps.detect.outputs.structured_output).confidence < 0.7
         run: |
@@ -89,16 +131,20 @@ jobs:
 
       # Comment on PR if this was a PR build
       - name: Comment on PR
-        if: github.event.workflow_run.event == 'pull_request'
+        if: |
+          steps.validate_output.outputs.valid == 'true' &&
+          github.event.workflow_run.event == 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ steps.validate.outputs.head_branch }}
+          WORKFLOW_URL: ${{ steps.validate.outputs.workflow_url }}
         run: |
           OUTPUT='${{ steps.detect.outputs.structured_output }}'
           IS_FLAKY=$(echo "$OUTPUT" | jq -r '.is_flaky')
           CONFIDENCE=$(echo "$OUTPUT" | jq -r '.confidence')
           SUMMARY=$(echo "$OUTPUT" | jq -r '.summary')
 
-          pr_number=$(gh pr list --head "${{ github.event.workflow_run.head_branch }}" --json number --jq '.[0].number')
+          pr_number=$(gh pr list --head "$HEAD_BRANCH" --json number --jq '.[0].number')
 
           if [ -n "$pr_number" ]; then
             if [ "$IS_FLAKY" = "true" ]; then
@@ -109,15 +155,6 @@ jobs:
               ACTION="⚠️ This appears to be a real bug - manual intervention needed"
             fi
 
-            gh pr comment "$pr_number" --body "$(cat <<EOF
-          ## $TITLE
-
-          **Analysis**: $SUMMARY
-          **Confidence**: $CONFIDENCE
-
-          $ACTION
-
-          [View workflow run](${{ github.event.workflow_run.html_url }})
-          EOF
-          )"
+            BODY=$(printf '## %s\n\n<b>Analysis</b>: %s\n<b>Confidence</b>: %s\n\n%s\n\n[View workflow run](%s)' "$TITLE" "$SUMMARY" "$CONFIDENCE" "$ACTION" "$WORKFLOW_URL")
+            gh pr comment "$pr_number" --body "$BODY"
           fi

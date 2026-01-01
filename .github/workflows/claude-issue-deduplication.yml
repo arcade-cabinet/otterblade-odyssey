@@ -11,6 +11,9 @@ jobs:
   deduplicate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: claude-dedup-${{ github.event.issue.number }}
+      cancel-in-progress: true
     permissions:
       contents: read
       issues: write
@@ -63,7 +66,8 @@ jobs:
 
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "*"
+          # Allowlist of trusted bots
+          allowed_bots: "dependabot[bot],renovate[bot],github-actions[bot],jules[bot],google-labs-jules[bot]"
           allowed_non_write_users: "*"
           claude_args: |
             --allowedTools "Read,Glob,Grep,LS,mcp__github__get_issue,mcp__github__search_issues,mcp__github__list_issues,mcp__github__create_issue_comment,mcp__github__update_issue,mcp__github__get_issue_comments"

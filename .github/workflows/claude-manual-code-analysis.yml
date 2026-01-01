@@ -18,6 +18,7 @@ permissions: {}
 jobs:
   analyze-commit:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
@@ -35,7 +36,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "*"
+          # Allowlist of trusted bots
+          allowed_bots: "dependabot[bot],renovate[bot],github-actions[bot],jules[bot],google-labs-jules[bot]"
           prompt: |
             REPO: ${{ github.repository }}
             BRANCH: ${{ github.ref_name }}

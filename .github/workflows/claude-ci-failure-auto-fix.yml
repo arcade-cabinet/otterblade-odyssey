@@ -16,6 +16,10 @@ jobs:
       github.event.workflow_run.pull_requests[0] &&
       !startsWith(github.event.workflow_run.head_branch, 'claude-auto-fix-ci-')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: claude-ci-fix-${{ github.event.workflow_run.id }}
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write
@@ -23,10 +27,28 @@ jobs:
       issues: write
       id-token: write
     steps:
+      # Security: Validate branch name to prevent injection attacks
+      - name: Validate branch name
+        id: validate
+        env:
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_ID: ${{ github.run_id }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          # Validate branch name contains only safe characters
+          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
+            echo "::error::Invalid branch name detected, aborting for security"
+            exit 1
+          fi
+          # Export validated values
+          echo "head_branch=$HEAD_BRANCH" >> $GITHUB_OUTPUT
+          echo "fix_branch=claude-auto-fix-ci-${HEAD_BRANCH}-${RUN_ID}" >> $GITHUB_OUTPUT
+          echo "workflow_run_id=$WORKFLOW_RUN_ID" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ steps.validate.outputs.head_branch }}
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN }}
 
@@ -37,42 +59,53 @@ jobs:
 
       - name: Create fix branch
         id: branch
+        env:
+          BRANCH_NAME: ${{ steps.validate.outputs.fix_branch }}
         run: |
-          BRANCH_NAME="claude-auto-fix-ci-${{ github.event.workflow_run.head_branch }}-${{ github.run_id }}"
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Get CI failure details
         id: failure_details
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          WORKFLOW_RUN_ID: ${{ steps.validate.outputs.workflow_run_id }}
         with:
           github-token: ${{ secrets.CI_GITHUB_TOKEN }}
           script: |
+            const runId = parseInt(process.env.WORKFLOW_RUN_ID, 10);
             const run = await github.rest.actions.getWorkflowRun({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              run_id: ${{ github.event.workflow_run.id }}
+              run_id: runId
             });
 
             const jobs = await github.rest.actions.listJobsForWorkflowRun({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              run_id: ${{ github.event.workflow_run.id }}
+              run_id: runId
             });
 
             const failedJobs = jobs.data.jobs.filter(job => job.conclusion === 'failure');
 
             let errorLogs = [];
             for (const job of failedJobs) {
-              const logs = await github.rest.actions.downloadJobLogsForWorkflowRun({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                job_id: job.id
-              });
-              errorLogs.push({
-                jobName: job.name,
-                logs: logs.data
-              });
+              try {
+                const logs = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  job_id: job.id
+                });
+                errorLogs.push({
+                  jobName: job.name,
+                  logs: logs.data.substring(0, 10000) // Limit log size
+                });
+              } catch (e) {
+                errorLogs.push({
+                  jobName: job.name,
+                  logs: `Failed to fetch logs: ${e.message}`
+                });
+              }
             }
 
             return {
@@ -84,6 +117,8 @@ jobs:
       - name: Fix CI failures with Claude
         id: claude
         uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        env:
+          HEAD_BRANCH: ${{ steps.validate.outputs.head_branch }}
         with:
           prompt: |
             /fix-ci 
@@ -91,15 +126,17 @@ jobs:
             Failed Jobs: ${{ join(fromJSON(steps.failure_details.outputs.result).failedJobs, ', ') }}
             PR Number: ${{ github.event.workflow_run.pull_requests[0].number }}
             Branch Name: ${{ steps.branch.outputs.branch_name }}
-            Base Branch: ${{ github.event.workflow_run.head_branch }}
+            Base Branch: ${{ env.HEAD_BRANCH }}
             Repository: ${{ github.repository }}
 
             Error logs:
             ${{ toJSON(fromJSON(steps.failure_details.outputs.result).errorLogs) }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          allowed_bots: "*"
+          # Allowlist of trusted bots - prevents arbitrary bot access
+          allowed_bots: "dependabot[bot],renovate[bot],github-actions[bot],jules[bot],google-labs-jules[bot]"
           additional_permissions: |
             actions: read
+          # Note: merge_pull_request intentionally excluded - PRs should be reviewed before merge
           claude_args: |
-            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(npm:*),Bash(pnpm:*),Bash(npx:*),Bash(bun:*),Bash(gh:*),mcp__github__get_issue,mcp__github__update_issue,mcp__github__create_issue_comment,mcp__github__list_issues,mcp__github__search_issues,mcp__github__get_issue_comments,mcp__github__create_issue,mcp__github__get_pull_request,mcp__github__list_pull_requests,mcp__github__create_pull_request,mcp__github__merge_pull_request,mcp__github__get_pull_request_diff,mcp__github__create_pull_request_review,mcp__github__list_pull_request_commits,mcp__github__update_pull_request,mcp__github__get_file_contents,mcp__github__create_or_update_file,mcp__github__push_files,mcp__github__create_branch,mcp__github__list_branches,mcp__github__get_commit,mcp__github__list_commits,mcp__github__search_repositories,mcp__github__get_repository,mcp__github__fork_repository,mcp__github__list_releases,mcp__github__create_release,mcp__github_inline_comment__create_inline_comment,mcp__github_ci__get_ci_status,mcp__github_ci__get_workflow_run_details,mcp__github_ci__download_job_log"
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(npm:*),Bash(pnpm:*),Bash(npx:*),Bash(bun:*),Bash(gh:*),mcp__github__get_issue,mcp__github__update_issue,mcp__github__create_issue_comment,mcp__github__list_issues,mcp__github__search_issues,mcp__github__get_issue_comments,mcp__github__create_issue,mcp__github__get_pull_request,mcp__github__list_pull_requests,mcp__github__create_pull_request,mcp__github__get_pull_request_diff,mcp__github__create_pull_request_review,mcp__github__list_pull_request_commits,mcp__github__update_pull_request,mcp__github__get_file_contents,mcp__github__create_or_update_file,mcp__github__push_files,mcp__github__create_branch,mcp__github__list_branches,mcp__github__get_commit,mcp__github__list_commits,mcp__github_inline_comment__create_inline_comment,mcp__github_ci__get_ci_status,mcp__github_ci__get_workflow_run_details,mcp__github_ci__download_job_log"
