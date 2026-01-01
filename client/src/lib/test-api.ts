@@ -80,7 +80,19 @@ export function initializeTestAPI(): void {
 
     isReady: () => {
       const state = useStore.getState();
-      return state.gameStarted || state.runId > 0 || state.playerState !== 'idle';
+
+      // Test readiness is intentionally a composite condition:
+      // - hasActiveGame: main game loop has been flagged as started
+      // - hasPersistedRun: a previous run has been created/restored (non-zero runId)
+      // - playerHasLeftIdle: the player has transitioned out of the initial idle state
+      //
+      // Any of these indicates that the game has progressed far enough for E2E tests
+      // to safely interact with the scene without racing initialization.
+      const hasActiveGame = state.gameStarted;
+      const hasPersistedRun = state.runId > 0;
+      const playerHasLeftIdle = state.playerState !== 'idle';
+
+      return hasActiveGame || hasPersistedRun || playerHasLeftIdle;
     },
   };
 
