@@ -1,0 +1,643 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 1,
+  "name": "River Path",
+  "location": "The Willow Banks",
+
+  "narrative": {
+    "theme": "The journey begins - from innocence to awareness",
+    "quest": "Reach the Gatehouse",
+    
+    "emotionalArc": {
+      "opening": "The familiar path along the river, once walked for pleasure, now walked with purpose. The world seems both smaller and larger.",
+      "midpoint": "First signs of the Galeborn's advance - frost where there should be none, abandoned camps of fleeing folk, the temperature dropping.",
+      "climax": "An ambush on the old bridge. Finn's first real fight. The Otterblade sings for the first time in years.",
+      "resolution": "The Gatehouse visible through the mist. Almost there. But 'almost' is not 'arrived.'"
+    },
+
+    "storyBeats": [
+      {
+        "id": "leaving_village",
+        "moment": "The village fades behind. Other cottages, smoke rising from chimneys. Neighbors who don't yet know what Finn knows.",
+        "triggeredBy": "chapter_start",
+        "expression": "determination"
+      },
+      {
+        "id": "first_frost",
+        "moment": "Ice crystals where the path meets shade. Unnatural. Wrong. Zephyros's touch reaches even here.",
+        "triggeredBy": "enter_frost_zone",
+        "expression": "fear"
+      },
+      {
+        "id": "abandoned_cart",
+        "moment": "An overturned cart, goods scattered. A child's toy frozen to the ground. Someone fled in terror.",
+        "triggeredBy": "approach_cart",
+        "expression": "sorrow"
+      },
+      {
+        "id": "the_old_bridge",
+        "moment": "The stone bridge father helped build. Now three Galeborn scouts block the way. No path but through.",
+        "triggeredBy": "approach_bridge",
+        "expression": "resolve"
+      },
+      {
+        "id": "first_blood",
+        "moment": "The Otterblade strikes true. The scouts scatter. Finn stands, panting, blade wet with frost-melt. This is real now.",
+        "triggeredBy": "bridge_cleared",
+        "expression": "determination"
+      },
+      {
+        "id": "gatehouse_visible",
+        "moment": "Through the river mist, the great Gatehouse of Willowmere rises. Home of the Hearthhold. Sanctuary—if Finn can reach it.",
+        "triggeredBy": "final_approach",
+        "expression": "hope"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 0,
+    "nextChapter": 2,
+    
+    "transitionIn": {
+      "type": "walk_in",
+      "cinematicId": null,
+      "playerSpawnPoint": { "x": 50, "y": 400 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_1_gatehouse_approach",
+      "exitPoint": { "x": 3800, "y": 350 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 0 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "fleeing_mouse_family",
+      "characterId": "npc_mouse_family",
+      "name": "Fleeing Family",
+      "role": "ambient",
+      "position": { "x": 600, "y": 420 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "patrol",
+        "patrolPath": [
+          { "x": 600, "y": 420 },
+          { "x": 800, "y": 420 }
+        ],
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "fleeing",
+        "states": {
+          "fleeing": {
+            "animation": "hurrying_scared",
+            "expression": "fear",
+            "canInteract": true
+          },
+          "helped": {
+            "animation": "grateful_pause",
+            "expression": "relief",
+            "canInteract": false
+          }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "point",
+          "finnResponse": "nod",
+          "actions": [
+            { "type": "show_toast", "value": "They point toward the Gatehouse—safety lies ahead" },
+            { "type": "npc_action", "target": "fleeing_mouse_family", "value": "helped" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wounded_hedgehog_scout",
+      "characterId": "npc_hedgehog_wounded",
+      "name": "Wounded Scout",
+      "role": "quest_giver",
+      "position": { "x": 1800, "y": 380 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "sit",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "wounded",
+        "states": {
+          "wounded": {
+            "animation": "leaning_hurt",
+            "expression": "pain",
+            "canInteract": true,
+            "questAvailable": "quest_light_the_way"
+          },
+          "tended": {
+            "animation": "resting",
+            "expression": "gratitude",
+            "canInteract": false
+          }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "beckon",
+          "finnResponse": "determined_look",
+          "actions": [
+            { "type": "show_toast", "value": "The scout gestures urgently toward unlit lanterns along the path" }
+          ]
+        },
+        {
+          "trigger": "lanterns_lit",
+          "gesture": "salute",
+          "finnResponse": "salute",
+          "actions": [
+            { "type": "restore_warmth", "value": 15 },
+            { "type": "npc_action", "target": "wounded_hedgehog_scout", "value": "tended" },
+            { "type": "complete_quest", "target": "quest_light_the_way" }
+          ]
+        }
+      ],
+      
+      "givesQuest": "quest_light_the_way"
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_reach_gatehouse",
+      "name": "Reach the Gatehouse",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_cross_bridge",
+          "description": "Cross the Old Bridge",
+          "type": "reach_location",
+          "target": "bridge_end"
+        },
+        {
+          "id": "obj_reach_gatehouse",
+          "description": "Reach the Gatehouse",
+          "type": "reach_location",
+          "target": "chapter_exit"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 25
+      },
+      
+      "completionTrigger": "chapter_complete"
+    },
+    {
+      "id": "quest_light_the_way",
+      "name": "Light the Way",
+      "type": "side",
+      "giver": "wounded_hedgehog_scout",
+      
+      "objectives": [
+        {
+          "id": "obj_light_lanterns",
+          "description": "Light the path lanterns",
+          "type": "light_lanterns",
+          "count": 4
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 15,
+        "achievement": "Keeper of the Flame"
+      },
+      
+      "completionTrigger": "lanterns_lit"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 4000,
+      "minY": 0,
+      "maxY": 600
+    },
+    
+    "biome": "forest",
+    "spawnPoint": { "x": 50, "y": 400 },
+    
+    "segments": [
+      {
+        "id": "village_outskirts",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 0, "y": 450, "width": 400, "type": "stone", "asset": "platform_village_path" },
+          { "x": 450, "y": 420, "width": 200, "type": "wood", "asset": "platform_wooden_dock" },
+          { "x": 700, "y": 450, "width": 150, "type": "stone", "asset": "platform_path_stones" }
+        ],
+        
+        "water": [
+          {
+            "region": { "x": 400, "y": 480, "width": 350, "height": 120 },
+            "depth": "shallow",
+            "current": { "direction": "right", "strength": 0.3 },
+            "warmsPlayer": false
+          }
+        ]
+      },
+      {
+        "id": "willow_path",
+        "startX": 800,
+        "endX": 1600,
+        
+        "platforms": [
+          { "x": 800, "y": 450, "width": 300, "type": "moss_stone", "asset": "platform_moss_path" },
+          { "x": 1100, "y": 380, "width": 120, "type": "wood", "asset": "platform_fallen_log" },
+          { "x": 1250, "y": 350, "width": 100, "type": "wood", "asset": "platform_branch" },
+          { "x": 1400, "y": 420, "width": 200, "type": "moss_stone", "asset": "platform_moss_stones" }
+        ],
+        
+        "ladders": [
+          { "x": 1050, "y": 380, "height": 70, "type": "vine", "asset": "climbable_vine" }
+        ],
+        
+        "scamperZones": [
+          { "x": 1100, "y": 360, "width": 100, "height": 40 }
+        ]
+      },
+      {
+        "id": "frost_touched_area",
+        "startX": 1600,
+        "endX": 2400,
+        
+        "platforms": [
+          { "x": 1600, "y": 420, "width": 250, "type": "ice", "asset": "platform_frost_stone", 
+            "properties": { "slippery": true } },
+          { "x": 1900, "y": 380, "width": 150, "type": "ice", "asset": "platform_frozen_log",
+            "properties": { "slippery": true } },
+          { "x": 2100, "y": 420, "width": 300, "type": "moss_stone", "asset": "platform_moss_path" }
+        ],
+        
+        "killZones": [
+          { "x": 1850, "y": 550, "width": 100 }
+        ]
+      },
+      {
+        "id": "old_bridge",
+        "startX": 2400,
+        "endX": 3200,
+        
+        "platforms": [
+          { "x": 2400, "y": 420, "width": 100, "type": "stone", "asset": "platform_bridge_approach" },
+          { "x": 2500, "y": 400, "width": 600, "type": "bridge", "asset": "platform_old_bridge" },
+          { "x": 3100, "y": 420, "width": 100, "type": "stone", "asset": "platform_bridge_end" }
+        ],
+        
+        "walls": [
+          { "x": 2520, "y": 300, "width": 30, "height": 100, "asset": "bridge_pillar_left" },
+          { "x": 3050, "y": 300, "width": 30, "height": 100, "asset": "bridge_pillar_right" }
+        ],
+        
+        "water": [
+          {
+            "region": { "x": 2500, "y": 500, "width": 600, "height": 100 },
+            "depth": "deep",
+            "current": { "direction": "right", "strength": 0.8 },
+            "warmsPlayer": false
+          }
+        ]
+      },
+      {
+        "id": "gatehouse_approach",
+        "startX": 3200,
+        "endX": 4000,
+        
+        "platforms": [
+          { "x": 3200, "y": 420, "width": 300, "type": "stone", "asset": "platform_approach_path" },
+          { "x": 3550, "y": 380, "width": 200, "type": "abbey_stone", "asset": "platform_abbey_steps" },
+          { "x": 3800, "y": 350, "width": 200, "type": "abbey_stone", "asset": "platform_gatehouse_base" }
+        ]
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_start", "position": { "x": 100, "y": 420 }, "type": "shrine" },
+      { "id": "checkpoint_willow", "position": { "x": 1400, "y": 390 }, "type": "shrine" },
+      { "id": "checkpoint_bridge_end", "position": { "x": 3150, "y": 390 }, "type": "shrine", "requiresTrigger": "bridge_cleared" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "patrol_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 1200, "y": 350 },
+      "behavior": { "type": "patrol", "patrolPath": [{ "x": 1100, "y": 350 }, { "x": 1300, "y": 350 }], "aggroRadius": 150 },
+      "difficulty": "easy"
+    },
+    {
+      "id": "icebat_1",
+      "enemyType": "icebat",
+      "position": { "x": 1800, "y": 300 },
+      "behavior": { "type": "patrol", "patrolPath": [{ "x": 1700, "y": 280 }, { "x": 1900, "y": 320 }], "aggroRadius": 200 },
+      "difficulty": "easy"
+    },
+    {
+      "id": "bridge_ambush_1",
+      "enemyType": "scout",
+      "position": { "x": 2700, "y": 370 },
+      "behavior": { "type": "guard", "guardRadius": 100, "aggroRadius": 120 },
+      "spawnedByTrigger": "bridge_ambush_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "bridge_ambush_2",
+      "enemyType": "scout",
+      "position": { "x": 2850, "y": 370 },
+      "behavior": { "type": "guard", "guardRadius": 100, "aggroRadius": 120 },
+      "spawnedByTrigger": "bridge_ambush_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "bridge_ambush_3",
+      "enemyType": "frostwolf",
+      "position": { "x": 2950, "y": 370 },
+      "behavior": { "type": "chase", "aggroRadius": 180 },
+      "spawnedByTrigger": "bridge_ambush_start",
+      "difficulty": "medium"
+    }
+  ],
+
+  "boss": null,
+
+  "interactions": [
+    {
+      "id": "lantern_1",
+      "type": "lantern",
+      "position": { "x": 900, "y": 350 },
+      "asset": "lantern_path",
+      "activateRadius": 50,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "lantern_path_off" },
+        "lit": { "asset": "lantern_path_on", "actions": [
+          { "type": "restore_warmth", "value": 8 },
+          { "type": "play_sound", "target": "lantern_light" }
+        ]}
+      }
+    },
+    {
+      "id": "lantern_2",
+      "type": "lantern",
+      "position": { "x": 1500, "y": 320 },
+      "asset": "lantern_path",
+      "activateRadius": 50,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "lantern_path_off" },
+        "lit": { "asset": "lantern_path_on", "actions": [
+          { "type": "restore_warmth", "value": 8 },
+          { "type": "play_sound", "target": "lantern_light" }
+        ]}
+      }
+    },
+    {
+      "id": "lantern_3",
+      "type": "lantern",
+      "position": { "x": 2200, "y": 320 },
+      "asset": "lantern_path",
+      "activateRadius": 50,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "lantern_path_off" },
+        "lit": { "asset": "lantern_path_on", "actions": [
+          { "type": "restore_warmth", "value": 8 },
+          { "type": "play_sound", "target": "lantern_light" }
+        ]}
+      }
+    },
+    {
+      "id": "lantern_4",
+      "type": "lantern",
+      "position": { "x": 3400, "y": 280 },
+      "asset": "lantern_path",
+      "activateRadius": 50,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "lantern_path_off" },
+        "lit": { "asset": "lantern_path_on", "actions": [
+          { "type": "restore_warmth", "value": 8 },
+          { "type": "play_sound", "target": "lantern_light" }
+        ]}
+      }
+    },
+    {
+      "id": "abandoned_cart",
+      "type": "sign",
+      "position": { "x": 1700, "y": 400 },
+      "asset": "cart_overturned",
+      "activateRadius": 80,
+      "initialState": "default",
+      "states": {
+        "default": { "asset": "cart_overturned" },
+        "examined": { "asset": "cart_overturned", "actions": [
+          { "type": "show_toast", "value": "A family fled in haste. The cold follows close behind." }
+        ]}
+      }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 0, "width": 200, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_willow_path" },
+        { "type": "show_toast", "value": "The Willow Banks" }
+      ]
+    },
+    {
+      "id": "enter_frost_zone",
+      "type": "enter_region",
+      "region": { "x": 1600, "y": 0, "width": 100, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The cold grows stronger here..." },
+        { "type": "change_music", "target": "music_willow_tension" },
+        { "type": "drain_warmth", "value": 5 }
+      ]
+    },
+    {
+      "id": "approach_cart",
+      "type": "enter_region",
+      "region": { "x": 1650, "y": 350, "width": 100, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "play_sound", "target": "wind_cold_whisper" }
+      ]
+    },
+    {
+      "id": "approach_bridge",
+      "type": "enter_region",
+      "region": { "x": 2450, "y": 0, "width": 50, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The Old Bridge. Father helped lay these stones." },
+        { "type": "change_music", "target": "music_willow_combat_build" }
+      ]
+    },
+    {
+      "id": "bridge_ambush_start",
+      "type": "enter_region",
+      "region": { "x": 2600, "y": 0, "width": 50, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "spawn_enemies", "value": ["bridge_ambush_1", "bridge_ambush_2", "bridge_ambush_3"] },
+        { "type": "change_music", "target": "music_combat" },
+        { "type": "show_toast", "value": "Galeborn!" },
+        { "type": "shake_screen", "value": 0.3 }
+      ]
+    },
+    {
+      "id": "bridge_cleared",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["bridge_ambush_start"],
+      "actions": [
+        { "type": "show_toast", "value": "The bridge is clear" },
+        { "type": "change_music", "target": "music_willow_path" },
+        { "type": "unlock_checkpoint" },
+        { "type": "unlock_achievement", "target": "First Blood" }
+      ]
+    },
+    {
+      "id": "lanterns_lit",
+      "type": "interact",
+      "targetId": "lantern_4",
+      "once": true,
+      "requires": [],
+      "actions": [
+        { "type": "show_toast", "value": "The path is lit. Others will find their way." }
+      ]
+    },
+    {
+      "id": "final_approach",
+      "type": "enter_region",
+      "region": { "x": 3500, "y": 0, "width": 100, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_gatehouse_approach" },
+        { "type": "show_toast", "value": "The Gatehouse..." }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "enter_region",
+      "region": { "x": 3900, "y": 0, "width": 100, "height": 600 },
+      "once": true,
+      "requires": ["bridge_cleared"],
+      "actions": [
+        { "type": "complete_quest", "target": "quest_reach_gatehouse" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_1_gatehouse_approach" }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_village_1", "type": "ember_shard", "position": { "x": 300, "y": 400 } },
+    { "id": "shard_willow_1", "type": "ember_shard", "position": { "x": 1150, "y": 330 } },
+    { "id": "shard_willow_2", "type": "ember_shard", "position": { "x": 1280, "y": 300 } },
+    { "id": "shard_frost_1", "type": "ember_shard", "position": { "x": 2000, "y": 350 } },
+    { "id": "shard_bridge_1", "type": "ember_shard", "position": { "x": 2750, "y": 370 }, "requiresTrigger": "bridge_cleared" },
+    { "id": "hearthstone_1", "type": "hearthstone", "position": { "x": 3300, "y": 350 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_willow_hollow",
+      "name": "The Willow's Heart",
+      "type": "hidden_room",
+      "entrance": { "x": 1050, "y": 400, "width": 40, "height": 50 },
+      "hint": "The oldest willow has a hollow at its roots, worn smooth by generations of otters seeking shelter",
+      "rewards": {
+        "emberShards": 10,
+        "loreFragment": "lore_willow_blessing"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "abbey_approach_chapter_plate",
+    "parallaxBackground": "outer_ruins_parallax_background",
+    "introCinematic": null,
+    "outroCinematic": "chapter_1_gatehouse_approach",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_willow_path",
+      "tension": "music_willow_tension",
+      "combat": "music_combat",
+      "boss": null,
+      "victory": "music_gatehouse_approach"
+    },
+    
+    "ambientSounds": [
+      "ambient_river_flow",
+      "ambient_willow_rustle",
+      "ambient_birds_occasional"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#8FBC8F",
+      "ambientIntensity": 0.7,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "mist",
+      "intensity": 0.4,
+      "affectsGameplay": false
+    },
+    
+    "warmthDrain": 0.2,
+    
+    "particles": [
+      {
+        "type": "leaves",
+        "density": 0.4,
+        "region": { "x": 800, "y": 0, "width": 800, "height": 500 }
+      },
+      {
+        "type": "mist",
+        "density": 0.6,
+        "region": { "x": 2400, "y": 400, "width": 800, "height": 200 }
+      },
+      {
+        "type": "snow",
+        "density": 0.3,
+        "region": { "x": 1600, "y": 0, "width": 800, "height": 500 }
+      }
+    ]
+  }
+}
