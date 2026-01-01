@@ -481,6 +481,82 @@ function updateEnemyAI(enemy: Entity, player: Entity, dt: number): void {
 }
 ```
 
+### Yuka AI Integration
+
+The game uses [Yuka](https://mugen87.github.io/yuka/) for advanced enemy AI with steering behaviors and finite state machines.
+
+```typescript
+import { EntityManager, Time, GameEntity, StateMachine, State } from 'yuka';
+
+// AI Manager (singleton pattern)
+class AIManager {
+  private entityManager = new EntityManager();
+  private time = new Time();
+
+  update(delta: number): void {
+    this.time.update();
+    this.entityManager.update(this.time.getDelta());
+  }
+
+  addEnemy(enemy: YukaEnemyEntity): void {
+    this.entityManager.add(enemy);
+  }
+
+  removeEnemy(enemy: YukaEnemyEntity): void {
+    this.entityManager.remove(enemy);
+  }
+}
+
+// Enemy entity with Yuka FSM and steering
+class YukaEnemyEntity extends GameEntity {
+  stateMachine: StateMachine;
+  target: GameEntity | null = null;
+  health: number;
+  aggroRadius: number;
+
+  constructor(config: EnemyConfig) {
+    super();
+
+    this.health = config.health;
+    this.aggroRadius = config.aggroRadius;
+
+    // Setup finite state machine
+    this.stateMachine = new StateMachine(this);
+    this.stateMachine.add('idle', new YukaIdleState());
+    this.stateMachine.add('patrol', new YukaPatrolState());
+    this.stateMachine.add('chase', new YukaChaseState());
+    this.stateMachine.add('attack', new YukaAttackState());
+    this.stateMachine.changeTo('idle');
+  }
+
+  update(delta: number): this {
+    this.stateMachine.update();
+    return this;
+  }
+}
+
+// Example state implementation
+class YukaChaseState extends State<YukaEnemyEntity> {
+  execute(enemy: YukaEnemyEntity): void {
+    if (!enemy.target) {
+      enemy.stateMachine.changeTo('idle');
+      return;
+    }
+
+    const distToTarget = enemy.position.distanceTo(enemy.target.position);
+
+    if (distToTarget > enemy.aggroRadius * 1.5) {
+      enemy.target = null;
+      enemy.stateMachine.changeTo('patrol');
+    } else if (distToTarget < MELEE_RANGE) {
+      enemy.stateMachine.changeTo('attack');
+    }
+  }
+}
+```
+
+**Integration with ECS**: Yuka entities are managed separately from Miniplex entities but can reference each other through shared IDs or position synchronization.
+
 ---
 
 ## Audio System
