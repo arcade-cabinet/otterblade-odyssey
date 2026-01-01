@@ -209,9 +209,7 @@ describe('NPC Data Consistency', () => {
   });
 
   it('should have diverse species represented', () => {
-    const speciesInUse = new Set(
-      npcData.characters.map((c: Record<string, unknown>) => c.species)
-    );
+    const speciesInUse = new Set(npcData.characters.map((c: Record<string, unknown>) => c.species));
     expect(speciesInUse.size).toBeGreaterThan(3);
   });
 });
