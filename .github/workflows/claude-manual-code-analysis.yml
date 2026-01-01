@@ -37,7 +37,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           # Allowlist of trusted bots
-          allowed_bots: "dependabot[bot],renovate[bot],github-actions[bot],jules[bot],google-labs-jules[bot]"
+          allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
           prompt: |
             REPO: ${{ github.repository }}
             BRANCH: ${{ github.ref_name }}

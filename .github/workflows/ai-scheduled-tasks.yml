@@ -1,0 +1,282 @@
+# AI Scheduled Tasks - Consolidated Jules maintenance workflows
+# Combines: cleanup, performance, docs, security, ux tasks
+name: AI Scheduled Tasks
+
+on:
+  schedule:
+    # Staggered schedule to avoid overlaps
+    - cron: '0 2 * * 1'  # Cleanup: Mondays at 2 AM
+    - cron: '0 3 * * 2'  # Docs: Tuesdays at 3 AM
+    - cron: '0 4 * * 3'  # Performance: Wednesdays at 4 AM
+    - cron: '0 5 * * 4'  # Security: Thursdays at 5 AM
+    - cron: '0 6 * * 5'  # UX: Fridays at 6 AM
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task to run'
+        type: choice
+        options:
+          - cleanup
+          - docs
+          - performance
+          - security
+          - ux
+          - all
+        default: all
+
+# No workflow-level permissions - job level only
+permissions: {}
+
+env:
+  REPO: ${{ github.repository }}
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  # TASK SELECTION
+  # ════════════════════════════════════════════════════════════════
+  select-task:
+    name: Select Task
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      run_cleanup: ${{ steps.select.outputs.run_cleanup }}
+      run_docs: ${{ steps.select.outputs.run_docs }}
+      run_performance: ${{ steps.select.outputs.run_performance }}
+      run_security: ${{ steps.select.outputs.run_security }}
+      run_ux: ${{ steps.select.outputs.run_ux }}
+    steps:
+      - name: Determine tasks to run
+        id: select
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TASK="${{ inputs.task }}"
+            if [ "$TASK" = "all" ]; then
+              echo "run_cleanup=true" >> $GITHUB_OUTPUT
+              echo "run_docs=true" >> $GITHUB_OUTPUT
+              echo "run_performance=true" >> $GITHUB_OUTPUT
+              echo "run_security=true" >> $GITHUB_OUTPUT
+              echo "run_ux=true" >> $GITHUB_OUTPUT
+            else
+              echo "run_cleanup=$([[ '$TASK' == 'cleanup' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+              echo "run_docs=$([[ '$TASK' == 'docs' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+              echo "run_performance=$([[ '$TASK' == 'performance' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+              echo "run_security=$([[ '$TASK' == 'security' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+              echo "run_ux=$([[ '$TASK' == 'ux' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Schedule-based selection
+            HOUR=$(date -u +%H)
+            DAY=$(date -u +%u)
+            
+            echo "run_cleanup=$([[ $DAY -eq 1 && $HOUR -eq 2 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "run_docs=$([[ $DAY -eq 2 && $HOUR -eq 3 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "run_performance=$([[ $DAY -eq 3 && $HOUR -eq 4 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "run_security=$([[ $DAY -eq 4 && $HOUR -eq 5 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "run_ux=$([[ $DAY -eq 5 && $HOUR -eq 6 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          fi
+
+  # ════════════════════════════════════════════════════════════════
+  # 🧹 CLEANUP TASK (Mondays)
+  # ════════════════════════════════════════════════════════════════
+  cleanup:
+    name: Weekly Cleanup
+    needs: select-task
+    if: needs.select-task.outputs.run_cleanup == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check
+        run: |
+          [ -n "${{ secrets.GOOGLE_JULES_API_KEY }}" ] && echo "available=true" >> $GITHUB_OUTPUT || echo "available=false" >> $GITHUB_OUTPUT
+
+      - name: Run Jules Cleanup
+        if: steps.check.outputs.available == 'true'
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          starting_branch: 'main'
+          prompt: |
+            # 🧹 WEEKLY CLEANUP - Otterblade Odyssey
+
+            **MUST CREATE PR with labels:** `jules-pr`, `maintenance`, `auto-triage`
+            **Branch:** `jules/cleanup-$(date +%Y%m%d)`
+
+            ## Tasks
+            1. Remove unused imports/variables/dead code
+            2. Reduce code duplication (DRY)
+            3. Simplify complexity (functions >50 lines)
+            4. Fix naming inconsistencies
+            5. Replace `any` types
+
+            ## Focus: `client/src/game/`, `server/`
+            ## Verify: `pnpm biome check .` && `pnpm tsc --noEmit`
+
+  # ════════════════════════════════════════════════════════════════
+  # 📚 DOCUMENTATION TASK (Tuesdays)
+  # ════════════════════════════════════════════════════════════════
+  docs:
+    name: Documentation Update
+    needs: select-task
+    if: needs.select-task.outputs.run_docs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check
+        run: |
+          [ -n "${{ secrets.GOOGLE_JULES_API_KEY }}" ] && echo "available=true" >> $GITHUB_OUTPUT || echo "available=false" >> $GITHUB_OUTPUT
+
+      - name: Run Jules Docs
+        if: steps.check.outputs.available == 'true'
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          starting_branch: 'main'
+          prompt: |
+            # 📚 DOCUMENTATION UPDATE - Otterblade Odyssey
+
+            **MUST CREATE PR with labels:** `jules-pr`, `documentation`, `auto-triage`
+            **Branch:** `jules/docs-$(date +%Y%m%d)`
+
+            ## Tasks
+            1. Add JSDoc to exports in `client/src/game/`
+            2. Update README if code changes require it
+            3. Document ECS components and systems
+            4. Add inline comments for complex logic
+
+            ## Standard: All exports need JSDoc with @param, @returns, @example
+
+  # ════════════════════════════════════════════════════════════════
+  # ⚡ PERFORMANCE TASK (Wednesdays)
+  # ════════════════════════════════════════════════════════════════
+  performance:
+    name: Performance Hunt
+    needs: select-task
+    if: needs.select-task.outputs.run_performance == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check
+        run: |
+          [ -n "${{ secrets.GOOGLE_JULES_API_KEY }}" ] && echo "available=true" >> $GITHUB_OUTPUT || echo "available=false" >> $GITHUB_OUTPUT
+
+      - name: Run Jules Performance
+        if: steps.check.outputs.available == 'true'
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          starting_branch: 'main'
+          prompt: |
+            # ⚡ PERFORMANCE OPTIMIZATION - Otterblade Odyssey
+
+            **MUST CREATE PR with labels:** `jules-pr`, `performance`, `auto-triage`
+            **Branch:** `jules/perf-$(date +%Y%m%d)`
+
+            ## Focus Areas
+            1. React memoization (useMemo, useCallback, React.memo)
+            2. ECS query efficiency in `client/src/game/ecs/systems.ts`
+            3. Render loop optimizations in Game.tsx
+            4. Asset loading/caching in loaders.ts
+            5. Zustand selector optimization
+
+            ## Game-Specific
+            - Physics step efficiency (Rapier2D)
+            - Entity iteration patterns (Miniplex)
+            - Frame-rate sensitive code
+
+  # ════════════════════════════════════════════════════════════════
+  # 🔒 SECURITY TASK (Thursdays)
+  # ════════════════════════════════════════════════════════════════
+  security:
+    name: Security Scan
+    needs: select-task
+    if: needs.select-task.outputs.run_security == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check
+        run: |
+          [ -n "${{ secrets.GOOGLE_JULES_API_KEY }}" ] && echo "available=true" >> $GITHUB_OUTPUT || echo "available=false" >> $GITHUB_OUTPUT
+
+      - name: Run Jules Security
+        if: steps.check.outputs.available == 'true'
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          starting_branch: 'main'
+          prompt: |
+            # 🔒 SECURITY SCAN - Otterblade Odyssey
+
+            **MUST CREATE PR with labels:** `jules-pr`, `security`, `auto-triage`
+            **Branch:** `jules/security-$(date +%Y%m%d)`
+
+            ## Scan Areas
+            1. Input validation (user inputs, URL params)
+            2. Secrets handling (no hardcoded secrets)
+            3. Dependency vulnerabilities (`pnpm audit`)
+            4. XSS prevention in React components
+            5. Server-side validation in `server/`
+
+            ## Game-Specific
+            - Asset loading from external sources
+            - Save/load game state security
+            - WebSocket/API communication
+
+  # ════════════════════════════════════════════════════════════════
+  # 🎨 UX POLISH TASK (Fridays)
+  # ════════════════════════════════════════════════════════════════
+  ux:
+    name: UX Polish
+    needs: select-task
+    if: needs.select-task.outputs.run_ux == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check
+        run: |
+          [ -n "${{ secrets.GOOGLE_JULES_API_KEY }}" ] && echo "available=true" >> $GITHUB_OUTPUT || echo "available=false" >> $GITHUB_OUTPUT
+
+      - name: Run Jules UX
+        if: steps.check.outputs.available == 'true'
+        uses: google-labs-code/jules-action@bff7875eaa123cac6742b7cfc51005b95ba4d566 # v1.0.0
+        with:
+          jules_api_key: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          starting_branch: 'main'
+          prompt: |
+            # 🎨 UX POLISH - Otterblade Odyssey
+
+            **MUST CREATE PR with labels:** `jules-pr`, `ux`, `accessibility`, `auto-triage`
+            **Branch:** `jules/ux-$(date +%Y%m%d)`
+
+            ## Focus: `client/src/components/hud/`
+            - BossBar.tsx, ChapterPlate.tsx, GameOver.tsx
+            - HUD.tsx, StartMenu.tsx, TouchControls.tsx
+
+            ## Tasks
+            1. Accessibility (ARIA labels, keyboard nav, contrast)
+            2. Animation smoothness (CSS transitions, no jank)
+            3. Responsive design (mobile touch controls)
+            4. Loading states and feedback
+            5. Error states and messaging
+
+            ## Brand: Warm storybook aesthetic, Redwall-inspired
