@@ -9,6 +9,12 @@
 
 import { useStore } from '@/game/store';
 
+declare global {
+  interface Window {
+    __GAME_TEST_API__?: GameTestAPI;
+  }
+}
+
 export interface GameTestAPI {
   getPlayerState: () => {
     x: number;
@@ -39,21 +45,23 @@ export function initializeTestAPI(): void {
   if (import.meta.env.PROD && import.meta.env.MODE !== 'test') {
     return;
   }
+  if (typeof window === 'undefined') {
+    return;
+  }
 
   const api: GameTestAPI = {
     getPlayerState: () => {
       const store = useStore.getState();
+      const isGrounded = !['jump', 'fall'].includes(store.playerState);
 
-      // In current React Three Fiber implementation, we get state from store
-      // In future Canvas 2D implementation, we'd get it from the game engine
       return {
-        x: 100, // TODO: Get from actual player entity
-        y: 450,
+        x: store.playerX,
+        y: store.playerY,
         velocityX: 0,
         velocityY: 0,
-        facing: 1,
-        grounded: true,
-        action: 'idle',
+        facing: store.playerFacingRight ? 1 : -1,
+        grounded: isGrounded,
+        action: store.playerState,
         health: store.health,
         currentPlatformId: null,
       };
@@ -71,13 +79,13 @@ export function initializeTestAPI(): void {
     },
 
     isReady: () => {
-      // Check if game systems are initialized
-      return useStore.getState() !== undefined;
+      const state = useStore.getState();
+      return state.gameStarted || state.runId > 0 || state.playerState !== 'idle';
     },
   };
 
   // Expose on window for Playwright access
-  (window as any).__GAME_TEST_API__ = api;
+  window.__GAME_TEST_API__ = api;
 
   console.log('[Test API] Initialized - test automation enabled');
 }
@@ -86,12 +94,18 @@ export function initializeTestAPI(): void {
  * Get the test API (for use within the game code)
  */
 export function getTestAPI(): GameTestAPI | null {
-  return (window as any).__GAME_TEST_API__ || null;
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return window.__GAME_TEST_API__ ?? null;
 }
 
 /**
  * Check if test API is available
  */
 export function isTestAPIEnabled(): boolean {
-  return !!(window as any).__GAME_TEST_API__;
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return Boolean(window.__GAME_TEST_API__);
 }
