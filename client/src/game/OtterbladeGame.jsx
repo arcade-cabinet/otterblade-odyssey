@@ -48,10 +48,14 @@ import { inputManager } from './systems/InputManager';
 const { World, Bodies, Body, Runner, Events } = Matter;
 
 // Procedural rendering functions
-function drawFinn(ctx, position, facing, animFrame) {
+function drawFinn(ctx, position, _facing, animFrame) {
+  // Validate inputs
+  if (!ctx || !position || typeof animFrame !== 'number') {
+    console.error('Invalid parameters to drawFinn');
+    return;
+  }
   ctx.save();
   ctx.translate(position.x, position.y);
-  ctx.scale(facing, 1);
 
   const breathe = Math.sin(animFrame * 0.05) * 2;
 
@@ -60,13 +64,6 @@ function drawFinn(ctx, position, facing, animFrame) {
   ctx.beginPath();
   ctx.ellipse(0, 28, 20, 6, 0, 0, Math.PI * 2);
   ctx.fill();
-function drawFinn(ctx, position, facing, animFrame) {
-  // Validate inputs
-  if (!ctx || !position || typeof animFrame !== 'number') {
-    console.error('Invalid parameters to drawFinn');
-    return;
-  }
-  ctx.save();
   // Body (warm brown otter)
   ctx.fillStyle = '#8B6F47';
   ctx.strokeStyle = '#6B5D4F';

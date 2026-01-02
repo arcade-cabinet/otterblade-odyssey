@@ -59,7 +59,7 @@ class InputManager {
     this.gamepad = e.gamepad;
   }
 
-  handleGamepadDisconnected(e) {
+  handleGamepadDisconnected(_e) {
     console.log('Gamepad disconnected');
     this.gamepad = null;
   }
@@ -93,13 +93,13 @@ class InputManager {
     this.state.jump = this.keys.KeyW || this.keys.ArrowUp || this.keys.Space;
 
     // Interact (E, Enter)
-    this.state.interact = this.keys['KeyE'] || this.keys['Enter'];
+    this.state.interact = this.keys.KeyE || this.keys.Enter;
 
     // Attack (Left Mouse, J, Z)
-    this.state.attack = this.keys['KeyJ'] || this.keys['KeyZ'];
+    this.state.attack = this.keys.KeyJ || this.keys.KeyZ;
 
     // Pause (Escape, P)
-    this.state.pause = this.keys['Escape'] || this.keys['KeyP'];
+    this.state.pause = this.keys.Escape || this.keys.KeyP;
   }
 
   updateGamepad() {
