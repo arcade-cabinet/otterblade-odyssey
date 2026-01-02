@@ -11,7 +11,7 @@ on:
     workflows: ["CI", "Build", "Test", "Lint"]
     types: [completed]
     branches-ignore: [main]
-  
+
   workflow_call:
     inputs:
       run_id:
@@ -93,10 +93,10 @@ jobs:
         run: |
           TARGET_REPO="$INPUT_REPO"
           TARGET_RUN_ID="$INPUT_RUN_ID"
-          
+
           echo "target_repo=$TARGET_REPO" >> $GITHUB_OUTPUT
           echo "target_run_id=$TARGET_RUN_ID" >> $GITHUB_OUTPUT
-          
+
           # Security: Reject PRs from forks
           if [[ "$EVENT_NAME" == "workflow_run" ]]; then
             if [[ "$HEAD_REPO" != "$BASE_REPO" ]]; then
@@ -106,16 +106,16 @@ jobs:
               exit 0
             fi
           fi
-          
+
           echo "is_fork=false" >> $GITHUB_OUTPUT
-          
-          # Validate branch name
-          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
-            echo "::error::Invalid branch name"
+
+          # Validate branch name (prevent path traversal: no .., .git/, leading dots/slashes)
+          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9][a-zA-Z0-9/_-]*$ ]]; then
+            echo "::error::Invalid branch name: must start with alphanumeric and contain only alphanumeric, /, _, or -"
             echo "is_trusted=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           echo "is_trusted=true" >> $GITHUB_OUTPUT
           echo "head_branch=$HEAD_BRANCH" >> $GITHUB_OUTPUT
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
@@ -131,11 +131,21 @@ jobs:
           # Get PR number
           PR_NUM=$(gh pr list --repo "$TARGET_REPO" --head "$TARGET_BRANCH" --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
           echo "Found PR: $PR_NUM"
-          
+
           # Get failure logs (truncated for context window)
           echo "📋 Fetching failure logs..."
           LOGS=$(gh run view "$TARGET_RUN_ID" --repo "$TARGET_REPO" --log-failed 2>&1 | tail -300 || echo "Could not fetch logs")
-          echo "$LOGS" > /tmp/failure.log
+
+          # Sanitize logs to remove potential secrets (common patterns)
+          # Note: GitHub Actions automatically masks registered secrets, but this adds defense in depth
+          SANITIZED=$(echo "$LOGS" | sed -E \
+            -e 's/(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}/<REDACTED_GITHUB_TOKEN>/g' \
+            -e 's/(AKIA[0-9A-Z]{16})/<REDACTED_AWS_KEY>/g' \
+            -e 's/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/<REDACTED_UUID>/g' \
+            -e 's/(sk-[A-Za-z0-9]{20,})/<REDACTED_API_KEY>/g' \
+            -e 's/(Bearer [A-Za-z0-9._-]{20,})/<REDACTED_BEARER_TOKEN>/g')
+
+          echo "$SANITIZED" > /tmp/failure.log
 
       - name: Upload failure log
         if: steps.check.outputs.is_trusted == 'true'
@@ -153,7 +163,9 @@ jobs:
     if: needs.validate.outputs.is_trusted == 'true'
     permissions:
       contents: read
-    uses: jbcom/control-center/.github/workflows/control-center-build.yml@main
+    # Pin to specific commit SHA for stability (instead of @main)
+    # Update periodically by checking: git ls-remote https://github.com/jbcom/control-center.git HEAD
+    uses: jbcom/control-center/.github/workflows/control-center-build.yml@c3435f9986cfd70e51e385f6bbeaea79b26f26ee
 
   ollama-fix:
     name: Ollama Quick Fix
@@ -192,29 +204,29 @@ jobs:
           PR_NUM: ${{ needs.validate.outputs.pr_number }}
         run: |
           chmod +x /tmp/control-center
-          
+
           # If no Ollama key, use simple log analysis and post suggestion
           if [ -z "$OLLAMA_API_KEY" ]; then
             echo "⚠️ No OLLAMA_API_KEY, posting manual suggestion..."
             FAILURE_LOG=$(head -200 /tmp/failure.log || echo "No logs available")
-            
+
             if [ -n "$PR_NUM" ]; then
               gh pr comment "$PR_NUM" --repo "$TARGET_REPO" --body "$(cat <<EOF
           ## 🔧 CI Fix Needed
-          
+
           **Branch:** ${{ needs.validate.outputs.head_branch }}
-          
+
           The CI workflow failed. Please review the logs and fix the issues.
-          
+
           <details>
           <summary>Failure Log (last 200 lines)</summary>
-          
+
           \`\`\`
           $FAILURE_LOG
           \`\`\`
-          
+
           </details>
-          
+
           ---
           <sub>🤖 Autoheal</sub>
           EOF
@@ -223,13 +235,13 @@ jobs:
             echo "needs_escalation=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # Run control-center fixer
           OUTPUT=$(/tmp/control-center fixer \
             --repo "$TARGET_REPO" \
             --run-id "$TARGET_RUN_ID" \
             --log-level info 2>&1) || true
-          
+
           # Check if fix was applied
           if echo "$OUTPUT" | grep -q "fix applied\|commit created\|PR created"; then
             echo "fix_applied=true" >> $GITHUB_OUTPUT
@@ -315,7 +327,7 @@ jobs:
           fi
           IS_FLAKY=$(echo "$OUTPUT" | jq -r '.is_flaky // false')
           CONFIDENCE=$(echo "$OUTPUT" | jq -r '.confidence // 0')
-          
+
           # Auto-retry only if flaky AND high confidence
           if [ "$IS_FLAKY" = "true" ] && [ "$(echo "$CONFIDENCE >= 0.7" | bc -l)" = "1" ]; then
             echo "should_retry=true" >> $GITHUB_OUTPUT
@@ -404,10 +416,10 @@ jobs:
             actions: read
           prompt: |
             Fix CI failure in ${{ needs.validate.outputs.target_repo }} PR #${{ needs.validate.outputs.pr_number }}.
-            
+
             Failed workflow run ID: ${{ needs.validate.outputs.target_run_id }}
             Logs: /tmp/failure_logs.txt
-            
+
             Diagnose the failure, implement a fix, and commit directly to this branch.
             Verify your fix passes the build.
           claude_args: |
@@ -432,7 +444,7 @@ jobs:
         run: |
           gh pr comment "$PR_NUM" --repo "$TARGET_REPO" --body "$(cat <<'EOF'
           ⚠️ **Auto-fix unavailable for fork PRs**
-          
+
           For security reasons, automatic CI fixes are disabled for fork PRs.
           Please fix the CI failure manually.
           EOF

@@ -55,6 +55,9 @@ env:
   OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'glm-4.6:cloud' }}
   TARGET_REPO: ${{ inputs.repository || github.repository }}
   TARGET_PR: ${{ inputs.pr_number || github.event.pull_request.number }}
+  # Escalation thresholds (configurable via repository variables)
+  ESCALATION_SUGGESTIONS_THRESHOLD: ${{ vars.ESCALATION_SUGGESTIONS_THRESHOLD || '5' }}
+  ESCALATION_LOC_THRESHOLD: ${{ vars.ESCALATION_LOC_THRESHOLD || '500' }}
 
 permissions:
   contents: read
@@ -84,7 +87,8 @@ jobs:
 
       - name: Review PR with Ollama
         id: review
-        uses: jbcom/control-center/.github/actions/agentic-pr-review@main
+        # Pin to specific commit SHA for stability (instead of @main)
+        uses: jbcom/control-center/.github/actions/agentic-pr-review@c3435f9986cfd70e51e385f6bbeaea79b26f26ee
         with:
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           model: ${{ env.OLLAMA_MODEL }}
@@ -95,13 +99,17 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          THRESHOLD_SUGGESTIONS: ${{ env.ESCALATION_SUGGESTIONS_THRESHOLD }}
+          THRESHOLD_LOC: ${{ env.ESCALATION_LOC_THRESHOLD }}
         run: |
           SUGGESTIONS="${{ steps.review.outputs.suggestion_count }}"
           ADDITIONS=$(gh pr view ${{ env.TARGET_PR }} --repo ${{ env.TARGET_REPO }} --json additions --jq '.additions')
 
-          # Escalate if: >5 suggestions OR >500 lines changed OR Ollama failed
-          if [[ "$SUGGESTIONS" -gt 5 ]] || [[ "$ADDITIONS" -gt 500 ]] || [[ -z "$SUGGESTIONS" ]]; then
+          # Escalate if: >N suggestions OR >M lines changed OR Ollama failed
+          # Thresholds configurable via ESCALATION_SUGGESTIONS_THRESHOLD and ESCALATION_LOC_THRESHOLD vars
+          if [[ "$SUGGESTIONS" -gt "$THRESHOLD_SUGGESTIONS" ]] || [[ "$ADDITIONS" -gt "$THRESHOLD_LOC" ]] || [[ -z "$SUGGESTIONS" ]]; then
             echo "needs_escalation=true" >> $GITHUB_OUTPUT
+            echo "::notice::Escalating to Claude: suggestions=$SUGGESTIONS (threshold=$THRESHOLD_SUGGESTIONS), LOC=$ADDITIONS (threshold=$THRESHOLD_LOC)"
           else
             echo "needs_escalation=false" >> $GITHUB_OUTPUT
           fi
@@ -158,11 +166,11 @@ jobs:
             actions: read
           prompt: |
             Review PR #${{ env.TARGET_PR }} in ${{ env.TARGET_REPO }}.
-            
+
             This PR was escalated because it's large or complex.
-            
+
             Review for: correctness, security, performance, and maintainability.
-            
+
             Use inline comments for specific issues. Summarize in a PR comment.
             Stay in THIS PR - do not create new PRs.
           claude_args: |
