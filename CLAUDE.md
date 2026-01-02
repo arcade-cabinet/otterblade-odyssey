@@ -4,9 +4,11 @@ This is the primary instruction file for Claude-based AI agents working on Otter
 
 ## Quick Context
 
-**Otterblade Odyssey: Zephyros Rising** is a production-grade React 2.5D platformer with Redwall-inspired woodland-epic branding. Think warm lantern light, mossy stone abbeys, brave woodland creatures—not neon sci-fi or grimdark horror.
+**Otterblade Odyssey: Zephyros Rising** is a production-grade 2.5D platformer built with **Vanilla JavaScript + Matter.js + Canvas 2D**, with Redwall-inspired woodland-epic branding. Think warm lantern light, mossy stone abbeys, brave woodland creatures—not neon sci-fi or grimdark horror.
 
 **Repository**: `github.com/jbdevprimary/otterblade-odyssey`
+
+**Architecture Decision**: Vanilla JavaScript + Matter.js (proven in POC) replaces React Three Fiber + Rapier (20,000+ lines, broken).
 
 ## Critical Rules for Claude
 
@@ -30,7 +32,7 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 - Subtle magic (firefly motes, not laser beams)
 
 ### 3. Use Procedural Generation (NOT Static Assets)
-```typescript
+```javascript
 // CORRECT - Procedural rendering like POC
 // See pocs/otterblade_odyssey.html for reference
 // Use canvas-based procedural generation for player, enemies, effects
@@ -40,43 +42,56 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 // import chapterPlate from "@assets/...png";  // DO NOT USE
 ```
 
-### 4. TypeScript Target is ES2022
-Required for Miniplex query iteration. Never downgrade to ES2021 or lower.
+### 4. JavaScript Target is ES2022
+Modern JavaScript features, ES modules. No TypeScript compilation overhead.
 
 ### 5. Node.js Version is 25.x
 All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` at repo root. CI/CD workflows, Replit, and local dev must all align to this version.
 
 ## Architecture Overview
 
-> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. Current production code uses React Three Fiber.
-
-### Current Technology Stack (Production)
+### Current Technology Stack
 | Layer | Technology |
 |-------|------------|
-| 3D Rendering | @react-three/fiber (React Three Fiber) |
-| Physics | @react-three/rapier (Rapier WASM) |
-| Entity Management | Miniplex + miniplex-react |
-| State | Zustand |
-| Procedural Graphics | @jbcom/strata |
-| Styling | Tailwind CSS v4 |
-| UI Components | shadcn/ui + Radix |
-| Mobile | Capacitor (native features, haptics) |
+| Language | Vanilla JavaScript (ES2022) |
+| Physics | Matter.js 0.20 (POC-proven) |
+| Rendering | Canvas 2D API |
+| AI/Pathfinding | YUKA 0.9 |
+| State Management | Vanilla JS (20 lines, no Zustand) |
 | Audio | Howler.js (spatial audio, music) |
+| Touch Controls | Custom implementation |
+| Bundler | esbuild (production only) |
+| Dev Server | Python SimpleHTTPServer |
 
 ### Key Directories
 ```
-client/src/game/
-├── ecs/              # Miniplex entities, systems, queries
-│   ├── world.ts      # Entity types and world instance
-│   ├── systems.ts    # Movement, gravity, cleanup systems
-│   └── SpriteRenderer.tsx
-├── Player.tsx        # Rapier physics player controller
-├── Level.tsx         # Procedural level generation
-├── store.ts          # Zustand game state
-└── constants.ts      # Biomes, collision groups
+game/src/
+├── index.html        # Entry point
+├── main.js           # Game initialization
+├── ui/
+│   └── styles.css    # Warm Redwall styling
+├── core/
+│   ├── Game.js       # Main game loop
+│   ├── Physics.js    # Matter.js wrapper
+│   ├── Renderer.js   # Canvas 2D rendering
+│   └── Camera.js     # Camera follow
+├── entities/
+│   ├── Player.js     # Finn (otter protagonist)
+│   ├── Enemy.js      # Galeborn enemies
+│   └── Platform.js   # Platforms, walls
+├── rendering/
+│   ├── finn.js       # Procedural Finn (from POC)
+│   ├── enemies.js    # Procedural enemies
+│   └── parallax.js   # Backgrounds
+├── ddl/
+│   ├── loader.js     # Load chapter JSONs
+│   └── builder.js    # Build levels from DDL
+└── state/
+    └── store.js      # Vanilla JS state
 
 client/src/data/
-├── manifests/        # JSON asset definitions (for future idempotent generation)
+├── manifests/        # JSON DDL definitions
+│   └── chapters/     # 10 chapter definitions
 └── approvals.json    # Asset approval tracking
 ```
 
@@ -97,74 +112,110 @@ client/src/data/
 
 ## Code Patterns
 
-### ECS Entity Definition (Miniplex)
-```typescript
-export type Entity = {
-  position: { x: number; y: number; z: number };
-  velocity?: { x: number; y: number; z: number };
-  player?: true;
-  enemy?: { type: "skirmisher" | "shielded" | "ranged" };
-  health?: { current: number; max: number };
-  collectible?: { type: "shard" | "health" };
-};
+### Matter.js Physics Setup (from POC)
+```javascript
+import Matter from 'matter-js';
 
-export const queries = {
-  moving: world.with("position", "velocity"),
-  players: world.with("player", "position"),
-  enemies: world.with("enemy", "position", "health"),
-};
-```
+const { Engine, World, Bodies, Body, Events } = Matter;
 
-### Physics with Rapier
-```tsx
-import { RigidBody, CuboidCollider } from "@react-three/rapier";
+// Create engine
+const engine = Engine.create();
+engine.gravity.y = 1.5; // POC-proven gravity value
 
-function Platform({ position, size }: PlatformProps) {
-  return (
-    <RigidBody type="fixed" position={position} collisionGroups={COLLISION_GROUPS.WORLD}>
-      <CuboidCollider args={size} />
-      <mesh>
-        <boxGeometry args={[size[0] * 2, size[1] * 2, size[2] * 2]} />
-        <meshStandardMaterial color="#8B7355" />
-      </mesh>
-    </RigidBody>
-  );
-}
-```
-
-### Zustand State
-```typescript
-interface GameState {
-  health: number;
-  maxHealth: number;
-  shards: number;
-  currentBiome: number;
-  checkpointPosition: { x: number; y: number };
-  // Actions
-  takeDamage: (amount: number) => void;
-  collectShard: () => void;
-  setCheckpoint: (pos: { x: number; y: number }) => void;
-}
-```
-
-### Strata Procedural Graphics
-```typescript
-import { createCharacter, animateCharacter, updateFurUniforms, fbm, noise3D } from "@jbcom/strata";
-
-// Procedural terrain
-const height = noise3D(x * 0.1, 0, z * 0.1) * 5 + fbm(x * 0.3, 0, z * 0.3, 3) * 1.5;
-
-// Character with fur
-const otter = createCharacter({
-  skinColor: 0x8b6914,
-  furOptions: {
-    baseColor: new THREE.Color("#5d4420"),
-    tipColor: new THREE.Color("#8b6914"),
-    layerCount: 8,
-    spacing: 0.015,
-    windStrength: 0.3,
-  },
+// Create player body
+const player = Bodies.rectangle(x, y, 35, 55, {
+  label: 'player',
+  friction: 0.1,
+  frictionAir: 0.01,
+  restitution: 0
 });
+
+World.add(engine.world, player);
+```
+
+### Procedural Finn Rendering (from POC)
+```javascript
+export function drawFinn(ctx, { x, y, facing, state, animFrame, warmth }) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(facing, 1);
+
+  const breathe = Math.sin(animFrame * 0.05) * 2;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+  ctx.beginPath();
+  ctx.ellipse(0, 28, 20, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body (warm brown otter)
+  ctx.fillStyle = '#8B6F47';
+  ctx.strokeStyle = '#6B5D4F';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0 + breathe, 16, 22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Chest (lighter tan)
+  ctx.fillStyle = '#D4A574';
+  ctx.beginPath();
+  ctx.ellipse(2, 2 + breathe, 10, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ... (head, snout, eyes, ears, arms, sword)
+
+  ctx.restore();
+}
+```
+
+### Vanilla JS State Management (20 lines, no frameworks!)
+```javascript
+// game/src/state/store.js
+export const store = {
+  state: {
+    currentChapter: 0,
+    health: 5,
+    shards: 0,
+    checkpointPosition: { x: 100, y: 450 }
+  },
+
+  listeners: new Set(),
+
+  get() {
+    return this.state;
+  },
+
+  set(updates) {
+    this.state = { ...this.state, ...updates };
+    this.notify();
+    this.save();
+  },
+
+  subscribe(listener) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  },
+
+  notify() {
+    this.listeners.forEach(fn => fn(this.state));
+  },
+
+  save() {
+    localStorage.setItem('otterblade', JSON.stringify(this.state));
+  },
+
+  load() {
+    const saved = localStorage.getItem('otterblade');
+    if (saved) this.state = JSON.parse(saved);
+  }
+};
+
+// Usage - same API as Zustand, zero dependencies
+import { store } from './state/store.js';
+
+store.set({ health: 4 });
+store.subscribe(state => console.log('Health:', state.health));
 ```
 
 ## Asset Generation System
@@ -280,10 +331,10 @@ pnpm audit:cinematics
 
 1. **Using npm/yarn** - Always use pnpm
 2. **Static PNG/MP4 assets** - Use procedural generation from POC, not static files
-3. **Query iteration** - Use `for (const e of query)`, not `.forEach()`
-4. **Entity removal during iteration** - Collect first, remove after
+3. **Adding frameworks** - Vanilla JavaScript is the correct path (proven in POC)
+4. **TypeScript** - Use vanilla JavaScript, no compilation overhead
 5. **Neon/sci-fi aesthetics** - Always check BRAND.md
-6. **ES2021 target** - Must be ES2022 for Miniplex
+6. **Over-engineering** - Keep it simple, proven patterns from POC
 
 ## Image Generation Prompts
 
@@ -300,7 +351,8 @@ Negative: neon, sci-fi, glowing energy, anime, grimdark, horror, demons, modern,
 |------|---------|
 | `BRAND.md` | Complete visual style guide |
 | `AGENTS.md` | Technical patterns for all AI agents |
-| `replit.md` | Project architecture (Replit-specific) |
+| `BUILD_PLAN_TONIGHT.md` | 6-hour build plan |
+| `VANILLA_JS_PLAN.md` | Why vanilla JS is superior |
 | `.github/copilot-instructions.md` | GitHub Copilot config |
-| `client/src/game/constants.ts` | Biome definitions |
-| `client/src/game/store.ts` | Zustand state structure |
+| `pocs/otterblade_odyssey.html` | Working POC (2,847 lines, Matter.js) |
+| `client/src/data/manifests/chapters/` | JSON DDL chapter definitions |
