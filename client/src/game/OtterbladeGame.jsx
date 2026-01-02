@@ -21,12 +21,32 @@ import {
   getChapterSpawnPoint,
   loadChapterManifest,
 } from './data/chapter-loaders';
+// AI systems
+import { ZephyrosAI } from './ai/BossAI';
+import { hearingSystem } from './ai/PerceptionSystem';
 import { aiManager } from './systems/AIManager';
-// Import our system modules
 import { audioManager } from './systems/AudioManager';
 import { inputManager } from './systems/InputManager';
+// Physics and environment systems
+import {
+  BellSystem,
+  FlowPuzzle,
+  HearthSystem,
+  LanternSystem,
+  TimingSequence,
+} from './environment/EnvironmentalSystems';
+import { PlayerController } from './physics/PlayerController';
+import {
+  COLLISION_GROUPS,
+  HazardSystem,
+  MovingPlatform,
+  WaterZone,
+  createFinnBody,
+  createPlatform,
+  createPhysicsEngine,
+} from './physics/PhysicsManager';
 
-const { Engine, World, Bodies, Body, Runner, Events } = Matter;
+const { World, Bodies, Body, Runner, Events } = Matter;
 
 export default function OtterbladeGame() {
   let canvasRef;
@@ -38,10 +58,29 @@ export default function OtterbladeGame() {
   const [currentChapter] = createSignal(0);
   const [health, setHealth] = createSignal(5);
   const [maxHealth] = createSignal(5);
+  const [warmth, setWarmth] = createSignal(100);
+  const [maxWarmth] = createSignal(100);
   const [shards, setShards] = createSignal(0);
   const [gameStarted, setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
   const [activeQuest, setActiveQuest] = createSignal(null);
+
+  // Game state object for systems
+  const gameStateObj = {
+    health: () => health(),
+    maxHealth: () => maxHealth(),
+    warmth: () => warmth(),
+    maxWarmth: () => maxWarmth(),
+    takeDamage: (amount) => setHealth((h) => Math.max(0, h - amount)),
+    restoreHealth: (amount) => setHealth((h) => Math.min(maxHealth(), h + amount)),
+    drainWarmth: (amount) => setWarmth((w) => Math.max(0, w - amount)),
+    restoreWarmth: (amount) => setWarmth((w) => Math.min(maxWarmth(), w + amount)),
+    setCheckpoint: (pos) => console.log('Checkpoint set:', pos),
+    summonAlly: (pos) => console.log('Ally summoned:', pos),
+    alertGuards: (pos) => console.log('Guards alerted:', pos),
+    rallyAllies: () => console.log('Allies rallied'),
+    onBossDefeated: () => console.log('Boss defeated!'),
+  };
 
   onMount(() => {
     if (!gameStarted()) return;
@@ -62,10 +101,19 @@ export default function OtterbladeGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Create Matter.js engine
-    const engine = Engine.create();
-    engine.gravity.y = 1.5; // POC-proven value
+    // Create Matter.js engine with comprehensive physics
+    const engine = createPhysicsEngine();
     const runner = Runner.create();
+
+    // Environmental systems
+    const lanternSystem = new LanternSystem(audioManager);
+    const bellSystem = new BellSystem(audioManager);
+    const hearthSystem = new HearthSystem(audioManager);
+    const hazardSystem = new HazardSystem();
+    const waterZones = [];
+    const movingPlatforms = [];
+    const flowPuzzles = [];
+    const timingSequences = [];
 
     // Load chapter manifest
     const chapterId = currentChapter();
@@ -99,15 +147,12 @@ export default function OtterbladeGame() {
       }, 500);
     }
 
-    // Create player
-    const player = Bodies.rectangle(spawnPoint.x, spawnPoint.y, 35, 55, {
-      label: 'player',
-      friction: 0.1,
-      frictionAir: 0.01,
-      restitution: 0,
-      inertia: Infinity,
-    });
+    // Create player with compound body (head/torso/feet sensors)
+    const player = createFinnBody(spawnPoint.x, spawnPoint.y);
     World.add(engine.world, player);
+
+    // Create advanced player controller
+    const playerController = new PlayerController(player, engine, gameStateObj, audioManager);
 
     // Create player reference for AI
     const playerRef = {
@@ -115,39 +160,54 @@ export default function OtterbladeGame() {
       body: player,
     };
 
-    // Build level geometry from DDL
+    // Build level geometry from DDL with advanced physics
     const platforms = [];
     const walls = [];
     const ceilings = [];
 
     if (manifest.level?.segments) {
-      for (const segment of manifest.level.segments) {
-        // Platforms
+      for (const segment of manifest.segments) {
+        // Platforms with type-based friction
         if (segment.platforms) {
           for (const platformDef of segment.platforms) {
-            const platform = Bodies.rectangle(
-              platformDef.x,
-              platformDef.y,
-              platformDef.width,
-              platformDef.height,
-              {
-                isStatic: true,
-                label: 'platform',
-                friction: 0.8,
-              }
-            );
+            const platform = createPlatform({
+              x: platformDef.x,
+              y: platformDef.y,
+              width: platformDef.width,
+              height: platformDef.height,
+              type: platformDef.type || 'stone',
+              properties: platformDef.properties,
+            });
             platforms.push({ body: platform, def: platformDef });
             World.add(engine.world, platform);
+
+            // Add moving platform if specified
+            if (platformDef.moving && platformDef.waypoints) {
+              const movingPlatform = new MovingPlatform({
+                x: platformDef.x,
+                y: platformDef.y,
+                width: platformDef.width,
+                height: platformDef.height,
+                waypoints: platformDef.waypoints,
+                speed: platformDef.speed || 2,
+                waitTime: platformDef.waitTime || 1000,
+                loop: platformDef.loop !== false,
+              });
+              movingPlatforms.push(movingPlatform);
+              World.add(engine.world, movingPlatform.body);
+            }
           }
         }
 
         // Walls
         if (segment.walls) {
           for (const wallDef of segment.walls) {
-            const wall = Bodies.rectangle(wallDef.x, wallDef.y, wallDef.width, wallDef.height, {
-              isStatic: true,
-              label: 'wall',
-              friction: 0.3,
+            const wall = createPlatform({
+              x: wallDef.x,
+              y: wallDef.y,
+              width: wallDef.width,
+              height: wallDef.height,
+              type: wallDef.type || 'stone',
             });
             walls.push({ body: wall, def: wallDef });
             World.add(engine.world, wall);
@@ -157,19 +217,111 @@ export default function OtterbladeGame() {
         // Ceilings
         if (segment.ceilings) {
           for (const ceilingDef of segment.ceilings) {
-            const ceiling = Bodies.rectangle(
-              ceilingDef.x,
-              ceilingDef.y,
-              ceilingDef.width,
-              ceilingDef.height,
-              {
-                isStatic: true,
-                label: 'ceiling',
-                friction: 0.3,
-              }
-            );
+            const ceiling = createPlatform({
+              x: ceilingDef.x,
+              y: ceilingDef.y,
+              width: ceilingDef.width,
+              height: ceilingDef.height,
+              type: ceilingDef.type || 'stone',
+            });
             ceilings.push({ body: ceiling, def: ceilingDef });
             World.add(engine.world, ceiling);
+          }
+        }
+
+        // Environmental hazards
+        if (segment.hazards) {
+          for (const hazardDef of segment.hazards) {
+            hazardSystem.addHazard(
+              hazardDef.type,
+              {
+                x: hazardDef.x,
+                y: hazardDef.y,
+                width: hazardDef.width,
+                height: hazardDef.height,
+              },
+              hazardDef.damage || 1,
+              hazardDef.cooldown || 1000,
+              hazardDef.warmthDrain || 0
+            );
+          }
+        }
+
+        // Water zones
+        if (segment.water) {
+          for (const waterDef of segment.water) {
+            waterZones.push(
+              new WaterZone(
+                {
+                  x: waterDef.x,
+                  y: waterDef.y,
+                  width: waterDef.width,
+                  height: waterDef.height,
+                },
+                waterDef.buoyancy || 0.01,
+                waterDef.drag || 0.15,
+                waterDef.warmthDrain || 0.5
+              )
+            );
+          }
+        }
+
+        // Environmental objects
+        if (segment.lanterns) {
+          for (const lanternDef of segment.lanterns) {
+            lanternSystem.addLantern(lanternDef.x, lanternDef.y, lanternDef.radius || 150);
+          }
+        }
+
+        if (segment.bells) {
+          for (const bellDef of segment.bells) {
+            bellSystem.addBell(bellDef.x, bellDef.y, bellDef.summons || 'help');
+          }
+        }
+
+        if (segment.hearths) {
+          for (const hearthDef of segment.hearths) {
+            hearthSystem.addHearth(hearthDef.x, hearthDef.y);
+          }
+        }
+
+        // Puzzles
+        if (segment.flowPuzzles) {
+          for (const puzzleDef of segment.flowPuzzles) {
+            const puzzle = new FlowPuzzle();
+            for (const region of puzzleDef.regions) {
+              puzzle.addFlowRegion(
+                region.x,
+                region.y,
+                region.width,
+                region.height,
+                region.direction,
+                region.strength
+              );
+            }
+            for (const valve of puzzleDef.valves || []) {
+              puzzle.addValve(valve.x, valve.y, valve.controlsRegionIndex);
+            }
+            flowPuzzles.push(puzzle);
+          }
+        }
+
+        if (segment.timingSequences) {
+          for (const seqDef of segment.timingSequences) {
+            const sequence = new TimingSequence();
+            for (const gate of seqDef.gates) {
+              sequence.addGate(
+                gate.x,
+                gate.y,
+                gate.width,
+                gate.height,
+                gate.openDuration,
+                gate.closedDuration,
+                gate.offset || 0
+              );
+            }
+            timingSequences.push(sequence);
+            sequence.start();
           }
         }
       }
@@ -194,9 +346,36 @@ export default function OtterbladeGame() {
       World.add(engine.world, npcBody);
     }
 
-    // Build enemies from DDL with YUKA AI
+    // Build enemies from DDL with YUKA AI and perception
     const encounterData = getChapterEncounters(chapterId);
+    let bossAI = null;
+
     for (const encounter of encounterData) {
+      // Check for boss encounter
+      if (encounter.type === 'boss' && encounter.boss) {
+        const bossDef = encounter.boss;
+        bossAI = new ZephyrosAI(
+          {
+            x: bossDef.spawnPoint?.x || 500,
+            y: bossDef.spawnPoint?.y || 300,
+            health: bossDef.health || 500,
+            damage: bossDef.damage || 35,
+            speed: bossDef.speed || 1.2,
+          },
+          gameStateObj,
+          audioManager
+        );
+
+        // Set player as target
+        bossAI.target = playerRef;
+
+        // Register as hearing listener
+        hearingSystem.addListener(bossAI);
+
+        console.log('Boss spawned: Zephyros');
+      }
+
+      // Regular enemies
       if (encounter.enemies) {
         for (const enemyDef of encounter.enemies) {
           // Create enemy physics body
@@ -228,7 +407,15 @@ export default function OtterbladeGame() {
               audioManager.playSFX('blade_swing', { rate: 0.9 });
               // Apply damage to player
               if (Math.abs(player.position.x - enemyBody.position.x) < 50) {
-                setHealth((h) => Math.max(0, h - 1));
+                const result = playerController.takeDamage(enemyDef.damage || 1, {
+                  x: player.velocity.x + (player.position.x > enemyBody.position.x ? 5 : -5),
+                  y: -3,
+                });
+
+                // Check if player parried
+                if (result.parried) {
+                  playerController.onSuccessfulParry(enemyBody);
+                }
               }
             },
             onDeath: () => {
@@ -239,6 +426,9 @@ export default function OtterbladeGame() {
 
           // Set player as target for AI
           enemyAI.playerTarget = playerRef;
+
+          // Register as hearing listener
+          hearingSystem.addListener(enemyAI);
 
           // Initialize position
           enemyAI.position.copy(new Vector3(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 0));
@@ -413,20 +603,122 @@ export default function OtterbladeGame() {
       if (!canvas || !ctx) return;
 
       animFrame++;
+      const delta = 16.67; // ms
+      const deltaSec = delta / 1000;
 
       // Update input system
       inputManager.update();
 
+      // Get unified controls
+      const controls = {
+        left: inputManager.isPressed('left'),
+        right: inputManager.isPressed('right'),
+        up: inputManager.isPressed('up'),
+        jump: inputManager.isPressed('jump'),
+        attack: inputManager.isPressed('attack'),
+        parry: inputManager.isPressed('parry'),
+        roll: inputManager.isPressed('roll'),
+        slink: inputManager.isPressed('slink'),
+        interact: inputManager.isPressed('interact'),
+      };
+
+      // Update advanced player controller
+      playerController.update(controls, deltaSec);
+
       // Update physics
-      Runner.tick(runner, engine, 16.67);
+      Runner.tick(runner, engine, delta);
+
+      // Update environmental systems
+      lanternSystem.update(deltaSec);
+      bellSystem.update(deltaSec);
+      hearthSystem.update(deltaSec);
+
+      // Update moving platforms
+      for (const platform of movingPlatforms) {
+        platform.update(deltaSec);
+      }
+
+      // Update timing sequences
+      for (const sequence of timingSequences) {
+        sequence.update(deltaSec);
+      }
+
+      // Apply water physics
+      for (const waterZone of waterZones) {
+        waterZone.applyToBody(player, deltaSec, gameStateObj);
+      }
+
+      // Check hazards
+      hazardSystem.checkCollisions(player, gameStateObj);
+
+      // Apply flow puzzles
+      for (const puzzle of flowPuzzles) {
+        const flow = puzzle.applyFlowToBody(player);
+        if (flow) {
+          Body.applyForce(player, player.position, { x: flow.x * 0.001, y: flow.y * 0.001 });
+        }
+      }
+
+      // Update hearing system
+      hearingSystem.update();
+
+      // Emit footstep sounds for hearing
+      if (Math.abs(player.velocity.x) > 1 && animFrame % 20 === 0) {
+        hearingSystem.emit(
+          new Vector3(player.position.x, player.position.y, 0),
+          0.3,
+          'footstep',
+          player
+        );
+      }
 
       // Update AI system with YUKA
-      aiManager.update(16.67 / 1000);
+      aiManager.update(deltaSec);
+
+      // Update boss AI
+      if (bossAI && !bossAI.isDead) {
+        bossAI.update(deltaSec);
+
+        // Boss attacks player
+        bossAI.selectAndExecuteAttack();
+
+        // Check boss projectile collisions
+        for (let i = bossAI.projectiles.length - 1; i >= 0; i--) {
+          const proj = bossAI.projectiles[i];
+          const dist = Math.sqrt(
+            (player.position.x - proj.x) ** 2 + (player.position.y - proj.y) ** 2
+          );
+
+          if (dist < 30) {
+            playerController.takeDamage(proj.damage, {
+              x: player.velocity.x + proj.vx * 0.5,
+              y: -3,
+            });
+            gameStateObj.drainWarmth(proj.warmthDrain || 0);
+            bossAI.projectiles.splice(i, 1);
+          }
+        }
+
+        // Check boss hazard zones
+        for (const zone of bossAI.hazardZones) {
+          if (
+            player.position.x >= zone.x &&
+            player.position.x <= zone.x + zone.width &&
+            player.position.y >= zone.y &&
+            player.position.y <= zone.y + zone.height
+          ) {
+            if (animFrame % 10 === 0) {
+              gameStateObj.takeDamage(zone.damage);
+              gameStateObj.drainWarmth(zone.warmthDrain);
+            }
+          }
+        }
+      }
 
       // Sync AI positions with physics bodies
       for (const enemy of aiManager.enemies.values()) {
         const enemyBody = Array.from(engine.world.bodies).find(
-          (b) => b.label === 'enemy' && Math.abs(b.position.x - enemy.position.x) < 1
+          (b) => b.label === 'enemy' && Math.abs(b.position.x - enemy.position.x) < 50
         );
         if (enemyBody) {
           // Copy AI velocity to physics
@@ -443,61 +735,28 @@ export default function OtterbladeGame() {
       // Update player reference for AI
       playerRef.position.x = player.position.x;
       playerRef.position.y = player.position.y;
+      playerFacing = player.facingDirection;
 
-      // Player movement with unified input
-      const moveForce = 0.005;
-      const maxSpeed = 8;
-      const axis = inputManager.getAxis();
-
-      if (axis !== 0) {
-        Body.applyForce(player, player.position, { x: axis * moveForce, y: 0 });
-        playerFacing = axis > 0 ? 1 : -1;
-
-        // Play footstep sounds occasionally
-        if (animFrame % 20 === 0) {
-          audioManager.playSFX('footstep', {
-            sprite: ['step1', 'step2', 'step3'][Math.floor(Math.random() * 3)],
-            volume: 0.3,
-          });
+      // Environmental interactions
+      if (controls.interact) {
+        // Check lanterns
+        for (const lantern of lanternSystem.lanterns) {
+          if (lanternSystem.lightLantern(lantern, { position: player.position, gameState: gameStateObj })) {
+            console.log('Lit lantern');
+          }
         }
-      }
 
-      // Limit speed
-      if (Math.abs(player.velocity.x) > maxSpeed) {
-        Body.setVelocity(player, {
-          x: Math.sign(player.velocity.x) * maxSpeed,
-          y: player.velocity.y,
-        });
-      }
+        // Check bells
+        for (const bell of bellSystem.bells) {
+          if (bellSystem.ringBell(bell, { position: player.position, gameState: gameStateObj })) {
+            console.log('Rang bell');
+          }
+        }
 
-      // Jump
-      const onGround = Math.abs(player.velocity.y) < 0.1;
-      if (inputManager.isPressed('jump') && onGround) {
-        Body.setVelocity(player, { x: player.velocity.x, y: -12 });
-        audioManager.playSFX('blade_swing', { rate: 1.5, volume: 0.4 });
-      }
-
-      // Attack
-      if (inputManager.isPressed('attack')) {
-        audioManager.playSFX('blade_swing');
-
-        // Find nearby enemies and damage them
-        const attackRange = 60;
-        const attackDamage = 1;
-
-        for (const enemy of aiManager.enemies.values()) {
-          const dist = Math.sqrt(
-            (player.position.x - enemy.position.x) ** 2 +
-              (player.position.y - enemy.position.y) ** 2
-          );
-
-          if (dist < attackRange) {
-            // Apply damage to enemy
-            enemy.takeDamage(attackDamage);
-            audioManager.playSFX('blade_hit');
-
-            // Visual feedback could be added here
-            console.log(`Hit enemy! HP: ${enemy.hp}/${enemy.maxHp}`);
+        // Check hearths
+        for (const hearth of hearthSystem.hearths) {
+          if (hearthSystem.kindleHearth(hearth, { position: player.position, gameState: gameStateObj })) {
+            console.log('Kindled hearth');
           }
         }
       }
@@ -615,6 +874,32 @@ export default function OtterbladeGame() {
         ctx.restore();
       }
 
+      // Draw water zones
+      for (const waterZone of waterZones) {
+        ctx.fillStyle = 'rgba(100, 150, 200, 0.3)';
+        ctx.fillRect(
+          waterZone.region.x,
+          waterZone.region.y,
+          waterZone.region.width,
+          waterZone.region.height
+        );
+      }
+
+      // Draw environmental systems
+      lanternSystem.render(ctx, camera);
+      bellSystem.render(ctx, camera);
+      hearthSystem.render(ctx, camera);
+
+      // Draw flow puzzles
+      for (const puzzle of flowPuzzles) {
+        puzzle.render(ctx, camera);
+      }
+
+      // Draw timing sequences
+      for (const sequence of timingSequences) {
+        sequence.render(ctx, camera);
+      }
+
       // Draw collectibles
       for (const collectible of collectibles) {
         if (!collectible.collected) {
@@ -649,6 +934,44 @@ export default function OtterbladeGame() {
       for (const enemy of aiManager.enemies.values()) {
         if (enemy.hp > 0) {
           drawEnemy(ctx, enemy, animFrame);
+        }
+      }
+
+      // Draw boss
+      if (bossAI && !bossAI.isDead) {
+        drawBoss(ctx, bossAI, animFrame);
+
+        // Draw boss projectiles
+        for (const proj of bossAI.projectiles) {
+          ctx.save();
+          ctx.translate(proj.x, proj.y);
+
+          // Frost wave visual
+          ctx.fillStyle = 'rgba(150, 200, 255, 0.6)';
+          ctx.shadowColor = '#88CCFF';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, proj.width / 2, proj.height / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          ctx.restore();
+        }
+
+        // Draw boss hazard zones
+        for (const zone of bossAI.hazardZones) {
+          ctx.fillStyle = 'rgba(200, 220, 255, 0.3)';
+          ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
+
+          // Particle effects
+          for (let i = 0; i < 5; i++) {
+            const px = zone.x + Math.random() * zone.width;
+            const py = zone.y + Math.random() * zone.height;
+            ctx.fillStyle = 'rgba(180, 220, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
 
@@ -754,6 +1077,31 @@ export default function OtterbladeGame() {
             <For each={Array(maxHealth()).fill(0)}>
               {(_, i) => <span>{i() < health() ? '❤️' : '🖤'}</span>}
             </For>
+          </div>
+          <div style={{ 'margin-bottom': '10px' }}>
+            <span style={{ color: '#F4D03F' }}>Warmth: </span>
+            <div
+              style={{
+                display: 'inline-block',
+                width: '100px',
+                height: '12px',
+                background: '#333',
+                border: '1px solid #F4D03F',
+                'vertical-align': 'middle',
+              }}
+            >
+              <div
+                style={{
+                  width: `${(warmth() / maxWarmth()) * 100}%`,
+                  height: '100%',
+                  background: warmth() > 50 ? '#FF6B35' : '#E67E22',
+                  transition: 'width 0.3s',
+                }}
+              />
+            </div>
+            <span style={{ 'margin-left': '8px' }}>
+              {warmth()}/{maxWarmth()}
+            </span>
           </div>
           <div>
             <span style={{ color: '#F4D03F' }}>Shards: </span>
@@ -993,6 +1341,132 @@ function drawNPC(ctx, npc, animFrame) {
   ctx.lineTo(-8, 5);
   ctx.closePath();
   ctx.fill();
+
+  ctx.restore();
+}
+
+function drawBoss(ctx, boss, animFrame) {
+  const x = boss.position.x;
+  const y = boss.position.y;
+  const facing = boss.facingDirection || 1;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(facing, 1);
+
+  // Phase transition effect
+  if (boss.phaseTransitionEffect > 0) {
+    ctx.shadowColor = '#88CCFF';
+    ctx.shadowBlur = 20;
+  }
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.beginPath();
+  ctx.ellipse(0, 40, 35, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Frost aura
+  const auraRadius = 50 + Math.sin(animFrame * 0.05) * 5;
+  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, auraRadius);
+  gradient.addColorStop(0, 'rgba(150, 200, 255, 0.2)');
+  gradient.addColorStop(1, 'rgba(150, 200, 255, 0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(0, 0, auraRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body (large, imposing)
+  ctx.fillStyle = '#88AACC';
+  ctx.strokeStyle = '#6688AA';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 30, 40, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Ice armor plates
+  ctx.fillStyle = '#AACCEE';
+  ctx.strokeStyle = '#88AACC';
+  ctx.lineWidth = 2;
+
+  // Chest plate
+  ctx.beginPath();
+  ctx.arc(-10, -10, 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(10, -10, 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Head
+  ctx.fillStyle = '#88AACC';
+  ctx.strokeStyle = '#6688AA';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(0, -30, 18, 22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Crown/horns (ice)
+  ctx.fillStyle = '#CCDDFF';
+  ctx.beginPath();
+  ctx.moveTo(-12, -45);
+  ctx.lineTo(-8, -55);
+  ctx.lineTo(-4, -45);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(4, -45);
+  ctx.lineTo(8, -55);
+  ctx.lineTo(12, -45);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Eyes (glowing ice blue)
+  ctx.fillStyle = '#66DDFF';
+  ctx.shadowColor = '#66DDFF';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.arc(-8, -32, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(8, -32, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Frost breath indicator (when casting)
+  if (boss.currentAnimation === 'cast' || boss.currentAnimation === 'summon') {
+    ctx.fillStyle = 'rgba(180, 220, 255, 0.5)';
+    for (let i = 0; i < 5; i++) {
+      const px = 15 + i * 5;
+      const py = -25 + (Math.sin(animFrame * 0.1 + i) * 3);
+      ctx.beginPath();
+      ctx.arc(px, py, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Health bar
+  const healthRatio = boss.hp / boss.maxHp;
+  const barWidth = 80;
+  ctx.fillStyle = '#C0392B';
+  ctx.fillRect(-barWidth / 2, -65, barWidth * healthRatio, 5);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(-barWidth / 2, -65, barWidth, 5);
+
+  // Phase indicator
+  ctx.fillStyle = '#F4D03F';
+  ctx.font = '12px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`Phase ${boss.phase}`, 0, -72);
 
   ctx.restore();
 }
