@@ -1,17 +1,13 @@
 import path from 'node:path';
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
 import solidPlugin from 'vite-plugin-solid';
 import { defineConfig } from 'vite';
 import { metaImagesPlugin } from './vite-plugin-meta-images';
 
 export default defineConfig({
   plugins: [
-    // React is used for: main app shell, UI components, asset review pages
-    react(),
-    // Solid.js is used for: new game implementation (client/src/game/OtterbladeGame.jsx)
-    // Both frameworks coexist: React for UI shell, Solid.js for game engine
+    // Solid.js for game implementation (per CLAUDE.md architecture decision)
     solidPlugin(),
     runtimeErrorOverlay(),
     tailwindcss(),
@@ -47,10 +43,8 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Vendor chunks for better caching
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-mui': ['@mui/material', '@mui/icons-material'],
-          // Note: Old React Three Fiber + Rapier implementation removed
-          // New game uses Matter.js + Solid.js (no chunking needed for game libs)
+          'vendor-solidjs': ['solid-js'],
+          'vendor-game': ['matter-js', 'yuka', 'howler', 'zustand'],
           'vendor-capacitor': [
             '@capacitor/core',
             '@capacitor/haptics',
