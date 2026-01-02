@@ -1,9 +1,8 @@
 import path from 'node:path';
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [],
   test: {
     globals: true,
     environment: 'happy-dom',
@@ -52,14 +51,6 @@ export default defineConfig({
     server: {
       deps: {
         inline: [
-          '@react-three/fiber',
-          '@react-three/drei',
-          '@react-three/postprocessing',
-          'three',
-          '@dimforge/rapier2d-compat',
-          'miniplex',
-          'miniplex-react',
-          '@hmans/use-rerender',
           'matter-js',
           'yuka',
         ],
@@ -69,7 +60,7 @@ export default defineConfig({
     deps: {
       optimizer: {
         web: {
-          include: ['miniplex-react', 'matter-js'],
+          include: ['matter-js'],
         },
       },
     },
