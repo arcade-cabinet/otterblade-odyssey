@@ -6,7 +6,6 @@ import nipplejs from 'nipplejs';
 
 import { createGame } from './core/Game.js';
 import { initializeInput } from './core/Input.js';
-import { loadChapterManifest } from './ddl/ManifestLoader.js';
 
 // Initialize game on start
 document.addEventListener('DOMContentLoaded', async () => {
