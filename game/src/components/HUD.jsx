@@ -1,4 +1,4 @@
-import { createSignal, createEffect, For, onMount } from 'solid-js';
+import { createSignal, For, onMount } from 'solid-js';
 import { gameStore } from '../stores/gameStore';
 
 export default function HUD() {
