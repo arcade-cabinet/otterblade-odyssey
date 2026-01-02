@@ -6,17 +6,17 @@
 
 import {
   EntityManager,
-  Time,
-  Vehicle,
-  StateMachine,
-  State,
-  SeekBehavior,
   FleeBehavior,
-  WanderBehavior,
-  Vector3,
+  FollowPathBehavior,
   NavMesh,
   PathPlanner,
-  FollowPathBehavior
+  SeekBehavior,
+  State,
+  StateMachine,
+  Time,
+  Vector3,
+  Vehicle,
+  WanderBehavior,
 } from 'yuka';
 
 /**
@@ -214,7 +214,7 @@ class FleeState extends TypedState {
   }
 
   enter(enemy) {
-    if (enemy.target && enemy.target.position) {
+    if (enemy.target?.position) {
       this.fleeBehavior.target = enemy.target.position;
       enemy.steering.behaviors.push(this.fleeBehavior);
       enemy.maxSpeed = enemy.chaseSpeed * 1.2;
@@ -353,8 +353,10 @@ class EnemyAI extends Vehicle {
 
   isWithinPatrolZone() {
     if (!this.patrolZone) return true;
-    return this.position.x >= this.patrolZone.x &&
-           this.position.x <= this.patrolZone.x + this.patrolZone.width;
+    return (
+      this.position.x >= this.patrolZone.x &&
+      this.position.x <= this.patrolZone.x + this.patrolZone.width
+    );
   }
 
   getCurrentState() {
@@ -400,7 +402,7 @@ class NPCAI {
     }
   }
 
-  updateIdle(delta) {
+  updateIdle(_delta) {
     // Occasional idle animations
     if (Math.random() < 0.001) {
       this.currentAnimation = 'look_around';
@@ -425,7 +427,7 @@ class NPCAI {
     }
   }
 
-  updateFollow(delta) {
+  updateFollow(_delta) {
     // Follow logic would need player reference
   }
 
@@ -441,7 +443,7 @@ class NPCAI {
   setState(newState) {
     if (this.storyStates[newState]) {
       this.storyState = newState;
-      }
+    }
   }
 }
 
@@ -464,25 +466,34 @@ class AIManager {
    */
   buildNavMesh(platforms) {
     this.navMesh = new NavMesh();
+    const polygons = [];
 
     // Generate navigation polygons from platforms
     // For each platform, create a walkable region
     for (const platform of platforms) {
       const bounds = platform.body.bounds;
-      const width = bounds.max.x - bounds.min.x;
-      const height = bounds.max.y - bounds.min.y;
 
-      // Create vertices for top surface of platform
+      // Create vertices for top surface of platform (walkable area)
       const vertices = [
         new Vector3(bounds.min.x, bounds.min.y - 5, 0),
         new Vector3(bounds.max.x, bounds.min.y - 5, 0),
         new Vector3(bounds.max.x, bounds.min.y, 0),
-        new Vector3(bounds.min.x, bounds.min.y, 0)
+        new Vector3(bounds.min.x, bounds.min.y, 0),
       ];
 
-      // Add polygon to nav mesh
-      // Note: In production, you'd use proper nav mesh generation
-      // This is a simplified version for platformer movement
+      // Create polygon from vertices
+      polygons.push(vertices);
+    }
+
+    // Build nav mesh from polygons
+    // Note: YUKA's fromPolygons expects specific format
+    // This creates a simplified nav mesh for 2D platformer pathfinding
+    if (polygons.length > 0) {
+      try {
+        this.navMesh.fromPolygons(polygons);
+      } catch (e) {
+        console.warn('NavMesh generation failed, using simplified pathfinding:', e.message);
+      }
     }
 
     return this.navMesh;
@@ -536,7 +547,7 @@ class AIManager {
 
       // Remove existing path behaviors
       enemy.steering.behaviors = enemy.steering.behaviors.filter(
-        b => !(b instanceof FollowPathBehavior)
+        (b) => !(b instanceof FollowPathBehavior)
       );
 
       // Add new path behavior
@@ -544,7 +555,7 @@ class AIManager {
     }
   }
 
-  update(delta) {
+  update(_delta) {
     this.time.update();
     this.entityManager.update(this.time.getDelta());
   }

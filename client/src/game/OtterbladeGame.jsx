@@ -9,24 +9,22 @@
  * - DDL factory patterns throughout
  */
 
-import { createSignal, onMount, onCleanup, Show, For } from 'solid-js';
 import Matter from 'matter-js';
+import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { Vector3 } from 'yuka';
-
+import TouchControls from './components/TouchControls';
+// DDL loaders
+import {
+  getChapterCollectibles,
+  getChapterEncounters,
+  getChapterNPCs,
+  getChapterSpawnPoint,
+  loadChapterManifest,
+} from './data/chapter-loaders';
+import { aiManager } from './systems/AIManager';
 // Import our system modules
 import { audioManager } from './systems/AudioManager';
 import { inputManager } from './systems/InputManager';
-import { aiManager } from './systems/AIManager';
-import TouchControls from './components/TouchControls';
-
-// DDL loaders
-import {
-  loadChapterManifest,
-  getChapterSpawnPoint,
-  getChapterNPCs,
-  getChapterEncounters,
-  getChapterCollectibles
-} from './data/chapter-loaders';
 
 const { Engine, World, Bodies, Body, Runner, Events } = Matter;
 
@@ -81,12 +79,14 @@ export default function OtterbladeGame() {
     if (manifest.quests && manifest.quests.length > 0) {
       const mainQuest = manifest.quests[0];
       setActiveQuest(mainQuest.name);
-      setQuestObjectives(mainQuest.objectives.map(obj => ({
-        id: obj.id,
-        description: obj.description,
-        completed: false,
-        optional: obj.optional || false
-      })));
+      setQuestObjectives(
+        mainQuest.objectives.map((obj) => ({
+          id: obj.id,
+          description: obj.description,
+          completed: false,
+          optional: obj.optional || false,
+        }))
+      );
     }
 
     // Load chapter audio with Howler.js
@@ -112,7 +112,7 @@ export default function OtterbladeGame() {
     // Create player reference for AI
     const playerRef = {
       position: new Vector3(player.position.x, player.position.y, 0),
-      body: player
+      body: player,
     };
 
     // Build level geometry from DDL
@@ -126,12 +126,14 @@ export default function OtterbladeGame() {
         if (segment.platforms) {
           for (const platformDef of segment.platforms) {
             const platform = Bodies.rectangle(
-              platformDef.x, platformDef.y,
-              platformDef.width, platformDef.height,
+              platformDef.x,
+              platformDef.y,
+              platformDef.width,
+              platformDef.height,
               {
                 isStatic: true,
                 label: 'platform',
-                friction: 0.8
+                friction: 0.8,
               }
             );
             platforms.push({ body: platform, def: platformDef });
@@ -142,15 +144,11 @@ export default function OtterbladeGame() {
         // Walls
         if (segment.walls) {
           for (const wallDef of segment.walls) {
-            const wall = Bodies.rectangle(
-              wallDef.x, wallDef.y,
-              wallDef.width, wallDef.height,
-              {
-                isStatic: true,
-                label: 'wall',
-                friction: 0.3
-              }
-            );
+            const wall = Bodies.rectangle(wallDef.x, wallDef.y, wallDef.width, wallDef.height, {
+              isStatic: true,
+              label: 'wall',
+              friction: 0.3,
+            });
             walls.push({ body: wall, def: wallDef });
             World.add(engine.world, wall);
           }
@@ -160,12 +158,14 @@ export default function OtterbladeGame() {
         if (segment.ceilings) {
           for (const ceilingDef of segment.ceilings) {
             const ceiling = Bodies.rectangle(
-              ceilingDef.x, ceilingDef.y,
-              ceilingDef.width, ceilingDef.height,
+              ceilingDef.x,
+              ceilingDef.y,
+              ceilingDef.width,
+              ceilingDef.height,
               {
                 isStatic: true,
                 label: 'ceiling',
-                friction: 0.3
+                friction: 0.3,
               }
             );
             ceilings.push({ body: ceiling, def: ceilingDef });
@@ -185,15 +185,11 @@ export default function OtterbladeGame() {
       const npc = aiManager.addNPC(npcDef.id, npcDef);
 
       // Create physics body for NPC
-      const npcBody = Bodies.rectangle(
-        npcDef.position.x, npcDef.position.y,
-        35, 55,
-        {
-          isStatic: true,
-          label: 'npc',
-          isSensor: true
-        }
-      );
+      const npcBody = Bodies.rectangle(npcDef.position.x, npcDef.position.y, 35, 55, {
+        isStatic: true,
+        label: 'npc',
+        isSensor: true,
+      });
       npcBodies.set(npcDef.id, { npc, body: npcBody });
       World.add(engine.world, npcBody);
     }
@@ -204,16 +200,12 @@ export default function OtterbladeGame() {
       if (encounter.enemies) {
         for (const enemyDef of encounter.enemies) {
           // Create enemy physics body
-          const enemyBody = Bodies.rectangle(
-            enemyDef.spawnPoint.x, enemyDef.spawnPoint.y,
-            40, 50,
-            {
-              label: 'enemy',
-              friction: 0.1,
-              frictionAir: 0.02,
-              restitution: 0
-            }
-          );
+          const enemyBody = Bodies.rectangle(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 40, 50, {
+            label: 'enemy',
+            friction: 0.1,
+            frictionAir: 0.02,
+            restitution: 0,
+          });
           World.add(engine.world, enemyBody);
 
           // Create YUKA AI for enemy
@@ -227,7 +219,7 @@ export default function OtterbladeGame() {
             attackRange: enemyDef.behavior?.attackRange || 50,
             patrolZone: {
               x: enemyDef.spawnPoint.x - 100,
-              width: 200
+              width: 200,
             },
             onAlert: () => {
               audioManager.playSFX('enemy_alert');
@@ -236,24 +228,20 @@ export default function OtterbladeGame() {
               audioManager.playSFX('blade_swing', { rate: 0.9 });
               // Apply damage to player
               if (Math.abs(player.position.x - enemyBody.position.x) < 50) {
-                setHealth(h => Math.max(0, h - 1));
+                setHealth((h) => Math.max(0, h - 1));
               }
             },
             onDeath: () => {
               audioManager.playSFX('enemy_hit');
               World.remove(engine.world, enemyBody);
-            }
+            },
           });
 
           // Set player as target for AI
           enemyAI.playerTarget = playerRef;
 
           // Initialize position
-          enemyAI.position.copy(new Vector3(
-            enemyDef.spawnPoint.x,
-            enemyDef.spawnPoint.y,
-            0
-          ));
+          enemyAI.position.copy(new Vector3(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 0));
         }
       }
     }
@@ -263,18 +251,20 @@ export default function OtterbladeGame() {
     if (manifest.interactions) {
       for (const interactionDef of manifest.interactions) {
         const interactionBody = Bodies.rectangle(
-          interactionDef.position.x, interactionDef.position.y,
-          60, 60,
+          interactionDef.position.x,
+          interactionDef.position.y,
+          60,
+          60,
           {
             isStatic: true,
             label: `interaction_${interactionDef.type}`,
-            isSensor: true
+            isSensor: true,
           }
         );
         interactions.push({
           body: interactionBody,
           def: interactionDef,
-          state: interactionDef.initialState
+          state: interactionDef.initialState,
         });
         World.add(engine.world, interactionBody);
       }
@@ -285,18 +275,20 @@ export default function OtterbladeGame() {
     const collectibleData = getChapterCollectibles(chapterId);
     for (const collectibleDef of collectibleData) {
       const collectibleBody = Bodies.rectangle(
-        collectibleDef.position.x, collectibleDef.position.y,
-        20, 20,
+        collectibleDef.position.x,
+        collectibleDef.position.y,
+        20,
+        20,
         {
           isStatic: true,
           label: 'collectible',
-          isSensor: true
+          isSensor: true,
         }
       );
       collectibles.push({
         body: collectibleBody,
         def: collectibleDef,
-        collected: false
+        collected: false,
       });
       World.add(engine.world, collectibleBody);
     }
@@ -307,30 +299,36 @@ export default function OtterbladeGame() {
         const { bodyA, bodyB } = pair;
 
         // Player collects shard
-        if ((bodyA === player && bodyB.label === 'collectible') ||
-            (bodyB === player && bodyA.label === 'collectible')) {
+        if (
+          (bodyA === player && bodyB.label === 'collectible') ||
+          (bodyB === player && bodyA.label === 'collectible')
+        ) {
           const collectibleBody = bodyA === player ? bodyB : bodyA;
-          const collectible = collectibles.find(c => c.body === collectibleBody);
+          const collectible = collectibles.find((c) => c.body === collectibleBody);
           if (collectible && !collectible.collected) {
             collectible.collected = true;
             World.remove(engine.world, collectibleBody);
-            setShards(s => s + 1);
+            setShards((s) => s + 1);
             audioManager.playSFX('shard_pickup');
           }
         }
 
         // Player takes damage from enemy
-        if ((bodyA === player && bodyB.label === 'enemy') ||
-            (bodyB === player && bodyA.label === 'enemy')) {
+        if (
+          (bodyA === player && bodyB.label === 'enemy') ||
+          (bodyB === player && bodyA.label === 'enemy')
+        ) {
           if (health() > 0) {
-            setHealth(h => Math.max(0, h - 1));
+            setHealth((h) => Math.max(0, h - 1));
             audioManager.playSFX('enemy_hit', { volume: 0.7 });
           }
         }
 
         // Player interacts with NPCs
-        if ((bodyA === player && bodyB.label === 'npc') ||
-            (bodyB === player && bodyA.label === 'npc')) {
+        if (
+          (bodyA === player && bodyB.label === 'npc') ||
+          (bodyB === player && bodyA.label === 'npc')
+        ) {
           const npcBody = bodyA === player ? bodyB : bodyA;
 
           // Find NPC by body
@@ -359,7 +357,7 @@ export default function OtterbladeGame() {
                     }
                     if (action.type === 'give_item') {
                       const objectives = questObjectives();
-                      const updated = objectives.map(o =>
+                      const updated = objectives.map((o) =>
                         o.id === action.target ? { ...o, completed: true } : o
                       );
                       setQuestObjectives(updated);
@@ -372,16 +370,18 @@ export default function OtterbladeGame() {
         }
 
         // Player interacts with objects
-        if ((bodyA === player && bodyB.label.startsWith('interaction_')) ||
-            (bodyB === player && bodyA.label.startsWith('interaction_'))) {
+        if (
+          (bodyA === player && bodyB.label.startsWith('interaction_')) ||
+          (bodyB === player && bodyA.label.startsWith('interaction_'))
+        ) {
           const interactionBody = bodyA === player ? bodyB : bodyA;
-          const interaction = interactions.find(i => i.body === interactionBody);
+          const interaction = interactions.find((i) => i.body === interactionBody);
           if (interaction && inputManager.isPressed('interact')) {
             audioManager.playSFX('door_open');
             console.log(`Interacting with ${interaction.def.id}`);
 
             // Execute DDL actions
-            if (interaction.def.states && interaction.def.states[interaction.state]) {
+            if (interaction.def.states?.[interaction.state]) {
               const stateData = interaction.def.states[interaction.state];
               if (stateData.actions) {
                 for (const action of stateData.actions) {
@@ -390,7 +390,7 @@ export default function OtterbladeGame() {
                   }
                   if (action.type === 'give_item') {
                     const objectives = questObjectives();
-                    const updated = objectives.map(o =>
+                    const updated = objectives.map((o) =>
                       o.id === action.target ? { ...o, completed: true } : o
                     );
                     setQuestObjectives(updated);
@@ -425,14 +425,14 @@ export default function OtterbladeGame() {
 
       // Sync AI positions with physics bodies
       for (const enemy of aiManager.enemies.values()) {
-        const enemyBody = Array.from(engine.world.bodies).find(b =>
-          b.label === 'enemy' && Math.abs(b.position.x - enemy.position.x) < 1
+        const enemyBody = Array.from(engine.world.bodies).find(
+          (b) => b.label === 'enemy' && Math.abs(b.position.x - enemy.position.x) < 1
         );
         if (enemyBody) {
           // Copy AI velocity to physics
           Body.setVelocity(enemyBody, {
             x: enemy.velocity.x,
-            y: enemyBody.velocity.y
+            y: enemyBody.velocity.y,
           });
           // Sync positions
           enemy.position.x = enemyBody.position.x;
@@ -457,7 +457,7 @@ export default function OtterbladeGame() {
         if (animFrame % 20 === 0) {
           audioManager.playSFX('footstep', {
             sprite: ['step1', 'step2', 'step3'][Math.floor(Math.random() * 3)],
-            volume: 0.3
+            volume: 0.3,
           });
         }
       }
@@ -466,7 +466,7 @@ export default function OtterbladeGame() {
       if (Math.abs(player.velocity.x) > maxSpeed) {
         Body.setVelocity(player, {
           x: Math.sign(player.velocity.x) * maxSpeed,
-          y: player.velocity.y
+          y: player.velocity.y,
         });
       }
 
@@ -487,8 +487,8 @@ export default function OtterbladeGame() {
 
         for (const enemy of aiManager.enemies.values()) {
           const dist = Math.sqrt(
-            Math.pow(player.position.x - enemy.position.x, 2) +
-            Math.pow(player.position.y - enemy.position.y, 2)
+            (player.position.x - enemy.position.x) ** 2 +
+              (player.position.y - enemy.position.y) ** 2
           );
 
           if (dist < attackRange) {
@@ -515,7 +515,7 @@ export default function OtterbladeGame() {
         village: '#2C3E50',
         forest: '#1a3a1a',
         abbey: '#1a1a24',
-        catacombs: '#0d0d15'
+        catacombs: '#0d0d15',
       };
       ctx.fillStyle = bgColors[biome] || '#1a1a24';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -531,12 +531,14 @@ export default function OtterbladeGame() {
         ctx.strokeStyle = type === 'wood' ? '#654321' : '#505050';
         ctx.lineWidth = 2;
         ctx.fillRect(
-          bounds.min.x, bounds.min.y,
+          bounds.min.x,
+          bounds.min.y,
           bounds.max.x - bounds.min.x,
           bounds.max.y - bounds.min.y
         );
         ctx.strokeRect(
-          bounds.min.x, bounds.min.y,
+          bounds.min.x,
+          bounds.min.y,
           bounds.max.x - bounds.min.x,
           bounds.max.y - bounds.min.y
         );
@@ -549,12 +551,14 @@ export default function OtterbladeGame() {
         ctx.strokeStyle = '#4A3C2B';
         ctx.lineWidth = 2;
         ctx.fillRect(
-          bounds.min.x, bounds.min.y,
+          bounds.min.x,
+          bounds.min.y,
           bounds.max.x - bounds.min.x,
           bounds.max.y - bounds.min.y
         );
         ctx.strokeRect(
-          bounds.min.x, bounds.min.y,
+          bounds.min.x,
+          bounds.min.y,
           bounds.max.x - bounds.min.x,
           bounds.max.y - bounds.min.y
         );
@@ -567,12 +571,14 @@ export default function OtterbladeGame() {
         ctx.strokeStyle = '#6B5A45';
         ctx.lineWidth = 2;
         ctx.fillRect(
-          bounds.min.x, bounds.min.y,
+          bounds.min.x,
+          bounds.min.y,
           bounds.max.x - bounds.min.x,
           bounds.max.y - bounds.min.y
         );
         ctx.strokeRect(
-          bounds.min.x, bounds.min.y,
+          bounds.min.x,
+          bounds.min.y,
           bounds.max.x - bounds.min.x,
           bounds.max.y - bounds.min.y
         );
@@ -670,32 +676,38 @@ export default function OtterbladeGame() {
   return (
     <>
       <Show when={!gameStarted()}>
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'linear-gradient(180deg, #1a1a24 0%, #2C3E50 100%)',
-          display: 'flex',
-          'flex-direction': 'column',
-          'align-items': 'center',
-          'justify-content': 'center',
-          color: '#F4D03F'
-        }}>
-          <h1 style={{
-            'font-size': '48px',
-            'font-weight': 'bold',
-            'margin-bottom': '20px',
-            color: '#E67E22'
-          }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'linear-gradient(180deg, #1a1a24 0%, #2C3E50 100%)',
+            display: 'flex',
+            'flex-direction': 'column',
+            'align-items': 'center',
+            'justify-content': 'center',
+            color: '#F4D03F',
+          }}
+        >
+          <h1
+            style={{
+              'font-size': '48px',
+              'font-weight': 'bold',
+              'margin-bottom': '20px',
+              color: '#E67E22',
+            }}
+          >
             Otterblade Odyssey
           </h1>
-          <h2 style={{
-            'font-size': '24px',
-            'margin-bottom': '40px',
-            color: '#F4D03F'
-          }}>
+          <h2
+            style={{
+              'font-size': '24px',
+              'margin-bottom': '40px',
+              color: '#F4D03F',
+            }}
+          >
             A Redwall-inspired woodland epic
           </h2>
           <button
@@ -709,7 +721,7 @@ export default function OtterbladeGame() {
               border: 'none',
               'border-radius': '8px',
               cursor: 'pointer',
-              'box-shadow': '0 4px 8px rgba(0,0,0,0.3)'
+              'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
             }}
           >
             Begin Journey
@@ -721,26 +733,26 @@ export default function OtterbladeGame() {
         <canvas ref={setCanvasRef} style={{ display: 'block' }} />
 
         {/* HUD */}
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          left: '20px',
-          padding: '15px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          'border-radius': '10px',
-          color: '#F4D03F',
-          'font-family': 'monospace',
-          'min-width': '250px'
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            padding: '15px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            'border-radius': '10px',
+            color: '#F4D03F',
+            'font-family': 'monospace',
+            'min-width': '250px',
+          }}
+        >
           <div style={{ 'font-size': '18px', 'margin-bottom': '10px', color: '#E67E22' }}>
             Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}
           </div>
           <div style={{ 'margin-bottom': '10px' }}>
             <span style={{ color: '#F4D03F' }}>Health: </span>
             <For each={Array(maxHealth()).fill(0)}>
-              {(_, i) => (
-                <span>{i() < health() ? '❤️' : '🖤'}</span>
-              )}
+              {(_, i) => <span>{i() < health() ? '❤️' : '🖤'}</span>}
             </For>
           </div>
           <div>
@@ -749,7 +761,13 @@ export default function OtterbladeGame() {
           </div>
 
           <Show when={activeQuest()}>
-            <div style={{ 'margin-top': '15px', 'padding-top': '10px', 'border-top': '1px solid #F4D03F' }}>
+            <div
+              style={{
+                'margin-top': '15px',
+                'padding-top': '10px',
+                'border-top': '1px solid #F4D03F',
+              }}
+            >
               <div style={{ 'font-weight': 'bold', color: '#8FBC8F' }}>{activeQuest()}</div>
               <For each={questObjectives()}>
                 {(obj) => (
@@ -874,7 +892,7 @@ function drawFinn(ctx, position, facing, animFrame) {
   ctx.restore();
 }
 
-function drawEnemy(ctx, enemy, animFrame) {
+function drawEnemy(ctx, enemy, _animFrame) {
   const x = enemy.position.x;
   const y = enemy.position.y;
   const facing = enemy.facingDirection;
