@@ -13,7 +13,7 @@ export default function GameCanvas() {
   let physics;
   let gameLoop;
   let player;
-  let camera = { x: 0, y: 0 };
+  const camera = { x: 0, y: 0 };
   let currentLevel;
   let collectibles = [];
   let resizeHandler;

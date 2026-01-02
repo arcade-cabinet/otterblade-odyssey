@@ -1,6 +1,6 @@
 import { createStore } from 'zustand/vanilla';
 
-export const gameStore = createStore((set, get) => ({
+export const gameStore = createStore((set, _get) => ({
   // Game state
   gameStarted: false,
   gameOver: false,

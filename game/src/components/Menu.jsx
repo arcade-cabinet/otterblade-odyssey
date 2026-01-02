@@ -20,7 +20,7 @@ export default function Menu() {
         <div class="menu-content">
           <h1 class="title">Otterblade Odyssey</h1>
           <p class="subtitle">A Woodland Adventure</p>
-          <button class="start-btn" onClick={startGame}>
+          <button type="button" class="start-btn" onClick={startGame}>
             Begin Journey
           </button>
           <div class="controls-hint">
