@@ -486,7 +486,7 @@ function interactLadder(interaction, player, gameState) {
  * Interact with lantern
  * @private
  */
-function interactLantern(interaction, player, gameState) {
+function interactLantern(interaction, _player, _gameState) {
   interaction.lit = !interaction.lit;
   interaction.state = interaction.lit ? 'lit' : 'default';
 
@@ -512,12 +512,12 @@ function interactSign(interaction, _player, _gameState) {
  * Interact with portal
  * @private
  */
-function interactPortal(interaction, _player, gameState) {
+function interactPortal(interaction, _player, _gameState) {
   if (!interaction.active) {
     return { success: false, message: 'Portal inactive' };
   }
 
-  if (interaction.requiresQuest && !gameState.questSystem?.isQuestCompleted(interaction.requiresQuest)) {
+  if (interaction.requiresQuest && !_gameState.questSystem?.isQuestCompleted(interaction.requiresQuest)) {
     return { success: false, message: 'Quest not completed' };
   }
 
