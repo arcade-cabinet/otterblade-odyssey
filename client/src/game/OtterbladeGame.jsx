@@ -12,6 +12,9 @@
 import Matter from 'matter-js';
 import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { Vector3 } from 'yuka';
+// AI systems
+import { ZephyrosAI } from './ai/BossAI';
+import { hearingSystem } from './ai/PerceptionSystem';
 import TouchControls from './components/TouchControls';
 // DDL loaders
 import {
@@ -21,12 +24,6 @@ import {
   getChapterSpawnPoint,
   loadChapterManifest,
 } from './data/chapter-loaders';
-// AI systems
-import { ZephyrosAI } from './ai/BossAI';
-import { hearingSystem } from './ai/PerceptionSystem';
-import { aiManager } from './systems/AIManager';
-import { audioManager } from './systems/AudioManager';
-import { inputManager } from './systems/InputManager';
 // Physics and environment systems
 import {
   BellSystem,
@@ -35,16 +32,18 @@ import {
   LanternSystem,
   TimingSequence,
 } from './environment/EnvironmentalSystems';
-import { PlayerController } from './physics/PlayerController';
 import {
-  COLLISION_GROUPS,
+  createFinnBody,
+  createPhysicsEngine,
+  createPlatform,
   HazardSystem,
   MovingPlatform,
   WaterZone,
-  createFinnBody,
-  createPlatform,
-  createPhysicsEngine,
 } from './physics/PhysicsManager';
+import { PlayerController } from './physics/PlayerController';
+import { aiManager } from './systems/AIManager';
+import { audioManager } from './systems/AudioManager';
+import { inputManager } from './systems/InputManager';
 
 const { World, Bodies, Body, Runner, Events } = Matter;
 
@@ -741,7 +740,12 @@ export default function OtterbladeGame() {
       if (controls.interact) {
         // Check lanterns
         for (const lantern of lanternSystem.lanterns) {
-          if (lanternSystem.lightLantern(lantern, { position: player.position, gameState: gameStateObj })) {
+          if (
+            lanternSystem.lightLantern(lantern, {
+              position: player.position,
+              gameState: gameStateObj,
+            })
+          ) {
             console.log('Lit lantern');
           }
         }
@@ -755,7 +759,12 @@ export default function OtterbladeGame() {
 
         // Check hearths
         for (const hearth of hearthSystem.hearths) {
-          if (hearthSystem.kindleHearth(hearth, { position: player.position, gameState: gameStateObj })) {
+          if (
+            hearthSystem.kindleHearth(hearth, {
+              position: player.position,
+              gameState: gameStateObj,
+            })
+          ) {
             console.log('Kindled hearth');
           }
         }
@@ -1446,7 +1455,7 @@ function drawBoss(ctx, boss, animFrame) {
     ctx.fillStyle = 'rgba(180, 220, 255, 0.5)';
     for (let i = 0; i < 5; i++) {
       const px = 15 + i * 5;
-      const py = -25 + (Math.sin(animFrame * 0.1 + i) * 3);
+      const py = -25 + Math.sin(animFrame * 0.1 + i) * 3;
       ctx.beginPath();
       ctx.arc(px, py, 3, 0, Math.PI * 2);
       ctx.fill();
