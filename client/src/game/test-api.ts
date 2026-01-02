@@ -39,11 +39,11 @@ export interface GameTestAPI {
    * Check if game over or victory
    */
   getGameState(): {
-    started: boolean;
-    over: boolean;
-    victory: boolean;
+    gameStarted: boolean;
+    gameOver: boolean;
+    biomeIndex: number;
     score: number;
-    distance: number;
+    shards: number;
   };
 
   /**
@@ -56,6 +56,11 @@ export interface GameTestAPI {
     attack?: boolean;
     slink?: boolean;
   }): void;
+
+  /**
+   * Check if test API is ready
+   */
+  isReady(): boolean;
 }
 
 // Extend Window interface to include test API
@@ -103,11 +108,11 @@ export function initializeTestAPI(): void {
     getGameState() {
       const store = useStore.getState();
       return {
-        started: store.gameStarted,
-        over: store.gameOver,
-        victory: store.gameOver && store.health > 0,
+        gameStarted: store.gameStarted,
+        gameOver: store.gameOver,
+        biomeIndex: store.biomeIndex,
         score: store.score,
-        distance: store.distance,
+        shards: store.shards,
       };
     },
 
@@ -115,10 +120,15 @@ export function initializeTestAPI(): void {
       const store = useStore.getState();
       const validKeys = ['left', 'right', 'jump', 'attack', 'slink', 'up', 'down', 'interact', 'roll'] as const;
       Object.entries(keys).forEach(([key, value]) => {
-        if (validKeys.includes(key as typeof validKeys[number])) {
+        if (validKeys.includes(key as typeof validKeys[number]) && value !== undefined) {
           store.setControl(key as typeof validKeys[number], value);
         }
       });
+    },
+
+    isReady() {
+      // Check if game systems are initialized
+      return useStore.getState() !== undefined;
     },
   };
 
