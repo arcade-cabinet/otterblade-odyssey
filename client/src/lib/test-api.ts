@@ -9,12 +9,6 @@
 
 import { useStore } from '@/game/store';
 
-declare global {
-  interface Window {
-    __GAME_TEST_API__?: GameTestAPI;
-  }
-}
-
 export interface GameTestAPI {
   getPlayerState: () => {
     x: number;
@@ -55,7 +49,9 @@ export function initializeTestAPI(): void {
   const api: GameTestAPI = {
     getPlayerState: () => {
       const store = useStore.getState();
-      const isGrounded = ['idle', 'run', 'slide'].includes(store.playerState);
+      const isGrounded = ['idle', 'run', 'slide', 'slink', 'sprint', 'land', 'roll'].includes(
+        store.playerState
+      );
 
       return {
         x: store.playerX,
@@ -84,18 +80,17 @@ export function initializeTestAPI(): void {
     isReady: () => {
       const state = useStore.getState();
 
-      // Test readiness is intentionally a composite condition:
+      // Test readiness requires the game to be properly initialized:
       // - hasActiveGame: main game loop has been flagged as started
       // - hasPersistedRun: a previous run has been created/restored (non-zero runId)
-      // - playerHasLeftIdle: the player has transitioned out of the initial idle state
       //
-      // Any of these indicates that the game has progressed far enough for E2E tests
-      // to safely interact with the scene without racing initialization.
+      // At least one of these core conditions must be true to prevent premature
+      // readiness signals (e.g., if setPlayerState() is called externally before
+      // the game actually starts).
       const hasActiveGame = state.gameStarted;
       const hasPersistedRun = state.runId > 0;
-      const playerHasLeftIdle = state.playerState !== 'idle';
 
-      return hasActiveGame || hasPersistedRun || playerHasLeftIdle;
+      return hasActiveGame || hasPersistedRun;
     },
   };
 

@@ -164,13 +164,19 @@ function buildNavigationGraph(platforms: Platform[]): Map<string, NavigationNode
   // Build edges between platforms
   for (const fromPlatform of platforms) {
     const fromNode = graph.get(fromPlatform.id);
-    if (!fromNode) continue;
+    if (!fromNode) {
+      console.error(`[Navigation Graph] Missing fromNode for platform ${fromPlatform.id}`);
+      continue;
+    }
 
     for (const toPlatform of platforms) {
       if (fromPlatform.id === toPlatform.id) continue;
 
       const toNode = graph.get(toPlatform.id);
-      if (!toNode) continue;
+      if (!toNode) {
+        console.error(`[Navigation Graph] Missing toNode for platform ${toPlatform.id}`);
+        continue;
+      }
       const dx = toNode.x - fromNode.x;
       const dy = toNode.y - fromNode.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
@@ -231,7 +237,12 @@ export function findPath(
 
   const endNode = graph.get(endPlatformId);
   const startNode = graph.get(startPlatformId);
-  if (!endNode || !startNode) return null;
+  if (!endNode || !startNode) {
+    console.error(
+      `[Pathfinding] Missing ${!startNode ? 'start' : ''} ${!startNode && !endNode ? 'and' : ''} ${!endNode ? 'end' : ''} node (start: ${startPlatformId}, end: ${endPlatformId})`
+    );
+    return null;
+  }
 
   fScore.set(startPlatformId, heuristic(startNode, endNode));
 
@@ -254,6 +265,7 @@ export function findPath(
     openSet.delete(current);
     const currentNode = graph.get(current);
     if (!currentNode) {
+      console.error(`[Pathfinding] Missing current node ${current} from graph during A* search`);
       continue;
     }
 
@@ -266,6 +278,9 @@ export function findPath(
 
         const neighbor = graph.get(edge.to);
         if (!neighbor) {
+          console.error(
+            `[Pathfinding] Missing neighbor node ${edge.to} referenced by edge from ${current}`
+          );
           continue;
         }
         fScore.set(edge.to, tentativeG + heuristic(neighbor, endNode));
@@ -299,6 +314,7 @@ function reconstructPath(
 ): NavigationNode[] {
   const startNode = graph.get(current);
   if (!startNode) {
+    console.error(`[Path Reconstruction] Missing start node ${current}`);
     return [];
   }
 
@@ -306,10 +322,16 @@ function reconstructPath(
 
   while (cameFrom.has(current)) {
     const next = cameFrom.get(current);
-    if (!next) break;
+    if (!next) {
+      console.error(`[Path Reconstruction] Missing predecessor for ${current}`);
+      break;
+    }
 
     const nextNode = graph.get(next);
-    if (!nextNode) break;
+    if (!nextNode) {
+      console.error(`[Path Reconstruction] Missing node ${next} in graph`);
+      break;
+    }
 
     current = next;
     path.unshift(nextNode);
