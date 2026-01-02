@@ -362,8 +362,8 @@ export default function OtterbladeGame() {
           yukaVehicle.userData = { enemyType: enemyDef.type };
 
           // YUKA: Pathfinding and steering behaviors
-          const pathPlanner = new YUKA.PathPlanner(yukaVehicle);
-          const navMesh = new YUKA.NavMesh();
+          const _pathPlanner = new YUKA.PathPlanner(yukaVehicle);
+          const _navMesh = new YUKA.NavMesh();
 
           // Create patrol path
           const path = new YUKA.Path();
@@ -498,7 +498,7 @@ export default function OtterbladeGame() {
             size: 120
           });
 
-          joystickManager.on('move', (evt, data) => {
+          joystickManager.on('move', (_evt, data) => {
             const angle = data.angle.radian;
             const force = Math.min(data.force, 2) / 2;
             setMobileJoystickData({
@@ -591,7 +591,7 @@ export default function OtterbladeGame() {
             audioSystem.playSound('interact', 0.6);
 
             // Handle interaction state changes from DDL
-            if (interaction.def.states && interaction.def.states[interaction.state]) {
+            if (interaction.def.states?.[interaction.state]) {
               const stateData = interaction.def.states[interaction.state];
               if (stateData.actions) {
                 for (const action of stateData.actions) {
@@ -715,7 +715,7 @@ export default function OtterbladeGame() {
 
       // Jump (keyboard, gamepad, mobile)
       const wantsToJump = keys[' '] || keys.w || keys.arrowup ||
-                          (gamepads[0] && gamepads[0].buttons[0]?.pressed) ||
+                          (gamepads[0]?.buttons[0]?.pressed) ||
                           mobileJump();
 
       if (wantsToJump && playerState.onGround) {
@@ -725,7 +725,7 @@ export default function OtterbladeGame() {
       }
 
       // Dodge roll (Shift key or gamepad B button)
-      if ((keys.shift || (gamepads[0] && gamepads[0].buttons[1]?.pressed)) &&
+      if ((keys.shift || (gamepads[0]?.buttons[1]?.pressed)) &&
           playerState.dodgeRollCooldown === 0) {
         playerState.dodgeRollCooldown = 120; // 2 second cooldown
         Body.setVelocity(player, {
@@ -1192,6 +1192,7 @@ export default function OtterbladeGame() {
         }} />
 
         <button
+          type="button"
           id="mobile-jump"
           style={{
             position: 'fixed',
@@ -1213,6 +1214,7 @@ export default function OtterbladeGame() {
         </button>
 
         <button
+          type="button"
           id="mobile-interact"
           style={{
             position: 'fixed',
@@ -1271,7 +1273,7 @@ export default function OtterbladeGame() {
                 Quest: {activeQuest()}
               </div>
               {questObjectives().map((objective) => (
-                <div style={{
+                <div key={objective.description} style={{
                   'font-size': '14px',
                   'margin-left': '10px',
                   'margin-top': '4px',
