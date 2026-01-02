@@ -189,7 +189,7 @@ function drawZephyrosPhase2(ctx, baseSize, swirl, pulse, animFrame, state, enrag
  * Draw Zephyros Phase 3 (Desperate, maximum chaos)
  * @private
  */
-function drawZephyrosPhase3(ctx, baseSize, swirl, pulse, animFrame, state, enragedPulse) {
+function drawZephyrosPhase3(ctx, baseSize, swirl, pulse, animFrame, _state, enragedPulse) {
   // Unstable, crackling storm form
   const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, baseSize);
   gradient.addColorStop(0, 'rgba(200, 50, 50, 0.95)');
@@ -310,7 +310,7 @@ function drawLightningBolts(ctx, baseSize, animFrame) {
  * Draw electrical discharge
  * @private
  */
-function drawElectricalDischarge(ctx, baseSize, animFrame) {
+function drawElectricalDischarge(ctx, baseSize, _animFrame) {
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
   ctx.lineWidth = 2;
 

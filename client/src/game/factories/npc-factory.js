@@ -357,13 +357,13 @@ function transitionToState(npc, newState) {
 
 /**
  * Interact with NPC
- * 
+ *
  * @param {Object} npc - NPC object
  * @param {Object} player - Player object
  * @param {Object} gameState - Current game state
  * @returns {Object} Interaction result
  */
-export function interactWithNPC(npc, player, gameState) {
+export function interactWithNPC(npc, player, _gameState) {
   if (!npc || !player) return null;
 
   const stateData = npc.storyStates[npc.currentState];

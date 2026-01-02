@@ -308,7 +308,7 @@ function drawWalls(ctx, x, y, width, height) {
   ctx.fillRect(x, y, width, height);
 
   // Add battlements
-  const battlement Width = 30;
+  const battlementWidth = 30;
   for (let i = 0; i < width / battlementWidth; i++) {
     if (i % 2 === 0) {
       ctx.fillRect(x + i * battlementWidth, y, battlementWidth * 0.8, height * 0.2);

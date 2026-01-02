@@ -500,7 +500,7 @@ function interactLantern(interaction, player, gameState) {
  * Interact with sign
  * @private
  */
-function interactSign(interaction, player, gameState) {
+function interactSign(interaction, _player, _gameState) {
   return {
     success: true,
     message: interaction.message,
@@ -512,7 +512,7 @@ function interactSign(interaction, player, gameState) {
  * Interact with portal
  * @private
  */
-function interactPortal(interaction, player, gameState) {
+function interactPortal(interaction, _player, gameState) {
   if (!interaction.active) {
     return { success: false, message: 'Portal inactive' };
   }
@@ -531,7 +531,7 @@ function interactPortal(interaction, player, gameState) {
  * Check if player has item
  * @private
  */
-function hasItem(player, itemId, gameState) {
+function hasItem(_player, itemId, gameState) {
   return gameState.inventory?.includes(itemId) || false;
 }
 
@@ -539,7 +539,7 @@ function hasItem(player, itemId, gameState) {
  * Consume item from inventory
  * @private
  */
-function consumeItem(player, itemId, gameState) {
+function consumeItem(_player, itemId, gameState) {
   if (!gameState.inventory) return;
   const index = gameState.inventory.indexOf(itemId);
   if (index > -1) {
