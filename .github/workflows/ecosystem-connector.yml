@@ -74,6 +74,9 @@ jobs:
           PR_NUM: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
+          # Sanitize PR title for safe usage
+          SAFE_TITLE=$(echo "$PR_TITLE" | tr -d '\n\r' | head -c 100)
+          
           # Check for existing review comment
           EXISTING=$(gh pr view "$PR_NUM" --json comments --jq '.comments[] | select(.body | contains("🤖 **Ecosystem Review**")) | .id' | head -1)
           

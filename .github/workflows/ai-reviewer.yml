@@ -233,7 +233,10 @@ jobs:
           additional_permissions: |
             actions: read
           prompt: |
-            Review PR #${{ needs.resolve-context.outputs.pr_number }} in ${{ github.repository }}.
+            Review the pull request in this repository.
+            
+            Pull request number: ${{ needs.resolve-context.outputs.pr_number }}
+            Repository: ${{ github.repository }}
             
             This PR was escalated because it's large or complex.
             Automated agents (CodeRabbit/Gemini) have already provided initial feedback.
@@ -243,8 +246,7 @@ jobs:
             
             Use inline comments for specific issues. Summarize in a PR comment.
 
-          claude_args: |
-            --allowedTools "Read,Glob,Grep,LS,Bash(gh:*),mcp__github__get_pull_request,mcp__github__get_pull_request_diff,mcp__github__list_pull_request_commits,mcp__github__create_pull_request_review,mcp__github__get_file_contents,mcp__github_inline_comment__create_inline_comment,mcp__github_ci__get_ci_status"
+          allowed_tools: "Read,Glob,Grep,LS,Bash(gh:*),mcp__github__get_pull_request,mcp__github__get_pull_request_diff,mcp__github__list_pull_request_commits,mcp__github__create_pull_request_review,mcp__github__get_file_contents,mcp__github_inline_comment__create_inline_comment,mcp__github_ci__get_ci_status"
 
   # ════════════════════════════════════════════════════════════════
   # TIER 3: Jules Refactor (when major code changes needed)
