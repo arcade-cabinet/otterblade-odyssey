@@ -3,8 +3,6 @@
  * Lantern lighting, bell ringing, hearth kindling, puzzles per WORLD.md:142-151
  */
 
-import { Vector3 } from 'yuka';
-
 /**
  * Lantern system (WORLD.md:142)
  */

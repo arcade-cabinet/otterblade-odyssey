@@ -6,7 +6,7 @@
 
 import Matter from 'matter-js';
 
-const { Engine, World, Bodies, Body, Events, Query, Composite, Sleeping } = Matter;
+const { Engine, Bodies, Body, Query, Composite, Sleeping } = Matter;
 
 // Collision category bitmasks (PHYSICS.md:100-154)
 export const COLLISION_GROUPS = {

@@ -9,7 +9,7 @@ import { onMount, onCleanup, Show } from 'solid-js';
 import nipplejs from 'nipplejs';
 import { inputManager } from '../systems/InputManager';
 
-export default function TouchControls(props) {
+export default function TouchControls(_props) {
   let joystickZone;
   let joystickManager;
 
@@ -33,7 +33,7 @@ export default function TouchControls(props) {
     });
 
     // Joystick event handlers
-    joystickManager.on('move', (evt, data) => {
+    joystickManager.on('move', (_evt, data) => {
       if (data.vector) {
         inputManager.setTouchJoystick(data.vector.x, data.vector.y);
       }
