@@ -38,8 +38,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     // Headed mode when MCP is available
     headless: !hasMcpSupport,
-    // Video recording with MCP for debugging
-    video: hasMcpSupport ? 'on-first-retry' : 'off',
+    // Video recording: always on CI for gameplay verification, on-first-retry with MCP
+    video: isCI ? 'on' : hasMcpSupport ? 'on-first-retry' : 'off',
     // Increased action timeout for WebGL rendering
     actionTimeout: 10000,
   },
