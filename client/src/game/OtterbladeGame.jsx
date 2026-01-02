@@ -10,7 +10,7 @@
  */
 
 import Matter from 'matter-js';
-import { createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { createEffect, createSignal, For, onCleanup, Show } from 'solid-js';
 import { Vector3 } from 'yuka';
 // AI systems
 import { ZephyrosAI } from './ai/BossAI';
@@ -545,7 +545,7 @@ export default function OtterbladeGame() {
     onBossDefeated: () => console.log('Boss defeated!'),
   };
 
-  onMount(() => {
+  createEffect(() => {
     if (!gameStarted()) return;
 
     const canvas = canvasRef;

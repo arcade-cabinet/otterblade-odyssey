@@ -86,11 +86,11 @@ class InputManager {
 
   updateKeyboard() {
     // Movement (WASD + Arrows)
-    this.state.moveLeft = this.keys['KeyA'] || this.keys['ArrowLeft'];
-    this.state.moveRight = this.keys['KeyD'] || this.keys['ArrowRight'];
+    this.state.moveLeft = this.keys.KeyA || this.keys.ArrowLeft;
+    this.state.moveRight = this.keys.KeyD || this.keys.ArrowRight;
 
     // Jump (W, ArrowUp, Space)
-    this.state.jump = this.keys['KeyW'] || this.keys['ArrowUp'] || this.keys['Space'];
+    this.state.jump = this.keys.KeyW || this.keys.ArrowUp || this.keys.Space;
 
     // Interact (E, Enter)
     this.state.interact = this.keys['KeyE'] || this.keys['Enter'];
