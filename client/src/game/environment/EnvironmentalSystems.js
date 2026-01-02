@@ -30,8 +30,7 @@ export class LanternSystem {
     if (lantern.lit) return false;
 
     const distance = Math.sqrt(
-      Math.pow(player.position.x - lantern.position.x, 2) +
-      Math.pow(player.position.y - lantern.position.y, 2)
+      (player.position.x - lantern.position.x) ** 2 + (player.position.y - lantern.position.y) ** 2
     );
 
     if (distance > 60) return false; // Too far
@@ -63,7 +62,7 @@ export class LanternSystem {
     if (!lantern.lit) return false;
 
     const distance = Math.sqrt(
-      Math.pow(position.x - lantern.position.x, 2) + Math.pow(position.y - lantern.position.y, 2)
+      (position.x - lantern.position.x) ** 2 + (position.y - lantern.position.y) ** 2
     );
 
     return distance < lantern.radius;
@@ -159,8 +158,7 @@ export class BellSystem {
     if (bell.cooldown > 0) return false;
 
     const distance = Math.sqrt(
-      Math.pow(player.position.x - bell.position.x, 2) +
-      Math.pow(player.position.y - bell.position.y, 2)
+      (player.position.x - bell.position.x) ** 2 + (player.position.y - bell.position.y) ** 2
     );
 
     if (distance > 60) return false;
@@ -277,8 +275,7 @@ export class HearthSystem {
     if (hearth.lit) return false;
 
     const distance = Math.sqrt(
-      Math.pow(player.position.x - hearth.position.x, 2) +
-      Math.pow(player.position.y - hearth.position.y, 2)
+      (player.position.x - hearth.position.x) ** 2 + (player.position.y - hearth.position.y) ** 2
     );
 
     if (distance > 60) return false;
@@ -405,7 +402,12 @@ export class FlowPuzzle {
 
       const { x, y } = body.position;
 
-      if (x >= region.x && x <= region.x + region.width && y >= region.y && y <= region.y + region.height) {
+      if (
+        x >= region.x &&
+        x <= region.x + region.width &&
+        y >= region.y &&
+        y <= region.y + region.height
+      ) {
         // Apply force based on direction
         const force = { x: 0, y: 0 };
 
@@ -536,7 +538,7 @@ export class TimingSequence {
     return gate;
   }
 
-  update(delta) {
+  update(_delta) {
     if (!this.sequenceActive) return;
 
     const time = (performance.now() / 1000) % 1000; // Wrap at 1000 seconds

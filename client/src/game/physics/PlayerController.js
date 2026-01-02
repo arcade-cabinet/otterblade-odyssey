@@ -94,7 +94,7 @@ export class PlayerController {
     });
   }
 
-  handleMovement(controls, delta) {
+  handleMovement(controls, _delta) {
     const isSLinking = controls.slink;
     const isInWater = this.player.isInWater;
 

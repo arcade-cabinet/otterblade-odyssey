@@ -652,7 +652,6 @@ export default function OtterbladeGame() {
     const ceilings = [];
 
     if (manifest.level?.segments) {
-    if (manifest.level?.segments) {
       for (const segment of manifest.level.segments) {
         // Platforms with type-based friction
         if (segment.platforms) {
@@ -882,65 +881,65 @@ export default function OtterbladeGame() {
             console.log('Boss spawned: Zephyros');
           }
 
-      // Regular enemies
-      if (encounter.enemies) {
-        for (const enemyDef of encounter.enemies) {
-          // Create enemy physics body
-          const enemyBody = Bodies.rectangle(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 40, 50, {
-            label: 'enemy',
-            friction: 0.1,
-            frictionAir: 0.02,
-            restitution: 0,
-          });
-          World.add(engine.world, enemyBody);
+          // Regular enemies
+          if (encounter.enemies) {
+            for (const enemyDef of encounter.enemies) {
+              // Create enemy physics body
+              const enemyBody = Bodies.rectangle(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 40, 50, {
+                label: 'enemy',
+                friction: 0.1,
+                frictionAir: 0.02,
+                restitution: 0,
+              });
+              World.add(engine.world, enemyBody);
 
-          // Create YUKA AI for enemy
-          const enemyAI = aiManager.addEnemy(enemyDef.id, {
-            id: enemyDef.id,
-            type: enemyDef.type,
-            health: enemyDef.health || 3,
-            damage: enemyDef.damage || 1,
-            speed: enemyDef.speed || 1.0,
-            aggroRadius: enemyDef.behavior?.aggroRadius || 200,
-            attackRange: enemyDef.behavior?.attackRange || 50,
-            patrolZone: {
-              x: enemyDef.spawnPoint.x - 100,
-              width: 200,
-            },
-            onAlert: () => {
-              audioManager.playSFX('enemy_alert');
-            },
-            onAttack: () => {
-              audioManager.playSFX('blade_swing', { rate: 0.9 });
-              // Apply damage to player
-              if (Math.abs(player.position.x - enemyBody.position.x) < 50) {
-                const result = playerController.takeDamage(enemyDef.damage || 1, {
-                  x: player.velocity.x + (player.position.x > enemyBody.position.x ? 5 : -5),
-                  y: -3,
-                });
+              // Create YUKA AI for enemy
+              const enemyAI = aiManager.addEnemy(enemyDef.id, {
+                id: enemyDef.id,
+                type: enemyDef.type,
+                health: enemyDef.health || 3,
+                damage: enemyDef.damage || 1,
+                speed: enemyDef.speed || 1.0,
+                aggroRadius: enemyDef.behavior?.aggroRadius || 200,
+                attackRange: enemyDef.behavior?.attackRange || 50,
+                patrolZone: {
+                  x: enemyDef.spawnPoint.x - 100,
+                  width: 200,
+                },
+                onAlert: () => {
+                  audioManager.playSFX('enemy_alert');
+                },
+                onAttack: () => {
+                  audioManager.playSFX('blade_swing', { rate: 0.9 });
+                  // Apply damage to player
+                  if (Math.abs(player.position.x - enemyBody.position.x) < 50) {
+                    const result = playerController.takeDamage(enemyDef.damage || 1, {
+                      x: player.velocity.x + (player.position.x > enemyBody.position.x ? 5 : -5),
+                      y: -3,
+                    });
 
-                // Check if player parried
-                if (result.parried) {
-                  playerController.onSuccessfulParry(enemyBody);
-                }
-              }
-            },
-            onDeath: () => {
-              audioManager.playSFX('enemy_hit');
-              World.remove(engine.world, enemyBody);
-            },
-          });
+                    // Check if player parried
+                    if (result.parried) {
+                      playerController.onSuccessfulParry(enemyBody);
+                    }
+                  }
+                },
+                onDeath: () => {
+                  audioManager.playSFX('enemy_hit');
+                  World.remove(engine.world, enemyBody);
+                },
+              });
 
-          // Set player as target for AI
-          enemyAI.playerTarget = playerRef;
+              // Set player as target for AI
+              enemyAI.playerTarget = playerRef;
 
-          // Register as hearing listener
-          hearingSystem.addListener(enemyAI);
+              // Register as hearing listener
+              hearingSystem.addListener(enemyAI);
 
-          // Initialize position
-          enemyAI.position.copy(new Vector3(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 0));
-        }
-      }
+              // Initialize position
+              enemyAI.position.copy(new Vector3(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 0));
+            }
+          }
         } catch (encounterError) {
           console.error(`Failed to process encounter:`, encounterError);
         }
