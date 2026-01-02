@@ -29,15 +29,15 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 - Moss, stone, lantern light, cloth, leather, iron
 - Subtle magic (firefly motes, not laser beams)
 
-### 3. Asset Imports Use @assets Alias
+### 3. Use Procedural Generation (NOT Static Assets)
 ```typescript
-// CORRECT
-import chapterPlate from "@assets/images/chapter-plates/prologue_village_chapter_plate.png";
-import parallax from "@assets/images/parallax/village_morning_parallax_background.png";
+// CORRECT - Procedural rendering like POC
+// See pocs/otterblade_odyssey.html for reference
+// Use canvas-based procedural generation for player, enemies, effects
 
-// WRONG
-import bg from "../attached_assets/generated_images/...";
-import bg from "./assets/...";
+// WRONG - Static PNG/MP4 imports (removed from codebase)
+// import otterSprite from "@assets/...png";  // DO NOT USE
+// import chapterPlate from "@assets/...png";  // DO NOT USE
 ```
 
 ### 4. TypeScript Target is ES2022
@@ -75,9 +75,9 @@ client/src/game/
 ├── store.ts          # Zustand game state
 └── constants.ts      # Biomes, collision groups
 
-attached_assets/
-├── generated_images/ # Chapter plates, parallax backgrounds
-└── generated_videos/ # Intro/outro cinematics
+client/src/data/
+├── manifests/        # JSON asset definitions (for future idempotent generation)
+└── approvals.json    # Asset approval tracking
 ```
 
 ## 10-Chapter Story Structure
@@ -279,7 +279,7 @@ pnpm audit:cinematics
 ## Common Mistakes to Avoid
 
 1. **Using npm/yarn** - Always use pnpm
-2. **Wrong asset paths** - Use `@assets` alias
+2. **Static PNG/MP4 assets** - Use procedural generation from POC, not static files
 3. **Query iteration** - Use `for (const e of query)`, not `.forEach()`
 4. **Entity removal during iteration** - Collect first, remove after
 5. **Neon/sci-fi aesthetics** - Always check BRAND.md

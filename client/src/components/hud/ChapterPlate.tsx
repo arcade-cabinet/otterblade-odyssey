@@ -1,44 +1,28 @@
 /**
  * @fileoverview Chapter plate component that displays chapter transitions
- * Uses the centralized chapters data and brand-aligned naming
+ *
+ * TODO: Replace with procedural canvas/CSS rendering
+ * This file currently imports static PNGs which have been removed from codebase.
+ * See NEXT_SESSION_TODO.md for implementation plan.
+ *
+ * CRITICAL: This component is BROKEN until procedural generation is implemented.
  */
 
-import abbeyApproachPlate from '@assets/generated_images/abbey_approach_chapter_plate.png';
-import courtyardPlate from '@assets/generated_images/courtyard_rally_chapter_plate.png';
-import dungeonPlate from '@assets/generated_images/dungeon_descent_chapter_plate.png';
-import epiloguePlate from '@assets/generated_images/epilogue_victory_chapter_plate.png';
-import finalAscentPlate from '@assets/generated_images/final_ascent_chapter_plate.png';
-import gatehousePlate from '@assets/generated_images/gatehouse_bridge_chapter_plate.png';
-import greatHallPlate from '@assets/generated_images/great_hall_oath_chapter_plate.png';
-import libraryPlate from '@assets/generated_images/library_map_table_chapter_plate.png';
-// Import chapter plate images
-import prologuePlate from '@assets/generated_images/prologue_village_chapter_plate.png';
-import rooftopPlate from '@assets/generated_images/rooftop_wind_chapter_plate.png';
+// REMOVED: Static PNG imports (legacy Replit junk)
+// import abbeyApproachPlate from '@assets/generated_images/abbey_approach_chapter_plate.png';
+// ... (10 PNG imports removed)
+
 import { useEffect, useState } from 'react';
 import { CHAPTERS } from '@/game/constants';
 import { useStore } from '@/game/store';
 
-/** Map chapter IDs to their imported images */
-const CHAPTER_PLATE_IMAGES: Record<number, string> = {
-  0: prologuePlate,
-  1: abbeyApproachPlate,
-  2: gatehousePlate,
-  3: greatHallPlate,
-  4: libraryPlate,
-  5: dungeonPlate,
-  6: courtyardPlate,
-  7: rooftopPlate,
-  8: finalAscentPlate,
-  9: epiloguePlate,
-};
-
-/** Get chapter data with plate image */
+/** Get chapter data for plate rendering */
 function getChapterPlateData(chapterId: number) {
   const chapter = CHAPTERS[chapterId];
   if (!chapter) return null;
 
   return {
-    image: CHAPTER_PLATE_IMAGES[chapterId] || prologuePlate,
+    // TODO: Generate procedural background or use CSS gradients
     title: chapter.name,
     subtitle: chapter.quest,
     setting: chapter.setting,
@@ -87,21 +71,21 @@ export default function ChapterPlate() {
       data-testid="chapter-plate"
     >
       <div className="relative max-w-4xl w-full mx-8">
-        {/* Chapter plate image */}
+        {/* Chapter plate - TODO: Replace with procedural canvas rendering */}
         <div
           className="relative rounded-lg overflow-hidden shadow-2xl"
           style={{
             boxShadow: '0 0 60px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.3)',
+            // Temporary: CSS gradient placeholder until procedural generation implemented
+            background: 'linear-gradient(135deg, #4a3728 0%, #2d1f16 50%, #1a120d 100%)',
+            minHeight: '400px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <img
-            src={currentPlate.image}
-            alt={currentPlate.title}
-            className="w-full h-auto"
-            style={{
-              filter: 'sepia(0.1) saturate(1.05)',
-            }}
-          />
+          {/* REMOVED: Static image (legacy Replit junk) */}
+          {/* <img src={currentPlate.image} ... /> */}
 
           {/* Text overlay with storybook-style typography */}
           <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/95 via-black/70 to-transparent">
