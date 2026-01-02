@@ -19,7 +19,7 @@
     "module": "ESNext",
     "strict": false,
     "lib": ["ES2022", "dom", "dom.iterable"],
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
