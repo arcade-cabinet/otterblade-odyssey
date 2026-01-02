@@ -388,3 +388,14 @@
     inset: -1px;
   }
 }
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: scale(0.95); }
+  10% { opacity: 1; transform: scale(1); }
+  85% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+
+.animate-fade-in-out {
+  animation: fadeInOut 4s ease-in-out forwards;
+}

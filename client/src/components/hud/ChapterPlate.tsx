@@ -80,11 +80,10 @@ export default function ChapterPlate() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
-      style={{
-        animation: 'fadeInOut 4s ease-in-out forwards',
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none animate-fade-in-out"
       data-testid="chapter-plate"
+      aria-live="polite"
+      aria-atomic="true"
     >
       <div className="relative max-w-4xl w-full mx-8">
         {/* Chapter plate image */}
@@ -120,7 +119,6 @@ export default function ChapterPlate() {
               className="text-4xl md:text-5xl font-serif text-amber-100 mb-3"
               style={{
                 textShadow: '0 3px 12px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,1)',
-                fontFamily: 'Georgia, "Times New Roman", serif',
               }}
             >
               {currentPlate.title}
@@ -131,7 +129,6 @@ export default function ChapterPlate() {
               className="text-lg md:text-xl text-amber-200/90 italic"
               style={{
                 textShadow: '0 2px 6px rgba(0,0,0,0.8)',
-                fontFamily: 'Georgia, "Times New Roman", serif',
               }}
             >
               "{currentPlate.subtitle}"
@@ -145,15 +142,6 @@ export default function ChapterPlate() {
           <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-amber-600/40" />
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeInOut {
-          0% { opacity: 0; transform: scale(0.95); }
-          10% { opacity: 1; transform: scale(1); }
-          85% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.02); }
-        }
-      `}</style>
     </div>
   );
 }

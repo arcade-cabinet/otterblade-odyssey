@@ -6,15 +6,9 @@
  * - Storybook art style
  */
 
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Fade from '@mui/material/Fade';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
 import { useStore } from '@/game/store';
 import { hapticError, hapticMedium } from '@/lib/capacitor';
-import { brandColors } from '@/lib/theme';
 
 export default function GameOverMenu() {
   const gameOver = useStore((s) => s.gameOver);
@@ -24,6 +18,16 @@ export default function GameOverMenu() {
   const checkpointSeen = useStore((s) => s.checkpointSeen);
   const respawn = useStore((s) => s.respawnFromCheckpoint);
   const startGame = useStore((s) => s.startGame);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (gameOver) {
+      const timer = setTimeout(() => setIsVisible(true), 100); // Short delay for fade-in
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [gameOver]);
 
   if (!gameOver) return null;
 
@@ -40,207 +44,87 @@ export default function GameOverMenu() {
   };
 
   return (
-    <Fade in timeout={500}>
-      <Box
-        data-testid="game-over-menu"
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: `${brandColors.nightSky}f0`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 20,
-          px: 3,
-        }}
-      >
-        <Container
-          maxWidth="sm"
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
+    <div
+      data-testid="game-over-menu"
+      className={`fixed inset-0 bg-night-sky/95 flex flex-col items-center justify-center z-20 px-4 sm:px-6 transition-opacity duration-500 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+      role="dialog"
+      aria-labelledby="game-over-title"
+      aria-modal="true"
+    >
+      <div className="flex flex-col items-center max-w-md w-full">
+        {/* Title */}
+        <h1
+          id="game-over-title"
+          className="text-4xl sm:text-5xl md:text-6xl text-center text-red-500 mb-2"
+          style={{ textShadow: '0 0 20px rgba(239, 68, 68, 0.5), 0 2px 4px rgba(0,0,0,0.8)' }}
         >
-          {/* Title */}
-          <Typography
-            variant="h2"
-            component="h1"
-            sx={{
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-              textAlign: 'center',
-              color: brandColors.crimson,
-              textShadow: `
-                0 0 20px ${brandColors.crimson}80,
-                0 2px 4px rgba(0,0,0,0.8)
-              `,
-              mb: 1,
-            }}
-          >
-            Blade Broken
-          </Typography>
+          Blade Broken
+        </h1>
 
-          {/* Subtitle */}
-          <Typography
-            variant="body1"
-            sx={{
-              color: brandColors.stoneBeige.main,
-              textAlign: 'center',
-              mb: 1,
-            }}
-          >
-            The otter warrior has fallen. Will you rise again?
-          </Typography>
+        {/* Subtitle */}
+        <p className="text-amber-100 text-center mb-2">
+          The otter warrior has fallen. Will you rise again?
+        </p>
 
-          <Typography
-            variant="caption"
-            sx={{
-              color: brandColors.stoneBeige.dark,
-              letterSpacing: '0.2em',
-              mb: 3,
-            }}
-          >
-            Journey Complete
-          </Typography>
+        <p className="text-amber-300/80 tracking-[0.2em] mb-6 text-sm uppercase">
+          Journey Complete
+        </p>
 
-          {/* Stats Card */}
-          <Paper
-            elevation={0}
-            sx={{
-              px: 3,
-              py: 2.5,
-              backgroundColor: `${brandColors.darkStone}90`,
-              backdropFilter: 'blur(8px)',
-              border: `1px solid ${brandColors.stoneBeige.dark}40`,
-              borderRadius: 2,
-              width: '100%',
-              maxWidth: '24rem',
-              mb: 4,
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                mb: 1.5,
-              }}
-            >
-              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
-                Score
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: brandColors.honeyGold.main,
-                  fontWeight: 600,
-                }}
-              >
-                {score.toLocaleString()}
-              </Typography>
-            </Box>
+        {/* Stats Card */}
+        <div
+          className="px-6 py-5 bg-stone-800/60 backdrop-blur-md border border-amber-200/20 rounded-lg w-full mb-8"
+          role="region"
+          aria-labelledby="stats-heading"
+        >
+          <h2 id="stats-heading" className="sr-only">
+            Player Stats
+          </h2>
+          <div className="flex justify-between mb-3">
+            <span className="text-amber-100">Score</span>
+            <span className="text-amber-300 font-semibold">{score.toLocaleString()}</span>
+          </div>
 
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                mb: 1.5,
-              }}
-            >
-              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
-                Distance Traveled
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: brandColors.honeyGold.main,
-                  fontWeight: 600,
-                }}
-              >
-                {Math.floor(distance)}m
-              </Typography>
-            </Box>
+          <div className="flex justify-between mb-3">
+            <span className="text-amber-100">Distance Traveled</span>
+            <span className="text-amber-300 font-semibold">{Math.floor(distance)}m</span>
+          </div>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" sx={{ color: brandColors.stoneBeige.main }}>
-                Shards Preserved
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: brandColors.lanternGlow,
-                  fontWeight: 600,
-                }}
-              >
-                {bankedShards}
-              </Typography>
-            </Box>
-          </Paper>
+          <div className="flex justify-between">
+            <span className="text-amber-100">Shards Preserved</span>
+            <span className="text-yellow-300 font-semibold">{bankedShards}</span>
+          </div>
+        </div>
 
-          {/* Action Buttons */}
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 2,
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-            }}
-          >
-            {canRespawn && (
-              <Button
-                variant="contained"
-                onClick={handleRespawn}
-                data-testid="button-respawn"
-                sx={{
-                  px: 4,
-                  py: 1.5,
-                  backgroundColor: brandColors.forestGreen.main,
-                  borderColor: brandColors.forestGreen.light,
-                  '&:hover': {
-                    backgroundColor: brandColors.forestGreen.light,
-                    boxShadow: `0 0 20px ${brandColors.forestGreen.main}60`,
-                  },
-                }}
-              >
-                Return to Shrine
-              </Button>
-            )}
-
-            <Button
-              variant="outlined"
-              onClick={handleNewRun}
-              data-testid="button-restart"
-              sx={{
-                px: 4,
-                py: 1.5,
-                borderColor: brandColors.honeyGold.main,
-                color: brandColors.honeyGold.main,
-                '&:hover': {
-                  borderColor: brandColors.honeyGold.light,
-                  backgroundColor: `${brandColors.honeyGold.main}15`,
-                  boxShadow: `0 0 20px ${brandColors.honeyGold.main}40`,
-                },
-              }}
-            >
-              Begin Anew
-            </Button>
-          </Box>
-
-          {/* Penalty notice */}
+        {/* Action Buttons */}
+        <div className="flex gap-4 flex-wrap justify-center">
           {canRespawn && (
-            <Typography
-              variant="caption"
-              sx={{
-                mt: 3,
-                color: brandColors.crimson,
-                opacity: 0.8,
-              }}
+            <button
+              type="button"
+              onClick={handleRespawn}
+              data-testid="button-respawn"
+              className="px-6 py-3 bg-emerald-700/80 border border-emerald-500/90 text-white rounded-md hover:bg-emerald-600 hover:shadow-lg transition-all"
             >
-              Shrine restoration costs 900 score
-            </Typography>
+              Return to Shrine
+            </button>
           )}
-        </Container>
-      </Box>
-    </Fade>
+
+          <button
+            type="button"
+            onClick={handleNewRun}
+            data-testid="button-restart"
+            className="px-6 py-3 border border-amber-400 text-amber-300 rounded-md hover:bg-amber-400/20 hover:shadow-lg transition-all"
+          >
+            Begin Anew
+          </button>
+        </div>
+
+        {/* Penalty notice */}
+        {canRespawn && (
+          <p className="mt-6 text-red-500/80 text-xs">Shrine restoration costs 900 score</p>
+        )}
+      </div>
+    </div>
   );
 }

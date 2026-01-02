@@ -62,13 +62,13 @@ export default function TouchControls() {
   if (!gameStarted || !('ontouchstart' in window)) return null;
 
   const buttonBase =
-    'rounded-full backdrop-blur flex items-center justify-center font-bold transition-all duration-75 active:scale-90 shadow-lg select-none';
-  const directionButton = `${buttonBase} w-16 h-16 bg-stone-900/60 border-2 border-amber-700/50 text-amber-200/90 active:bg-amber-900/40 active:border-amber-500`;
-  const actionButton = `${buttonBase} w-[4.5rem] h-[4.5rem] text-sm`;
+    'rounded-full backdrop-blur-md flex items-center justify-center font-bold transition-all duration-100 active:scale-95 shadow-lg select-none transform-gpu';
+  const directionButton = `${buttonBase} w-20 h-20 bg-stone-900/70 border-2 border-amber-700/60 text-amber-200/90 active:bg-amber-800/60 active:border-amber-400`;
+  const actionButton = `${buttonBase} w-20 h-20 text-sm uppercase`;
 
   return (
     <div
-      className="absolute bottom-0 w-full h-56 flex justify-between px-6 pb-6 pt-4 pointer-events-auto select-none"
+      className="absolute bottom-0 w-full h-64 flex justify-between items-center p-8 pointer-events-auto select-none"
       style={{
         touchAction: 'none',
         background:
@@ -78,7 +78,7 @@ export default function TouchControls() {
       data-touch-control="container"
     >
       {/* Left side: Direction buttons */}
-      <div className="flex gap-4 items-end" data-touch-control="left-pad">
+      <div className="flex gap-6 items-center" data-touch-control="left-pad">
         <button
           type="button"
           data-testid="button-left"
@@ -91,8 +91,8 @@ export default function TouchControls() {
           aria-label="Move left"
         >
           <svg
-            width="24"
-            height="24"
+            width="32"
+            height="32"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -116,8 +116,8 @@ export default function TouchControls() {
           aria-label="Move right"
         >
           <svg
-            width="24"
-            height="24"
+            width="32"
+            height="32"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -132,7 +132,7 @@ export default function TouchControls() {
       </div>
 
       {/* Right side: Diamond layout (Jump top, Attack right, Crouch bottom, Special left) */}
-      <div className="relative w-44 h-44" data-touch-control="right-pad">
+      <div className="relative w-52 h-52" data-touch-control="right-pad">
         {/* Jump - Top */}
         <button
           type="button"
@@ -141,10 +141,11 @@ export default function TouchControls() {
           onTouchStart={handleTouchStart('jump')}
           onTouchEnd={handleTouchEnd('jump')}
           onTouchCancel={handleTouchCancel('jump')}
-          className={`${actionButton} absolute top-0 left-1/2 -translate-x-1/2 bg-emerald-900/60 border-2 border-emerald-600/70 text-emerald-300 active:bg-emerald-700/50 active:border-emerald-400`}
+          className={`${actionButton} absolute top-0 left-1/2 -translate-x-1/2 bg-emerald-800/70 border-2 border-emerald-500/80 text-emerald-200 active:bg-emerald-700/70 active:border-emerald-300`}
           style={{ touchAction: 'none' }}
+          aria-label="Jump"
         >
-          JUMP
+          Jump
         </button>
 
         {/* Attack - Right */}
@@ -155,10 +156,11 @@ export default function TouchControls() {
           onTouchStart={handleTouchStart('attack')}
           onTouchEnd={handleTouchEnd('attack')}
           onTouchCancel={handleTouchCancel('attack')}
-          className={`${actionButton} absolute right-0 top-1/2 -translate-y-1/2 bg-amber-900/60 border-2 border-amber-600/70 text-amber-300 active:bg-amber-700/50 active:border-amber-400`}
+          className={`${actionButton} absolute right-0 top-1/2 -translate-y-1/2 bg-rose-800/70 border-2 border-rose-500/80 text-rose-200 active:bg-rose-700/70 active:border-rose-300`}
           style={{ touchAction: 'none' }}
+          aria-label="Attack"
         >
-          ATK
+          Attack
         </button>
 
         {/* Slink (go low on all fours) - Bottom */}
@@ -169,10 +171,11 @@ export default function TouchControls() {
           onTouchStart={handleTouchStart('slink')}
           onTouchEnd={handleTouchEnd('slink')}
           onTouchCancel={handleTouchCancel('slink')}
-          className={`${actionButton} absolute bottom-0 left-1/2 -translate-x-1/2 bg-stone-800/60 border-2 border-stone-500/70 text-stone-300 active:bg-stone-600/50 active:border-stone-400`}
+          className={`${actionButton} absolute bottom-0 left-1/2 -translate-x-1/2 bg-stone-700/70 border-2 border-stone-500/80 text-stone-200 active:bg-stone-600/70 active:border-stone-400`}
           style={{ touchAction: 'none' }}
+          aria-label="Slink"
         >
-          LOW
+          Slink
         </button>
 
         {/* Special/Interact - Left */}
@@ -180,10 +183,11 @@ export default function TouchControls() {
           type="button"
           data-testid="button-special"
           data-touch-control="special"
-          className={`${actionButton} absolute left-0 top-1/2 -translate-y-1/2 bg-sky-900/60 border-2 border-sky-600/70 text-sky-300 active:bg-sky-700/50 active:border-sky-400`}
+          className={`${actionButton} absolute left-0 top-1/2 -translate-y-1/2 bg-sky-800/70 border-2 border-sky-500/80 text-sky-200 active:bg-sky-700/70 active:border-sky-300`}
           style={{ touchAction: 'none' }}
+          aria-label="Interact"
         >
-          ACT
+          Action
         </button>
       </div>
     </div>

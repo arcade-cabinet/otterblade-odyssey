@@ -15,12 +15,20 @@ export default function BossBar() {
       <div
         className="text-white/90 text-xs tracking-widest uppercase mb-1"
         style={{ textShadow: '0 2px 0 rgba(0,0,0,1)' }}
+        id="boss-bar-label"
       >
         Boss {bossIndex + 1}
       </div>
-      <div className="h-2.5 rounded-md overflow-hidden bg-white/10 shadow-inner">
+      <div
+        className="h-2.5 rounded-md overflow-hidden bg-white/10 shadow-inner"
+        role="progressbar"
+        aria-labelledby="boss-bar-label"
+        aria-valuenow={bossHp}
+        aria-valuemin={0}
+        aria-valuemax={bossMax}
+      >
         <div
-          className="h-full transition-all duration-75 linear"
+          className="h-full transition-all duration-500 ease-out"
           style={{
             width: `${pct}%`,
             background: 'linear-gradient(90deg, #f43f5e, #facc15)',
