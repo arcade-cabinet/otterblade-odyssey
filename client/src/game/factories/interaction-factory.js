@@ -472,7 +472,7 @@ function interactShrine(interaction, player, gameState) {
  * Interact with ladder
  * @private
  */
-function interactLadder(interaction, player, gameState) {
+function interactLadder(interaction, _player, _gameState) {
   return {
     success: true,
     type: 'ladder',

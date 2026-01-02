@@ -248,7 +248,7 @@ function drawTrees(ctx, x, y, width, height, count) {
     ctx.fillRect(treeX - treeWidth * 0.1, y + height - treeHeight, treeWidth * 0.2, treeHeight * 0.4);
 
     // Canopy
-    ctx.fillStyle = ctx.fillStyle; // Use layer color
+    ctx.fillStyle = '#3A5F3A'; // Forest green
     ctx.beginPath();
     ctx.ellipse(treeX, y + height - treeHeight * 0.7, treeWidth * 0.5, treeHeight * 0.6, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -379,7 +379,7 @@ function drawMountains(ctx, x, y, width, height) {
  * Draw rain
  * @private
  */
-function drawRain(ctx, camera, width, height) {
+function drawRain(ctx, _camera, width, height) {
   ctx.strokeStyle = 'rgba(174, 214, 241, 0.5)';
   ctx.lineWidth = 1;
 
@@ -402,7 +402,7 @@ function drawRain(ctx, camera, width, height) {
  * Draw generic background
  * @private
  */
-function drawGenericBackground(ctx, camera, width, height) {
+function drawGenericBackground(ctx, _camera, width, height) {
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
   gradient.addColorStop(0, '#87CEEB');
   gradient.addColorStop(1, '#E0F6FF');

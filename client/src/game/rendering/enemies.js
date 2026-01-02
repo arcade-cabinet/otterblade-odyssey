@@ -7,9 +7,9 @@
  * Draw Galeborn enemy soldier
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {Object} enemy - Enemy object with position, facing, hp
- * @param {number} animFrame - Animation frame counter
+ * @param {number} _animFrame - Animation frame counter
  */
-export function drawEnemy(ctx, enemy, animFrame) {
+export function drawEnemy(ctx, enemy, _animFrame) {
   const x = enemy.position.x;
   const y = enemy.position.y;
   const facing = enemy.facing || 1;

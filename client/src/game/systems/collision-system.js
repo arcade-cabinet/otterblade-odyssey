@@ -52,7 +52,7 @@ export class CollisionSystem {
     const key = this.getCollisionKey(bodyA.label, bodyB.label);
     const handler = this.collisionHandlers.get(key);
 
-    if (handler && handler.onStart) {
+    if (handler?.onStart) {
       handler.onStart(bodyA, bodyB);
     }
 
@@ -60,7 +60,7 @@ export class CollisionSystem {
     const reverseKey = this.getCollisionKey(bodyB.label, bodyA.label);
     const reverseHandler = this.collisionHandlers.get(reverseKey);
 
-    if (reverseHandler && reverseHandler.onStart) {
+    if (reverseHandler?.onStart) {
       reverseHandler.onStart(bodyB, bodyA);
     }
   }
