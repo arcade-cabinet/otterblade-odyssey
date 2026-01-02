@@ -12,5 +12,3 @@ declare global {
     __GAME_TEST_API__?: GameTestAPI;
   }
 }
-
-export {};
