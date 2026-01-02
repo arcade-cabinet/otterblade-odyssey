@@ -49,7 +49,10 @@ const { World, Bodies, Body, Runner, Events } = Matter;
 
 // Procedural rendering functions
 function drawFinn(ctx, position, _facing, animFrame) {
-  // Validate inputs
+  if (!ctx || !position || typeof animFrame !== 'number') {
+    console.error('Invalid parameters to drawFinn');
+    return;
+  }
   if (!ctx || !position || typeof animFrame !== 'number') {
     console.error('Invalid parameters to drawFinn');
     return;
