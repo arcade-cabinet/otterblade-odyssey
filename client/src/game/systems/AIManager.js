@@ -9,7 +9,6 @@ import {
   FleeBehavior,
   FollowPathBehavior,
   NavMesh,
-  PathPlanner,
   SeekBehavior,
   State,
   StateMachine,
@@ -457,7 +456,6 @@ class AIManager {
     this.enemies = new Map();
     this.npcs = new Map();
     this.navMesh = null;
-    this.pathPlanners = new Map(); // Store path planners for each entity
   }
 
   /**
@@ -523,20 +521,13 @@ class AIManager {
   }
 
   /**
-   * Set entity to follow a path using PathPlanner
+   * Set entity to follow a path
    * @param {string} entityId - Entity ID
    * @param {Vector3} targetPosition - Destination
    */
   setEntityPath(entityId, targetPosition) {
     const enemy = this.enemies.get(entityId);
     if (!enemy) return;
-
-    // Get or create path planner for this entity
-    let pathPlanner = this.pathPlanners.get(entityId);
-    if (!pathPlanner) {
-      pathPlanner = new PathPlanner(enemy);
-      this.pathPlanners.set(entityId, pathPlanner);
-    }
 
     // Find path
     const path = this.findPath(enemy.position, targetPosition);
@@ -564,10 +555,6 @@ class AIManager {
     const enemy = new EnemyAI(config);
     this.enemies.set(id, enemy);
     this.entityManager.add(enemy);
-
-    // Create path planner for this enemy
-    const pathPlanner = new PathPlanner(enemy);
-    this.pathPlanners.set(id, pathPlanner);
 
     return enemy;
   }
@@ -612,7 +599,6 @@ class AIManager {
     this.entityManager.clear();
     this.enemies.clear();
     this.npcs.clear();
-    this.pathPlanners.clear();
     this.navMesh = null;
   }
 }
