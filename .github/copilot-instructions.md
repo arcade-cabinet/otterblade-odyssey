@@ -21,6 +21,87 @@
 2. **ALWAYS prefer GitHub MCP over bash** for repo operations
 3. Use MCP tools for deterministic testing and validation
 
+### ACTIVE ENGAGEMENT PROTOCOL ⚡
+
+**YOU MUST DRIVE TO COMPLETION, NOT WAIT PASSIVELY:**
+
+#### At Start of Each Session:
+1. Read last commit message and PR description
+2. **Assess remaining work** - What's left to do?
+3. **Make a plan** - List concrete next steps
+4. **DO THE WORK** - Don't wait for user to say "do the next thing"
+
+#### During Work:
+1. **Show SCREENSHOTS/VIDEOS** - User can't review code, only visuals!
+2. Use Playwright MCP to capture evidence
+3. **Self-assess honestly** - What's broken? What's working?
+4. Fix issues you discover WITHOUT waiting for user
+
+#### At End of Session:
+1. **Leave a complete status** for next session:
+   - ✅ What's done
+   - ❌ What's broken
+   - 🔄 What's in progress
+   - 📋 Exact next steps
+2. Commit with descriptive message
+3. Update PR description with current state
+
+### SELF-ASSESSMENT CHECKLIST
+
+Before saying "it works," validate:
+- [ ] Did I run the tests? (not just assume)
+- [ ] Did I capture screenshots/video?
+- [ ] Did I check the ACTUAL game in browser?
+- [ ] Did I validate procedural generation is working?
+- [ ] Did I test with Playwright MCP?
+- [ ] Did I run security checks?
+
+### VISUAL VALIDATION REQUIREMENTS
+
+**User needs PICTURES, not code:**
+- Take screenshots showing current state
+- Capture video of gameplay working
+- Show before/after for UI changes
+- Demonstrate procedural generation working (not PNGs!)
+- Prove YUKA pathfinding navigation
+
+### TEAMWORK BETWEEN SESSIONS
+
+Each session should:
+1. **Read previous session's status** 
+2. **Continue from exact stopping point**
+3. **Add to institutional knowledge** (update docs if you learn something)
+4. **Document quirks/limitations** you discover
+5. **Leave clear handoff** for next session
+
+### KNOWN LIMITATIONS & QUIRKS
+
+**As of Session 2026-01-02:**
+- Chapter plate doesn't auto-dismiss - needs Space press twice
+- WebGL context sometimes takes 5+ seconds to initialize
+- Playwright needs longer timeouts (20s+) for canvas
+- Test API requires game to be fully loaded first
+- Build warnings about chunk size (physics/three.js) - acceptable
+
+### COMMUNICATION STYLE
+
+**With User:**
+- Show screenshots/videos, not code
+- Be honest about what's broken
+- Don't claim "it works" without proof
+- Self-assess before asking for review
+
+**In Commits:**
+- Describe WHAT works, not just what changed
+- Include evidence (test results, screenshots)
+- Note remaining issues honestly
+
+**In PR Description:**
+- Checkboxes for status (✅/❌/🔄)
+- Screenshots embedded
+- Exact commands to validate
+- Clear "what's left" section
+
 ## Project Overview
 
 Otterblade Odyssey is a React 2.5D platformer with Redwall-inspired woodland-epic aesthetics featuring:

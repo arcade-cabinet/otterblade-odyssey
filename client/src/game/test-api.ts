@@ -74,11 +74,11 @@ export function initializeTestAPI(): void {
       return {
         x: store.playerX,
         y: store.playerY,
-        velocityX: 0, // Would need to track this in store
+        velocityX: 0, // TODO: Track velocity in store
         velocityY: 0,
-        facing: store.playerFacing,
-        grounded: true, // Would need to track this
-        action: 'idle', // Would need to track this
+        facing: store.playerFacingRight ? 1 : -1,
+        grounded: true, // TODO: Track grounded state
+        action: store.playerState,
         health: store.health,
         currentPlatformId: null,
       };
