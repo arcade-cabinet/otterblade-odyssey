@@ -61,7 +61,10 @@ export class LevelLoader {
     const spawn = level.spawnPoint;
 
     // Get exit point from connections (with fallback)
-    const exit = manifest.connections.transitionOut?.exitPoint || { x: level.bounds.endX - 100, y: 0 };
+    const exit = manifest.connections.transitionOut?.exitPoint || {
+      x: level.bounds.endX - 100,
+      y: 0,
+    };
 
     // Use level bounds from manifest
     const bounds = {

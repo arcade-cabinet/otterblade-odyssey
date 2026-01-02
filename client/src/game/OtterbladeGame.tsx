@@ -22,7 +22,7 @@ export default function OtterbladeGame() {
 
     const canvas = canvasRef;
     const ctx = canvas.getContext('2d')!;
-    
+
     // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -44,14 +44,14 @@ export default function OtterbladeGame() {
       friction: 0.1,
       frictionAir: 0.01,
       restitution: 0,
-      inertia: Infinity
+      inertia: Infinity,
     });
 
     World.add(engine.world, player);
 
     // Build level from DDL manifest
     const platforms: Matter.Body[] = [];
-    
+
     if (manifest.level?.segments) {
       for (const segment of manifest.level.segments) {
         if (segment.platforms) {
@@ -64,7 +64,7 @@ export default function OtterbladeGame() {
               {
                 isStatic: true,
                 label: 'platform',
-                friction: 0.8
+                friction: 0.8,
               }
             );
             platforms.push(platform);
@@ -76,11 +76,11 @@ export default function OtterbladeGame() {
 
     // Input handling
     const keys: Record<string, boolean> = {};
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       keys[e.key.toLowerCase()] = true;
     };
-    
+
     const handleKeyUp = (e: KeyboardEvent) => {
       keys[e.key.toLowerCase()] = false;
     };
@@ -111,7 +111,7 @@ export default function OtterbladeGame() {
       if (Math.abs(player.velocity.x) > maxSpeed) {
         Body.setVelocity(player, {
           x: Math.sign(player.velocity.x) * maxSpeed,
-          y: player.velocity.y
+          y: player.velocity.y,
         });
       }
 
@@ -129,7 +129,7 @@ export default function OtterbladeGame() {
         return;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Background
       ctx.fillStyle = '#1a1a24';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -153,7 +153,7 @@ export default function OtterbladeGame() {
       // Draw player (procedural otter)
       const px = player.position.x;
       const py = player.position.y;
-      
+
       // Finn's body
       ctx.fillStyle = '#8B6F47'; // Warm brown
       ctx.beginPath();
@@ -212,24 +212,29 @@ export default function OtterbladeGame() {
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       <Show when={!gameStarted()}>
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          'text-align': 'center',
-          'z-index': 1000
-        }}>
-          <h1 style={{
-            'font-family': 'Georgia, serif',
-            color: '#F4D03F',
-            'font-size': '48px',
-            'margin-bottom': '20px',
-            'text-shadow': '2px 2px 8px rgba(0,0,0,0.9)'
-          }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            'text-align': 'center',
+            'z-index': 1000,
+          }}
+        >
+          <h1
+            style={{
+              'font-family': 'Georgia, serif',
+              color: '#F4D03F',
+              'font-size': '48px',
+              'margin-bottom': '20px',
+              'text-shadow': '2px 2px 8px rgba(0,0,0,0.9)',
+            }}
+          >
             Otterblade Odyssey
           </h1>
           <button
+            type="button"
             onClick={() => setGameStarted(true)}
             style={{
               background: 'rgba(230, 126, 34, 0.9)',
@@ -240,7 +245,7 @@ export default function OtterbladeGame() {
               'font-size': '24px',
               'font-family': 'Georgia, serif',
               cursor: 'pointer',
-              'box-shadow': '0 4px 12px rgba(192, 57, 43, 0.6)'
+              'box-shadow': '0 4px 12px rgba(192, 57, 43, 0.6)',
             }}
           >
             Begin Journey
@@ -252,22 +257,24 @@ export default function OtterbladeGame() {
 
       {/* HUD */}
       <Show when={gameStarted()}>
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          left: '20px',
-          background: 'rgba(93, 78, 55, 0.9)',
-          padding: '15px',
-          'border-radius': '12px',
-          border: '3px solid #D4A574',
-          color: '#F4D03F',
-          'font-family': 'Georgia, serif',
-          'min-width': '200px'
-        }}>
-          <div>Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}</div>
-          <div style={{ 'margin-top': '8px' }}>
-            Health: {'❤️'.repeat(health())}
+        <div
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            background: 'rgba(93, 78, 55, 0.9)',
+            padding: '15px',
+            'border-radius': '12px',
+            border: '3px solid #D4A574',
+            color: '#F4D03F',
+            'font-family': 'Georgia, serif',
+            'min-width': '200px',
+          }}
+        >
+          <div>
+            Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}
           </div>
+          <div style={{ 'margin-top': '8px' }}>Health: {'❤️'.repeat(health())}</div>
           <div>Shards: {shards()} ✨</div>
         </div>
       </Show>
