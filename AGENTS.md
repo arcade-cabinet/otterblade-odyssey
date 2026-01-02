@@ -17,25 +17,28 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ---
 
-## Technology Stack (Current Production)
+## Technology Stack (Astro + Solid.js)
 
-> **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. This table reflects CURRENT production code.
+**Architecture Decision**: Astro 5.x + Solid.js + Matter.js (proven in POC) replaces React Three Fiber + Rapier (20,000+ lines, broken).
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
 | **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
-| Rendering | @react-three/fiber | 3D renderer in orthographic mode |
-| Physics | @react-three/rapier | Rapier WASM physics |
-| Entity Management | Miniplex + miniplex-react | Resources for state |
-| State | Zustand | Gameplay state |
-| Mobile | Capacitor | Native features, haptics |
-| Audio | Howler.js | Spatial audio, music |
-| Styling | Tailwind CSS v4 | HUD/UI only |
-| UI Components | shadcn/ui + Radix | Menus, dialogs |
-| Package Manager | **pnpm 10.x** (never npm/yarn) | |
-| Linting | Biome | Strict mode |
+| **Framework** | Astro 5.x | Static site generation, GitHub Pages deployment |
+| **UI Components** | Solid.js | Reactive UI, 7KB runtime (vs 140KB React) |
+| **Language** | JavaScript (ES2022) | No TypeScript compilation overhead |
+| **Physics** | Matter.js 0.20 | POC-proven, 2D rigid body physics |
+| **Rendering** | Canvas 2D API | Procedural character rendering, parallax |
+| **AI/Pathfinding** | YUKA 0.9 | Enemy AI, steering behaviors, FSM |
+| **State Management** | Zustand 5.x | Game state with localStorage persistence |
+| **Audio** | Howler.js / Tone.js | Spatial audio, music |
+| **Touch Controls** | nipplejs / Custom | Mobile-first touch joystick |
+| **Bundler** | esbuild | Fast JavaScript bundling |
+| **Dev Server** | Astro dev server | Port 4321 |
+| **Package Manager** | **pnpm 10.x** (never npm/yarn) | |
+| **Linting** | Biome | Strict mode |
 
-**Planned Migration**: Canvas 2D API + Matter.js physics + Yuka AI (see IMPLEMENTATION.md for details)
+**Performance**: Fast Solid.js reactivity, <200KB bundle target, 60fps stable
 
 ---
 
@@ -51,22 +54,47 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ### Directory Responsibilities
 ```
-client/src/
-├── data/               # JSON content files ONLY
-│   ├── chapters.json   # Chapter definitions
-│   ├── biomes.json     # Visual environment configs
-│   └── README.md       # Data architecture docs
-├── game/
-│   ├── data/           # Zod loaders for JSON validation
-│   │   ├── schemas.ts  # Zod schemas
-│   │   ├── loaders.ts  # Typed data loaders
-│   │   └── index.ts    # Barrel export
-│   ├── ecs/            # Miniplex entities/systems
-│   └── *.tsx           # Game components
-├── components/
-│   ├── hud/            # Game UI overlays
-│   └── ui/             # Reusable UI primitives (shadcn)
-└── pages/              # Route pages
+game/src/                  # Astro + Solid.js game
+├── pages/
+│   └── index.astro        # Main game page
+├── components/            # Solid.js components
+│   ├── GameCanvas.jsx     # Game canvas wrapper
+│   ├── HUD.jsx            # Health, shards, quest display
+│   ├── TouchControls.jsx  # Mobile controls
+│   ├── StartMenu.jsx      # Start screen
+│   └── ChapterPlate.jsx   # Chapter transitions
+├── game/                  # Core game engine
+│   ├── engine/
+│   │   ├── physics.js     # Matter.js engine setup
+│   │   ├── renderer.js    # Canvas 2D rendering pipeline
+│   │   └── gameLoop.js    # RequestAnimationFrame loop
+│   ├── entities/
+│   │   ├── Player.js      # Finn (otter protagonist)
+│   │   ├── Enemy.js       # Galeborn enemies
+│   │   ├── Platform.js    # Platforms, walls, hazards
+│   │   └── Item.js        # Collectibles, powerups
+│   ├── systems/
+│   │   ├── collision.js   # Collision handlers
+│   │   ├── ai.js          # YUKA AI manager
+│   │   ├── input.js       # Unified input (keyboard, gamepad, touch)
+│   │   └── audio.js       # Howler.js audio manager
+│   ├── rendering/
+│   │   ├── finn.js        # Procedural Finn rendering
+│   │   ├── enemies.js     # Procedural enemy rendering
+│   │   ├── environment.js # Platforms, parallax backgrounds
+│   │   └── effects.js     # Particles, post-process
+│   ├── store.js           # Zustand state management
+│   └── constants.js       # Game constants, collision groups
+└── ui/
+    └── styles.css         # Warm Redwall-inspired CSS
+
+client/src/data/
+├── manifests/             # JSON DDL definitions
+│   ├── chapters/          # 10 chapter definitions
+│   ├── schema/            # JSON schemas
+│   ├── enemies.json
+│   └── sounds.json
+└── approvals.json         # Asset approval tracking
 ```
 
 ---
@@ -80,34 +108,37 @@ client/src/
 - **NPC definitions** → `manifests/npcs.json`
 - Asset manifests → `manifests/sprites.json`, `cinematics.json`, etc.
 
-### Typed Data Loaders (in `client/src/game/data/`)
+### Data Loaders (in `game/src/ddl/loader.js`)
 
-```typescript
-// Load chapter manifests with full type safety
-import { loadChapterManifest, getChapterBoss } from '@/game/data';
+```javascript
+// Load chapter manifests
+export async function loadChapterManifest(chapterId) {
+  const response = await fetch(`../../client/src/data/manifests/chapters/chapter-${chapterId}.json`);
+  return await response.json();
+}
 
-const chapter0 = loadChapterManifest(0);
-const boss = getChapterBoss(8); // Returns Zephyros data
+export async function getChapterBoss(chapterId) {
+  const manifest = await loadChapterManifest(chapterId);
+  return manifest.levelDefinition.bossEncounter;
+}
 
-// Load NPC data
-import { getCharacterById, getCharacterDrawFunction } from '@/game/data';
-
-const finn = getCharacterById('finn_otterblade');
-const drawFn = getCharacterDrawFunction('finn_otterblade'); // "drawFinn"
+// Usage
+const chapter0 = await loadChapterManifest(0);
+const boss = await getChapterBoss(8); // Returns Zephyros data
 ```
 
-### Runtime State (ECS/Zustand)
-- Current chapter progress → Zustand store (persisted)
-- Player state → Zustand store (persisted)
+### Runtime State (Vanilla JS store)
+- Current chapter progress → Vanilla JS store (persisted via localStorage)
+- Player state → Vanilla JS store (persisted via localStorage)
 - Physics bodies → Matter.js world
-- Active entities → Miniplex world
+- Active entities → Simple array/object tracking
 
 ### Critical Rules
 - **NEVER** put mutable state in JSON
-- **NEVER** put authored content in TypeScript constants
-- **NEVER** import JSON directly - always use typed loaders
-- **ALWAYS** validate JSON via Zod schemas
-- **Schemas are flexible** - use `.passthrough()` for evolving content
+- **NEVER** put authored content in JavaScript constants
+- **NEVER** import JSON directly - always use async loaders
+- **ALWAYS** validate JSON structure (optional: use JSON Schema)
+- **Keep it simple** - Vanilla JS patterns, no over-engineering
 
 ---
 
@@ -116,7 +147,6 @@ const drawFn = getCharacterDrawFunction('finn_otterblade'); // "drawFinn"
 Before completing any task, verify ALL of these:
 
 - [ ] `pnpm biome check .` reports no errors
-- [ ] `pnpm tsc --noEmit` passes
 - [ ] No unused imports (Biome enforces)
 - [ ] No unused variables (Biome enforces)
 - [ ] JSDoc on all exports
@@ -124,16 +154,18 @@ Before completing any task, verify ALL of these:
 - [ ] No hardcoded magic strings/numbers
 - [ ] No duplicate code
 - [ ] Obsolete files removed
+- [ ] ES2022 features only (no TypeScript)
 
 ---
 
 ## Naming Conventions
 
 ### Files
-- Components: `PascalCase.tsx`
-- Utilities: `camelCase.ts`
+- Modules: `PascalCase.js` (classes) or `camelCase.js` (utilities)
 - Data: `kebab-case.json`
-- Tests: `*.test.ts` or `*.spec.ts`
+- Tests: `*.test.js` or `*.spec.js`
+- HTML: `index.html`
+- CSS: `styles.css`
 
 ### Code
 - Components: `PascalCase`
@@ -146,37 +178,29 @@ Before completing any task, verify ALL of these:
 
 ## Forbidden Patterns
 
-```typescript
+```javascript
 // ❌ Hardcoded magic numbers
 const damage = 10;
 
 // ✅ Named constants or JSON data
-import { PLAYER_BASE_DAMAGE } from "./constants";
+import { PLAYER_BASE_DAMAGE } from "./constants.js";
 
-// ❌ Direct JSON import
+// ❌ Direct JSON import (doesn't work well in browsers anyway)
 import data from './data.json';
 
-// ✅ Typed loader with validation
-import { loadChapters } from './data';
+// ✅ Async loader
+import { loadChapters } from './ddl/loader.js';
+const chapters = await loadChapters();
 
-// ❌ Any type
-function process(data: any) {}
+// ❌ Massive function (500+ lines)
+function gameLoop() { /* everything */ }
 
-// ✅ Proper typing
-function process(data: Chapter) {}
-
-// ❌ Massive component (500+ lines)
-function GameScreen() { /* everything */ }
-
-// ✅ Composed components
-function GameScreen() {
-  return (
-    <>
-      <GameCanvas />
-      <GameHUD />
-      <GameControls />
-    </>
-  );
+// ✅ Composed functions
+function gameLoop() {
+  updatePhysics(deltaTime);
+  updateAI(deltaTime);
+  updateCamera();
+  render();
 }
 
 // ❌ Using npm/yarn
@@ -184,6 +208,15 @@ npm install something
 
 // ✅ Using pnpm
 pnpm add something
+
+// ❌ Adding frameworks when vanilla JS works
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+// ✅ Vanilla JS DOM manipulation
+const hud = document.createElement('div');
+hud.className = 'hud';
+document.body.appendChild(hud);
 ```
 
 ---
@@ -221,35 +254,76 @@ See `WORLD.md` for complete lore and world-building details.
 
 ---
 
-## ECS Pattern (Miniplex)
+## Matter.js + Vanilla JS Patterns (from POC)
 
-```typescript
-import { World } from "miniplex";
+### Matter.js Physics Setup
+```javascript
+import Matter from 'matter-js';
 
-export type Entity = {
-  position: { x: number; y: number; z: number };
-  velocity?: { x: number; y: number; z: number };
-  player?: true;
-  // ... other components
-};
+const { Engine, World, Bodies, Body, Events } = Matter;
 
-export const world = new World<Entity>();
+// Create engine
+const engine = Engine.create();
+engine.gravity.y = 1.5; // POC-proven gravity value
 
-// Create queries for efficient filtering
-export const queries = {
-  moving: world.with("position", "velocity"),
-  players: world.with("player", "position"),
-};
+// Create player body
+const player = Bodies.rectangle(x, y, 35, 55, {
+  label: 'player',
+  friction: 0.1,
+  frictionAir: 0.01,
+  restitution: 0
+});
 
-// Safe iteration (requires ES2022 target)
-for (const entity of queries.moving) {
-  entity.position.x += entity.velocity.x * dt;
+World.add(engine.world, player);
+
+// Game loop
+function gameLoop() {
+  Engine.update(engine, 1000 / 60); // 60fps
+  render();
+  requestAnimationFrame(gameLoop);
+}
+```
+
+### Entity Tracking (Simple Arrays)
+```javascript
+// Track entities in simple arrays
+const enemies = [];
+const platforms = [];
+const items = [];
+
+// Add enemy
+function spawnEnemy(x, y, type) {
+  const enemyBody = Bodies.rectangle(x, y, 28, 45, { label: 'enemy' });
+  const enemy = {
+    body: enemyBody,
+    type: type,
+    hp: 25,
+    damage: 8,
+    speed: 1.2,
+    aiState: 'patrol'
+  };
+  enemies.push(enemy);
+  World.add(engine.world, enemyBody);
+  return enemy;
 }
 
-// Entity removal - collect first, remove after
-const toRemove: Entity[] = [];
-for (const e of queries.dead) toRemove.push(e);
-toRemove.forEach(e => world.remove(e));
+// Update loop
+function updateEnemies(deltaTime) {
+  for (const enemy of enemies) {
+    updateEnemyAI(enemy, deltaTime);
+    updateEnemyAnimation(enemy);
+  }
+}
+
+// Remove dead enemies
+function cleanupEnemies() {
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    if (enemies[i].hp <= 0) {
+      World.remove(engine.world, enemies[i].body);
+      enemies.splice(i, 1);
+    }
+  }
+}
 ```
 
 ---
@@ -259,19 +333,21 @@ toRemove.forEach(e => world.remove(e));
 ### Before Starting Work
 1. Read this document
 2. Read `WORLD.md` for lore context
-3. Review `replit.md` for technical context
-4. Check existing code patterns
+3. Review `BUILD_PLAN_TONIGHT.md` and `VANILLA_JS_PLAN.md` for architecture
+4. Study POC (`pocs/otterblade_odyssey.html`) for proven patterns
+5. Check existing code patterns
 
 ### During Work
 1. Follow these standards strictly
 2. Clean up as you go
 3. Test your changes
-4. Use typed data loaders
+4. Use async data loaders (not direct imports)
+5. Keep it simple - vanilla JS patterns from POC
 
 ### Before Completing
 1. Run `pnpm biome check .`
-2. Run `pnpm tsc --noEmit`
-3. Request architect review
+2. Test in browser (no build step needed for dev)
+3. Request review if making significant changes
 4. Fix all raised issues
 5. Verify workflow runs without errors
 

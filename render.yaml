@@ -2,8 +2,8 @@ services:
   - type: web
     name: otterblade-odyssey
     runtime: static
-    buildCommand: pnpm install --frozen-lockfile && pnpm build
-    staticPublishPath: ./dist/public
+    buildCommand: pnpm install --frozen-lockfile && pnpm build:client
+    staticPublishPath: ./dist
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*
@@ -24,6 +24,6 @@ services:
         destination: /index.html
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 25
       - key: PNPM_VERSION
         value: 10

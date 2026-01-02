@@ -24,7 +24,8 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, 'client', 'src'),
       '@shared': path.resolve(import.meta.dirname, 'shared'),
-      '@assets': path.resolve(import.meta.dirname, 'attached_assets'),
+      // Note: @assets alias removed - game should use procedural generation
+      // not static PNG/MP4 files. See NEXT_SESSION_TODO.md for implementation plan.
     },
   },
   css: {

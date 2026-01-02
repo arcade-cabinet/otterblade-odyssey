@@ -83,18 +83,23 @@ pnpm --filter @otterblade/dev-tools cli -- --force --id player_sprite_sheet
 | Parallax backgrounds | `client/src/assets/images/parallax/` |
 | Cinematics | `attached_assets/generated_videos/` |
 
-### Importing Assets
+### Asset Usage (IMPORTANT UPDATE)
 
-Always use the `@assets` alias in Vite:
+**Static PNG/MP4 assets have been REMOVED from the codebase.**
+
+The game should use **procedural generation** like the POC (`pocs/otterblade_odyssey.html`):
 
 ```tsx
-// ✅ CORRECT
-import parallax from '@assets/images/parallax/village_morning_parallax_background.png';
-import chapterPlate from '@assets/images/chapter-plates/prologue_village_chapter_plate.png';
+// ✅ CORRECT - Procedural rendering (to be implemented)
+// See pocs/otterblade_odyssey.html for reference
+// Use canvas-based procedural generation for visuals
 
-// ❌ WRONG - Never use relative paths to attached_assets
-import bg from '../../../attached_assets/...';
+// ❌ WRONG - Static asset imports (removed from codebase)
+// import otterSprite from '@assets/...png';  // DO NOT USE
+// import chapterPlate from '@assets/...png';  // DO NOT USE
 ```
+
+See `NEXT_SESSION_TODO.md` for implementation plan.
 
 ## Design Principles
 

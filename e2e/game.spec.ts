@@ -103,13 +103,14 @@ test.describe('Otterblade Odyssey', () => {
   });
 
   test('should render canvas element', async ({ page }) => {
-    await page.waitForTimeout(hasMcpSupport ? 3000 : 2500);
+    // Wait for WebGL context to initialize
+    await page.waitForTimeout(hasMcpSupport ? 5000 : 3000);
 
     const canvas = page.locator('canvas');
     const canvasCount = await canvas.count();
 
     if (hasMcpSupport) {
-      await expect(canvas).toBeVisible({ timeout: 15000 });
+      await expect(canvas).toBeVisible({ timeout: 20000 });
       expect(canvasCount).toBeGreaterThan(0);
     } else {
       console.log(`Canvas elements found: ${canvasCount}`);

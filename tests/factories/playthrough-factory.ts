@@ -45,7 +45,9 @@ export async function executePlaythrough(
 
   // Parse level geometry
   const geometry = parseLevel(config.chapter);
-  console.log(`Parsed level: ${geometry.platforms.length} platforms, ${geometry.walls.length} walls`);
+  console.log(
+    `Parsed level: ${geometry.platforms.length} platforms, ${geometry.walls.length} walls`
+  );
 
   // Create AI player
   const aiPlayer = new AIPlayer({
@@ -151,7 +153,9 @@ export async function executePlaythrough(
     // Log progress periodically
     if (iterations % 50 === 0) {
       const progress = aiPlayer.getProgress();
-      console.log(`Progress: ${(progress * 100).toFixed(1)}% (${iterations * loopInterval}ms elapsed)`);
+      console.log(
+        `Progress: ${(progress * 100).toFixed(1)}% (${iterations * loopInterval}ms elapsed)`
+      );
     }
   }
 
@@ -159,7 +163,7 @@ export async function executePlaythrough(
     success: false,
     duration: Date.now() - startTime,
     screenshots,
-    finalPosition: await getPlayerState(page).then(s => ({ x: s.x, y: s.y })),
+    finalPosition: await getPlayerState(page).then((s) => ({ x: s.x, y: s.y })),
     error: 'Timeout - max duration exceeded',
   };
 }

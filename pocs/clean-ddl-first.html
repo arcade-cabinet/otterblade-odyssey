@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otterblade Odyssey - CLEAN DDL PROOF</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Georgia', serif; overflow: hidden; }
+        #gameCanvas { display: block; }
+        .hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #F4D03F;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div class="hud">
+        <div>❤️ Health: <span id="health">5</span></div>
+        <div>💎 Shards: <span id="shards">0</span></div>
+        <div>📍 Chapter: <span id="chapter">0 - The Calling</span></div>
+        <div>🎯 Quest: <span id="quest">Answer the Call</span></div>
+        <div style="margin-top:10px; color: #8FBC8F;">Controls: Arrow Keys / WASD, Space = Jump</div>
+    </div>
+
+    <script>
+// CLEAN IMPLEMENTATION - DDL FIRST, POC RENDERING, NO BULLSHIT
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// GAME STATE - Zustand-style with localStorage
+const gameState = {
+    currentChapter: 0,
+    health: 5,
+    shards: 0,
+    save() {
+        localStorage.setItem('otterblade', JSON.stringify(this));
+    },
+    load() {
+        const saved = localStorage.getItem('otterblade');
+        if (saved) Object.assign(this, JSON.parse(saved));
+    }
+};
+gameState.load();
+
+// DDL - Chapter manifest (would load from JSON)
+const chapter0DDL = {
+    id: 0,
+    name: "The Calling",
+    quest: "Answer the Call",
+    spawn: { x: 200, y: 300 },
+    boundaries: [
+        { x: 0, y: 450, width: 1200, height: 50 },
+        { x: 300, y: 350, width: 150, height: 20 },
+        { x: 550, y: 300, width: 150, height: 20 },
+        { x: 800, y: 250, width: 150, height: 20 }
+    ]
+};
+
+// PLAYER - From DDL spawn
+const player = {
+    x: chapter0DDL.spawn.x,
+    y: chapter0DDL.spawn.y,
+    vx: 0,
+    vy: 0,
+    facing: 1,
+    state: 'idle',
+    onGround: false
+};
+
+// PLATFORMS - From DDL boundaries
+const platforms = chapter0DDL.boundaries;
+
+// CONTROLS
+const keys = {};
+window.addEventListener('keydown', (e) => {
+    keys[e.key] = true;
+    if ((e.key === ' ' || e.key === 'w' || e.key === 'ArrowUp') && player.onGround) {
+        player.vy = -12;
+    }
+});
+window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+// PROCEDURAL RENDERER - POC style
+function drawPlayer(frame) {
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.scale(player.facing, 1);
+    
+    const breathe = Math.sin(frame * 0.1) * 2;
+    
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(0, 22, 15, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Body
+    ctx.fillStyle = '#8B6F47';
+    ctx.strokeStyle = '#6B5330';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0 + breathe, 15, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Belly
+    ctx.fillStyle = '#D4A574';
+    ctx.beginPath();
+    ctx.ellipse(0, 2 + breathe, 10, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.beginPath();
+    ctx.ellipse(0, -18 + breathe, 10, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Snout
+    ctx.fillStyle = '#D4A574';
+    ctx.beginPath();
+    ctx.ellipse(5, -15 + breathe, 6, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Nose
+    ctx.fillStyle = '#2C3E50';
+    ctx.beginPath();
+    ctx.arc(9, -15 + breathe, 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Eyes
+    ctx.fillStyle = '#2C3E50';
+    ctx.beginPath();
+    ctx.arc(-3, -20 + breathe, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(3, -20 + breathe, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Eye gleam
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillRect(-4, -21 + breathe, 1, 1);
+    ctx.fillRect(2, -21 + breathe, 1, 1);
+    
+    // Ears
+    ctx.fillStyle = '#8B6F47';
+    ctx.beginPath();
+    ctx.arc(-7, -24 + breathe, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(7, -24 + breathe, 4, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+function drawBackground(scrollX) {
+    // Sky gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    skyGrad.addColorStop(0, '#87CEEB');
+    skyGrad.addColorStop(1, '#D4E6F1');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Mountains (parallax)
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#34495E';
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height * 0.6);
+    for (let x = 0; x < canvas.width + 200; x += 100) {
+        const h = canvas.height * 0.4 + Math.sin((x + scrollX * 0.1) * 0.01) * 50;
+        ctx.lineTo(x, h);
+    }
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+// PHYSICS - Simple AABB
+function updatePhysics() {
+    player.vy += 0.6; // Gravity
+    player.x += player.vx;
+    player.y += player.vy;
+    
+    player.onGround = false;
+    platforms.forEach(p => {
+        if (player.x + 15 > p.x && player.x - 15 < p.x + p.width &&
+            player.y + 30 > p.y && player.y - 30 < p.y + p.height) {
+            if (player.vy > 0) {
+                player.y = p.y - 30;
+                player.vy = 0;
+                player.onGround = true;
+            }
+        }
+    });
+}
+
+// UPDATE
+function update() {
+    if (keys['ArrowLeft'] || keys['a']) {
+        player.vx = -4;
+        player.facing = -1;
+        player.state = 'walking';
+    } else if (keys['ArrowRight'] || keys['d']) {
+        player.vx = 4;
+        player.facing = 1;
+        player.state = 'walking';
+    } else {
+        player.vx *= 0.8;
+        if (Math.abs(player.vx) < 0.1) {
+            player.vx = 0;
+            player.state = 'idle';
+        }
+    }
+    
+    updatePhysics();
+}
+
+// RENDER
+let frame = 0;
+function gameLoop() {
+    update();
+    
+    // Draw
+    drawBackground(player.x);
+    
+    ctx.save();
+    ctx.translate(-player.x + canvas.width / 2, 0);
+    
+    // Platforms from DDL
+    ctx.fillStyle = '#5D4E37';
+    platforms.forEach(p => {
+        ctx.fillRect(p.x, p.y, p.width, p.height);
+    });
+    
+    // Player (POC procedural)
+    drawPlayer(frame);
+    
+    ctx.restore();
+    
+    frame++;
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+console.log('🎮 CLEAN IMPLEMENTATION RUNNING');
+console.log('📜 DDL Loaded:', chapter0DDL.name);
+console.log('🎯 Quest:', chapter0DDL.quest);
+console.log('✅ Procedural rendering: POC otter');
+console.log('✅ DDL-driven platforms');
+console.log('✅ Simple physics');
+console.log('✅ localStorage state');
+console.log('');
+console.log('THIS IS WHAT WORKS. NO R3F, NO ECS, NO COMPLEXITY.');
+    </script>
+</body>
+</html>

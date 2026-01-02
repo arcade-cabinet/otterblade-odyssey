@@ -22,8 +22,9 @@ on:
         description: 'Asset category to generate (leave empty for all)'
         required: false
         type: choice
+        default: 'all'
         options:
-          - ''
+          - 'all'
           - sprites
           - enemies
           - cinematics
