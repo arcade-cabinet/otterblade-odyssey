@@ -2,12 +2,14 @@ import path from 'node:path';
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import solidPlugin from 'vite-plugin-solid';
 import { defineConfig } from 'vite';
 import { metaImagesPlugin } from './vite-plugin-meta-images';
 
 export default defineConfig({
   plugins: [
     react(),
+    solidPlugin(),
     runtimeErrorOverlay(),
     tailwindcss(),
     metaImagesPlugin(),
