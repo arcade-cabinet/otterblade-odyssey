@@ -28,32 +28,45 @@ reviews:
   
   # Scope of review
   tools:
-    biome: true
-    github-checks: true
-    markdownlint: false
-    languagetool: false
+    biome:
+      enabled: true
+    github-checks:
+      enabled: true
+    markdownlint:
+      enabled: false
+    languagetool:
+      enabled: false
   
   # Path-specific instructions
   path_instructions:
-    - path: "client/**/*.{ts,tsx}"
+    - path: "game/src/**/*.{js,jsx}"
       instructions: |
-        - Follow React Three Fiber patterns
-        - Use Miniplex ECS with for...of iteration
-        - Ensure TypeScript strict mode compliance
-        - Check for physics simulation correctness
-    
+        - Follow Astro + Solid.js patterns
+        - Use Matter.js for physics (proven in POC)
+        - Procedural rendering with Canvas 2D API
+        - Check for proper DDL manifest loading
+        - Warm aesthetic consistency (BRAND.md)
+
+    - path: "client/src/**/*.{ts,tsx}"
+      instructions: |
+        - Legacy React Three Fiber code (being migrated)
+        - Check for migration opportunities to Astro + Solid.js
+        - Flag static asset imports (should be procedural)
+
     - path: "e2e/**/*.spec.ts"
       instructions: |
         - Verify Playwright best practices
         - Check for proper test isolation
         - Ensure video capture is configured correctly
-    
+        - Validate game state API usage
+
     - path: ".github/workflows/**/*.yml"
       instructions: |
         - Validate GitHub Actions syntax
         - Check for proper secret handling
         - Verify workflow dependencies and triggers
         - Ensure proper permissions are set
+        - Node.js version must be 25.x
 
 # Chat settings
 chat:
@@ -61,13 +74,13 @@ chat:
 
 # Knowledge base
 knowledge_base:
-  # Game-specific patterns
+  # Game-specific patterns (updated for Astro + Solid.js architecture)
   learnings:
-    - "Use pnpm exclusively, never npm or yarn"
-    - "Import assets using @assets alias"
-    - "ECS entities use optional components pattern"
-    - "Miniplex queries use for...of iteration"
-    - "Remove entities in two-pass: collect then remove"
-    - "Biome index bounds checking required"
-    - "React Three Fiber for 3D rendering"
-    - "Rapier for physics simulation"
+    - pattern: "Use pnpm exclusively, never npm or yarn"
+    - pattern: "Procedural rendering with Canvas 2D, no static PNG/MP4 imports"
+    - pattern: "Matter.js for physics simulation (proven in POC)"
+    - pattern: "Solid.js for reactive UI components"
+    - pattern: "Astro for static site generation"
+    - pattern: "JavaScript preferred over TypeScript for simplicity"
+    - pattern: "DDL-driven architecture with JSON manifests"
+    - pattern: "Warm Redwall-inspired aesthetic (BRAND.md)"

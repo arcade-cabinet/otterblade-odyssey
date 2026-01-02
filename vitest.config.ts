@@ -17,7 +17,9 @@ export default defineConfig({
         'tests/',
         'e2e/',
         '**/*.spec.ts',
+        '**/*.spec.js',
         '**/*.test.ts',
+        '**/*.test.js',
         '**/*.d.ts',
         '**/types/',
         'vite.config.ts',
@@ -26,6 +28,7 @@ export default defineConfig({
         'drizzle.config.ts',
         '.github/',
         'proofs/',
+        'pocs/',
         'attached_assets/',
         'server/',
         'script/',
@@ -38,7 +41,12 @@ export default defineConfig({
       // Output coverage to standard location for Coveralls
       reportsDirectory: './coverage',
     },
-    include: ['tests/**/*.{test,spec}.{ts,tsx}', 'client/src/**/*.{test,spec}.{ts,tsx}'],
+    // Test both legacy TypeScript and new JavaScript code
+    include: [
+      'tests/**/*.{test,spec}.{ts,tsx,js,jsx}',
+      'client/src/**/*.{test,spec}.{ts,tsx}',
+      'game/src/**/*.{test,spec}.{js,jsx}',
+    ],
     exclude: ['node_modules', 'dist', 'e2e'],
     // Handle ESM packages that have directory imports or other Node ESM issues
     server: {
@@ -52,6 +60,8 @@ export default defineConfig({
           'miniplex',
           'miniplex-react',
           '@hmans/use-rerender',
+          'matter-js',
+          'yuka',
         ],
       },
     },
@@ -59,7 +69,7 @@ export default defineConfig({
     deps: {
       optimizer: {
         web: {
-          include: ['miniplex-react'],
+          include: ['miniplex-react', 'matter-js'],
         },
       },
     },
@@ -68,7 +78,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './client/src'),
       '@shared': path.resolve(__dirname, './shared'),
-      '@assets': path.resolve(__dirname, './attached_assets'),
+      '@game': path.resolve(__dirname, './game/src'),
     },
     conditions: ['node', 'default', 'import'],
   },
