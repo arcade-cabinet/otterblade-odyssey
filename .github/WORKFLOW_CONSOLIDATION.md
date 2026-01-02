@@ -159,6 +159,47 @@ Removed Jules integration:
 
 ---
 
+## Security & Configuration
+
+### Security Improvements (2026-01-02)
+
+All workflows now follow these security best practices:
+
+1. **Least Privilege Tokens**
+   - Checkout steps use workflow-scoped `GITHUB_TOKEN` instead of PAT
+   - Only actions that need write access use `CI_GITHUB_TOKEN`
+
+2. **Dependency Pinning**
+   - External workflows/actions pinned to commit SHA (not `@main`)
+   - Update instructions in comments for maintainability
+
+3. **Input Validation**
+   - Branch names validated with strict regex (prevents path traversal)
+   - Fork PRs rejected from autoheal workflow
+
+4. **Log Sanitization**
+   - Failure logs sanitized to strip tokens, API keys, credentials
+   - Defense-in-depth beyond GitHub's built-in masking
+
+5. **Author Verification**
+   - `@claude` commands require write access or higher
+   - Unauthorized attempts rejected with explanatory comment
+   - Full audit trail of who invoked AI agents
+
+### Configurable Settings
+
+Override defaults via repository variables:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `AI_AGENT_PATTERNS` | `copilot\|github-actions\|...` | AI bot regex for PR tracking |
+| `ESCALATION_SUGGESTIONS_THRESHOLD` | `5` | Review escalation (suggestions count) |
+| `ESCALATION_LOC_THRESHOLD` | `500` | Review escalation (lines changed) |
+| `CLAUDE_ALLOWED_TOOLS` | `Edit,MultiEdit,Write,...` | Tools available to @claude |
+| `OLLAMA_MODEL` | `glm-4.6:cloud` | Model for Ollama reviews/fixes |
+
+---
+
 ## Migration Notes
 
 ### For maintainers:
