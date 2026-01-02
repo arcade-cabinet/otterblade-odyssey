@@ -168,6 +168,7 @@ export const PlatformSchema = z.object({
   x: z.number(),
   y: z.number(),
   width: z.number(),
+  height: z.number(),
   // Flexible platform types for varied level design
   type: z.string(),
   asset: z.string().optional(),

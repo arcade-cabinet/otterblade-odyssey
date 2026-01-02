@@ -1,3 +1,4 @@
+/** @jsxImportSource solid-js */
 /**
  * Main Otterblade Odyssey Game Component
  * Uses DDL loaders and factory patterns to build the game from JSON manifests
@@ -11,7 +12,7 @@ import type { ChapterManifest } from './data/manifest-schemas';
 const { Engine, World, Bodies, Body, Events, Runner } = Matter;
 
 export default function OtterbladeGame() {
-  let canvasRef: HTMLCanvasElement | undefined;
+  let canvasRef!: HTMLCanvasElement;
   const [currentChapter, setCurrentChapter] = createSignal(0);
   const [health, setHealth] = createSignal(5);
   const [shards, setShards] = createSignal(0);
@@ -60,7 +61,7 @@ export default function OtterbladeGame() {
               platformDef.x,
               platformDef.y,
               platformDef.width,
-              20, // Default platform thickness
+              platformDef.height,
               {
                 isStatic: true,
                 label: 'platform',
@@ -218,18 +219,18 @@ export default function OtterbladeGame() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            textAlign: 'center',
-            zIndex: 1000,
-          }}
+            'text-align': 'center',
+            'z-index': '1000',
+          } as any}
         >
           <h1
             style={{
-              fontFamily: 'Georgia, serif',
+              'font-family': 'Georgia, serif',
               color: '#F4D03F',
-              fontSize: '48px',
-              marginBottom: '20px',
-              textShadow: '2px 2px 8px rgba(0,0,0,0.9)',
-            }}
+              'font-size': '48px',
+              'margin-bottom': '20px',
+              'text-shadow': '2px 2px 8px rgba(0,0,0,0.9)',
+            } as any}
           >
             Otterblade Odyssey
           </h1>
@@ -239,14 +240,14 @@ export default function OtterbladeGame() {
             style={{
               background: 'rgba(230, 126, 34, 0.9)',
               border: '3px solid #F4D03F',
-              borderRadius: '12px',
+              'border-radius': '12px',
               color: '#F4D03F',
               padding: '20px 40px',
-              fontSize: '24px',
-              fontFamily: 'Georgia, serif',
+              'font-size': '24px',
+              'font-family': 'Georgia, serif',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(192, 57, 43, 0.6)',
-            }}
+              'box-shadow': '0 4px 12px rgba(192, 57, 43, 0.6)',
+            } as any}
           >
             Begin Journey
           </button>
@@ -264,17 +265,17 @@ export default function OtterbladeGame() {
             left: '20px',
             background: 'rgba(93, 78, 55, 0.9)',
             padding: '15px',
-            borderRadius: '12px',
+            'border-radius': '12px',
             border: '3px solid #D4A574',
             color: '#F4D03F',
-            fontFamily: 'Georgia, serif',
-            minWidth: '200px',
-          }}
+            'font-family': 'Georgia, serif',
+            'min-width': '200px',
+          } as any}
         >
           <div>
             Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}
           </div>
-          <div style={{ marginTop: '8px' }}>Health: {'❤️'.repeat(health())}</div>
+          <div style={{ 'margin-top': '8px' } as any}>Health: {'❤️'.repeat(health())}</div>
           <div>Shards: {shards()} ✨</div>
         </div>
       </Show>

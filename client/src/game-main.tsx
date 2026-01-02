@@ -1,4 +1,8 @@
+/** @jsxImportSource solid-js */
 import { render } from 'solid-js/web';
 import OtterbladeGame from './game/OtterbladeGame';
 
-render(() => <OtterbladeGame />, document.getElementById('root')!);
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  render(() => <OtterbladeGame />, rootElement);
+}
