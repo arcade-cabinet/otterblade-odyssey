@@ -110,8 +110,12 @@ jobs:
           echo "is_fork=false" >> $GITHUB_OUTPUT
 
           # Validate branch name (prevent path traversal: no .., .git/, leading dots/slashes)
-          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9][a-zA-Z0-9/_-]*$ ]]; then
-            echo "::error::Invalid branch name: must start with alphanumeric and contain only alphanumeric, /, _, or -"
+          # Allow forward slashes (e.g., feature/my-branch) but reject dangerous patterns
+          if [[ ! "$HEAD_BRANCH" =~ ^[a-zA-Z0-9][a-zA-Z0-9/_-]*$ ]] || \
+             [[ "$HEAD_BRANCH" =~ \.\. ]] || \
+             [[ "$HEAD_BRANCH" =~ \.git ]] || \
+             [[ "$HEAD_BRANCH" =~ ^[/.] ]]; then
+            echo "::error::Invalid branch name: must start with alphanumeric, no '..' or '.git' patterns"
             echo "is_trusted=false" >> $GITHUB_OUTPUT
             exit 0
           fi

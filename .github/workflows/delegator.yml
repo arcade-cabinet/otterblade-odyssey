@@ -99,8 +99,21 @@ jobs:
         run: |
           # Security: Only allow repository collaborators to invoke @claude
           # This prevents unauthorized users from executing arbitrary code changes
-          PERMISSION=$(gh api repos/${{ env.TARGET_REPO }}/collaborators/$COMMENT_AUTHOR/permission --jq '.permission' 2>&1 || echo "none")
+          set +e  # Don't exit on error, we want to handle it
+          PERMISSION_JSON=$(gh api repos/${{ env.TARGET_REPO }}/collaborators/$COMMENT_AUTHOR/permission 2>&1)
+          API_EXIT_CODE=$?
+          set -e
 
+          if [ $API_EXIT_CODE -ne 0 ]; then
+            # API call failed - user is not a collaborator or API error
+            echo "authorized=false" >> $GITHUB_OUTPUT
+            echo "::warning::@claude invoked by non-collaborator or API error: $COMMENT_AUTHOR. Ignoring request."
+            gh issue comment ${{ env.TARGET_ISSUE }} --repo ${{ env.TARGET_REPO }} \
+              --body "⚠️ @$COMMENT_AUTHOR does not have permission to invoke @claude (requires write access or higher)" || true
+            exit 0
+          fi
+
+          PERMISSION=$(echo "$PERMISSION_JSON" | jq -r '.permission // "none"')
           echo "User: $COMMENT_AUTHOR, Permission: $PERMISSION"
 
           if [[ "$PERMISSION" =~ ^(admin|write|maintain)$ ]]; then
@@ -109,8 +122,7 @@ jobs:
           else
             echo "authorized=false" >> $GITHUB_OUTPUT
             echo "::warning::@claude invoked by unauthorized user: $COMMENT_AUTHOR (permission: $PERMISSION). Ignoring request."
-            # Post a comment explaining why
-            gh pr comment ${{ env.TARGET_ISSUE }} --repo ${{ env.TARGET_REPO }} \
+            gh issue comment ${{ env.TARGET_ISSUE }} --repo ${{ env.TARGET_REPO }} \
               --body "⚠️ @$COMMENT_AUTHOR does not have permission to invoke @claude (requires write access or higher)" || true
           fi
 
