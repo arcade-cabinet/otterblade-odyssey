@@ -60,7 +60,7 @@ export default function OtterbladeGame() {
               platformDef.x,
               platformDef.y,
               platformDef.width,
-              platformDef.height,
+              20, // Default platform thickness
               {
                 isStatic: true,
                 label: 'platform',
@@ -218,17 +218,17 @@ export default function OtterbladeGame() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            'text-align': 'center',
-            'z-index': 1000,
+            textAlign: 'center',
+            zIndex: 1000,
           }}
         >
           <h1
             style={{
-              'font-family': 'Georgia, serif',
+              fontFamily: 'Georgia, serif',
               color: '#F4D03F',
-              'font-size': '48px',
-              'margin-bottom': '20px',
-              'text-shadow': '2px 2px 8px rgba(0,0,0,0.9)',
+              fontSize: '48px',
+              marginBottom: '20px',
+              textShadow: '2px 2px 8px rgba(0,0,0,0.9)',
             }}
           >
             Otterblade Odyssey
@@ -239,13 +239,13 @@ export default function OtterbladeGame() {
             style={{
               background: 'rgba(230, 126, 34, 0.9)',
               border: '3px solid #F4D03F',
-              'border-radius': '12px',
+              borderRadius: '12px',
               color: '#F4D03F',
               padding: '20px 40px',
-              'font-size': '24px',
-              'font-family': 'Georgia, serif',
+              fontSize: '24px',
+              fontFamily: 'Georgia, serif',
               cursor: 'pointer',
-              'box-shadow': '0 4px 12px rgba(192, 57, 43, 0.6)',
+              boxShadow: '0 4px 12px rgba(192, 57, 43, 0.6)',
             }}
           >
             Begin Journey
@@ -264,17 +264,17 @@ export default function OtterbladeGame() {
             left: '20px',
             background: 'rgba(93, 78, 55, 0.9)',
             padding: '15px',
-            'border-radius': '12px',
+            borderRadius: '12px',
             border: '3px solid #D4A574',
             color: '#F4D03F',
-            'font-family': 'Georgia, serif',
-            'min-width': '200px',
+            fontFamily: 'Georgia, serif',
+            minWidth: '200px',
           }}
         >
           <div>
             Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}
           </div>
-          <div style={{ 'margin-top': '8px' }}>Health: {'❤️'.repeat(health())}</div>
+          <div style={{ marginTop: '8px' }}>Health: {'❤️'.repeat(health())}</div>
           <div>Shards: {shards()} ✨</div>
         </div>
       </Show>
