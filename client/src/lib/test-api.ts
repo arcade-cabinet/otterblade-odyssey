@@ -52,7 +52,7 @@ export function initializeTestAPI(): void {
   const api: GameTestAPI = {
     getPlayerState: () => {
       const store = useStore.getState();
-      const isGrounded = ['idle', 'run', 'slide'].includes(store.playerState);
+      const isGrounded = ['idle', 'run', 'slide', 'slink', 'sprint', 'land', 'roll'].includes(store.playerState);
 
       return {
         x: store.playerX,
