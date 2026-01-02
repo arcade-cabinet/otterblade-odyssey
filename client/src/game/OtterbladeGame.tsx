@@ -125,6 +125,9 @@ export default function OtterbladeGame() {
       camera.y = player.position.y - canvas.height / 2;
 
       // Render
+      if (!canvas || !ctx) {
+        return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       // Background
