@@ -3,7 +3,7 @@
  * Creates platforms/boundaries from JSON instead of random generation
  */
 
-import type { ChapterManifest } from '@/data/schema/chapter-schema';
+import type { ChapterManifest } from '@/game/data/manifest-schemas';
 
 export interface Platform {
   x: number;
@@ -25,32 +25,50 @@ export class LevelLoader {
    * Load level geometry from chapter manifest
    */
   loadLevelFromManifest(manifest: ChapterManifest): LevelGeometry {
-    const level = manifest.levelDefinition;
+    const level = manifest.level;
     const platforms: Platform[] = [];
 
-    // Convert DDL boundaries to platforms
-    for (const boundary of level.boundaries) {
-      platforms.push({
-        x: boundary.x,
-        y: boundary.y,
-        width: boundary.width,
-        height: boundary.height,
-        type: boundary.type as 'ground' | 'platform' | 'wall',
-      });
+    // Convert DDL segments and platforms to our Platform format
+    for (const segment of level.segments) {
+      // Add platforms from segment
+      if (segment.platforms) {
+        for (const platform of segment.platforms) {
+          platforms.push({
+            x: platform.x,
+            y: platform.y,
+            width: platform.width,
+            height: 20, // Default platform thickness
+            type: 'platform',
+          });
+        }
+      }
+
+      // Add walls from segment
+      if (segment.walls) {
+        for (const wall of segment.walls) {
+          platforms.push({
+            x: wall.x,
+            y: wall.y,
+            width: wall.width,
+            height: wall.height,
+            type: 'wall',
+          });
+        }
+      }
     }
 
-    // Get spawn point from connections
-    const spawn = manifest.connections.transitionIn.playerSpawnPoint;
+    // Get spawn point from level
+    const spawn = level.spawnPoint;
 
-    // Get exit point
-    const exit = manifest.connections.transitionOut.exitPoint;
+    // Get exit point from connections (with fallback)
+    const exit = manifest.connections.transitionOut?.exitPoint || { x: level.bounds.endX - 100, y: 0 };
 
-    // Calculate level bounds
+    // Use level bounds from manifest
     const bounds = {
-      minX: Math.min(...level.boundaries.map((b) => b.x)),
-      maxX: Math.max(...level.boundaries.map((b) => b.x + b.width)),
-      minY: Math.min(...level.boundaries.map((b) => b.y)),
-      maxY: Math.max(...level.boundaries.map((b) => b.y + b.height)),
+      minX: level.bounds.startX,
+      maxX: level.bounds.endX,
+      minY: level.bounds.minY,
+      maxY: level.bounds.maxY,
     };
 
     return {
