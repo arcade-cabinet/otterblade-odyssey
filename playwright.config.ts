@@ -29,7 +29,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'http://localhost:5173', // Single consistent port
+    baseURL: 'http://localhost:4321', // Astro default port
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: isCI ? 'on' : isMCP ? 'retain-on-failure' : 'off',
@@ -38,12 +38,9 @@ export default defineConfig({
     // Headless mode control
     headless: !isMCP,
 
-    // WebGL support for all environments
+    // Canvas 2D support (simpler than WebGL)
     launchOptions: {
       args: [
-        '--enable-webgl',
-        '--ignore-gpu-blocklist',
-        '--use-gl=swiftshader', // Software rendering fallback
         '--disable-gpu-sandbox',
       ],
     },
@@ -67,8 +64,8 @@ export default defineConfig({
 
   // Smart server management - always reuses existing, starts if needed
   webServer: {
-    command: 'pnpm run dev:client',
-    url: 'http://localhost:5173',
+    command: 'pnpm run dev:game',
+    url: 'http://localhost:4321', // Astro default port
     reuseExistingServer: true, // KEY: Always reuse for MCP seamlessness
     timeout: 120000,
     stdout: 'pipe',
