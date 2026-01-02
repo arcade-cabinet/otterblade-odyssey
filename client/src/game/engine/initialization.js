@@ -14,20 +14,8 @@ import {
   getChapterSpawnPoint,
   loadChapterManifest,
 } from '../data/chapter-loaders';
-import {
-  BellSystem,
-  FlowPuzzle,
-  HearthSystem,
-  LanternSystem,
-  TimingSequence,
-} from '../environment/EnvironmentalSystems';
-import {
-  createFinnBody,
-  createPlatform,
-  HazardSystem,
-  MovingPlatform,
-  WaterZone,
-} from '../physics/PhysicsManager';
+import { FlowPuzzle, TimingSequence } from '../environment/EnvironmentalSystems';
+import { createPlatform, MovingPlatform, WaterZone } from '../physics/PhysicsManager';
 
 const { World, Bodies } = Matter;
 
@@ -314,17 +302,11 @@ export function buildNPCs(chapterId, engine, aiManager) {
         const npc = aiManager.addNPC(npcDef.id, npcDef);
 
         // Create physics body for NPC
-        const npcBody = Bodies.rectangle(
-          npcDef.position?.x || 0,
-          npcDef.position?.y || 0,
-          35,
-          55,
-          {
-            isStatic: true,
-            label: 'npc',
-            isSensor: true,
-          }
-        );
+        const npcBody = Bodies.rectangle(npcDef.position?.x || 0, npcDef.position?.y || 0, 35, 55, {
+          isStatic: true,
+          label: 'npc',
+          isSensor: true,
+        });
         npcBodies.set(npcDef.id, { npc, body: npcBody });
         World.add(engine.world, npcBody);
       } catch (npcError) {

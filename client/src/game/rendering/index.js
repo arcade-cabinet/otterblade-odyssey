@@ -4,23 +4,23 @@
  */
 
 export {
-  drawFinn,
-  drawEnemy,
-  drawNPC,
   drawBoss,
+  drawEnemy,
+  drawFinn,
+  drawNPC,
 } from './characters.js';
 
 export {
-  drawPlatforms,
-  drawWalls,
+  drawBackground,
+  drawBossHazardZones,
+  drawBossProjectiles,
   drawCeilings,
-  drawInteractions,
-  drawWaterZones,
   drawCollectibles,
   drawEnvironmentalSystems,
   drawFlowPuzzles,
+  drawInteractions,
+  drawPlatforms,
   drawTimingSequences,
-  drawBossProjectiles,
-  drawBossHazardZones,
-  drawBackground,
+  drawWalls,
+  drawWaterZones,
 } from './environment.js';

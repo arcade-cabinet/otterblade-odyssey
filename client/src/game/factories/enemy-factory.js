@@ -1,8 +1,8 @@
 /**
  * Enemy Factory
- * 
+ *
  * Creates enemies from DDL manifests with AI behaviors.
- * 
+ *
  * @module factories/enemy-factory
  */
 
@@ -14,7 +14,7 @@ const { Bodies, World } = Matter;
 
 /**
  * Build enemies for a chapter
- * 
+ *
  * @param {number} chapterId - Chapter ID
  * @param {Object} engine - Matter.js engine
  * @returns {Array} Array of enemy objects
@@ -41,7 +41,7 @@ export function buildEnemies(chapterId, engine) {
 
 /**
  * Create a single enemy from definition
- * 
+ *
  * @param {Object} enemyDef - Enemy definition from DDL
  * @param {Object} engine - Matter.js engine
  * @returns {Object} Enemy object
@@ -69,7 +69,7 @@ export function createEnemy(enemyDef, engine) {
       friction: 0.1,
       frictionAir: 0.01,
       restitution: 0,
-      inertia: Infinity
+      inertia: Infinity,
     }
   );
 
@@ -80,13 +80,13 @@ export function createEnemy(enemyDef, engine) {
     type: enemyDef.enemyType,
     body: body,
     position: body.position,
-    
+
     // Stats
     health: enemyDef.health || stats.health,
     maxHealth: enemyDef.health || stats.health,
     damage: enemyDef.damage || stats.damage,
     speed: enemyDef.speed || stats.speed,
-    
+
     // AI behavior
     behavior: enemyDef.behavior || stats.defaultBehavior,
     aiState: 'idle',
@@ -95,7 +95,7 @@ export function createEnemy(enemyDef, engine) {
     currentPatrolIndex: 0,
     alertRadius: enemyDef.alertRadius || stats.alertRadius,
     attackRange: enemyDef.attackRange || stats.attackRange,
-    
+
     // Animation
     facing: 1,
     animFrame: 0,
@@ -103,16 +103,16 @@ export function createEnemy(enemyDef, engine) {
     alerted: false,
     damaged: false,
     damageTimer: 0,
-    
+
     // YUKA AI
     yukaEntity: new Vector3(body.position.x, body.position.y, 0),
     yukaVelocity: new Vector3(0, 0, 0),
-    
+
     // Loot
     lootTable: enemyDef.loot || stats.defaultLoot,
-    
+
     // Special abilities
-    abilities: enemyDef.abilities || []
+    abilities: enemyDef.abilities || [],
   };
 
   return enemy;
@@ -133,9 +133,7 @@ function getEnemyStats(enemyType) {
       alertRadius: 200,
       attackRange: 30,
       defaultBehavior: 'patrol',
-      defaultLoot: [
-        { item: 'shard', chance: 0.5, amount: 1 }
-      ]
+      defaultLoot: [{ item: 'shard', chance: 0.5, amount: 1 }],
     },
     stormcrow: {
       width: 32,
@@ -148,8 +146,8 @@ function getEnemyStats(enemyType) {
       defaultBehavior: 'fly_patrol',
       defaultLoot: [
         { item: 'shard', chance: 0.4, amount: 1 },
-        { item: 'feather', chance: 0.3, amount: 1 }
-      ]
+        { item: 'feather', chance: 0.3, amount: 1 },
+      ],
     },
     thornguard: {
       width: 35,
@@ -162,8 +160,8 @@ function getEnemyStats(enemyType) {
       defaultBehavior: 'guard',
       defaultLoot: [
         { item: 'shard', chance: 0.6, amount: 2 },
-        { item: 'iron_scrap', chance: 0.5, amount: 1 }
-      ]
+        { item: 'iron_scrap', chance: 0.5, amount: 1 },
+      ],
     },
     iceshard: {
       width: 30,
@@ -176,8 +174,8 @@ function getEnemyStats(enemyType) {
       defaultBehavior: 'wander',
       defaultLoot: [
         { item: 'shard', chance: 0.5, amount: 1 },
-        { item: 'ice_crystal', chance: 0.4, amount: 1 }
-      ]
+        { item: 'ice_crystal', chance: 0.4, amount: 1 },
+      ],
     },
     shadowling: {
       width: 25,
@@ -188,10 +186,8 @@ function getEnemyStats(enemyType) {
       alertRadius: 220,
       attackRange: 25,
       defaultBehavior: 'ambush',
-      defaultLoot: [
-        { item: 'shard', chance: 0.3, amount: 1 }
-      ]
-    }
+      defaultLoot: [{ item: 'shard', chance: 0.3, amount: 1 }],
+    },
   };
 
   return stats[enemyType.toLowerCase()] || stats.galeborn;
@@ -199,7 +195,7 @@ function getEnemyStats(enemyType) {
 
 /**
  * Update enemy (called each frame)
- * 
+ *
  * @param {Object} enemy - Enemy object
  * @param {number} deltaTime - Time since last frame in ms
  * @param {Object} player - Player object
@@ -233,7 +229,7 @@ export function updateEnemy(enemy, deltaTime, player, level) {
  * Update enemy AI
  * @private
  */
-function updateEnemyAI(enemy, deltaTime, player, level) {
+function updateEnemyAI(enemy, deltaTime, player, _level) {
   // Check if player is in alert radius
   if (player && !enemy.alerted) {
     const dx = player.position.x - enemy.position.x;
@@ -275,7 +271,7 @@ function executeIdleBehavior(enemy, deltaTime) {
   // Reduce velocity
   Matter.Body.setVelocity(enemy.body, {
     x: enemy.body.velocity.x * 0.9,
-    y: enemy.body.velocity.y
+    y: enemy.body.velocity.y,
   });
 
   // Return to patrol after idle time
@@ -296,7 +292,7 @@ function executeIdleBehavior(enemy, deltaTime) {
  * Execute patrol behavior
  * @private
  */
-function executePatrolBehavior(enemy, deltaTime) {
+function executePatrolBehavior(enemy, _deltaTime) {
   if (!enemy.patrolPoints || enemy.patrolPoints.length === 0) {
     enemy.aiState = 'idle';
     return;
@@ -316,7 +312,7 @@ function executePatrolBehavior(enemy, deltaTime) {
     const moveForce = enemy.speed * 0.001;
     Matter.Body.applyForce(enemy.body, enemy.position, {
       x: (dx / dist) * moveForce,
-      y: 0 // Don't move vertically for ground enemies
+      y: 0, // Don't move vertically for ground enemies
     });
     enemy.facing = dx > 0 ? 1 : -1;
   }
@@ -326,7 +322,7 @@ function executePatrolBehavior(enemy, deltaTime) {
  * Execute chase behavior
  * @private
  */
-function executeChaseBehavior(enemy, deltaTime, player) {
+function executeChaseBehavior(enemy, _deltaTime, player) {
   if (!player || !enemy.target) {
     enemy.aiState = 'patrol';
     enemy.alerted = false;
@@ -355,7 +351,7 @@ function executeChaseBehavior(enemy, deltaTime, player) {
   const moveForce = enemy.speed * 0.0015; // Faster when chasing
   Matter.Body.applyForce(enemy.body, enemy.position, {
     x: (dx / dist) * moveForce,
-    y: 0
+    y: 0,
   });
   enemy.facing = dx > 0 ? 1 : -1;
 }
@@ -382,7 +378,7 @@ function executeAttackBehavior(enemy, deltaTime) {
   // Reduce velocity during attack
   Matter.Body.setVelocity(enemy.body, {
     x: enemy.body.velocity.x * 0.5,
-    y: enemy.body.velocity.y
+    y: enemy.body.velocity.y,
   });
 }
 
@@ -390,7 +386,7 @@ function executeAttackBehavior(enemy, deltaTime) {
  * Execute retreat behavior
  * @private
  */
-function executeRetreatBehavior(enemy, deltaTime) {
+function executeRetreatBehavior(enemy, _deltaTime) {
   // Move away from player
   if (enemy.target) {
     const dx = enemy.position.x - enemy.target.position.x;
@@ -406,7 +402,7 @@ function executeRetreatBehavior(enemy, deltaTime) {
     const moveForce = enemy.speed * 0.001;
     Matter.Body.applyForce(enemy.body, enemy.position, {
       x: (dx / dist) * moveForce,
-      y: 0
+      y: 0,
     });
     enemy.facing = dx > 0 ? 1 : -1;
   }
@@ -414,7 +410,7 @@ function executeRetreatBehavior(enemy, deltaTime) {
 
 /**
  * Damage enemy
- * 
+ *
  * @param {Object} enemy - Enemy object
  * @param {number} amount - Damage amount
  * @returns {boolean} True if enemy died
@@ -442,7 +438,7 @@ export function damageEnemy(enemy, amount) {
 
 /**
  * Get enemy loot drop
- * 
+ *
  * @param {Object} enemy - Enemy object
  * @returns {Array} Array of loot items
  */
@@ -455,7 +451,7 @@ export function getEnemyLoot(enemy) {
     if (Math.random() < lootItem.chance) {
       loot.push({
         item: lootItem.item,
-        amount: lootItem.amount || 1
+        amount: lootItem.amount || 1,
       });
     }
   }
@@ -465,7 +461,7 @@ export function getEnemyLoot(enemy) {
 
 /**
  * Cleanup enemy (remove from world)
- * 
+ *
  * @param {Object} enemy - Enemy object
  * @param {Object} engine - Matter.js engine
  */

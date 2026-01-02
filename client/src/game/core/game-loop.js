@@ -1,8 +1,8 @@
 /**
  * Game Loop
- * 
+ *
  * Main game loop handling update and render cycles at 60fps.
- * 
+ *
  * @module core/game-loop
  */
 
@@ -12,14 +12,14 @@
 export class GameLoop {
   /**
    * Create a game loop
-   * 
+   *
    * @param {Function} updateCallback - Called each frame with deltaTime
    * @param {Function} renderCallback - Called each frame after update
    */
   constructor(updateCallback, renderCallback) {
     this.updateCallback = updateCallback;
     this.renderCallback = renderCallback;
-    
+
     this.running = false;
     this.animationFrameId = null;
     this.lastTime = 0;
@@ -28,7 +28,7 @@ export class GameLoop {
     this.frameCount = 0;
     this.fpsUpdateTime = 0;
     this.currentFps = 60;
-    
+
     // Fixed timestep for physics (60fps = 16.67ms)
     this.fixedDeltaTime = 1000 / 60;
     this.accumulator = 0;
@@ -82,7 +82,7 @@ export class GameLoop {
     try {
       // Fixed timestep update (for physics)
       this.accumulator += cappedDeltaTime;
-      
+
       // Clamp accumulator to prevent spiral of death
       if (this.accumulator > this.maxAccumulator) {
         this.accumulator = this.maxAccumulator;
@@ -127,7 +127,7 @@ export class GameLoop {
 
   /**
    * Get current FPS
-   * 
+   *
    * @returns {number} Current FPS
    */
   getFps() {
@@ -136,7 +136,7 @@ export class GameLoop {
 
   /**
    * Get delta time
-   * 
+   *
    * @returns {number} Delta time in milliseconds
    */
   getDeltaTime() {
@@ -145,7 +145,7 @@ export class GameLoop {
 
   /**
    * Check if loop is running
-   * 
+   *
    * @returns {boolean}
    */
   isRunning() {

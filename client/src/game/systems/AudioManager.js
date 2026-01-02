@@ -17,7 +17,7 @@ class AudioManager {
       master: 0.7,
       music: 0.6,
       sfx: 0.8,
-      ambient: 0.5
+      ambient: 0.5,
     };
 
     // Current playing state
@@ -40,69 +40,99 @@ class AudioManager {
 
   preloadCommonSounds() {
     // Footstep sounds
-    this.sfx.set('footstep', new Howl({
-      src: ['/audio/sfx/footstep.mp3', '/audio/sfx/footstep.webm'],
-      volume: this.volumes.sfx * 0.3,
-      sprite: {
-        step1: [0, 200],
-        step2: [200, 200],
-        step3: [400, 200]
-      }
-    }));
+    this.sfx.set(
+      'footstep',
+      new Howl({
+        src: ['/audio/sfx/footstep.mp3', '/audio/sfx/footstep.webm'],
+        volume: this.volumes.sfx * 0.3,
+        sprite: {
+          step1: [0, 200],
+          step2: [200, 200],
+          step3: [400, 200],
+        },
+      })
+    );
 
     // Blade sounds
-    this.sfx.set('blade_swing', new Howl({
-      src: ['/audio/sfx/blade_swing.mp3'],
-      volume: this.volumes.sfx * 0.6,
-      rate: 1.2
-    }));
+    this.sfx.set(
+      'blade_swing',
+      new Howl({
+        src: ['/audio/sfx/blade_swing.mp3'],
+        volume: this.volumes.sfx * 0.6,
+        rate: 1.2,
+      })
+    );
 
-    this.sfx.set('blade_hit', new Howl({
-      src: ['/audio/sfx/blade_hit.mp3'],
-      volume: this.volumes.sfx * 0.7
-    }));
+    this.sfx.set(
+      'blade_hit',
+      new Howl({
+        src: ['/audio/sfx/blade_hit.mp3'],
+        volume: this.volumes.sfx * 0.7,
+      })
+    );
 
     // UI sounds
-    this.sfx.set('menu_select', new Howl({
-      src: ['/audio/sfx/menu_select.mp3'],
-      volume: this.volumes.sfx * 0.5
-    }));
+    this.sfx.set(
+      'menu_select',
+      new Howl({
+        src: ['/audio/sfx/menu_select.mp3'],
+        volume: this.volumes.sfx * 0.5,
+      })
+    );
 
-    this.sfx.set('door_open', new Howl({
-      src: ['/audio/sfx/door_open.mp3'],
-      volume: this.volumes.sfx * 0.6
-    }));
+    this.sfx.set(
+      'door_open',
+      new Howl({
+        src: ['/audio/sfx/door_open.mp3'],
+        volume: this.volumes.sfx * 0.6,
+      })
+    );
 
     // Enemy sounds
-    this.sfx.set('enemy_alert', new Howl({
-      src: ['/audio/sfx/enemy_alert.mp3'],
-      volume: this.volumes.sfx * 0.7
-    }));
+    this.sfx.set(
+      'enemy_alert',
+      new Howl({
+        src: ['/audio/sfx/enemy_alert.mp3'],
+        volume: this.volumes.sfx * 0.7,
+      })
+    );
 
-    this.sfx.set('enemy_hit', new Howl({
-      src: ['/audio/sfx/enemy_hit.mp3'],
-      volume: this.volumes.sfx * 0.6
-    }));
+    this.sfx.set(
+      'enemy_hit',
+      new Howl({
+        src: ['/audio/sfx/enemy_hit.mp3'],
+        volume: this.volumes.sfx * 0.6,
+      })
+    );
 
     // Collectible sounds
-    this.sfx.set('shard_pickup', new Howl({
-      src: ['/audio/sfx/shard_pickup.mp3'],
-      volume: this.volumes.sfx * 0.8,
-      rate: 1.1
-    }));
+    this.sfx.set(
+      'shard_pickup',
+      new Howl({
+        src: ['/audio/sfx/shard_pickup.mp3'],
+        volume: this.volumes.sfx * 0.8,
+        rate: 1.1,
+      })
+    );
 
     // Bell sounds
-    this.sfx.set('bell_ring', new Howl({
-      src: ['/audio/sfx/bell_ring.mp3'],
-      volume: this.volumes.sfx * 0.9
-    }));
+    this.sfx.set(
+      'bell_ring',
+      new Howl({
+        src: ['/audio/sfx/bell_ring.mp3'],
+        volume: this.volumes.sfx * 0.9,
+      })
+    );
 
     // Hearth sounds
-    this.ambience.set('hearth_crackle', new Howl({
-      src: ['/audio/ambient/hearth_crackle.mp3'],
-      volume: this.volumes.ambient * 0.5,
-      loop: true
-    }));
+    this.ambience.set(
+      'hearth_crackle',
+      new Howl({
+        src: ['/audio/ambient/hearth_crackle.mp3'],
+        volume: this.volumes.ambient * 0.5,
+        loop: true,
+      })
+    );
   }
 
   /**
@@ -119,27 +149,33 @@ class AudioManager {
         if (!this.music) {
           this.music = new Map();
         }
-        this.music.set(track.id, new Howl({
-          src: [track.url],
-          volume: this.volumes.music,
-          loop: track.loop !== false,
-          onend: () => {
-            if (track.nextTrack) {
-              this.playMusic(track.nextTrack);
-            }
-          }
-        }));
+        this.music.set(
+          track.id,
+          new Howl({
+            src: [track.url],
+            volume: this.volumes.music,
+            loop: track.loop !== false,
+            onend: () => {
+              if (track.nextTrack) {
+                this.playMusic(track.nextTrack);
+              }
+            },
+          })
+        );
       }
     }
 
     // Load ambient sounds
     if (ambience) {
       for (const ambient of ambience) {
-        this.ambience.set(ambient.id, new Howl({
-          src: [ambient.url],
-          volume: this.volumes.ambient * (ambient.volume || 1),
-          loop: ambient.loop !== false
-        }));
+        this.ambience.set(
+          ambient.id,
+          new Howl({
+            src: [ambient.url],
+            volume: this.volumes.ambient * (ambient.volume || 1),
+            loop: ambient.loop !== false,
+          })
+        );
       }
     }
   }
@@ -212,7 +248,7 @@ class AudioManager {
     // Clone options with defaults
     const playOptions = {
       rate: options.rate || 1,
-      volume: options.volume !== undefined ? options.volume : 1
+      volume: options.volume !== undefined ? options.volume : 1,
     };
 
     // Apply rate and volume
@@ -250,7 +286,7 @@ class AudioManager {
     const ambient = this.ambience.get(ambientId);
     if (ambient) {
       ambient.stop();
-      this.currentAmbience = this.currentAmbience.filter(id => id !== ambientId);
+      this.currentAmbience = this.currentAmbience.filter((id) => id !== ambientId);
     }
   }
 

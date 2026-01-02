@@ -1,8 +1,8 @@
 /**
  * Interaction Factory
- * 
+ *
  * Creates interactive objects from DDL manifests (hearths, levers, doors, chests, etc.)
- * 
+ *
  * @module factories/interaction-factory
  */
 
@@ -12,13 +12,13 @@ const { Bodies, World } = Matter;
 
 /**
  * Build interactions for a chapter
- * 
+ *
  * @param {number} chapterId - Chapter ID
  * @param {Object} manifest - Chapter manifest
  * @param {Object} engine - Matter.js engine
  * @returns {Array} Array of interaction objects
  */
-export function buildInteractions(chapterId, manifest, engine) {
+export function buildInteractions(_chapterId, manifest, engine) {
   if (!manifest || !manifest.interactions) {
     return [];
   }
@@ -39,7 +39,7 @@ export function buildInteractions(chapterId, manifest, engine) {
 
 /**
  * Create a single interaction from definition
- * 
+ *
  * @param {Object} interactionDef - Interaction definition from DDL
  * @param {Object} engine - Matter.js engine
  * @returns {Object} Interaction object
@@ -54,13 +54,13 @@ export function createInteraction(interactionDef, engine) {
     type: interactionDef.type,
     position: {
       x: interactionDef.position?.x || 0,
-      y: interactionDef.position?.y || 0
+      y: interactionDef.position?.y || 0,
     },
     state: interactionDef.initialState || 'default',
     interactable: true,
     requiresItem: interactionDef.requiresItem,
     triggerOnInteract: interactionDef.triggerOnInteract,
-    
+
     // Create sensor for interaction range
     sensor: Bodies.rectangle(
       interactionDef.position?.x || 0,
@@ -70,9 +70,9 @@ export function createInteraction(interactionDef, engine) {
       {
         isSensor: true,
         label: 'interaction',
-        interactionId: interactionDef.id
+        interactionId: interactionDef.id,
       }
-    )
+    ),
   };
 
   World.add(engine.world, interaction.sensor);
@@ -232,7 +232,7 @@ function initializePortal(interaction, def) {
 
 /**
  * Interact with an object
- * 
+ *
  * @param {Object} interaction - Interaction object
  * @param {Object} player - Player object
  * @param {Object} gameState - Current game state
@@ -247,7 +247,7 @@ export function interact(interaction, player, gameState) {
   if (interaction.requiresItem && !hasItem(player, interaction.requiresItem, gameState)) {
     return {
       success: false,
-      message: `Requires ${interaction.requiresItem}`
+      message: `Requires ${interaction.requiresItem}`,
     };
   }
 
@@ -289,13 +289,12 @@ function interactHearth(interaction, player, gameState) {
 
   const results = {
     success: true,
-    effects: []
+    effects: [],
   };
 
   if (interaction.heals && player.health < player.maxHealth) {
-    const healAmount = interaction.healAmount === 'full' 
-      ? player.maxHealth
-      : interaction.healAmount;
+    const healAmount =
+      interaction.healAmount === 'full' ? player.maxHealth : interaction.healAmount;
     player.health = Math.min(player.maxHealth, player.health + healAmount);
     results.effects.push('healed');
   }
@@ -317,7 +316,7 @@ function interactHearth(interaction, player, gameState) {
  * Interact with lever
  * @private
  */
-function interactLever(interaction, player, gameState) {
+function interactLever(interaction, _player, gameState) {
   interaction.pulled = !interaction.pulled;
   interaction.state = interaction.pulled ? 'pulled' : 'default';
 
@@ -336,7 +335,7 @@ function interactLever(interaction, player, gameState) {
 
   return {
     success: true,
-    state: interaction.pulled ? 'pulled' : 'released'
+    state: interaction.pulled ? 'pulled' : 'released',
   };
 }
 
@@ -368,7 +367,7 @@ function interactDoor(interaction, player, gameState) {
   if (interaction.destination) {
     return {
       success: true,
-      teleport: interaction.destination
+      teleport: interaction.destination,
     };
   }
 
@@ -401,7 +400,7 @@ function interactChest(interaction, player, gameState) {
       success: true,
       trapped: true,
       damage: interaction.trapDamage,
-      contents: interaction.contents
+      contents: interaction.contents,
     };
   }
 
@@ -410,7 +409,7 @@ function interactChest(interaction, player, gameState) {
 
   return {
     success: true,
-    contents: interaction.contents
+    contents: interaction.contents,
   };
 }
 
@@ -418,7 +417,7 @@ function interactChest(interaction, player, gameState) {
  * Interact with bell
  * @private
  */
-function interactBell(interaction, player, gameState) {
+function interactBell(interaction, _player, gameState) {
   if (interaction.cooldown > 0) {
     return { success: false, message: 'Bell cooling down' };
   }
@@ -434,7 +433,7 @@ function interactBell(interaction, player, gameState) {
     return {
       success: true,
       alertEnemies: true,
-      radius: interaction.alertRadius
+      radius: interaction.alertRadius,
     };
   }
 
@@ -464,7 +463,7 @@ function interactShrine(interaction, player, gameState) {
   return {
     success: true,
     blessing: interaction.blessing,
-    duration: interaction.blessingDuration
+    duration: interaction.blessingDuration,
   };
 }
 
@@ -478,7 +477,7 @@ function interactLadder(interaction, _player, _gameState) {
     type: 'ladder',
     topY: interaction.topY,
     bottomY: interaction.bottomY,
-    climbSpeed: interaction.climbSpeed
+    climbSpeed: interaction.climbSpeed,
   };
 }
 
@@ -492,7 +491,7 @@ function interactLantern(interaction, _player, _gameState) {
 
   return {
     success: true,
-    lit: interaction.lit
+    lit: interaction.lit,
   };
 }
 
@@ -504,7 +503,7 @@ function interactSign(interaction, _player, _gameState) {
   return {
     success: true,
     message: interaction.message,
-    iconType: interaction.iconType
+    iconType: interaction.iconType,
   };
 }
 
@@ -517,13 +516,16 @@ function interactPortal(interaction, _player, _gameState) {
     return { success: false, message: 'Portal inactive' };
   }
 
-  if (interaction.requiresQuest && !_gameState.questSystem?.isQuestCompleted(interaction.requiresQuest)) {
+  if (
+    interaction.requiresQuest &&
+    !_gameState.questSystem?.isQuestCompleted(interaction.requiresQuest)
+  ) {
     return { success: false, message: 'Quest not completed' };
   }
 
   return {
     success: true,
-    teleport: interaction.destination
+    teleport: interaction.destination,
   };
 }
 
@@ -549,7 +551,7 @@ function consumeItem(_player, itemId, gameState) {
 
 /**
  * Update interaction (called each frame)
- * 
+ *
  * @param {Object} interaction - Interaction object
  * @param {number} deltaTime - Time since last frame in ms
  */
@@ -572,7 +574,7 @@ export function updateInteraction(interaction, deltaTime) {
 
 /**
  * Cleanup interaction (remove from world)
- * 
+ *
  * @param {Object} interaction - Interaction object
  * @param {Object} engine - Matter.js engine
  */

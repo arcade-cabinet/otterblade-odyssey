@@ -1,15 +1,15 @@
 /**
  * Enemy Procedural Renderer
- * 
+ *
  * Renders various enemy types (Galeborn, Stormcrow, Thornguard, etc.)
  * using Canvas 2D procedural generation.
- * 
+ *
  * @module rendering/enemy-renderer
  */
 
 /**
  * Draw an enemy based on type
- * 
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
  * @param {Object} position - Position {x, y}
  * @param {string} enemyType - Enemy type (galeborn, stormcrow, thornguard, etc.)
@@ -25,7 +25,7 @@ export function drawEnemy(ctx, position, enemyType, facing = 1, animFrame = 0, s
 
   ctx.save();
   ctx.translate(position.x, position.y);
-  
+
   if (facing < 0) {
     ctx.scale(-1, 1);
   }
@@ -57,7 +57,7 @@ export function drawEnemy(ctx, position, enemyType, facing = 1, animFrame = 0, s
 function drawGaleborn(ctx, animFrame, state) {
   const swirl = Math.sin(animFrame * 0.08) * 5;
   const pulse = Math.abs(Math.sin(animFrame * 0.1)) * 0.3 + 0.7;
-  
+
   // Shadowy form
   ctx.fillStyle = state.alerted ? 'rgba(100, 120, 140, 0.8)' : 'rgba(80, 100, 120, 0.7)';
   ctx.beginPath();
@@ -97,7 +97,7 @@ function drawGaleborn(ctx, animFrame, state) {
 function drawStormcrow(ctx, animFrame, state) {
   const flap = Math.sin(animFrame * 0.2) * 15;
   const hover = Math.sin(animFrame * 0.1) * 3;
-  
+
   // Body
   ctx.fillStyle = '#2C2C3E';
   ctx.strokeStyle = '#1A1A24';
@@ -157,7 +157,7 @@ function drawStormcrow(ctx, animFrame, state) {
  */
 function drawThornguard(ctx, animFrame, state) {
   const step = Math.abs(Math.sin(animFrame * 0.12)) * 3;
-  
+
   // Shield
   ctx.fillStyle = '#5C4033';
   ctx.strokeStyle = '#3D2817';
@@ -241,7 +241,7 @@ function drawThornguard(ctx, animFrame, state) {
 function drawIceshard(ctx, animFrame, state) {
   const float = Math.sin(animFrame * 0.08) * 4;
   const shimmer = Math.abs(Math.sin(animFrame * 0.15));
-  
+
   // Main crystal body
   ctx.fillStyle = `rgba(200, 230, 255, ${0.7 + shimmer * 0.3})`;
   ctx.strokeStyle = '#ADD8E6';
@@ -293,7 +293,7 @@ function drawIceshard(ctx, animFrame, state) {
  */
 function drawGenericEnemy(ctx, animFrame, state) {
   const pulse = Math.abs(Math.sin(animFrame * 0.1)) * 0.2 + 0.8;
-  
+
   // Body
   ctx.fillStyle = state.alerted ? '#8B0000' : '#A52A2A';
   ctx.strokeStyle = '#5C1A1A';

@@ -1,15 +1,15 @@
 /**
  * NPC Procedural Renderer
- * 
+ *
  * Renders NPCs (Mother Riverstone, Abbot Oakenshield, etc.)
  * using Canvas 2D procedural generation with wordless gestures.
- * 
+ *
  * @module rendering/npc-renderer
  */
 
 /**
  * Draw an NPC with current gesture/expression
- * 
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
  * @param {Object} position - Position {x, y}
  * @param {Object} npc - NPC data from DDL
@@ -68,7 +68,7 @@ function drawOtterNPC(ctx, npc, gesture, expression, animFrame, breathe) {
   ctx.fillStyle = npc.color || '#8B6F47';
   ctx.strokeStyle = '#6B5D4F';
   ctx.lineWidth = 2;
-  
+
   // Body
   ctx.beginPath();
   ctx.ellipse(0, 0 + breathe, 16, 22, 0, 0, Math.PI * 2);
@@ -112,7 +112,7 @@ function drawBadgerNPC(ctx, npc, gesture, expression, animFrame, breathe) {
   ctx.fillStyle = '#2C2C2C';
   ctx.strokeStyle = '#1A1A1A';
   ctx.lineWidth = 2;
-  
+
   // Body
   ctx.beginPath();
   ctx.ellipse(0, 0 + breathe, 18, 24, 0, 0, Math.PI * 2);
@@ -184,7 +184,7 @@ function drawMouseNPC(ctx, npc, gesture, expression, animFrame, breathe) {
   ctx.fillStyle = npc.color || '#A0866F';
   ctx.strokeStyle = '#7A6655';
   ctx.lineWidth = 1.5;
-  
+
   // Body
   ctx.beginPath();
   ctx.ellipse(0, 0 + breathe, 10, 14, 0, 0, Math.PI * 2);
@@ -239,7 +239,7 @@ function drawHareNPC(ctx, npc, gesture, expression, animFrame, breathe) {
   ctx.fillStyle = npc.color || '#D2B48C';
   ctx.strokeStyle = '#A89968';
   ctx.lineWidth = 1.5;
-  
+
   // Body
   ctx.beginPath();
   ctx.ellipse(0, 0 + breathe, 12, 20, 0, 0, Math.PI * 2);
@@ -285,7 +285,7 @@ function drawGenericNPC(ctx, npc, gesture, expression, animFrame, breathe) {
   ctx.fillStyle = npc.color || '#8B7355';
   ctx.strokeStyle = '#6B5345';
   ctx.lineWidth = 2;
-  
+
   ctx.beginPath();
   ctx.ellipse(0, 0 + breathe, 14, 20, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -306,7 +306,7 @@ function drawGenericNPC(ctx, npc, gesture, expression, animFrame, breathe) {
  */
 function drawExpression(ctx, expression, headY, scale = 1) {
   ctx.fillStyle = '#2C2C2C';
-  
+
   switch (expression) {
     case 'happy':
       // Smiling eyes
@@ -315,7 +315,7 @@ function drawExpression(ctx, expression, headY, scale = 1) {
       ctx.arc(4 * scale, headY - 2, 2 * scale, 0, Math.PI);
       ctx.fill();
       break;
-    
+
     case 'worried':
       // Wide eyes
       ctx.beginPath();
@@ -323,7 +323,7 @@ function drawExpression(ctx, expression, headY, scale = 1) {
       ctx.arc(4 * scale, headY - 2, 3 * scale, 0, Math.PI * 2);
       ctx.fill();
       break;
-    
+
     case 'sad':
       // Downcast eyes
       ctx.beginPath();
@@ -331,7 +331,7 @@ function drawExpression(ctx, expression, headY, scale = 1) {
       ctx.arc(4 * scale, headY, 2 * scale, Math.PI, 0);
       ctx.fill();
       break;
-    
+
     case 'determined':
       // Focused eyes
       ctx.fillStyle = '#FF4500';
@@ -340,7 +340,7 @@ function drawExpression(ctx, expression, headY, scale = 1) {
       ctx.arc(4 * scale, headY - 2, 2.5 * scale, 0, Math.PI * 2);
       ctx.fill();
       break;
-    
+
     default: // calm
       // Normal eyes
       ctx.beginPath();
@@ -367,7 +367,7 @@ function drawGesture(ctx, gesture, animFrame, breathe, scale = 1) {
       ctx.lineTo(18 * scale + wave, -18 * scale + breathe);
       ctx.stroke();
       break;
-    
+
     case 'point':
       // Arm extended, pointing
       ctx.beginPath();
@@ -375,7 +375,7 @@ function drawGesture(ctx, gesture, animFrame, breathe, scale = 1) {
       ctx.lineTo(25 * scale, -8 * scale + breathe);
       ctx.stroke();
       break;
-    
+
     case 'beckon':
       // Arm bent, beckoning
       ctx.beginPath();
@@ -383,7 +383,7 @@ function drawGesture(ctx, gesture, animFrame, breathe, scale = 1) {
       ctx.lineTo(20 * scale, -12 * scale + breathe + wave);
       ctx.stroke();
       break;
-    
+
     case 'crossed':
       // Arms crossed
       ctx.beginPath();
@@ -393,7 +393,7 @@ function drawGesture(ctx, gesture, animFrame, breathe, scale = 1) {
       ctx.lineTo(-8 * scale, -2 * scale + breathe);
       ctx.stroke();
       break;
-    
+
     case 'open':
       // Arms outstretched
       ctx.beginPath();
@@ -403,7 +403,7 @@ function drawGesture(ctx, gesture, animFrame, breathe, scale = 1) {
       ctx.lineTo(22 * scale, -8 * scale + breathe);
       ctx.stroke();
       break;
-    
+
     default: // idle - arms at sides
       ctx.beginPath();
       ctx.moveTo(-10 * scale, -2 * scale + breathe);
@@ -450,7 +450,7 @@ function drawSpeechIndicator(ctx, animFrame, breathe) {
  */
 function drawQuestMarker(ctx, animFrame) {
   const float = Math.sin(animFrame * 0.1) * 3;
-  
+
   ctx.fillStyle = '#FFD700';
   ctx.strokeStyle = '#FFA500';
   ctx.lineWidth = 2;

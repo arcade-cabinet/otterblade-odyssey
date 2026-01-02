@@ -1,8 +1,8 @@
 /**
  * Trigger System
- * 
+ *
  * Handles event triggers from DDL manifests (enter_region, interact, defeat_enemies, etc.)
- * 
+ *
  * @module systems/trigger-system
  */
 
@@ -22,7 +22,7 @@ export class TriggerSystem {
 
   /**
    * Register triggers from chapter manifest
-   * 
+   *
    * @param {Object} manifest - Chapter manifest
    */
   registerTriggers(manifest) {
@@ -46,7 +46,7 @@ export class TriggerSystem {
       actions: triggerDef.actions || [],
       once: triggerDef.once !== false, // Default true
       triggered: false,
-      enabled: true
+      enabled: true,
     };
 
     // Create sensor for spatial triggers
@@ -59,7 +59,7 @@ export class TriggerSystem {
         {
           isSensor: true,
           label: 'trigger',
-          triggerId: trigger.id
+          triggerId: trigger.id,
         }
       );
       World.add(this.engine.world, trigger.sensor);
@@ -70,11 +70,11 @@ export class TriggerSystem {
 
   /**
    * Update triggers (called each frame)
-   * 
+   *
    * @param {number} deltaTime - Time since last frame
    * @param {Object} gameState - Current game state
    */
-  update(deltaTime, gameState) {
+  update(_deltaTime, gameState) {
     for (const trigger of this.triggers) {
       if (!trigger.enabled || (trigger.once && trigger.triggered)) {
         continue;
@@ -94,33 +94,33 @@ export class TriggerSystem {
     switch (trigger.type) {
       case 'enter_region':
         return this.activeTriggers.has(trigger.id);
-      
+
       case 'exit_region':
         return !this.activeTriggers.has(trigger.id) && trigger.wasActive;
-      
+
       case 'interact':
         // Handled by interaction system
         return false;
-      
+
       case 'defeat_enemies':
         return this.checkDefeatEnemiesCondition(trigger, gameState);
-      
+
       case 'collect_item':
         return this.checkCollectItemCondition(trigger, gameState);
-      
+
       case 'quest_complete':
         return this.checkQuestCompleteCondition(trigger, gameState);
-      
+
       case 'health_threshold':
         return this.checkHealthThresholdCondition(trigger, gameState);
-      
+
       case 'timer':
         return this.checkTimerCondition(trigger, gameState);
-      
+
       case 'npc_dialogue':
         // Handled by NPC system
         return false;
-      
+
       default:
         console.warn(`Unknown trigger type: ${trigger.type}`);
         return false;
@@ -133,16 +133,14 @@ export class TriggerSystem {
    */
   checkDefeatEnemiesCondition(trigger, gameState) {
     const condition = trigger.condition;
-    
+
     if (condition.enemyGroup) {
       const group = gameState.enemyGroups?.[condition.enemyGroup];
       return group?.defeated === true;
     }
 
     if (condition.enemyIds) {
-      return condition.enemyIds.every(id => 
-        gameState.defeatedEnemies?.includes(id)
-      );
+      return condition.enemyIds.every((id) => gameState.defeatedEnemies?.includes(id));
     }
 
     if (condition.enemyType && condition.count) {
@@ -159,15 +157,14 @@ export class TriggerSystem {
    */
   checkCollectItemCondition(trigger, gameState) {
     const condition = trigger.condition;
-    
+
     if (condition.itemId) {
       return gameState.inventory?.includes(condition.itemId);
     }
 
     if (condition.itemType && condition.count) {
-      const count = gameState.inventory?.filter(item => 
-        item.type === condition.itemType
-      ).length || 0;
+      const count =
+        gameState.inventory?.filter((item) => item.type === condition.itemType).length || 0;
       return count >= condition.count;
     }
 
@@ -303,7 +300,7 @@ export class TriggerSystem {
 
   /**
    * Handle collision with trigger sensor
-   * 
+   *
    * @param {Object} body - Physics body that collided
    * @param {Object} sensor - Trigger sensor
    */
@@ -311,8 +308,8 @@ export class TriggerSystem {
     if (body.label !== 'player') return;
 
     const triggerId = sensor.triggerId;
-    const trigger = this.triggers.find(t => t.id === triggerId);
-    
+    const trigger = this.triggers.find((t) => t.id === triggerId);
+
     if (!trigger) return;
 
     if (trigger.type === 'enter_region') {
@@ -323,7 +320,7 @@ export class TriggerSystem {
 
   /**
    * Handle collision end with trigger sensor
-   * 
+   *
    * @param {Object} body - Physics body
    * @param {Object} sensor - Trigger sensor
    */
@@ -331,8 +328,8 @@ export class TriggerSystem {
     if (body.label !== 'player') return;
 
     const triggerId = sensor.triggerId;
-    const trigger = this.triggers.find(t => t.id === triggerId);
-    
+    const trigger = this.triggers.find((t) => t.id === triggerId);
+
     if (!trigger) return;
 
     if (trigger.type === 'enter_region') {
@@ -342,12 +339,12 @@ export class TriggerSystem {
 
   /**
    * Manually trigger by ID
-   * 
+   *
    * @param {string} triggerId - Trigger ID
    * @param {Object} gameState - Current game state
    */
   manualTrigger(triggerId, gameState) {
-    const trigger = this.triggers.find(t => t.id === triggerId);
+    const trigger = this.triggers.find((t) => t.id === triggerId);
     if (!trigger) {
       console.warn(`Trigger not found: ${triggerId}`);
       return;
@@ -368,11 +365,11 @@ export class TriggerSystem {
 
   /**
    * Enable a trigger
-   * 
+   *
    * @param {string} triggerId - Trigger ID
    */
   enableTrigger(triggerId) {
-    const trigger = this.triggers.find(t => t.id === triggerId);
+    const trigger = this.triggers.find((t) => t.id === triggerId);
     if (trigger) {
       trigger.enabled = true;
     }
@@ -380,11 +377,11 @@ export class TriggerSystem {
 
   /**
    * Disable a trigger
-   * 
+   *
    * @param {string} triggerId - Trigger ID
    */
   disableTrigger(triggerId) {
-    const trigger = this.triggers.find(t => t.id === triggerId);
+    const trigger = this.triggers.find((t) => t.id === triggerId);
     if (trigger) {
       trigger.enabled = false;
     }
@@ -392,11 +389,11 @@ export class TriggerSystem {
 
   /**
    * Reset a trigger (allow it to trigger again)
-   * 
+   *
    * @param {string} triggerId - Trigger ID
    */
   resetTrigger(triggerId) {
-    const trigger = this.triggers.find(t => t.id === triggerId);
+    const trigger = this.triggers.find((t) => t.id === triggerId);
     if (trigger) {
       trigger.triggered = false;
       trigger.timerStarted = false;

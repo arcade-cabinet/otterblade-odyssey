@@ -1,8 +1,8 @@
 import path from 'node:path';
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
-import solidPlugin from 'vite-plugin-solid';
 import { defineConfig } from 'vite';
+import solidPlugin from 'vite-plugin-solid';
 import { metaImagesPlugin } from './vite-plugin-meta-images';
 
 export default defineConfig({

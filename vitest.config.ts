@@ -56,10 +56,7 @@ export default defineConfig({
     // Handle ESM packages that have directory imports or other Node ESM issues
     server: {
       deps: {
-        inline: [
-          'matter-js',
-          'yuka',
-        ],
+        inline: ['matter-js', 'yuka'],
       },
     },
     // Mock modules that have ESM issues in test environment

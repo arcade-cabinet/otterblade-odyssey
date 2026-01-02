@@ -1,8 +1,8 @@
 /**
  * Camera System
- * 
+ *
  * Handles camera positioning, smooth following, and screen shake effects.
- * 
+ *
  * @module core/camera
  */
 
@@ -53,7 +53,7 @@ export class Camera {
       this.shakeTime += deltaTime;
       const progress = this.shakeTime / this.shakeDuration;
       const decay = 1 - progress;
-      
+
       this.x += (Math.random() - 0.5) * this.shakeIntensity * decay;
       this.y += (Math.random() - 0.5) * this.shakeIntensity * decay;
     }
@@ -79,7 +79,7 @@ export class Camera {
       console.warn('Camera.apply: Invalid context');
       return;
     }
-    
+
     ctx.translate(-Math.floor(this.x), -Math.floor(this.y));
   }
 
@@ -92,7 +92,7 @@ export class Camera {
   screenToWorld(screenX, screenY) {
     return {
       x: screenX + this.x,
-      y: screenY + this.y
+      y: screenY + this.y,
     };
   }
 
@@ -105,7 +105,7 @@ export class Camera {
   worldToScreen(worldX, worldY) {
     return {
       x: worldX - this.x,
-      y: worldY - this.y
+      y: worldY - this.y,
     };
   }
 
@@ -117,7 +117,7 @@ export class Camera {
    */
   isVisible(position, margin = 100) {
     if (!position) return false;
-    
+
     return (
       position.x > this.x - margin &&
       position.x < this.x + this.canvasWidth + margin &&

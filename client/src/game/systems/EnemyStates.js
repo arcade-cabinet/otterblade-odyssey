@@ -4,12 +4,7 @@
  * Uses YUKA.js State base class for transitions
  */
 
-import {
-  State,
-  WanderBehavior,
-  SeekBehavior,
-  FleeBehavior,
-} from 'yuka';
+import { FleeBehavior, SeekBehavior, State, WanderBehavior } from 'yuka';
 
 /**
  * Base class for typed states with proper lifecycle methods

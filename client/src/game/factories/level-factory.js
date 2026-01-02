@@ -1,27 +1,27 @@
 /**
  * Level Factory
- * 
+ *
  * Builds complete game levels from DDL JSON manifests.
  * Creates platforms, walls, hazards, water zones, checkpoints, etc.
- * 
+ *
  * @module factories/level-factory
  */
 
 import Matter from 'matter-js';
+import { getChapterSpawnPoint, loadChapterManifest } from '../data/chapter-loaders';
 import {
   createPlatform,
   createWall,
   HazardSystem,
+  MovingPlatform,
   WaterZone,
-  MovingPlatform
 } from '../physics/PhysicsManager.js';
-import { loadChapterManifest, getChapterSpawnPoint } from '../data/chapter-loaders';
 
 const { World, Bodies } = Matter;
 
 /**
  * Build a complete level from a chapter manifest
- * 
+ *
  * @param {number} chapterId - Chapter ID (0-9)
  * @param {Object} engine - Matter.js engine
  * @returns {Object} Level data with all entities
@@ -53,7 +53,7 @@ export function buildLevel(chapterId, engine) {
     checkpoints: [],
     exits: [],
     secrets: [],
-    bounds: null
+    bounds: null,
   };
 
   // Build from segments
@@ -126,7 +126,7 @@ export function buildLevel(chapterId, engine) {
           checkpointDef.width || 60,
           checkpointDef.height || 80,
           { isSensor: true, label: 'checkpoint' }
-        )
+        ),
       };
       level.checkpoints.push(checkpoint);
       World.add(engine.world, checkpoint.sensor);
@@ -142,13 +142,10 @@ export function buildLevel(chapterId, engine) {
         destination: exitDef.destination,
         requiresQuest: exitDef.requiresQuest,
         locked: exitDef.locked || false,
-        sensor: Bodies.rectangle(
-          exitDef.x,
-          exitDef.y,
-          exitDef.width || 60,
-          exitDef.height || 100,
-          { isSensor: true, label: 'exit' }
-        )
+        sensor: Bodies.rectangle(exitDef.x, exitDef.y, exitDef.width || 60, exitDef.height || 100, {
+          isSensor: true,
+          label: 'exit',
+        }),
       };
       level.exits.push(exit);
       World.add(engine.world, exit.sensor);
@@ -170,7 +167,7 @@ export function buildLevel(chapterId, engine) {
           secretDef.width || 40,
           secretDef.height || 40,
           { isSensor: true, label: 'secret' }
-        )
+        ),
       };
       level.secrets.push(secret);
       World.add(engine.world, secret.sensor);
@@ -183,7 +180,7 @@ export function buildLevel(chapterId, engine) {
       minX: manifest.level.bounds.minX,
       minY: manifest.level.bounds.minY,
       maxX: manifest.level.bounds.maxX,
-      maxY: manifest.level.bounds.maxY
+      maxY: manifest.level.bounds.maxY,
     };
   } else {
     // Calculate bounds from platforms
@@ -208,14 +205,14 @@ function buildSegment(segment, engine, level) {
         height: platformDef.height,
         friction: platformDef.friction || 0.8,
         asset: platformDef.asset,
-        type: platformDef.type || 'solid'
+        type: platformDef.type || 'solid',
       });
-      
+
       level.platforms.push({
         body: platform,
         asset: platformDef.asset,
         type: platformDef.type || 'solid',
-        friction: platformDef.friction || 0.8
+        friction: platformDef.friction || 0.8,
       });
     }
   }
@@ -228,12 +225,12 @@ function buildSegment(segment, engine, level) {
         y: wallDef.y,
         width: wallDef.width,
         height: wallDef.height,
-        asset: wallDef.asset
+        asset: wallDef.asset,
       });
-      
+
       level.walls.push({
         body: wall,
-        asset: wallDef.asset
+        asset: wallDef.asset,
       });
     }
   }
@@ -249,14 +246,14 @@ function buildSegment(segment, engine, level) {
         {
           isStatic: true,
           label: 'ceiling',
-          friction: 0.1
+          friction: 0.1,
         }
       );
       World.add(engine.world, ceiling);
-      
+
       level.ceilings.push({
         body: ceiling,
-        asset: ceilingDef.asset
+        asset: ceilingDef.asset,
       });
     }
   }
@@ -290,13 +287,13 @@ function calculateBoundsFromPlatforms(level) {
     minX: minX - padding,
     minY: minY - padding,
     maxX: maxX + padding,
-    maxY: maxY + padding
+    maxY: maxY + padding,
   };
 }
 
 /**
  * Cleanup level (remove all bodies from world)
- * 
+ *
  * @param {Object} level - Level to cleanup
  * @param {Object} engine - Matter.js engine
  */

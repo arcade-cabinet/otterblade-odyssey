@@ -421,7 +421,11 @@ export class ZephyrosAI extends PerceptiveEntity {
     const playerHealthPercent = (this.target.hp / this.target.maxHp) * 100;
     const ownHealthPercent = (this.hp / this.maxHp) * 100;
 
-    const aggression = this.threatAssessment.evaluate(distance, playerHealthPercent, ownHealthPercent);
+    const aggression = this.threatAssessment.evaluate(
+      distance,
+      playerHealthPercent,
+      ownHealthPercent
+    );
 
     // Select pattern based on aggression
     let selectedPattern;
@@ -445,7 +449,9 @@ export class ZephyrosAI extends PerceptiveEntity {
 
   selectHighPowerAttack(patterns) {
     const powerful = patterns.filter((p) => p.warmthDrain > 40);
-    return powerful.length > 0 ? powerful[Math.floor(Math.random() * powerful.length)] : patterns[0];
+    return powerful.length > 0
+      ? powerful[Math.floor(Math.random() * powerful.length)]
+      : patterns[0];
   }
 
   selectMediumPowerAttack(patterns) {
@@ -455,7 +461,9 @@ export class ZephyrosAI extends PerceptiveEntity {
 
   selectDefensivePattern(patterns) {
     const defensive = patterns.filter((p) => p.name.includes('Zone') || p.name.includes('Pillar'));
-    return defensive.length > 0 ? defensive[Math.floor(Math.random() * defensive.length)] : patterns[0];
+    return defensive.length > 0
+      ? defensive[Math.floor(Math.random() * defensive.length)]
+      : patterns[0];
   }
 
   updateProjectiles(delta) {

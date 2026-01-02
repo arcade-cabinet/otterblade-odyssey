@@ -24,7 +24,7 @@ export function createGameLoop(params) {
     playerController,
     playerRef,
     inputManager,
-    audioManager,
+    _audioManager,
     aiManager,
     bossAI,
     enemyBodyMap,

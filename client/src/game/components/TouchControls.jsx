@@ -5,8 +5,8 @@
  * Implements touch controls per CLAUDE.md line 64
  */
 
-import { onMount, onCleanup, Show } from 'solid-js';
 import nipplejs from 'nipplejs';
+import { onCleanup, onMount, Show } from 'solid-js';
 import { inputManager } from '../systems/InputManager';
 
 export default function TouchControls(_props) {
@@ -14,8 +14,10 @@ export default function TouchControls(_props) {
   let joystickManager;
 
   const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-           window.innerWidth <= 768;
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.innerWidth <= 768
+    );
   };
 
   onMount(() => {
@@ -29,7 +31,7 @@ export default function TouchControls(_props) {
       color: '#E67E22', // Hearth orange from WORLD.md
       size: 120,
       threshold: 0.1,
-      fadeTime: 0
+      fadeTime: 0,
     });
 
     // Joystick event handlers
@@ -67,15 +69,17 @@ export default function TouchControls(_props) {
 
   return (
     <Show when={isMobile()}>
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        'pointer-events': 'none',
-        'z-index': 1000
-      }}>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          'pointer-events': 'none',
+          'z-index': 1000,
+        }}
+      >
         {/* Joystick container */}
         <div
           ref={joystickZone}
@@ -85,20 +89,22 @@ export default function TouchControls(_props) {
             bottom: 0,
             width: '200px',
             height: '200px',
-            'pointer-events': 'auto'
+            'pointer-events': 'auto',
           }}
         />
 
         {/* Action buttons (right side) */}
-        <div style={{
-          position: 'absolute',
-          right: '5%',
-          bottom: '15%',
-          display: 'flex',
-          'flex-direction': 'column',
-          gap: '15px',
-          'pointer-events': 'auto'
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            right: '5%',
+            bottom: '15%',
+            display: 'flex',
+            'flex-direction': 'column',
+            gap: '15px',
+            'pointer-events': 'auto',
+          }}
+        >
           {/* Jump button (top) */}
           <button
             type="button"
@@ -115,7 +121,7 @@ export default function TouchControls(_props) {
               cursor: 'pointer',
               'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
               'user-select': 'none',
-              '-webkit-tap-highlight-color': 'transparent'
+              '-webkit-tap-highlight-color': 'transparent',
             }}
           >
             ↑
@@ -137,7 +143,7 @@ export default function TouchControls(_props) {
               cursor: 'pointer',
               'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
               'user-select': 'none',
-              '-webkit-tap-highlight-color': 'transparent'
+              '-webkit-tap-highlight-color': 'transparent',
             }}
           >
             ⚔️
@@ -159,7 +165,7 @@ export default function TouchControls(_props) {
               cursor: 'pointer',
               'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
               'user-select': 'none',
-              '-webkit-tap-highlight-color': 'transparent'
+              '-webkit-tap-highlight-color': 'transparent',
             }}
           >
             E
@@ -168,17 +174,19 @@ export default function TouchControls(_props) {
 
         {/* Desktop hint (hidden on mobile) */}
         <Show when={!isMobile()}>
-          <div style={{
-            position: 'absolute',
-            bottom: '20px',
-            right: '20px',
-            padding: '10px 15px',
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: '#F4D03F',
-            'border-radius': '8px',
-            'font-size': '14px',
-            'font-family': 'monospace'
-          }}>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              right: '20px',
+              padding: '10px 15px',
+              background: 'rgba(0, 0, 0, 0.7)',
+              color: '#F4D03F',
+              'border-radius': '8px',
+              'font-size': '14px',
+              'font-family': 'monospace',
+            }}
+          >
             <div>WASD / Arrows: Move</div>
             <div>Space / W: Jump</div>
             <div>E: Interact</div>

@@ -1,8 +1,8 @@
 /**
  * Game State Manager
- * 
+ *
  * Manages global game state with persistence.
- * 
+ *
  * @module core/game-state
  */
 
@@ -34,14 +34,14 @@ export class GameState {
       musicVolume: 0.7,
       sfxVolume: 0.8,
       showQuestTracker: true,
-      showTutorialHints: true
+      showTutorialHints: true,
     };
     this.listeners = [];
   }
 
   /**
    * Subscribe to state changes
-   * 
+   *
    * @param {Function} callback - Called when state changes
    * @returns {Function} Unsubscribe function
    */
@@ -71,7 +71,7 @@ export class GameState {
 
   /**
    * Take damage
-   * 
+   *
    * @param {number} amount - Damage amount
    * @returns {boolean} True if player died
    */
@@ -89,7 +89,7 @@ export class GameState {
 
   /**
    * Heal player
-   * 
+   *
    * @param {number} amount - Heal amount ('full' or number)
    */
   heal(amount) {
@@ -103,7 +103,7 @@ export class GameState {
 
   /**
    * Drain warmth
-   * 
+   *
    * @param {number} amount - Warmth to drain
    */
   drainWarmth(amount) {
@@ -120,7 +120,7 @@ export class GameState {
 
   /**
    * Restore warmth
-   * 
+   *
    * @param {number} amount - Warmth to restore ('full' or number)
    */
   restoreWarmth(amount) {
@@ -134,7 +134,7 @@ export class GameState {
 
   /**
    * Collect shards
-   * 
+   *
    * @param {number} amount - Number of shards
    */
   collectShards(amount = 1) {
@@ -144,7 +144,7 @@ export class GameState {
 
   /**
    * Add item to inventory
-   * 
+   *
    * @param {string} itemId - Item ID
    * @param {number} amount - Amount to add
    */
@@ -157,7 +157,7 @@ export class GameState {
 
   /**
    * Remove item from inventory
-   * 
+   *
    * @param {string} itemId - Item ID
    * @param {number} amount - Amount to remove
    * @returns {boolean} True if item was removed
@@ -171,7 +171,7 @@ export class GameState {
         removed++;
       }
     }
-    
+
     if (removed > 0) {
       this.notify();
     }
@@ -181,7 +181,7 @@ export class GameState {
 
   /**
    * Check if player has item
-   * 
+   *
    * @param {string} itemId - Item ID
    * @returns {boolean}
    */
@@ -191,26 +191,26 @@ export class GameState {
 
   /**
    * Complete quest
-   * 
+   *
    * @param {string} questId - Quest ID
    */
   completeQuest(questId) {
     if (!this.completedQuests.includes(questId)) {
       this.completedQuests.push(questId);
-      
+
       // Remove from active
       const index = this.activeQuests.indexOf(questId);
       if (index > -1) {
         this.activeQuests.splice(index, 1);
       }
-      
+
       this.notify();
     }
   }
 
   /**
    * Start quest
-   * 
+   *
    * @param {string} questId - Quest ID
    */
   startQuest(questId) {
@@ -222,26 +222,26 @@ export class GameState {
 
   /**
    * Mark enemy as defeated
-   * 
+   *
    * @param {string} enemyId - Enemy ID
    * @param {string} enemyType - Enemy type
    */
   defeatEnemy(enemyId, enemyType) {
     if (!this.defeatedEnemies.includes(enemyId)) {
       this.defeatedEnemies.push(enemyId);
-      
+
       if (!this.defeatedEnemiesByType[enemyType]) {
         this.defeatedEnemiesByType[enemyType] = 0;
       }
       this.defeatedEnemiesByType[enemyType]++;
-      
+
       this.notify();
     }
   }
 
   /**
    * Mark enemy group as defeated
-   * 
+   *
    * @param {string} groupId - Group ID
    */
   defeatEnemyGroup(groupId) {
@@ -254,7 +254,7 @@ export class GameState {
 
   /**
    * Discover secret
-   * 
+   *
    * @param {string} secretId - Secret ID
    */
   discoverSecret(secretId) {
@@ -266,7 +266,7 @@ export class GameState {
 
   /**
    * Activate checkpoint
-   * 
+   *
    * @param {string} checkpointId - Checkpoint ID
    */
   activateCheckpoint(checkpointId) {
@@ -279,7 +279,7 @@ export class GameState {
 
   /**
    * Unlock door
-   * 
+   *
    * @param {string} doorId - Door ID
    */
   unlockDoor(doorId) {
@@ -301,7 +301,7 @@ export class GameState {
 
   /**
    * Set chapter
-   * 
+   *
    * @param {number} chapterId - Chapter ID
    */
   setChapter(chapterId) {
@@ -313,7 +313,7 @@ export class GameState {
 
   /**
    * Update play time
-   * 
+   *
    * @param {number} deltaTime - Time in ms
    */
   updatePlayTime(deltaTime) {
@@ -332,7 +332,7 @@ export class GameState {
 
   /**
    * Serialize state for saving
-   * 
+   *
    * @returns {Object} Serialized state
    */
   serialize() {
@@ -355,13 +355,13 @@ export class GameState {
       playTime: this.playTime,
       deaths: this.deaths,
       lastCheckpoint: this.lastCheckpoint,
-      settings: this.settings
+      settings: this.settings,
     };
   }
 
   /**
    * Deserialize state from save
-   * 
+   *
    * @param {Object} data - Serialized state
    */
   deserialize(data) {
@@ -375,7 +375,7 @@ export class GameState {
 
   /**
    * Save to localStorage
-   * 
+   *
    * @param {string} slot - Save slot name
    */
   save(slot = 'default') {
@@ -391,7 +391,7 @@ export class GameState {
 
   /**
    * Load from localStorage
-   * 
+   *
    * @param {string} slot - Save slot name
    * @returns {boolean} Success
    */
@@ -410,7 +410,7 @@ export class GameState {
 
   /**
    * Check if save exists
-   * 
+   *
    * @param {string} slot - Save slot name
    * @returns {boolean}
    */
@@ -420,7 +420,7 @@ export class GameState {
 
   /**
    * Delete save
-   * 
+   *
    * @param {string} slot - Save slot name
    */
   deleteSave(slot = 'default') {

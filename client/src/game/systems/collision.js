@@ -3,6 +3,7 @@
  * Handles all game collision events with O(1) lookups using Maps
  */
 
+import { Vector3 } from 'yuka';
 import { World } from 'matter-js';
 
 /**
@@ -31,18 +32,22 @@ export function setupCollisionHandlers(
     collectibles,
     npcBodies,
     interactions,
-    enemyBodyMap,
+    _enemyBodyMap,
   } = collections;
   const { setHealth, setShards, setQuestObjectives } = setters;
   const { health, maxHealth, questObjectives } = getters;
-  const { playerController } = controllers;
+  const { _playerController } = controllers;
 
   // Create O(1) lookup maps for efficient collision detection
   const collectibleMap = new Map();
-  collectibles.forEach((c) => collectibleMap.set(c.body.id, c));
+  for (const c of collectibles) {
+    collectibleMap.set(c.body.id, c);
+  }
 
   const interactionMap = new Map();
-  interactions.forEach((i) => interactionMap.set(i.body.id, i));
+  for (const i of interactions) {
+    interactionMap.set(i.body.id, i);
+  }
 
   Events.on(engine, 'collisionStart', (event) => {
     for (const pair of event.pairs) {
@@ -86,7 +91,6 @@ export function setupCollisionHandlers(
         for (const [npcId, npcData] of npcBodies) {
           if (npcData.body === npcBody && inputManager.isPressed('interact')) {
             const npc = npcData.npc;
-            const { Vector3 } = await import('yuka');
             const playerPos = new Vector3(player.position.x, player.position.y, 0);
 
             // Trigger NPC interaction
@@ -168,5 +172,7 @@ export function setupCollisionHandlers(
  */
 export function updateCollisionMaps(map, entities) {
   map.clear();
-  entities.forEach((entity) => map.set(entity.body.id, entity));
+  for (const entity of entities) {
+    map.set(entity.body.id, entity);
+  }
 }

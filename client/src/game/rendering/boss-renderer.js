@@ -1,14 +1,14 @@
 /**
  * Boss Procedural Renderer
- * 
+ *
  * Renders boss enemies (Zephyros) with multi-phase visual states.
- * 
+ *
  * @module rendering/boss-renderer
  */
 
 /**
  * Draw a boss enemy
- * 
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
  * @param {Object} position - Position {x, y}
  * @param {string} bossType - Boss type (zephyros, etc.)
@@ -25,7 +25,7 @@ export function drawBoss(ctx, position, bossType, phase, facing = 1, animFrame =
 
   ctx.save();
   ctx.translate(position.x, position.y);
-  
+
   if (facing < 0) {
     ctx.scale(-1, 1);
   }
@@ -147,7 +147,9 @@ function drawZephyrosPhase2(ctx, baseSize, swirl, pulse, animFrame, state, enrag
   ctx.beginPath();
   for (let i = 0; i < 16; i++) {
     const angle = (i / 16) * Math.PI * 2 + animFrame * 0.05;
-    const r = baseSize * pulse * (1 + enragedPulse) + Math.sin(angle * 4 + animFrame * 0.08) * (baseSize * 0.3);
+    const r =
+      baseSize * pulse * (1 + enragedPulse) +
+      Math.sin(angle * 4 + animFrame * 0.08) * (baseSize * 0.3);
     const x = Math.cos(angle) * r + swirl * Math.sin(i * 2);
     const y = Math.sin(angle) * r + swirl * Math.cos(i * 2);
     if (i === 0) ctx.moveTo(x, y);
@@ -202,7 +204,10 @@ function drawZephyrosPhase3(ctx, baseSize, swirl, pulse, animFrame, _state, enra
   for (let i = 0; i < 20; i++) {
     const angle = (i / 20) * Math.PI * 2 + animFrame * 0.08;
     const chaos = Math.sin(animFrame * 0.1 + i) * (baseSize * 0.4);
-    const r = baseSize * pulse * (1 + enragedPulse * 1.5) + Math.sin(angle * 5 + animFrame * 0.1) * (baseSize * 0.35) + chaos;
+    const r =
+      baseSize * pulse * (1 + enragedPulse * 1.5) +
+      Math.sin(angle * 5 + animFrame * 0.1) * (baseSize * 0.35) +
+      chaos;
     const x = Math.cos(angle) * r + swirl * Math.sin(i * 3);
     const y = Math.sin(angle) * r + swirl * Math.cos(i * 3);
     if (i === 0) ctx.moveTo(x, y);
@@ -236,7 +241,7 @@ function drawZephyrosPhase3(ctx, baseSize, swirl, pulse, animFrame, _state, enra
 
   // Continuous lightning
   drawLightningBolts(ctx, baseSize, animFrame);
-  
+
   // Electrical discharge
   drawElectricalDischarge(ctx, baseSize, animFrame);
 }
@@ -255,7 +260,7 @@ function drawLightningCrown(ctx, baseSize, animFrame, count) {
     const angle = (i / count) * Math.PI * 2;
     const startX = Math.cos(angle) * baseSize * 0.6;
     const startY = Math.sin(angle) * baseSize * 0.6 - baseSize * 0.4;
-    
+
     const zigzag = Math.sin(animFrame * 0.1 + i) * baseSize * 0.15;
     const endX = Math.cos(angle) * baseSize * 1.2 + zigzag;
     const endY = Math.sin(angle) * baseSize * 1.2 - baseSize * 0.6;
@@ -291,7 +296,7 @@ function drawLightningBolts(ctx, baseSize, animFrame) {
 
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    
+
     // Zigzag
     for (let j = 1; j < 6; j++) {
       const t = j / 6;
@@ -299,7 +304,7 @@ function drawLightningBolts(ctx, baseSize, animFrame) {
       const y = startY + (endY - startY) * t + (Math.random() - 0.5) * baseSize * 0.3;
       ctx.lineTo(x, y);
     }
-    
+
     ctx.stroke();
   }
 
@@ -338,8 +343,8 @@ function drawElectricalDischarge(ctx, baseSize, _animFrame) {
 function drawStunnedEffect(ctx, baseSize, animFrame) {
   const starPositions = [
     { angle: 0, distance: baseSize * 1.3 },
-    { angle: Math.PI * 2 / 3, distance: baseSize * 1.3 },
-    { angle: Math.PI * 4 / 3, distance: baseSize * 1.3 }
+    { angle: (Math.PI * 2) / 3, distance: baseSize * 1.3 },
+    { angle: (Math.PI * 4) / 3, distance: baseSize * 1.3 },
   ];
 
   ctx.fillStyle = '#FFD700';
@@ -347,7 +352,7 @@ function drawStunnedEffect(ctx, baseSize, animFrame) {
   ctx.lineWidth = 2;
 
   for (let i = 0; i < starPositions.length; i++) {
-    const rotation = animFrame * 0.1 + i * Math.PI * 2 / 3;
+    const rotation = animFrame * 0.1 + (i * Math.PI * 2) / 3;
     const pos = starPositions[i];
     const x = Math.cos(pos.angle + rotation) * pos.distance;
     const y = Math.sin(pos.angle + rotation) * pos.distance - baseSize * 0.8;
@@ -362,9 +367,9 @@ function drawStunnedEffect(ctx, baseSize, animFrame) {
  */
 function drawChargingEffect(ctx, baseSize, animFrame) {
   const chargeRings = 3;
-  
+
   for (let i = 0; i < chargeRings; i++) {
-    const progress = ((animFrame * 0.08 + i * 0.3) % 1);
+    const progress = (animFrame * 0.08 + i * 0.3) % 1;
     const radius = baseSize * (0.5 + progress * 1.5);
     const alpha = 1 - progress;
 
@@ -383,21 +388,21 @@ function drawChargingEffect(ctx, baseSize, animFrame) {
 function drawStar(ctx, x, y, points, outerRadius, innerRadius) {
   ctx.save();
   ctx.translate(x, y);
-  
+
   ctx.beginPath();
   for (let i = 0; i < points * 2; i++) {
     const radius = i % 2 === 0 ? outerRadius : innerRadius;
     const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
     const px = Math.cos(angle) * radius;
     const py = Math.sin(angle) * radius;
-    
+
     if (i === 0) ctx.moveTo(px, py);
     else ctx.lineTo(px, py);
   }
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  
+
   ctx.restore();
 }
 

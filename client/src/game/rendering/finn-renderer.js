@@ -1,15 +1,15 @@
 /**
  * Finn Procedural Renderer
- * 
+ *
  * Renders Finn the otter using Canvas 2D procedural generation.
  * No sprites - fully procedural with animations.
- * 
+ *
  * @module rendering/finn-renderer
  */
 
 /**
  * Draw Finn (the otter protagonist) procedurally
- * 
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
  * @param {Object} position - Position {x, y}
  * @param {number} facing - Facing direction (-1 = left, 1 = right)
@@ -25,7 +25,7 @@ export function drawFinn(ctx, position, facing = 1, animFrame = 0, state = {}) {
 
   ctx.save();
   ctx.translate(position.x, position.y);
-  
+
   // Flip sprite based on facing direction
   if (facing < 0) {
     ctx.scale(-1, 1);
@@ -147,7 +147,7 @@ export function drawFinn(ctx, position, facing = 1, animFrame = 0, state = {}) {
 
 /**
  * Draw the Otterblade sword
- * 
+ *
  * @private
  * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {number} animFrame - Animation frame
@@ -156,7 +156,7 @@ export function drawFinn(ctx, position, facing = 1, animFrame = 0, state = {}) {
  */
 function drawOtterblade(ctx, animFrame, breathe, bounce) {
   const swingAngle = Math.sin(animFrame * 0.3) * 0.5;
-  
+
   ctx.save();
   ctx.translate(12, -10 + breathe - bounce);
   ctx.rotate(swingAngle - 0.5);
@@ -166,7 +166,7 @@ function drawOtterblade(ctx, animFrame, breathe, bounce) {
   gradient.addColorStop(0, '#B0C4DE');
   gradient.addColorStop(0.5, '#E0E0E0');
   gradient.addColorStop(1, '#A9A9A9');
-  
+
   ctx.fillStyle = gradient;
   ctx.strokeStyle = '#696969';
   ctx.lineWidth = 1;

@@ -1,8 +1,8 @@
 /**
  * Collision System
- * 
+ *
  * Handles all collision detection and response logic.
- * 
+ *
  * @module systems/collision-system
  */
 
@@ -73,7 +73,7 @@ export class CollisionSystem {
     const key = this.getCollisionKey(bodyA.label, bodyB.label);
     const handler = this.collisionHandlers.get(key);
 
-    if (handler && handler.onActive) {
+    if (handler?.onActive) {
       handler.onActive(bodyA, bodyB);
     }
 
@@ -81,7 +81,7 @@ export class CollisionSystem {
     const reverseKey = this.getCollisionKey(bodyB.label, bodyA.label);
     const reverseHandler = this.collisionHandlers.get(reverseKey);
 
-    if (reverseHandler && reverseHandler.onActive) {
+    if (reverseHandler?.onActive) {
       reverseHandler.onActive(bodyB, bodyA);
     }
   }
@@ -94,7 +94,7 @@ export class CollisionSystem {
     const key = this.getCollisionKey(bodyA.label, bodyB.label);
     const handler = this.collisionHandlers.get(key);
 
-    if (handler && handler.onEnd) {
+    if (handler?.onEnd) {
       handler.onEnd(bodyA, bodyB);
     }
 
@@ -102,7 +102,7 @@ export class CollisionSystem {
     const reverseKey = this.getCollisionKey(bodyB.label, bodyA.label);
     const reverseHandler = this.collisionHandlers.get(reverseKey);
 
-    if (reverseHandler && reverseHandler.onEnd) {
+    if (reverseHandler?.onEnd) {
       reverseHandler.onEnd(bodyB, bodyA);
     }
   }
@@ -117,7 +117,7 @@ export class CollisionSystem {
 
   /**
    * Register collision handler
-   * 
+   *
    * @param {string} labelA - First body label
    * @param {string} labelB - Second body label
    * @param {Object} handlers - Handler functions {onStart, onActive, onEnd}
@@ -129,7 +129,7 @@ export class CollisionSystem {
 
   /**
    * Unregister collision handler
-   * 
+   *
    * @param {string} labelA - First body label
    * @param {string} labelB - Second body label
    */
@@ -140,7 +140,7 @@ export class CollisionSystem {
 
   /**
    * Register common game collision handlers
-   * 
+   *
    * @param {Object} gameState - Current game state
    */
   registerGameHandlers(gameState) {
@@ -152,16 +152,16 @@ export class CollisionSystem {
           gameState.player.canJump = true;
         }
       },
-      onEnd: (player, platform) => {
+      onEnd: (_player, _platform) => {
         gameState.player.grounded = false;
-      }
+      },
     });
 
     // Player vs Enemy
     this.registerHandler('player', 'enemy', {
-      onStart: (player, enemy) => {
+      onStart: (_player, enemy) => {
         // Find enemy object
-        const enemyObj = gameState.enemies.find(e => e.body === enemy);
+        const enemyObj = gameState.enemies.find((e) => e.body === enemy);
         if (!enemyObj) return;
 
         // Check if player is attacking
@@ -173,60 +173,60 @@ export class CollisionSystem {
           gameState.damagePlayer?.(enemyObj.damage);
           gameState.camera?.shake(8, 200);
         }
-      }
+      },
     });
 
     // Player vs Collectible
     this.registerHandler('player', 'collectible', {
-      onStart: (player, collectible) => {
+      onStart: (_player, collectible) => {
         if (collectible.collected) return;
 
         collectible.collected = true;
         gameState.collectItem?.(collectible.itemType, collectible.amount);
         gameState.audioManager?.playSFX('collect');
-      }
+      },
     });
 
     // Player vs Hazard
     this.registerHandler('player', 'hazard', {
-      onActive: (player, hazard) => {
+      onActive: (_player, hazard) => {
         // Damage over time
         if (!hazard.lastDamageTime || Date.now() - hazard.lastDamageTime > 500) {
           gameState.damagePlayer?.(hazard.damage || 1);
           hazard.lastDamageTime = Date.now();
           gameState.camera?.shake(5, 150);
         }
-      }
+      },
     });
 
     // Player vs Water
     this.registerHandler('player', 'water', {
-      onStart: (player, water) => {
+      onStart: (_player, water) => {
         gameState.player.inWater = true;
         gameState.player.waterCurrent = water.current || { x: 0, y: 0 };
       },
-      onEnd: (player, water) => {
+      onEnd: (_player, _water) => {
         gameState.player.inWater = false;
         gameState.player.waterCurrent = null;
-      }
+      },
     });
 
     // Player vs Checkpoint
     this.registerHandler('player', 'checkpoint', {
-      onStart: (player, checkpointSensor) => {
-        const checkpoint = gameState.checkpoints.find(c => c.sensor === checkpointSensor);
+      onStart: (_player, checkpointSensor) => {
+        const checkpoint = gameState.checkpoints.find((c) => c.sensor === checkpointSensor);
         if (checkpoint && !checkpoint.activated) {
           checkpoint.activated = true;
           gameState.setCheckpoint?.(checkpoint.id);
           gameState.audioManager?.playSFX('checkpoint');
         }
-      }
+      },
     });
 
     // Player vs Exit
     this.registerHandler('player', 'exit', {
-      onStart: (player, exitSensor) => {
-        const exit = gameState.exits.find(e => e.sensor === exitSensor);
+      onStart: (_player, exitSensor) => {
+        const exit = gameState.exits.find((e) => e.sensor === exitSensor);
         if (!exit) return;
 
         if (exit.locked) {
@@ -241,23 +241,23 @@ export class CollisionSystem {
 
         // Trigger level transition
         gameState.completeLevel?.(exit.destination);
-      }
+      },
     });
 
     // Player vs Interaction
     this.registerHandler('player', 'interaction', {
-      onStart: (player, interactionSensor) => {
-        const interaction = gameState.interactions.find(i => i.sensor === interactionSensor);
+      onStart: (_player, interactionSensor) => {
+        const interaction = gameState.interactions.find((i) => i.sensor === interactionSensor);
         if (interaction) {
           gameState.player.nearbyInteraction = interaction;
         }
       },
-      onEnd: (player, interactionSensor) => {
-        const interaction = gameState.interactions.find(i => i.sensor === interactionSensor);
+      onEnd: (_player, interactionSensor) => {
+        const interaction = gameState.interactions.find((i) => i.sensor === interactionSensor);
         if (interaction && gameState.player.nearbyInteraction === interaction) {
           gameState.player.nearbyInteraction = null;
         }
-      }
+      },
     });
 
     // Player vs Trigger
@@ -267,45 +267,45 @@ export class CollisionSystem {
       },
       onEnd: (player, triggerSensor) => {
         gameState.triggerSystem?.handleCollisionEnd(player, triggerSensor);
-      }
+      },
     });
 
     // Player vs Secret
     this.registerHandler('player', 'secret', {
-      onStart: (player, secretSensor) => {
-        const secret = gameState.secrets.find(s => s.sensor === secretSensor);
+      onStart: (_player, secretSensor) => {
+        const secret = gameState.secrets.find((s) => s.sensor === secretSensor);
         if (secret && !secret.discovered) {
           secret.discovered = true;
           gameState.discoverSecret?.(secret);
           gameState.audioManager?.playSFX('secret_found');
         }
-      }
+      },
     });
 
     // Player Attack vs Enemy
     this.registerHandler('player_attack', 'enemy', {
       onStart: (attack, enemy) => {
-        const enemyObj = gameState.enemies.find(e => e.body === enemy);
+        const enemyObj = gameState.enemies.find((e) => e.body === enemy);
         if (!enemyObj) return;
 
         gameState.damageEnemy?.(enemyObj, attack.damage || 10);
         gameState.camera?.shake(5, 100);
         gameState.audioManager?.playSFX('hit');
-      }
+      },
     });
 
     // Enemy Attack vs Player
     this.registerHandler('enemy_attack', 'player', {
-      onStart: (attack, player) => {
+      onStart: (attack, _player) => {
         gameState.damagePlayer?.(attack.damage || 5);
         gameState.camera?.shake(8, 200);
-      }
+      },
     });
   }
 
   /**
    * Check if two bodies are currently colliding
-   * 
+   *
    * @param {Object} bodyA - First body
    * @param {Object} bodyB - Second body
    * @returns {boolean}
@@ -318,7 +318,7 @@ export class CollisionSystem {
 
   /**
    * Get all bodies colliding with a given body
-   * 
+   *
    * @param {Object} body - Body to check
    * @returns {Array} Array of colliding bodies
    */
@@ -330,7 +330,7 @@ export class CollisionSystem {
 
     for (const other of allBodies) {
       if (other === body) continue;
-      
+
       const collision = Matter.Collision.collides(body, other);
       if (collision) {
         colliding.push(other);
@@ -342,7 +342,7 @@ export class CollisionSystem {
 
   /**
    * Check if body is grounded (on a platform)
-   * 
+   *
    * @param {Object} body - Body to check
    * @returns {boolean}
    */

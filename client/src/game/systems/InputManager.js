@@ -10,7 +10,7 @@ class InputManager {
     this.gamepad = null;
     this.touch = {
       joystick: { x: 0, y: 0 },
-      buttons: {}
+      buttons: {},
     };
 
     // Input state
@@ -20,7 +20,7 @@ class InputManager {
       jump: false,
       interact: false,
       attack: false,
-      pause: false
+      pause: false,
     };
 
     // Previous frame state for edge detection
@@ -207,7 +207,7 @@ class InputManager {
     this.keys = {};
     this.touch = {
       joystick: { x: 0, y: 0 },
-      buttons: {}
+      buttons: {},
     };
     this.state = {
       moveLeft: false,
@@ -215,7 +215,7 @@ class InputManager {
       jump: false,
       interact: false,
       attack: false,
-      pause: false
+      pause: false,
     };
     this.prevState = { ...this.state };
   }

@@ -5,7 +5,7 @@
  */
 
 import Matter from 'matter-js';
-import { PLAYER_PHYSICS, checkGrounded, createAttackHitbox } from './PhysicsManager';
+import { checkGrounded, createAttackHitbox, PLAYER_PHYSICS } from './PhysicsManager';
 
 const { Body } = Matter;
 
@@ -238,14 +238,14 @@ export class PlayerController {
       });
     }
 
-// Better approach: Track roll state with timestamp
-this.rollEndTime = performance.now() + 500;
+    // Better approach: Track roll state with timestamp
+    this.rollEndTime = performance.now() + 500;
 
-// In update loop:
-if (performance.now() >= this.rollEndTime && this.player.isRolling) {
-  this.player.isRolling = false;
-  this.player.isInvulnerable = false;
-}
+    // In update loop:
+    if (performance.now() >= this.rollEndTime && this.player.isRolling) {
+      this.player.isRolling = false;
+      this.player.isInvulnerable = false;
+    }
 
     // Wall jump
     if (controls.jump && this.player.canJump) {
@@ -379,7 +379,15 @@ if (performance.now() >= this.rollEndTime && this.player.isRolling) {
     const hs = this.hearthStrike;
 
     // Create powerful hitbox
-    const hitbox = createAttackHitbox(this.player, hs.offsetX, hs.offsetY, hs.width, hs.height, hs.damage, hs.kb);
+    const hitbox = createAttackHitbox(
+      this.player,
+      hs.offsetX,
+      hs.offsetY,
+      hs.width,
+      hs.height,
+      hs.damage,
+      hs.kb
+    );
 
     hitbox.warmthCost = 20; // Costs warmth to use
 

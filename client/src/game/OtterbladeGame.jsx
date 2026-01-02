@@ -10,6 +10,7 @@ import { createEffect, createSignal, ErrorBoundary, For, onCleanup, Show } from 
 import { Vector3 } from 'yuka';
 import TouchControls from './components/TouchControls';
 import { loadChapterManifest } from './data/chapter-loaders';
+import { createGameLoop } from './engine/gameLoop';
 import {
   buildEnemies,
   buildInteractionsAndCollectibles,
@@ -19,18 +20,9 @@ import {
   initializeChapterData,
   initializeQuests,
 } from './engine/initialization';
-import { createGameLoop } from './engine/gameLoop';
 import { createSceneRenderer } from './engine/rendering';
-import {
-  BellSystem,
-  HearthSystem,
-  LanternSystem,
-} from './environment/EnvironmentalSystems';
-import {
-  createFinnBody,
-  createPhysicsEngine,
-  HazardSystem,
-} from './physics/PhysicsManager';
+import { BellSystem, HearthSystem, LanternSystem } from './environment/EnvironmentalSystems';
+import { createFinnBody, createPhysicsEngine, HazardSystem } from './physics/PhysicsManager';
 import { PlayerController } from './physics/PlayerController';
 import { aiManager } from './systems/AIManager';
 import { audioManager } from './systems/AudioManager';

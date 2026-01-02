@@ -1,17 +1,17 @@
 /**
  * NPC Factory
- * 
+ *
  * Creates NPCs from DDL manifests with story states, gestures, and interactions.
- * 
+ *
  * @module factories/npc-factory
  */
 
-import { getChapterNPCs } from '../data/chapter-loaders';
 import { Vector3 } from 'yuka';
+import { getChapterNPCs } from '../data/chapter-loaders';
 
 /**
  * Build NPCs for a chapter
- * 
+ *
  * @param {number} chapterId - Chapter ID
  * @param {Object} gameState - Current game state (for story progression)
  * @returns {Array} Array of NPC objects
@@ -34,7 +34,7 @@ export function buildNPCs(chapterId, gameState = {}) {
 
 /**
  * Create a single NPC from definition
- * 
+ *
  * @param {Object} npcDef - NPC definition from DDL
  * @param {Object} gameState - Current game state
  * @returns {Object} NPC object
@@ -55,37 +55,37 @@ export function createNPC(npcDef, gameState = {}) {
     color: npcDef.color,
     position: {
       x: npcDef.position?.x || 0,
-      y: npcDef.position?.y || 0
+      y: npcDef.position?.y || 0,
     },
-    
+
     // Story state
     currentState: currentState,
     storyStates: npcDef.storyState?.states || {},
-    
+
     // Current gesture and expression (from story state)
     currentGesture: stateData?.gesture || 'idle',
     currentExpression: stateData?.expression || 'calm',
-    
+
     // Interactions
     interactions: npcDef.interactions || [],
     hasQuest: false,
     isTalking: false,
-    
+
     // Dialogue (wordless - gestures only)
     dialogueSequence: stateData?.dialogueSequence || [],
     currentDialogueIndex: 0,
-    
+
     // Behavior
     behavior: npcDef.behavior || {
       type: 'stationary',
       wanderRadius: 0,
-      facePlayer: true
+      facePlayer: true,
     },
     facing: 1,
-    
+
     // YUKA AI (for movement)
     yukaEntity: null,
-    aiState: 'idle'
+    aiState: 'idle',
   };
 
   // Check if NPC has available quest
@@ -103,7 +103,7 @@ export function createNPC(npcDef, gameState = {}) {
 
 /**
  * Update NPC (called each frame)
- * 
+ *
  * @param {Object} npc - NPC object
  * @param {number} deltaTime - Time since last frame in ms
  * @param {Object} player - Player object
@@ -235,7 +235,7 @@ function updateWanderBehavior(npc, deltaTime) {
     const radius = Math.random() * npc.behavior.wanderRadius;
     npc.wanderTarget = {
       x: npc.position.x + Math.cos(angle) * radius,
-      y: npc.position.y + Math.sin(angle) * radius
+      y: npc.position.y + Math.sin(angle) * radius,
     };
   }
 
@@ -318,7 +318,7 @@ function updateDialogueAnimation(npc, deltaTime) {
  */
 function checkStateTransitions(npc, gameState) {
   const currentStateData = npc.storyStates[npc.currentState];
-  
+
   if (!currentStateData?.transitions) return;
 
   for (const transition of currentStateData.transitions) {
@@ -367,13 +367,13 @@ export function interactWithNPC(npc, _player, _gameState) {
   if (!npc || !_player) return null;
 
   const stateData = npc.storyStates[npc.currentState];
-  
+
   // Start dialogue sequence (wordless gestures)
   if (stateData?.dialogueSequence && stateData.dialogueSequence.length > 0) {
     npc.isTalking = true;
     npc.currentDialogueIndex = 0;
     npc.dialogueTimer = 0;
-    
+
     const firstGesture = stateData.dialogueSequence[0];
     npc.currentGesture = firstGesture.gesture || 'idle';
     npc.currentExpression = firstGesture.expression || npc.currentExpression;
@@ -385,7 +385,7 @@ export function interactWithNPC(npc, _player, _gameState) {
       type: 'quest',
       questId: stateData.availableQuest,
       npcId: npc.id,
-      npcName: npc.name
+      npcName: npc.name,
     };
   }
 
@@ -394,13 +394,13 @@ export function interactWithNPC(npc, _player, _gameState) {
       type: 'interaction',
       interactionId: stateData.interaction,
       npcId: npc.id,
-      npcName: npc.name
+      npcName: npc.name,
     };
   }
 
   return {
     type: 'dialogue',
     npcId: npc.id,
-    npcName: npc.name
+    npcName: npc.name,
   };
 }

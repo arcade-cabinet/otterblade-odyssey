@@ -1,14 +1,14 @@
 /**
  * Environment Renderer
- * 
+ *
  * Renders parallax backgrounds, weather effects, particles, and environmental elements.
- * 
+ *
  * @module rendering/environment-renderer
  */
 
 /**
  * Draw parallax background layers
- * 
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
  * @param {Object} camera - Camera object with x, y properties
  * @param {string} biome - Biome type (cottage, forest, abbey, storm)
@@ -245,12 +245,25 @@ function drawTrees(ctx, x, y, width, height, count) {
 
     // Trunk
     ctx.fillStyle = '#4A3728';
-    ctx.fillRect(treeX - treeWidth * 0.1, y + height - treeHeight, treeWidth * 0.2, treeHeight * 0.4);
+    ctx.fillRect(
+      treeX - treeWidth * 0.1,
+      y + height - treeHeight,
+      treeWidth * 0.2,
+      treeHeight * 0.4
+    );
 
     // Canopy
     ctx.fillStyle = '#3A5F3A'; // Forest green
     ctx.beginPath();
-    ctx.ellipse(treeX, y + height - treeHeight * 0.7, treeWidth * 0.5, treeHeight * 0.6, 0, 0, Math.PI * 2);
+    ctx.ellipse(
+      treeX,
+      y + height - treeHeight * 0.7,
+      treeWidth * 0.5,
+      treeHeight * 0.6,
+      0,
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
   }
 }
@@ -280,7 +293,7 @@ function drawUndergrowth(ctx, x, y, width, height) {
 function drawAbbeyStructures(ctx, x, y, width, height, count) {
   for (let i = 0; i < count; i++) {
     const buildingX = x + (i / count) * width;
-    const buildingWidth = width / count * 0.7;
+    const buildingWidth = (width / count) * 0.7;
     const buildingHeight = height * (0.7 + Math.random() * 0.3);
 
     // Building
@@ -387,8 +400,8 @@ function drawRain(ctx, _camera, width, height) {
   const time = Date.now() * 0.01;
 
   for (let i = 0; i < rainCount; i++) {
-    const x = ((i * 123 + time * 50) % width);
-    const y = ((i * 456 + time * 200) % height);
+    const x = (i * 123 + time * 50) % width;
+    const y = (i * 456 + time * 200) % height;
     const length = 20 + Math.random() * 10;
 
     ctx.beginPath();
@@ -413,7 +426,7 @@ function drawGenericBackground(ctx, _camera, width, height) {
 
 /**
  * Draw particle effect
- * 
+ *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
  * @param {Object} particle - Particle object
  * @param {Object} camera - Camera object
