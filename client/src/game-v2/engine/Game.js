@@ -7,6 +7,8 @@ import { Physics } from './Physics.js';
 import { InputManager } from './Input.js';
 import { Player } from '../entities/Player.js';
 import { store } from '../state/store.js';
+import { ManifestLoader } from '../ddl/loader.js';
+import { LevelBuilder } from '../ddl/builder.js';
 
 export class Game {
   constructor(canvas) {
@@ -14,22 +16,26 @@ export class Game {
     this.renderer = new Renderer(canvas);
     this.physics = new Physics();
     this.input = new InputManager();
+    this.manifestLoader = new ManifestLoader();
     
     this.entities = [];
     this.player = null;
     this.currentChapter = 0;
+    this.currentManifest = null;
     this.biome = 'forest';
+    this.exitPoint = null;
     
     this.frame = 0;
     this.lastTime = 0;
     this.running = false;
-    
-    this.dt = 16.67; // Target 60fps
   }
 
   async init() {
     // Load saved state
     store.load();
+    
+    // Pre-load all chapter manifests
+    await this.manifestLoader.loadAllChapters();
     
     // Create player
     this.player = new Player(200, 300);
@@ -42,28 +48,27 @@ export class Game {
     console.log(`📜 Loading Chapter ${chapterId}...`);
     
     // Clear existing entities except player
-    this.entities = this.entities.filter(e => e === this.player);
+    this.entities = [this.player];
     
-    // Would load from DDL here
-    // For now: simple test platforms
-    this.createTestLevel();
+    // Load manifest from DDL
+    this.currentManifest = await this.manifestLoader.loadChapter(chapterId);
     
+    // Build level from manifest
+    const level = LevelBuilder.build(this.currentManifest, this.player);
+    this.entities.push(...level.entities);
+    this.biome = level.biome;
+    this.exitPoint = level.exitPoint;
+    
+    // Update store
     this.currentChapter = chapterId;
-    store.set({ currentChapter: chapterId });
+    store.set({ 
+      currentChapter: chapterId,
+      currentQuest: level.quest,
+      currentLocation: level.name
+    });
     
-    console.log(`✅ Chapter ${chapterId} loaded`);
-  }
-
-  createTestLevel() {
-    // Temporary test platforms
-    const platforms = [
-      { x: 0, y: 450, width: 1200, height: 50, solid: true, width: 30, height: 30 },
-      { x: 300, y: 350, width: 150, height: 20, solid: true, width: 30, height: 20 },
-      { x: 550, y: 300, width: 150, height: 20, solid: true, width: 30, height: 20 },
-      { x: 800, y: 250, width: 150, height: 20, solid: true, width: 30, height: 20 },
-    ];
-    
-    platforms.forEach(p => this.entities.push(p));
+    console.log(`✅ Chapter ${chapterId} loaded: ${level.name}`);
+    console.log(`🎯 Quest: ${level.quest}`);
   }
 
   start() {
@@ -88,19 +93,99 @@ export class Game {
       this.player.update(dt);
     }
 
+    // Update enemies
+    this.entities.forEach(entity => {
+      if (entity.update && entity !== this.player) {
+        entity.update(dt, this.player);
+      }
+    });
+
     // Update physics
     this.physics.update(this.entities, 1);
+    
+    // Check combat (player attacking enemies)
+    if (this.player && this.player.state === 'attacking') {
+      this.checkCombat();
+    }
+
+    // Check collectibles
+    this.checkCollectibles();
+
+    // Remove dead entities
+    this.entities = this.entities.filter(e => !e.dead && !e.collected);
     
     // Update camera to follow player
     if (this.player) {
       this.renderer.setCamera(this.player.x, this.player.y - 100);
     }
 
-    // Check win condition (reached right edge)
-    if (this.player && this.player.x > 1000) {
-      console.log('🏆 Chapter complete!');
-      // Would transition to next chapter
+    // Check exit (reached portal)
+    if (this.player && this.exitPoint) {
+      const dx = Math.abs(this.player.x - this.exitPoint.x);
+      const dy = Math.abs(this.player.y - this.exitPoint.y);
+      
+      if (dx < 50 && dy < 50) {
+        this.completeChapter();
+      }
     }
+
+    // Check game over
+    if (this.player && this.player.health <= 0) {
+      this.gameOver();
+    }
+  }
+
+  checkCombat() {
+    this.entities.forEach(entity => {
+      if (!entity.health || entity === this.player) return;
+      
+      const dx = Math.abs(this.player.x - entity.x);
+      const dy = Math.abs(this.player.y - entity.y);
+      
+      // Player's sword reach
+      if (dx < 60 && dy < 40) {
+        entity.takeDamage(1);
+      }
+    });
+  }
+
+  checkCollectibles() {
+    this.entities.forEach(entity => {
+      if (!entity.collect) return;
+      
+      const dx = Math.abs(this.player.x - entity.x);
+      const dy = Math.abs(this.player.y - entity.y);
+      
+      if (dx < 30 && dy < 30) {
+        entity.collect(this.player);
+      }
+    });
+  }
+
+  completeChapter() {
+    console.log('🏆 Chapter complete!');
+    
+    const nextChapter = this.currentChapter + 1;
+    
+    if (nextChapter < 10) {
+      console.log(`➡️ Moving to Chapter ${nextChapter}`);
+      this.loadChapter(nextChapter);
+    } else {
+      console.log('🎉 GAME COMPLETE! Victory!');
+      this.victory();
+    }
+  }
+
+  gameOver() {
+    console.log('💀 Game Over');
+    this.stop();
+    // Would show game over screen
+  }
+
+  victory() {
+    console.log('🎊 VICTORY! All chapters complete!');
+    this.stop();
+    // Would show victory screen
   }
 
   render() {
@@ -110,8 +195,29 @@ export class Game {
     
     // Draw platforms
     this.entities.forEach(entity => {
-      if (entity.solid) {
+      if (entity.solid && !entity.isExit) {
         this.renderer.drawPlatform(entity);
+      }
+    });
+    
+    // Draw exit portal
+    this.entities.forEach(entity => {
+      if (entity.isExit) {
+        this.renderer.drawExitPortal(entity);
+      }
+    });
+    
+    // Draw collectibles
+    this.entities.forEach(entity => {
+      if (entity.collect && !entity.collected) {
+        this.renderer.drawCollectible(entity, this.frame);
+      }
+    });
+    
+    // Draw enemies
+    this.entities.forEach(entity => {
+      if (entity.health && entity !== this.player) {
+        this.renderer.drawEnemy(entity, this.frame);
       }
     });
     

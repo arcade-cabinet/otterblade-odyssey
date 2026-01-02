@@ -246,6 +246,98 @@ export class Renderer {
     return colors[biome] || colors.forest;
   }
 
+  /**
+   * Draw exit portal
+   */
+  drawExitPortal(portal) {
+    const { ctx } = this;
+    const x = portal.x - this.camera.x + this.canvas.width / 2;
+    const y = portal.y - this.camera.y + this.canvas.height / 2;
+
+    // Glowing portal effect
+    const pulseAlpha = 0.3 + Math.sin(Date.now() * 0.005) * 0.2;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    
+    // Outer glow
+    const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, 40);
+    grad.addColorStop(0, `rgba(244, 208, 63, ${pulseAlpha})`);
+    grad.addColorStop(1, 'rgba(244, 208, 63, 0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 40, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Portal ring
+    ctx.strokeStyle = '#F4D03F';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(0, 0, 30, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Inner shine
+    ctx.fillStyle = 'rgba(244, 208, 63, 0.5)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 20, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
+  /**
+   * Draw collectible
+   */
+  drawCollectible(collectible, frame) {
+    const { ctx } = this;
+    const x = collectible.x - this.camera.x + this.canvas.width / 2;
+    const y = collectible.y - this.camera.y + this.canvas.height / 2;
+    const bob = Math.sin(frame * 0.1) * 5;
+
+    ctx.save();
+    ctx.translate(x, y + bob);
+    
+    if (collectible.type === 'shard') {
+      // Ember shard - glowing crystal
+      const shardGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 15);
+      shardGrad.addColorStop(0, '#E67E22');
+      shardGrad.addColorStop(0.5, '#D35400');
+      shardGrad.addColorStop(1, 'rgba(230, 126, 34, 0)');
+      
+      ctx.fillStyle = shardGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Crystal shape
+      ctx.fillStyle = '#E67E22';
+      ctx.beginPath();
+      ctx.moveTo(0, -10);
+      ctx.lineTo(7, 0);
+      ctx.lineTo(0, 10);
+      ctx.lineTo(-7, 0);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Sparkle
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillRect(-2, -2, 4, 4);
+    } else if (collectible.type === 'health') {
+      // Health pickup - heart
+      ctx.fillStyle = '#E74C3C';
+      ctx.beginPath();
+      ctx.arc(-5, -5, 5, 0, Math.PI * 2);
+      ctx.arc(5, -5, 5, 0, Math.PI * 2);
+      ctx.moveTo(-8, -2);
+      ctx.lineTo(0, 8);
+      ctx.lineTo(8, -2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    
+    ctx.restore();
+  }
+
   drawMountainLayer(offset, color, alpha) {
     const { ctx, canvas } = this;
     ctx.globalAlpha = alpha;
