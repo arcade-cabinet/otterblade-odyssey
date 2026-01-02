@@ -57,6 +57,10 @@ function drawFinn(ctx, position, _facing, animFrame) {
     console.error('Invalid parameters to drawFinn');
     return;
   }
+  if (!ctx || !position || typeof animFrame !== 'number') {
+    console.error('Invalid parameters to drawFinn');
+    return;
+  }
   ctx.save();
   ctx.translate(position.x, position.y);
 
