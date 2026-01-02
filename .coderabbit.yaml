@@ -76,11 +76,11 @@ chat:
 knowledge_base:
   # Game-specific patterns (updated for Astro + Solid.js architecture)
   learnings:
-    - pattern: "Use pnpm exclusively, never npm or yarn"
-    - pattern: "Procedural rendering with Canvas 2D, no static PNG/MP4 imports"
-    - pattern: "Matter.js for physics simulation (proven in POC)"
-    - pattern: "Solid.js for reactive UI components"
-    - pattern: "Astro for static site generation"
-    - pattern: "JavaScript preferred over TypeScript for simplicity"
-    - pattern: "DDL-driven architecture with JSON manifests"
-    - pattern: "Warm Redwall-inspired aesthetic (BRAND.md)"
+    package_manager: "Use pnpm exclusively, never npm or yarn"
+    rendering: "Procedural rendering with Canvas 2D, no static PNG/MP4 imports"
+    physics: "Matter.js for physics simulation (proven in POC)"
+    ui_framework: "Solid.js for reactive UI components"
+    static_site_gen: "Astro for static site generation"
+    language_preference: "JavaScript preferred over TypeScript for simplicity"
+    architecture: "DDL-driven architecture with JSON manifests"
+    aesthetic: "Warm Redwall-inspired aesthetic (BRAND.md)"
