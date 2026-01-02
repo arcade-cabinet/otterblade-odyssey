@@ -1518,6 +1518,23 @@ export default function OtterbladeGame() {
 
     // Register cleanup
     onCleanup(() => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      audioManager.stopAll();
+      aiManager.destroy();
+      inputManager.reset();
+      // Cleanup environmental systems (correct variable names)
+      lanternSystem?.destroy?.();
+      bellSystem?.destroy?.();
+      hearthSystem?.destroy?.();
+      for (const sequence of timingSequences) {
+        sequence?.destroy?.();
+      }
+      Engine.clear(engine);
+      World.clear(engine.world, false);
+      enemyBodyMap.clear();
+    });
       // Cancel animation frame to prevent memory leaks
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
