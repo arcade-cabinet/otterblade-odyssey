@@ -244,7 +244,6 @@ export function createInputManager(game) {
 
       // Axes (left stick)
       const axisX = gamepad.axes[0];
-      const axisY = gamepad.axes[1];
 
       // Apply deadzone
       const DEADZONE = 0.2;

@@ -58,6 +58,13 @@ export interface GameTestAPI {
   }): void;
 }
 
+// Extend Window interface to include test API
+declare global {
+  interface Window {
+    __GAME_TEST_API__?: GameTestAPI;
+  }
+}
+
 /**
  * Initialize test API on window object
  * Only call in development/test environments
@@ -107,13 +114,13 @@ export function initializeTestAPI(): void {
     simulateInput(keys) {
       const store = useStore.getState();
       Object.entries(keys).forEach(([key, value]) => {
-        store.setControl(key as any, value);
+        store.setControl(key as string, value);
       });
     },
   };
 
   // Expose on window
-  (window as any).__GAME_TEST_API__ = api;
+  window.__GAME_TEST_API__ = api;
   console.log('[Test API] Initialized - available as window.__GAME_TEST_API__');
 }
 
@@ -124,5 +131,5 @@ export function cleanupTestAPI(): void {
   if (import.meta.env.MODE === 'production') {
     return;
   }
-  delete (window as any).__GAME_TEST_API__;
+  delete window.__GAME_TEST_API__;
 }

@@ -6,7 +6,7 @@
 import Matter from 'matter-js';
 import { createInputManager } from '../systems/input.js';
 
-const { Engine, World, Bodies, Body, Events } = Matter;
+const { Engine, World, Bodies } = Matter;
 
 /**
  * Create and initialize the game
@@ -203,7 +203,9 @@ export async function createGame() {
       }
 
       // Update enemies
-      this.enemies.forEach(enemy => this.updateEnemy(enemy, dt));
+      for (const enemy of this.enemies) {
+        this.updateEnemy(enemy, dt);
+      }
 
       // Update camera to follow player
       this.updateCamera();
@@ -237,10 +239,10 @@ export async function createGame() {
 
     /**
      * Update enemy AI
-     * @param {object} enemy - Enemy entity
-     * @param {number} dt - Delta time
+     * @param {object} _enemy - Enemy entity
+     * @param {number} _dt - Delta time
      */
-    updateEnemy(enemy, dt) {
+    updateEnemy(_enemy, _dt) {
       // TODO: Implement YUKA AI pathfinding
       // For now, simple patrol behavior
     },
@@ -309,7 +311,9 @@ export async function createGame() {
       }
 
       // Render enemies
-      this.enemies.forEach(enemy => this.renderEnemy(enemy));
+      for (const enemy of this.enemies) {
+        this.renderEnemy(enemy);
+      }
 
       this.ctx.restore();
     },
@@ -386,9 +390,9 @@ export async function createGame() {
 
     /**
      * Render enemy
-     * @param {object} enemy - Enemy entity
+     * @param {object} _enemy - Enemy entity
      */
-    renderEnemy(enemy) {
+    renderEnemy(_enemy) {
       // TODO: Implement procedural enemy rendering
     },
 
