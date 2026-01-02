@@ -519,7 +519,7 @@ function drawBoss(ctx, boss, animFrame) {
 
 export default function OtterbladeGame() {
   let canvasRef;
-  const setCanvasRef = (el) => {
+  const _setCanvasRef = (el) => {
     canvasRef = el;
   };
 
@@ -529,10 +529,10 @@ export default function OtterbladeGame() {
   const [maxHealth] = createSignal(5);
   const [warmth, setWarmth] = createSignal(100);
   const [maxWarmth] = createSignal(100);
-  const [shards, setShards] = createSignal(0);
-  const [gameStarted, setGameStarted] = createSignal(false);
+  const [_shards, setShards] = createSignal(0);
+  const [gameStarted, _setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
-  const [activeQuest, setActiveQuest] = createSignal(null);
+  const [_activeQuest, setActiveQuest] = createSignal(null);
 
   // Game state object for systems
   const gameStateObj = {
@@ -1538,23 +1538,6 @@ export default function OtterbladeGame() {
       World.clear(engine.world, false);
       enemyBodyMap.clear();
     });
-      // Cancel animation frame to prevent memory leaks
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      audioManager.stopAll();
-      aiManager.destroy();
-      inputManager.reset();
-      // Cleanup environmental systems
-      lanternManager?.destroy();
-      bellManager?.destroy();
-      hearthManager?.destroy();
-      timingSequenceManager?.destroy();
-      Engine.clear(engine);
-      World.clear(engine.world, false);
-      // Clear enemy body map
-      enemyBodyMap.clear();
-    });
   });
 
   return (
@@ -1614,7 +1597,7 @@ export default function OtterbladeGame() {
       </Show>
 
       <Show when={gameStarted()}>
-        <canvas ref={setCanvasRef} style={{ display: 'block' }} />
+        <canvas ref={_setCanvasRef} style={{ display: 'block' }} />
 
         {/* HUD */}
         <div
