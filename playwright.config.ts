@@ -29,7 +29,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'http://localhost:5173', // Vanilla JS game server port
+    baseURL: 'http://localhost:4321', // Astro dev server port
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: isCI ? 'on' : isMCP ? 'retain-on-failure' : 'off',
@@ -38,7 +38,7 @@ export default defineConfig({
     // Headless mode control
     headless: !isMCP,
 
-    // Canvas 2D support for vanilla JS game
+    // Canvas 2D support for Astro + Solid.js game
     launchOptions: {
       args: [
         '--disable-gpu-sandbox',
@@ -64,8 +64,8 @@ export default defineConfig({
 
   // Smart server management - always reuses existing, starts if needed
   webServer: {
-    command: 'pnpm run dev:client',
-    url: 'http://localhost:5173', // Vanilla JS game server port
+    command: 'pnpm run dev:game',
+    url: 'http://localhost:4321', // Astro dev server port
     reuseExistingServer: true, // KEY: Always reuse for MCP seamlessness
     timeout: 120000,
     stdout: 'pipe',

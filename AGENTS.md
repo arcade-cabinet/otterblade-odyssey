@@ -17,26 +17,28 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ---
 
-## Technology Stack (Vanilla JavaScript)
+## Technology Stack (Astro + Solid.js)
 
-**Architecture Decision**: Vanilla JavaScript + Matter.js (proven in POC) replaces React Three Fiber + Rapier (20,000+ lines, broken).
+**Architecture Decision**: Astro 5.x + Solid.js + Matter.js (proven in POC) replaces React Three Fiber + Rapier (20,000+ lines, broken).
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
 | **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
-| **Language** | Vanilla JavaScript (ES2022) | No TypeScript compilation overhead |
+| **Framework** | Astro 5.x | Static site generation, GitHub Pages deployment |
+| **UI Components** | Solid.js | Reactive UI, 7KB runtime (vs 140KB React) |
+| **Language** | JavaScript (ES2022) | No TypeScript compilation overhead |
 | **Physics** | Matter.js 0.20 | POC-proven, 2D rigid body physics |
 | **Rendering** | Canvas 2D API | Procedural character rendering, parallax |
 | **AI/Pathfinding** | YUKA 0.9 | Enemy AI, steering behaviors, FSM |
-| **State Management** | Vanilla JS (20 lines) | No Zustand, custom subscribe/notify pattern |
-| **Audio** | Howler.js | Spatial audio, music |
-| **Touch Controls** | Custom implementation | Mobile-first touch joystick |
-| **Bundler** | esbuild | Production bundling only |
-| **Dev Server** | Python SimpleHTTPServer | No build step in development |
+| **State Management** | Zustand 5.x | Game state with localStorage persistence |
+| **Audio** | Howler.js / Tone.js | Spatial audio, music |
+| **Touch Controls** | nipplejs / Custom | Mobile-first touch joystick |
+| **Bundler** | esbuild | Fast JavaScript bundling |
+| **Dev Server** | Astro dev server | Port 4321 |
 | **Package Manager** | **pnpm 10.x** (never npm/yarn) | |
 | **Linting** | Biome | Strict mode |
 
-**Performance**: 8MB memory (vs 120MB React), <100KB bundle (vs 1.2MB), 60fps stable (vs 15-25fps)
+**Performance**: Fast Solid.js reactivity, <200KB bundle target, 60fps stable
 
 ---
 
@@ -52,43 +54,47 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ### Directory Responsibilities
 ```
-game/src/
-├── index.html          # Entry point
-├── main.js             # Game initialization
-├── ui/
-│   └── styles.css      # Warm Redwall styling
-├── core/
-│   ├── Game.js         # Main game loop controller
-│   ├── Physics.js      # Matter.js engine wrapper
-│   ├── Renderer.js     # Canvas 2D rendering pipeline
-│   └── Camera.js       # Camera follow system
-├── entities/
-│   ├── Player.js       # Finn (otter protagonist)
-│   ├── Enemy.js        # Galeborn enemies
-│   └── Platform.js     # Platforms, walls, hazards
-├── systems/
-│   ├── collision.js    # Collision handlers
-│   ├── ai.js           # YUKA AI manager
-│   ├── input.js        # Unified input (keyboard, gamepad, touch)
-│   └── audio.js        # Howler.js audio manager
-├── rendering/
-│   ├── finn.js         # Procedural Finn (from POC)
-│   ├── enemies.js      # Procedural enemies
-│   ├── parallax.js     # Parallax backgrounds
-│   └── particles.js    # Particle effects
-├── ddl/
-│   ├── loader.js       # Load chapter JSON manifests
-│   └── builder.js      # Build levels from DDL
-└── state/
-    └── store.js        # Vanilla JS state management
+game/src/                  # Astro + Solid.js game
+├── pages/
+│   └── index.astro        # Main game page
+├── components/            # Solid.js components
+│   ├── GameCanvas.jsx     # Game canvas wrapper
+│   ├── HUD.jsx            # Health, shards, quest display
+│   ├── TouchControls.jsx  # Mobile controls
+│   ├── StartMenu.jsx      # Start screen
+│   └── ChapterPlate.jsx   # Chapter transitions
+├── game/                  # Core game engine
+│   ├── engine/
+│   │   ├── physics.js     # Matter.js engine setup
+│   │   ├── renderer.js    # Canvas 2D rendering pipeline
+│   │   └── gameLoop.js    # RequestAnimationFrame loop
+│   ├── entities/
+│   │   ├── Player.js      # Finn (otter protagonist)
+│   │   ├── Enemy.js       # Galeborn enemies
+│   │   ├── Platform.js    # Platforms, walls, hazards
+│   │   └── Item.js        # Collectibles, powerups
+│   ├── systems/
+│   │   ├── collision.js   # Collision handlers
+│   │   ├── ai.js          # YUKA AI manager
+│   │   ├── input.js       # Unified input (keyboard, gamepad, touch)
+│   │   └── audio.js       # Howler.js audio manager
+│   ├── rendering/
+│   │   ├── finn.js        # Procedural Finn rendering
+│   │   ├── enemies.js     # Procedural enemy rendering
+│   │   ├── environment.js # Platforms, parallax backgrounds
+│   │   └── effects.js     # Particles, post-process
+│   ├── store.js           # Zustand state management
+│   └── constants.js       # Game constants, collision groups
+└── ui/
+    └── styles.css         # Warm Redwall-inspired CSS
 
 client/src/data/
-├── manifests/          # JSON DDL definitions
-│   ├── chapters/       # 10 chapter definitions
-│   ├── schema/         # JSON schemas
+├── manifests/             # JSON DDL definitions
+│   ├── chapters/          # 10 chapter definitions
+│   ├── schema/            # JSON schemas
 │   ├── enemies.json
 │   └── sounds.json
-└── approvals.json      # Asset approval tracking
+└── approvals.json         # Asset approval tracking
 ```
 
 ---

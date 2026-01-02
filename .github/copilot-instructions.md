@@ -104,14 +104,14 @@ Each session should:
 
 ## Project Overview
 
-Otterblade Odyssey is a **vanilla JavaScript + Matter.js** 2D platformer with Redwall-inspired woodland-epic aesthetics featuring:
+Otterblade Odyssey is an **Astro + Solid.js + Matter.js** 2D platformer with Redwall-inspired woodland-epic aesthetics featuring:
 - **Wordless storytelling** (pantomime, British theatre tradition)
 - **Warm, homey, childhood adventure** feel
 - **JSON DDL architecture** - All levels defined in JSON manifests
 - **Procedural generation** - Player and enemies procedurally rendered with Canvas 2D (not sprite sheets)
 - **YUKA pathfinding** - AI navigation for enemies and automated tests
 
-**Architecture Decision**: Vanilla JavaScript + Matter.js (proven in POC at `pocs/otterblade_odyssey.html`) replaces React Three Fiber + Rapier (20,000+ lines, broken).
+**Architecture Decision**: Astro 5.x + Solid.js + Matter.js (proven in POC at `pocs/otterblade_odyssey.html`) replaces React Three Fiber + Rapier (20,000+ lines, broken).
 
 ## Package Manager
 
@@ -128,7 +128,8 @@ pnpm run build
 
 ### JavaScript Configuration
 - Target: ES2022
-- Vanilla JavaScript (no TypeScript compilation overhead)
+- JavaScript (no TypeScript compilation overhead)
+- Astro for pages, Solid.js for components
 - ES modules
 
 ### Import Patterns

@@ -4,11 +4,11 @@ This is the primary instruction file for Claude-based AI agents working on Otter
 
 ## Quick Context
 
-**Otterblade Odyssey: Zephyros Rising** is a production-grade 2.5D platformer built with **Vanilla JavaScript + Matter.js + Canvas 2D**, with Redwall-inspired woodland-epic branding. Think warm lantern light, mossy stone abbeys, brave woodland creatures—not neon sci-fi or grimdark horror.
+**Otterblade Odyssey: Zephyros Rising** is a production-grade 2.5D platformer built with **Astro + Solid.js + Matter.js**, with Redwall-inspired woodland-epic branding. Think warm lantern light, mossy stone abbeys, brave woodland creatures—not neon sci-fi or grimdark horror.
 
 **Repository**: `github.com/jbdevprimary/otterblade-odyssey`
 
-**Architecture Decision**: Vanilla JavaScript + Matter.js (proven in POC) replaces React Three Fiber + Rapier (20,000+ lines, broken).
+**Architecture Decision**: Astro 5.x + Solid.js + Matter.js (proven in POC) replaces React Three Fiber + Rapier (20,000+ lines, broken).
 
 ## Critical Rules for Claude
 
@@ -43,7 +43,7 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 ```
 
 ### 4. JavaScript Target is ES2022
-Modern JavaScript features, ES modules. No TypeScript compilation overhead.
+Modern JavaScript features, ES modules. **Use JavaScript (not TypeScript)** for simplicity.
 
 ### 5. Node.js Version is 25.x
 All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` at repo root. CI/CD workflows, Replit, and local dev must all align to this version.
@@ -53,46 +53,58 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 ### Current Technology Stack
 | Layer | Technology |
 |-------|------------|
-| Language | Vanilla JavaScript (ES2022) |
+| Framework | Astro 5.x (static site generation) |
+| UI Components | Solid.js (reactive UI) |
+| Language | JavaScript (ES2022) |
 | Physics | Matter.js 0.20 (POC-proven) |
 | Rendering | Canvas 2D API |
 | AI/Pathfinding | YUKA 0.9 |
-| State Management | Vanilla JS (20 lines, no Zustand) |
-| Audio | Howler.js (spatial audio, music) |
-| Touch Controls | Custom implementation |
-| Bundler | esbuild (production only) |
-| Dev Server | Python SimpleHTTPServer |
+| State Management | Zustand 5.x (with localStorage) |
+| Audio | Howler.js / Tone.js |
+| Touch Controls | nipplejs / Custom |
+| Bundler | esbuild |
+| Dev Server | Astro dev server (port 4321) |
 
 ### Key Directories
 ```
-game/src/
-├── index.html        # Entry point
-├── main.js           # Game initialization
-├── ui/
-│   └── styles.css    # Warm Redwall styling
-├── core/
-│   ├── Game.js       # Main game loop
-│   ├── Physics.js    # Matter.js wrapper
-│   ├── Renderer.js   # Canvas 2D rendering
-│   └── Camera.js     # Camera follow
-├── entities/
-│   ├── Player.js     # Finn (otter protagonist)
-│   ├── Enemy.js      # Galeborn enemies
-│   └── Platform.js   # Platforms, walls
-├── rendering/
-│   ├── finn.js       # Procedural Finn (from POC)
-│   ├── enemies.js    # Procedural enemies
-│   └── parallax.js   # Backgrounds
-├── ddl/
-│   ├── loader.js     # Load chapter JSONs
-│   └── builder.js    # Build levels from DDL
-└── state/
-    └── store.js      # Vanilla JS state
+game/src/                  # Astro + Solid.js game
+├── pages/
+│   └── index.astro        # Main game page
+├── components/            # Solid.js components
+│   ├── GameCanvas.jsx     # Game canvas wrapper
+│   ├── HUD.jsx            # Health, shards, quest display
+│   ├── TouchControls.jsx  # Mobile controls
+│   ├── StartMenu.jsx      # Start screen
+│   └── ChapterPlate.jsx   # Chapter transitions
+├── game/                  # Core game engine
+│   ├── engine/
+│   │   ├── physics.js     # Matter.js engine setup
+│   │   ├── renderer.js    # Canvas 2D rendering pipeline
+│   │   └── gameLoop.js    # RequestAnimationFrame loop
+│   ├── entities/
+│   │   ├── Player.js      # Finn (otter protagonist)
+│   │   ├── Enemy.js       # Galeborn enemies
+│   │   ├── Platform.js    # Platforms, walls, hazards
+│   │   └── Item.js        # Collectibles, powerups
+│   ├── systems/
+│   │   ├── collision.js   # Collision handlers
+│   │   ├── ai.js          # YUKA AI manager
+│   │   ├── input.js       # Unified input (keyboard, gamepad, touch)
+│   │   └── audio.js       # Howler.js audio manager
+│   ├── rendering/
+│   │   ├── finn.js        # Procedural Finn rendering
+│   │   ├── enemies.js     # Procedural enemy rendering
+│   │   ├── environment.js # Platforms, parallax backgrounds
+│   │   └── effects.js     # Particles, post-process
+│   ├── store.js           # Zustand state management
+│   └── constants.js       # Game constants, collision groups
+└── ui/
+    └── styles.css         # Warm Redwall-inspired CSS
 
 client/src/data/
-├── manifests/        # JSON DDL definitions
-│   └── chapters/     # 10 chapter definitions
-└── approvals.json    # Asset approval tracking
+├── manifests/             # JSON DDL definitions
+│   └── chapters/          # 10 chapter definitions
+└── approvals.json         # Asset approval tracking
 ```
 
 ## 10-Chapter Story Structure
@@ -169,53 +181,46 @@ export function drawFinn(ctx, { x, y, facing, state, animFrame, warmth }) {
 }
 ```
 
-### Vanilla JS State Management (20 lines, no frameworks!)
+### Zustand State Management (with localStorage)
 ```javascript
-// game/src/state/store.js
-export const store = {
-  state: {
-    currentChapter: 0,
-    health: 5,
-    shards: 0,
-    checkpointPosition: { x: 100, y: 450 }
-  },
+// game/src/game/store.js
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-  listeners: new Set(),
+export const useGameStore = create(
+  persist(
+    (set) => ({
+      health: 5,
+      maxHealth: 5,
+      shards: 0,
+      currentChapter: 0,
+      checkpointPosition: { x: 100, y: 450 },
 
-  get() {
-    return this.state;
-  },
+      takeDamage: (amount) => set((state) => ({
+        health: Math.max(0, state.health - amount)
+      })),
 
-  set(updates) {
-    this.state = { ...this.state, ...updates };
-    this.notify();
-    this.save();
-  },
+      collectShard: () => set((state) => ({
+        shards: state.shards + 1
+      })),
 
-  subscribe(listener) {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  },
+      setCheckpoint: (pos) => set({ checkpointPosition: pos })
+    }),
+    {
+      name: 'otterblade-save',
+      partialize: (state) => ({
+        bestScore: state.bestScore,
+        unlockedChapters: state.unlockedChapters
+      })
+    }
+  )
+);
 
-  notify() {
-    this.listeners.forEach(fn => fn(this.state));
-  },
+// Usage in Solid.js components
+import { useGameStore } from '../game/store';
 
-  save() {
-    localStorage.setItem('otterblade', JSON.stringify(this.state));
-  },
-
-  load() {
-    const saved = localStorage.getItem('otterblade');
-    if (saved) this.state = JSON.parse(saved);
-  }
-};
-
-// Usage - same API as Zustand, zero dependencies
-import { store } from './state/store.js';
-
-store.set({ health: 4 });
-store.subscribe(state => console.log('Health:', state.health));
+const health = useGameStore((state) => state.health);
+const takeDamage = useGameStore((state) => state.takeDamage);
 ```
 
 ## Asset Generation System
@@ -331,8 +336,8 @@ pnpm audit:cinematics
 
 1. **Using npm/yarn** - Always use pnpm
 2. **Static PNG/MP4 assets** - Use procedural generation from POC, not static files
-3. **Adding frameworks** - Vanilla JavaScript is the correct path (proven in POC)
-4. **TypeScript** - Use vanilla JavaScript, no compilation overhead
+3. **Wrong framework** - Use Astro + Solid.js, NOT vanilla JS, NOT React
+4. **TypeScript** - Use JavaScript for simplicity
 5. **Neon/sci-fi aesthetics** - Always check BRAND.md
 6. **Over-engineering** - Keep it simple, proven patterns from POC
 
