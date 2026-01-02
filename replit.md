@@ -403,10 +403,14 @@ Features:
 | Workflow | Purpose |
 |----------|---------|
 | `ci.yml` | Lint, typecheck, test, build |
-| `cd.yml` | Deploy to GitHub Pages |
+| `cd.yml` | Deploy to GitHub Pages, Android APKs |
 | `assets.yml` | AI-powered asset generation |
-| `ai-reviewer.yml` | AI code review on PRs |
-| `ecosystem-*.yml` | Multi-repo orchestration |
+| `triage.yml` | Issue/PR triage, tracking, deduplication |
+| `autoheal.yml` | CI failure resolution (Ollama → Claude) |
+| `review.yml` | PR review automation (Ollama → Claude) |
+| `delegator.yml` | @claude command routing in comments |
+| `release-gate.yml` | E2E test gate for main branch |
+| `repo-sync.yml` | Repository configuration sync |
 
 ## Recent Changes
 
