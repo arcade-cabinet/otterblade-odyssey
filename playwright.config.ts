@@ -3,98 +3,75 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Playwright E2E test configuration for Otterblade Odyssey
  *
- * Supports two modes:
- * 1. PLAYWRIGHT_MCP=true - Full Playwright MCP with headed browser and WebGL
- * 2. Default - Headless mode with WebGL workarounds for CI/limited environments
+ * Auto-detects environment and configures appropriately:
+ * - Copilot MCP: Reuses existing server if available (seamless)
+ * - Local dev: Starts dev server automatically
+ * - CI: Builds and previews production bundle with video capture
  *
  * @see https://playwright.dev/docs/test-configuration
  */
 
-// Check if running with full Playwright MCP capabilities
-const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 const isCI = !!process.env.CI;
+const isMCP = !!process.env.PLAYWRIGHT_MCP;
 
 export default defineConfig({
   testDir: './e2e',
-  // Run tests in files in parallel
-  fullyParallel: true,
-  // Fail the build on CI if you accidentally left test.only in the source code
+  fullyParallel: !isMCP, // Sequential in MCP for debugging
   forbidOnly: isCI,
-  // Retry on CI only (not needed with MCP)
-  retries: hasMcpSupport ? 0 : isCI ? 2 : 0,
-  // Parallel workers - more with MCP, fewer in CI
-  workers: hasMcpSupport ? undefined : isCI ? 2 : undefined,
-  // Longer timeout for WebGL rendering with MCP
-  timeout: hasMcpSupport ? 60000 : 30000,
-  // Reporter to use
-  reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
-  // Shared settings for all the projects below
+  retries: isCI ? 2 : 0,
+  workers: isCI ? 2 : isMCP ? 1 : undefined,
+  timeout: 60000, // Generous timeout for WebGL games
+  
+  reporter: [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list'],
+    ...(isCI ? [['github' as const]] : []),
+  ],
+  
   use: {
-    // Base URL to use in actions like `await page.goto('/')`
-    baseURL: hasMcpSupport ? 'http://localhost:5000' : 'http://localhost:4173',
-    // Collect trace when retrying the failed test
+    baseURL: 'http://localhost:5173', // Single consistent port
     trace: 'on-first-retry',
-    // Take screenshot on failure
     screenshot: 'only-on-failure',
-    // Headed mode when MCP is available
-    headless: !hasMcpSupport,
-    // Video recording: always on CI for gameplay verification, on-first-retry with MCP
-    video: isCI ? 'on' : hasMcpSupport ? 'on-first-retry' : 'off',
-    // Increased action timeout for WebGL rendering
-    actionTimeout: 10000,
+    video: isCI ? 'on' : isMCP ? 'retain-on-failure' : 'off',
+    actionTimeout: 15000,
+    
+    // Headless mode control
+    headless: !isMCP,
+    
+    // WebGL support for all environments
+    launchOptions: {
+      args: [
+        '--enable-webgl',
+        '--ignore-gpu-blocklist',
+        '--use-gl=swiftshader', // Software rendering fallback
+        '--disable-gpu-sandbox',
+      ],
+    },
   },
-  // Expect options for visual regression
+  
   expect: {
-    // Timeout for expect() calls
     timeout: 10000,
-    // Screenshot comparison settings
     toHaveScreenshot: {
-      // Maximum number of pixels that can differ
       maxDiffPixels: 100,
-      // Animation handling
       animations: 'disabled',
-      // CSS media features
       caret: 'hide',
     },
   },
-  // Configure projects for major browsers
+  
   projects: [
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Different launch options based on environment
-        launchOptions: hasMcpSupport
-          ? {
-              // MCP mode - headed with full GPU
-              args: ['--enable-webgl', '--ignore-gpu-blocklist'],
-            }
-          : {
-              // Headless mode - software rendering
-              args: [
-                '--use-gl=swiftshader',
-                '--enable-webgl',
-                '--ignore-gpu-blocklist',
-                '--disable-gpu-sandbox',
-              ],
-            },
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Run your local dev server before starting the tests
-  webServer: hasMcpSupport
-    ? {
-        // MCP mode: Use dev server for interactive testing
-        command: 'pnpm run dev:client',
-        url: 'http://localhost:5000',
-        reuseExistingServer: false,
-        timeout: 120000,
-      }
-    : {
-        // CI mode: Use production preview
-        command: 'pnpm build:client && pnpm preview',
-        url: 'http://localhost:4173',
-        reuseExistingServer: !isCI,
-        timeout: 120000,
-      },
+  
+  // Smart server management - always reuses existing, starts if needed
+  webServer: {
+    command: 'pnpm run dev:client',
+    url: 'http://localhost:5173',
+    reuseExistingServer: true, // KEY: Always reuse for MCP seamlessness
+    timeout: 120000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  },
 });
