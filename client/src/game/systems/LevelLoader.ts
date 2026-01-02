@@ -35,29 +35,29 @@ export class LevelLoader {
         y: boundary.y,
         width: boundary.width,
         height: boundary.height,
-        type: boundary.type as 'ground' | 'platform' | 'wall'
+        type: boundary.type as 'ground' | 'platform' | 'wall',
       });
     }
 
     // Get spawn point from connections
     const spawn = manifest.connections.transitionIn.playerSpawnPoint;
-    
+
     // Get exit point
     const exit = manifest.connections.transitionOut.exitPoint;
 
     // Calculate level bounds
     const bounds = {
-      minX: Math.min(...level.boundaries.map(b => b.x)),
-      maxX: Math.max(...level.boundaries.map(b => b.x + b.width)),
-      minY: Math.min(...level.boundaries.map(b => b.y)),
-      maxY: Math.max(...level.boundaries.map(b => b.y + b.height))
+      minX: Math.min(...level.boundaries.map((b) => b.x)),
+      maxX: Math.max(...level.boundaries.map((b) => b.x + b.width)),
+      minY: Math.min(...level.boundaries.map((b) => b.y)),
+      maxY: Math.max(...level.boundaries.map((b) => b.y + b.height)),
     };
 
     return {
       platforms,
       spawn,
       exit,
-      bounds
+      bounds,
     };
   }
 
@@ -65,7 +65,7 @@ export class LevelLoader {
    * Simple procedural fallback for testing
    * (Can remove once all manifests have boundaries defined)
    */
-  generateSimplePlatforms(chapterId: number): LevelGeometry {
+  generateSimplePlatforms(_chapterId: number): LevelGeometry {
     const platforms: Platform[] = [];
 
     // Ground platform
@@ -74,7 +74,7 @@ export class LevelLoader {
       y: 400,
       width: 1200,
       height: 50,
-      type: 'ground'
+      type: 'ground',
     });
 
     // A few floating platforms for variety
@@ -84,7 +84,7 @@ export class LevelLoader {
         y: 300 - i * 20,
         width: 150,
         height: 20,
-        type: 'platform'
+        type: 'platform',
       });
     }
 
@@ -92,7 +92,7 @@ export class LevelLoader {
       platforms,
       spawn: { x: 150, y: 300 },
       exit: { x: 1000, y: 350 },
-      bounds: { minX: 0, maxX: 1200, minY: 0, maxY: 450 }
+      bounds: { minX: 0, maxX: 1200, minY: 0, maxY: 450 },
     };
   }
 }

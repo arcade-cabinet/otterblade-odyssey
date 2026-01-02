@@ -113,9 +113,10 @@ export function parseLevel(chapter: ChapterManifest): LevelGeometry {
 
   // Determine start/end positions
   const startPosition = { x: 100, y: 450 }; // Default start
-  const endPosition = platforms.length > 0
-    ? { x: platforms[platforms.length - 1].x, y: platforms[platforms.length - 1].y - 50 }
-    : { x: 1000, y: 450 };
+  const endPosition =
+    platforms.length > 0
+      ? { x: platforms[platforms.length - 1].x, y: platforms[platforms.length - 1].y - 50 }
+      : { x: 1000, y: 450 };
 
   return {
     platforms,
@@ -273,11 +274,7 @@ function reconstructPath(
 /**
  * Find the nearest platform to a given position
  */
-export function findNearestPlatform(
-  platforms: Platform[],
-  x: number,
-  y: number
-): Platform | null {
+export function findNearestPlatform(platforms: Platform[], x: number, y: number): Platform | null {
   if (platforms.length === 0) return null;
 
   let nearest = platforms[0];

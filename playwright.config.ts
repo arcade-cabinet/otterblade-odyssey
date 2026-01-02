@@ -21,23 +21,23 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   workers: isCI ? 2 : isMCP ? 1 : undefined,
   timeout: 60000, // Generous timeout for WebGL games
-  
+
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['list'],
     ...(isCI ? [['github' as const]] : []),
   ],
-  
+
   use: {
     baseURL: 'http://localhost:5173', // Single consistent port
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: isCI ? 'on' : isMCP ? 'retain-on-failure' : 'off',
     actionTimeout: 15000,
-    
+
     // Headless mode control
     headless: !isMCP,
-    
+
     // WebGL support for all environments
     launchOptions: {
       args: [
@@ -48,7 +48,7 @@ export default defineConfig({
       ],
     },
   },
-  
+
   expect: {
     timeout: 10000,
     toHaveScreenshot: {
@@ -57,14 +57,14 @@ export default defineConfig({
       caret: 'hide',
     },
   },
-  
+
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  
+
   // Smart server management - always reuses existing, starts if needed
   webServer: {
     command: 'pnpm run dev:client',

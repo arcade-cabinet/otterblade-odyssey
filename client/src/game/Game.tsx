@@ -104,7 +104,7 @@ export default function Game() {
 
   useEffect(() => {
     setHasWebGL(checkWebGLSupport());
-    
+
     // Initialize test API for E2E testing
     if (import.meta.env.MODE !== 'production') {
       initializeTestAPI();

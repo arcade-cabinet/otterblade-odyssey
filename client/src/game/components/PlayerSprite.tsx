@@ -17,11 +17,16 @@ interface PlayerSpriteProps {
  * Generate procedural otter sprite on canvas (from POC)
  * Returns THREE.CanvasTexture with drawn otter
  */
-function generateOtterTexture(facing: number, state: string, animFrame: number): THREE.CanvasTexture {
+function generateOtterTexture(
+  facing: number,
+  state: string,
+  animFrame: number
+): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 128;
   canvas.height = 128;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Failed to get 2d context');
 
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -44,7 +49,7 @@ function generateOtterTexture(facing: number, state: string, animFrame: number):
   ctx.fillStyle = '#8B6F47';
   ctx.strokeStyle = '#6B5D4F';
   ctx.lineWidth = 2;
-  const tailWag = Math.sin(frame * Math.PI / 2) * 8;
+  const tailWag = Math.sin((frame * Math.PI) / 2) * 8;
   ctx.beginPath();
   ctx.moveTo(-8, 10);
   ctx.quadraticCurveTo(-20 + tailWag, 15, -25, 20);
@@ -57,7 +62,7 @@ function generateOtterTexture(facing: number, state: string, animFrame: number):
   // Back leg
   ctx.fillStyle = '#8B6F47';
   if (state === 'walking') {
-    const legSwing = Math.sin(frame * Math.PI / 2 + Math.PI) * 8;
+    const legSwing = Math.sin((frame * Math.PI) / 2 + Math.PI) * 8;
     ctx.fillRect(-12 - legSwing, 12, 7, 16);
     ctx.beginPath();
     ctx.arc(-8 - legSwing, 28, 4, 0, Math.PI * 2);
@@ -103,7 +108,7 @@ function generateOtterTexture(facing: number, state: string, animFrame: number):
   // Front leg
   ctx.fillStyle = '#8B6F47';
   if (state === 'walking') {
-    const legSwing = Math.sin(frame * Math.PI / 2) * 8;
+    const legSwing = Math.sin((frame * Math.PI) / 2) * 8;
     ctx.fillRect(5 + legSwing, 12, 7, 16);
     ctx.beginPath();
     ctx.arc(8 + legSwing, 28, 4, 0, Math.PI * 2);
@@ -171,7 +176,7 @@ function generateOtterTexture(facing: number, state: string, animFrame: number):
 
   // Arms
   ctx.fillStyle = '#8B6F47';
-  const armAngle = state === 'walking' ? Math.sin(frame * Math.PI / 2) * 0.3 : 0;
+  const armAngle = state === 'walking' ? Math.sin((frame * Math.PI) / 2) * 0.3 : 0;
   ctx.save();
   ctx.translate(-10, -5 + breathe);
   ctx.rotate(armAngle);
@@ -200,7 +205,6 @@ export function PlayerSprite({ position }: PlayerSpriteProps) {
 
   const facingRight = useStore((s) => s.playerFacingRight);
   const controls = useStore((s) => s.controls);
-  const health = useStore((s) => s.health);
 
   // Determine animation state
   const getAnimationState = () => {
@@ -212,7 +216,7 @@ export function PlayerSprite({ position }: PlayerSpriteProps) {
   // Initial texture generation
   useMemo(() => {
     textureRef.current = generateOtterTexture(facingRight ? 1 : -1, 'idle', 0);
-  }, []);
+  }, [facingRight]);
 
   useFrame((_, delta) => {
     if (!meshRef.current || !textureRef.current) return;

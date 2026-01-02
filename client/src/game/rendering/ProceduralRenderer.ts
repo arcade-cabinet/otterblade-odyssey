@@ -16,10 +16,6 @@ export interface CharacterState {
 }
 
 export class ProceduralRenderer {
-  private animFrame = 0;
-
-  constructor() {}
-
   /**
    * Draw Finn (the player otter) - from POC lines 650-818
    */
@@ -109,7 +105,7 @@ export class ProceduralRenderer {
     ctx.fill();
 
     // Back arm
-    const armAngle = state === 'walking' ? Math.sin(frame * Math.PI / 2 + Math.PI) * 0.3 : 0;
+    const armAngle = state === 'walking' ? Math.sin((frame * Math.PI) / 2 + Math.PI) * 0.3 : 0;
     ctx.save();
     ctx.translate(-10, -5 + breathe);
     ctx.rotate(armAngle);
@@ -126,8 +122,12 @@ export class ProceduralRenderer {
     }
 
     // Front arm
-    const frontArmAngle = state === 'walking' ? Math.sin(frame * Math.PI / 2) * 0.3 :
-                          state === 'attacking' ? -Math.PI / 4 : 0;
+    const frontArmAngle =
+      state === 'walking'
+        ? Math.sin((frame * Math.PI) / 2) * 0.3
+        : state === 'attacking'
+          ? -Math.PI / 4
+          : 0;
     ctx.save();
     ctx.translate(10, -5 + breathe);
     ctx.rotate(frontArmAngle);
@@ -211,7 +211,11 @@ export class ProceduralRenderer {
   /**
    * Draw Galeborn enemy - from POC lines 820-950
    */
-  drawEnemy(ctx: CanvasRenderingContext2D, enemy: { position: { x: number; y: number }; enemyType: string }, frame: number): void {
+  drawEnemy(
+    ctx: CanvasRenderingContext2D,
+    enemy: { position: { x: number; y: number }; enemyType: string },
+    _frame: number
+  ): void {
     ctx.save();
     ctx.translate(enemy.position.x, enemy.position.y);
 
@@ -277,7 +281,12 @@ export class ProceduralRenderer {
    * Draw procedural parallax background layers
    * Simple gradient layers that look good and work immediately
    */
-  drawParallaxBackground(ctx: CanvasRenderingContext2D, biome: string, scrollOffset: number, frame: number): void {
+  drawParallaxBackground(
+    ctx: CanvasRenderingContext2D,
+    biome: string,
+    scrollOffset: number,
+    _frame: number
+  ): void {
     const canvas = ctx.canvas;
     const width = canvas.width;
     const height = canvas.height;
@@ -313,7 +322,14 @@ export class ProceduralRenderer {
     }
   }
 
-  private drawMountainLayer(ctx: CanvasRenderingContext2D, width: number, height: number, offset: number, color: string, alpha: number): void {
+  private drawMountainLayer(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    offset: number,
+    color: string,
+    alpha: number
+  ): void {
     ctx.globalAlpha = alpha;
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -331,7 +347,14 @@ export class ProceduralRenderer {
     ctx.globalAlpha = 1;
   }
 
-  private drawTreeLayer(ctx: CanvasRenderingContext2D, width: number, height: number, offset: number, color: string, alpha: number): void {
+  private drawTreeLayer(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    offset: number,
+    color: string,
+    alpha: number
+  ): void {
     ctx.globalAlpha = alpha;
     ctx.fillStyle = color;
 

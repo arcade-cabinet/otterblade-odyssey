@@ -4,7 +4,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('React Testing Infrastructure', () => {
   it('should have React Testing Library configured', () => {
