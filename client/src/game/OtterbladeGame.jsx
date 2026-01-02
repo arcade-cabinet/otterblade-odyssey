@@ -534,7 +534,7 @@ export default function OtterbladeGame() {
   const [warmth, setWarmth] = createSignal(100);
   const [maxWarmth] = createSignal(100);
   const [_shards, setShards] = createSignal(0);
-  const [gameStarted, _setGameStarted] = createSignal(false);
+  const [gameStarted, setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
   const [_activeQuest, setActiveQuest] = createSignal(null);
 
