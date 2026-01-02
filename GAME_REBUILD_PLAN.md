@@ -1,277 +1,376 @@
-# Game Rebuild Plan: DDL Factory Pattern Alignment
+# Game Rebuild Plan: JavaScript + DDL Factory Pattern (POC-Aligned)
 
 **Date:** 2026-01-02  
-**Issue:** Built bespoke game instead of using existing DDL factory patterns  
-**Status:** Planning complete rebuild
+**Issue:** Built bespoke game; need DDL alignment with **JAVASCRIPT** (not TypeScript)  
+**Status:** Planning JavaScript rebuild following POC architecture
 
 ---
 
-## Problem Summary
+## Critical Clarification: JavaScript First!
 
-The game I built (in `game/` directory) was a **simplified, bespoke implementation** that:
-- Ignored 6,977 lines of carefully crafted JSON chapter manifests
-- Didn't use existing TypeScript loaders (`chapter-loaders.ts`, `loaders.ts`)
-- Skipped factory patterns documented in `IMPLEMENTATION.md`
-- Missed NPCs, quests, triggers, interactions, story beats, cinematics
-- Used vanilla JS instead of TypeScript with Zod validation
+**User directive:** "Rip OUT with a chainsaw ALL the TypeScript"
 
-## What Exists (That I Should Use)
+### Architecture Goals
+1. **JavaScript** (vanilla, like `pocs/otterblade_odyssey.html`)
+2. **Matter.js** v0.19.0 for physics (POC-proven)
+3. **Astro** for framework (simple, not React/TypeScript complexity)
+4. **Factory patterns** in JavaScript to load DDL JSON manifests
+5. **POC-aligned** - Follow proven patterns from 1,934-line POC
 
-### 1. Data Layer
+### What To Avoid
+- ❌ TypeScript compilation
+- ❌ React complexity
+- ❌ Complex build tooling
+- ❌ Type systems and schemas (reference only)
+
+### What To Use
+- ✅ Vanilla JavaScript
+- ✅ Matter.js physics engine
+- ✅ Canvas 2D rendering
+- ✅ Simple JSON loading
+- ✅ Factory functions (JavaScript)
+- ✅ POC-proven patterns
+
+## What Exists (Reference for JavaScript Implementation)
+
+### 1. Data Layer (Use These JSON Files)
 ```
 client/src/data/
-├── biomes.json (5 biomes with colors)
-├── chapters.json (10 chapter overview)
+├── biomes.json (5 biomes with colors) ← LOAD THIS
+├── chapters.json (10 chapter overview) ← LOAD THIS
 └── manifests/
-    ├── chapters/ (10 detailed manifests, 492-949 lines each)
-    ├── enemies.json
-    ├── npcs.json
-    ├── sprites.json (procedural sprite generation)
-    ├── cinematics.json
-    ├── sounds.json
-    └── schema/ (JSON schemas for validation)
+    ├── chapters/ (10 detailed manifests) ← LOAD THESE
+    ├── enemies.json ← LOAD THIS
+    ├── npcs.json ← LOAD THIS
+    ├── sprites.json ← REFERENCE for procedural generation
+    ├── cinematics.json ← LOAD THIS
+    └── sounds.json ← LOAD THIS
 ```
 
-### 2. Loader Layer
+### 2. TypeScript Loaders (REFERENCE ONLY - Rewrite in JavaScript)
 ```
 client/src/game/data/
-├── loaders.ts (loadChapters, loadBiomes)
-├── chapter-loaders.ts (loadChapterManifest, + 20 helper functions)
-├── npc-loaders.ts
-└── schemas.ts (Zod schemas for type safety)
+├── loaders.ts ← Convert to JavaScript
+├── chapter-loaders.ts ← Convert to JavaScript  
+├── npc-loaders.ts ← Convert to JavaScript
+└── schemas.ts ← Reference only, no runtime validation
 ```
 
-### 3. Implementation Guide
+### 3. POC Proven Architecture (FOLLOW THIS)
 ```
-IMPLEMENTATION.md (comprehensive technical guide)
-- Physics system patterns (Matter.js)
-- Rendering pipeline (Canvas 2D)
-- Character implementation
-- Enemy AI with Yuka
-- Level design from DDL
-- State management (Zustand)
-- Collision & interaction system
-- Audio pipeline
-- Procedural generation
+pocs/otterblade_odyssey.html (1,934 lines)
+- Vanilla JavaScript
+- Matter.js v0.19.0 physics
+- Canvas 2D procedural rendering
+- Simple game loop
+- Touch controls
+- HUD system
+- NO TypeScript, NO React, NO complex tooling
 ```
 
-### 4. Test Infrastructure
+### 4. Implementation Guide (Reference)
 ```
-e2e/automated-playthroughs/
-- Complete journey validation
-- YUKA pathfinding for AI player
-- MP4 video capture
-docs/COMPLETE_JOURNEY_VALIDATION.md
+IMPLEMENTATION.md (comprehensive patterns, adapt to JavaScript)
 ```
 
 ---
 
-## Rebuild Plan
+## Rebuild Plan (JavaScript Edition)
 
-### Phase 1: Setup TypeScript Game Foundation (4-6 hours)
+### Phase 1: JavaScript Game Foundation (3-4 hours)
 
-**Goal:** Replace vanilla JS game with TypeScript using existing patterns
+**Goal:** Create JavaScript game following POC architecture
 
 **Tasks:**
-1. Create new `client/src/game/` directory structure:
+1. Create Astro project with JavaScript (NO TypeScript):
    ```
-   client/src/game/
-   ├── core/
-   │   ├── engine.ts (Matter.js wrapper)
-   │   ├── renderer.ts (Canvas 2D)
-   │   └── loop.ts (game loop)
-   ├── entities/
-   │   ├── player.ts (Finn)
-   │   ├── enemies/
-   │   └── npcs/
-   ├── systems/
-   │   ├── collision.ts
-   │   ├── ai.ts (Yuka)
-   │   ├── warmth.ts
-   │   ├── quest.ts
-   │   └── trigger.ts
-   ├── drawing/
-   │   ├── characters/
-   │   ├── environment/
-   │   └── effects/
-   ├── factories/
-   │   ├── level-factory.ts (DDL → game objects)
-   │   ├── npc-factory.ts
-   │   ├── interaction-factory.ts
-   │   └── trigger-factory.ts
-   └── store.ts (Zustand)
+   game/
+   ├── src/
+   │   ├── pages/
+   │   │   └── index.astro (entry point)
+   │   ├── game/
+   │   │   ├── engine.js (Matter.js wrapper)
+   │   │   ├── renderer.js (Canvas 2D)
+   │   │   ├── loop.js (game loop)
+   │   │   ├── player.js (Finn)
+   │   │   └── camera.js (follow camera)
+   │   ├── factories/
+   │   │   ├── level-factory.js (DDL → platforms)
+   │   │   ├── npc-factory.js (DDL → NPCs)
+   │   │   ├── interaction-factory.js (DDL → interactions)
+   │   │   └── trigger-factory.js (DDL → triggers)
+   │   ├── loaders/
+   │   │   ├── chapter-loader.js (load JSON manifests)
+   │   │   └── manifest-loader.js (load all DDL)
+   │   └── rendering/
+   │       ├── finn.js (procedural otter)
+   │       ├── parallax.js (backgrounds)
+   │       └── effects.js (particles)
+   └── astro.config.mjs
    ```
 
-2. Port Matter.js physics from POC to TypeScript
-3. Port procedural Finn rendering to TypeScript
-4. Set up Zustand store with TypeScript types
+2. Port Matter.js physics from POC (JavaScript):
+   ```javascript
+   // game/src/game/engine.js
+   import Matter from 'matter-js';
+   const { Engine, World, Bodies, Body, Events } = Matter;
+   
+   export function createPhysicsEngine() {
+     const engine = Engine.create();
+     engine.gravity.y = 1.5; // POC-proven value
+     return engine;
+   }
+   
+   export function createPlayerBody(x, y) {
+     return Bodies.rectangle(x, y, 35, 55, {
+       label: 'player',
+       friction: 0.1,
+       frictionAir: 0.01,
+       restitution: 0
+     });
+   }
+   ```
+
+3. Port procedural Finn rendering (JavaScript):
+   ```javascript
+   // game/src/rendering/finn.js
+   export function drawFinn(ctx, player, state) {
+     // ... procedural otter rendering from POC
+   }
+   ```
 
 **Validation:**
-- [ ] TypeScript compiles without errors
-- [ ] Matter.js engine initializes
+- [ ] Astro builds successfully (JavaScript only)
+- [ ] Matter.js initializes
 - [ ] Finn renders on canvas
-- [ ] Game loop runs at 60fps
+- [ ] 60fps game loop
 
 ---
 
-### Phase 2: DDL Loading & Factory Patterns (6-8 hours)
+### Phase 2: JavaScript DDL Loaders & Factories (4-6 hours)
 
-**Goal:** Load chapter manifests and build levels using factory patterns
+**Goal:** Load JSON manifests with JavaScript factory functions
 
 **Tasks:**
 
-#### 2.1 Level Factory
-```typescript
-// client/src/game/factories/level-factory.ts
-import { loadChapterManifest } from '../data/chapter-loaders';
-import type { ChapterManifest } from '../data/manifest-schemas';
+#### 2.1 Chapter Loader (JavaScript)
+```javascript
+// game/src/loaders/chapter-loader.js
 
-export class LevelFactory {
-  static buildLevel(chapterId: number, physics: PhysicsEngine): Level {
-    const manifest = loadChapterManifest(chapterId);
+// Static imports for all chapter manifests
+import chapter0 from '../../../client/src/data/manifests/chapters/chapter-0-the-calling.json';
+import chapter1 from '../../../client/src/data/manifests/chapters/chapter-1-river-path.json';
+// ... all 10 chapters
+
+const CHAPTERS = {
+  0: chapter0,
+  1: chapter1,
+  // ... map all
+};
+
+export function loadChapterManifest(chapterId) {
+  const manifest = CHAPTERS[chapterId];
+  if (!manifest) {
+    throw new Error(`Chapter ${chapterId} not found`);
+  }
+  return manifest;
+}
+
+export function getChapterOverview(chapterId) {
+  const chapter = loadChapterManifest(chapterId);
+  return {
+    id: chapter.id,
+    name: chapter.name,
+    location: chapter.location,
+    quest: chapter.narrative.quest,
+    hasBoss: !!chapter.boss
+  };
+}
+```
+
+#### 2.2 Level Factory (JavaScript)
+```javascript
+// game/src/factories/level-factory.js
+import { loadChapterManifest } from '../loaders/chapter-loader.js';
+import { createPlatform, createWall } from '../engine.js';
+
+export function buildLevel(chapterId, physics) {
+  const manifest = loadChapterManifest(chapterId);
+  
+  const level = {
+    id: chapterId,
+    name: manifest.name,
+    bounds: manifest.level.bounds,
+    platforms: [],
+    walls: [],
+    npcs: [],
+    interactions: [],
+    triggers: [],
+    collectibles: []
+  };
+  
+  // Build platforms from segments
+  for (const segment of manifest.level.segments) {
+    for (const platformDef of segment.platforms) {
+      const platform = createPlatform(physics, {
+        x: platformDef.x,
+        y: platformDef.y,
+        width: platformDef.width,
+        height: platformDef.height,
+        type: platformDef.type
+      });
+      level.platforms.push({
+        body: platform,
+        asset: platformDef.asset,
+        type: platformDef.type
+      });
+    }
     
-    // Build platforms from segments
-    const platforms = this.buildPlatforms(manifest.level.segments, physics);
-    
-    // Build walls/ceilings
-    const walls = this.buildWalls(manifest.level.segments, physics);
-    
-    // Build checkpoints
-    const checkpoints = this.buildCheckpoints(manifest.level.checkpoints);
-    
-    // Build interactions
-    const interactions = this.buildInteractions(manifest.interactions, physics);
-    
-    return new Level({
-      manifest,
-      platforms,
-      walls,
-      checkpoints,
-      interactions,
-      bounds: manifest.level.bounds,
-      biome: manifest.level.biome
-    });
+    // Build walls
+    for (const wallDef of segment.walls) {
+      const wall = createWall(physics, wallDef);
+      level.walls.push({
+        body: wall,
+        asset: wallDef.asset
+      });
+    }
   }
   
-  private static buildPlatforms(segments, physics) {
-    const platforms = [];
-    for (const segment of segments) {
-      for (const platformDef of segment.platforms) {
-        const platform = physics.createPlatform({
-          x: platformDef.x,
-          y: platformDef.y,
-          width: platformDef.width,
-          height: platformDef.height,
-          type: platformDef.type,
-          properties: platformDef.properties
-        });
-        platforms.push({
-          body: platform,
-          asset: platformDef.asset,
-          type: platformDef.type
-        });
+  // Build NPCs
+  level.npcs = manifest.npcs?.map(npcDef => 
+    createNPC(npcDef, physics)
+  ) || [];
+  
+  // Build interactions
+  level.interactions = manifest.interactions?.map(interactionDef =>
+    createInteraction(interactionDef)
+  ) || [];
+  
+  // Build triggers
+  level.triggers = manifest.triggers?.map(triggerDef =>
+    createTrigger(triggerDef)
+  ) || [];
+  
+  // Build collectibles
+  level.collectibles = manifest.collectibles?.map(collectibleDef =>
+    createCollectible(collectibleDef)
+  ) || [];
+  
+  return level;
+}
+```
+
+#### 2.3 NPC Factory (JavaScript)
+```javascript
+// game/src/factories/npc-factory.js
+
+export function createNPC(npcDef, physics) {
+  const body = physics.createNPCBody(npcDef.position.x, npcDef.position.y);
+  
+  return {
+    id: npcDef.id,
+    characterId: npcDef.characterId,
+    name: npcDef.name,
+    role: npcDef.role,
+    body: body,
+    facing: npcDef.facing,
+    behavior: npcDef.behavior,
+    currentState: npcDef.storyState.initialState,
+    storyStates: npcDef.storyState.states,
+    interactions: npcDef.interactions || [],
+    
+    update(deltaTime) {
+      // Update NPC behavior
+      const state = this.storyStates[this.currentState];
+      // Render animation based on state
+    },
+    
+    interact(player, gameState) {
+      const state = this.storyStates[this.currentState];
+      if (!state.canInteract) return;
+      
+      const interaction = this.findMatchingInteraction(gameState);
+      if (interaction) {
+        this.performGesture(interaction.gesture);
+        player.performGesture(interaction.finnResponse);
+        this.executeActions(interaction.actions);
+      }
+    },
+    
+    performGesture(gesture) {
+      // Wordless animation: nod, point, wave, bow, etc.
+      console.log(`NPC performs: ${gesture}`);
+    },
+    
+    findMatchingInteraction(gameState) {
+      // Find interaction that matches current triggers
+      return this.interactions.find(i => 
+        !i.trigger || gameState.triggersF fired.has(i.trigger)
+      );
+    },
+    
+    executeActions(actions) {
+      // Execute array of actions
+      for (const action of actions) {
+        executeAction(action);
       }
     }
-    return platforms;
-  }
-  
-  // ... more factory methods
+  };
 }
 ```
 
-#### 2.2 NPC Factory
-```typescript
-// client/src/game/factories/npc-factory.ts
-export class NPCFactory {
-  static createNPC(npcDef: ChapterNPC, physics: PhysicsEngine): NPC {
-    const body = physics.createNPCBody(npcDef.position.x, npcDef.position.y);
+#### 2.4 Interaction Factory (JavaScript)
+```javascript
+// game/src/factories/interaction-factory.js
+
+export function createInteraction(def) {
+  return {
+    id: def.id,
+    type: def.type,
+    position: def.position,
+    asset: def.asset,
+    activateRadius: def.activateRadius || 50,
+    currentState: def.initialState,
+    states: def.states || {},
+    requires: def.requires || {},
+    linkedTo: def.linkedTo || [],
     
-    return new NPC({
-      id: npcDef.id,
-      characterId: npcDef.characterId,
-      name: npcDef.name,
-      role: npcDef.role,
-      body,
-      facing: npcDef.facing,
-      behavior: npcDef.behavior,
-      storyState: npcDef.storyState,
-      interactions: npcDef.interactions
-    });
-  }
-}
-```
-
-#### 2.3 Interaction Factory
-```typescript
-// client/src/game/factories/interaction-factory.ts
-export class InteractionFactory {
-  static createInteraction(def: ChapterInteraction): InteractionObject {
-    switch (def.type) {
-      case 'lantern':
-        return new Lantern(def);
-      case 'lever':
-        return new Lever(def);
-      case 'door':
-        return new Door(def);
-      case 'chest':
-        return new Chest(def);
-      case 'shrine':
-        return new Shrine(def);
-      // ... all interaction types from schema
-    }
-  }
-}
-```
-
-#### 2.4 Trigger System
-```typescript
-// client/src/game/systems/trigger.ts
-export class TriggerSystem {
-  private triggers: Map<string, Trigger>;
-  private firedTriggers: Set<string>;
-  
-  loadFromManifest(manifest: ChapterManifest) {
-    for (const triggerDef of manifest.triggers) {
-      const trigger = new Trigger({
-        id: triggerDef.id,
-        type: triggerDef.type,
-        region: triggerDef.region,
-        once: triggerDef.once,
-        requires: triggerDef.requires,
-        actions: triggerDef.actions
-      });
-      this.triggers.set(trigger.id, trigger);
-    }
-  }
-  
-  update(player: Player, gameState: GameState) {
-    for (const [id, trigger] of this.triggers) {
-      if (trigger.checkConditions(player, gameState, this.firedTriggers)) {
-        this.executeTrigger(trigger);
-        if (trigger.once) {
-          this.firedTriggers.add(id);
+    canActivate(player, gameState) {
+      // Check requirements
+      if (this.requires.trigger && !gameState.triggersFired.has(this.requires.trigger)) {
+        return false;
+      }
+      if (this.requires.warmth && gameState.warmth < this.requires.warmth) {
+        return false;
+      }
+      return true;
+    },
+    
+    activate(player, gameState) {
+      if (!this.canActivate(player, gameState)) return false;
+      
+      const state = this.states[this.currentState];
+      if (state.actions) {
+        for (const action of state.actions) {
+          executeAction(action, gameState);
         }
       }
+      
+      // Change to next state if defined
+      const nextState = this.getNextState();
+      if (nextState) {
+        this.currentState = nextState;
+      }
+      
+      return true;
+    },
+    
+    render(ctx, camera) {
+      const state = this.states[this.currentState];
+      // Render based on current state asset
+      // ... rendering logic
     }
-  }
-  
-  private executeTrigger(trigger: Trigger) {
-    for (const action of trigger.actions) {
-      this.executeAction(action);
-    }
-  }
-  
-  private executeAction(action: TriggerAction) {
-    switch (action.type) {
-      case 'spawn_enemies':
-        // ... implementation
-      case 'play_cinematic':
-        // ... implementation
-      case 'show_toast':
-        // ... implementation
-      // ... all 20+ action types from schema
-    }
-  }
+  };
 }
 ```
 
@@ -280,409 +379,331 @@ export class TriggerSystem {
 - [ ] Build platforms from segments
 - [ ] Create NPCs at correct positions
 - [ ] Set up interactions (hearth, window, blade, door)
-- [ ] Register triggers (chapter_start, approach_window, etc.)
+- [ ] Register triggers
 
 ---
 
-### Phase 3: NPC & Quest Systems (6-8 hours)
+### Phase 3: Quest & Trigger Systems (JavaScript) (3-4 hours)
 
-**Goal:** Implement NPCs with story states and quest objectives
+**Goal:** Implement quests and event triggers in JavaScript
 
 **Tasks:**
 
-#### 3.1 NPC System
-```typescript
-// client/src/game/entities/npcs/NPC.ts
-export class NPC {
-  private currentState: string;
-  private storyStates: Record<string, NPCState>;
+#### 3.1 Trigger System
+```javascript
+// game/src/game/trigger-system.js
+
+export function createTriggerSystem() {
+  const triggers = new Map();
+  const firedTriggers = new Set();
   
-  constructor(config: NPCConfig) {
-    this.currentState = config.storyState.initialState;
-    this.storyStates = config.storyState.states;
-  }
-  
-  interact(player: Player, gameState: GameState) {
-    const state = this.storyStates[this.currentState];
-    if (!state.canInteract) return;
+  return {
+    loadFromManifest(manifest) {
+      for (const triggerDef of manifest.triggers || []) {
+        triggers.set(triggerDef.id, {
+          ...triggerDef,
+          fired: false
+        });
+      }
+    },
     
-    const interaction = this.findMatchingInteraction(gameState);
-    if (interaction) {
-      this.performGesture(interaction.gesture);
-      player.performGesture(interaction.finnResponse);
-      this.executeActions(interaction.actions);
+    update(player, gameState) {
+      for (const [id, trigger] of triggers) {
+        if (trigger.once && firedTriggers.has(id)) continue;
+        
+        if (this.checkTrigger(trigger, player, gameState)) {
+          this.executeTrigger(trigger, gameState);
+          if (trigger.once) {
+            firedTriggers.add(id);
+          }
+        }
+      }
+    },
+    
+    checkTrigger(trigger, player, gameState) {
+      // Check if required triggers have fired
+      if (trigger.requires) {
+        for (const reqId of trigger.requires) {
+          if (!firedTriggers.has(reqId)) return false;
+        }
+      }
+      
+      // Check trigger type
+      switch (trigger.type) {
+        case 'enter_region':
+          return this.checkEnterRegion(trigger.region, player);
+        case 'interact':
+          return gameState.lastInteraction === trigger.targetId;
+        case 'defeat_enemies':
+          return gameState.enemiesDefeated >= trigger.threshold;
+        // ... more trigger types
+        default:
+          return false;
+      }
+    },
+    
+    checkEnterRegion(region, player) {
+      const px = player.body.position.x;
+      const py = player.body.position.y;
+      return px >= region.x && px <= region.x + region.width &&
+             py >= region.y && py <= region.y + region.height;
+    },
+    
+    executeTrigger(trigger, gameState) {
+      for (const action of trigger.actions) {
+        executeAction(action, gameState);
+      }
     }
-  }
-  
-  performGesture(gesture: string) {
-    // Wordless animation: nod, point, wave, bow, etc.
-  }
-  
-  update(deltaTime: number) {
-    const state = this.storyStates[this.currentState];
-    this.playAnimation(state.animation);
-    this.showExpression(state.expression);
-  }
+  };
 }
 ```
 
 #### 3.2 Quest System
-```typescript
-// client/src/game/systems/quest.ts
-export class QuestSystem {
-  private activeQuests: Map<string, Quest>;
+```javascript
+// game/src/game/quest-system.js
+
+export function createQuestSystem() {
+  const activeQuests = new Map();
   
-  loadFromManifest(manifest: ChapterManifest) {
-    for (const questDef of manifest.quests) {
-      const quest = new Quest({
-        id: questDef.id,
-        name: questDef.name,
-        type: questDef.type,
-        objectives: questDef.objectives,
-        rewards: questDef.rewards
-      });
-      this.activeQuests.set(quest.id, quest);
-    }
-  }
-  
-  updateObjective(objectiveId: string, value: number | boolean) {
-    for (const quest of this.activeQuests.values()) {
-      const objective = quest.objectives.find(o => o.id === objectiveId);
-      if (objective) {
-        objective.progress = value;
-        if (quest.isComplete()) {
-          this.completeQuest(quest);
+  return {
+    loadFromManifest(manifest) {
+      for (const questDef of manifest.quests || []) {
+        activeQuests.set(questDef.id, {
+          ...questDef,
+          objectives: questDef.objectives.map(obj => ({
+            ...obj,
+            complete: false
+          }))
+        });
+      }
+    },
+    
+    updateObjective(objectiveId, value) {
+      for (const quest of activeQuests.values()) {
+        const objective = quest.objectives.find(o => o.id === objectiveId);
+        if (objective) {
+          objective.complete = true;
+          objective.progress = value;
+          
+          if (this.isQuestComplete(quest)) {
+            this.completeQuest(quest);
+          }
         }
       }
-    }
-  }
-  
-  completeQuest(quest: Quest) {
-    this.giveRewards(quest.rewards);
-    this.activeQuests.delete(quest.id);
-    // Trigger completion events
-  }
-}
-```
-
-**Validation:**
-- [ ] Mother Riverstone NPC in chapter 0 at position (300, 320)
-- [ ] NPC story state changes from "worried" to "blessing_given"
-- [ ] Quest "Answer the Call" with 3 objectives
-- [ ] Objective completion detection
-- [ ] Wordless gesture animations play
-
----
-
-### Phase 4: Interaction & Environment Systems (4-6 hours)
-
-**Goal:** Implement all interaction types and environment effects
-
-**Tasks:**
-
-#### 4.1 Interaction Base Class
-```typescript
-// client/src/game/entities/interactions/InteractionObject.ts
-export abstract class InteractionObject {
-  protected currentState: string;
-  protected states: Record<string, InteractionState>;
-  
-  abstract interact(player: Player): void;
-  abstract render(ctx: CanvasRenderingContext2D, camera: Camera): void;
-  
-  changeState(newState: string) {
-    this.currentState = newState;
-    const state = this.states[newState];
-    this.executeActions(state.actions);
-  }
-  
-  protected executeActions(actions: TriggerAction[]) {
-    // Execute all state transition actions
-  }
-}
-```
-
-#### 4.2 Specific Interactions
-- Lantern (light/unlit states)
-- Lever (up/down states)
-- Door (closed/open/locked states)
-- Chest (closed/open states)
-- Bell (resting/ringing states)
-- Shrine (hearth checkpoints)
-- Sign (environmental storytelling)
-- Pressure plate (triggers)
-- Breakable objects
-- Pushable objects
-
-#### 4.3 Environment System
-```typescript
-// client/src/game/systems/environment.ts
-export class EnvironmentSystem {
-  private lighting: LightingConfig;
-  private weather: WeatherConfig;
-  private warmthDrain: number;
-  private particles: ParticleEmitter[];
-  
-  loadFromManifest(manifest: ChapterManifest) {
-    this.lighting = manifest.environment.lighting;
-    this.weather = manifest.environment.weather;
-    this.warmthDrain = manifest.environment.warmthDrain;
-    this.particles = manifest.environment.particles.map(p => 
-      new ParticleEmitter(p)
-    );
-  }
-  
-  update(deltaTime: number, player: Player, gameState: GameState) {
-    this.updateLighting(gameState.warmth);
-    this.updateWeather(deltaTime);
-    this.drainWarmth(player, deltaTime);
-    this.updateParticles(deltaTime);
-  }
-}
-```
-
-**Validation:**
-- [ ] Cottage hearth interaction restores warmth
-- [ ] Window interaction triggers distant bells sound
-- [ ] Otterblade mount interaction with slow motion effect
-- [ ] Door requires blade_taken trigger to open
-- [ ] Ambient particles (dust, embers) render correctly
-
----
-
-### Phase 5: Boss Fights & Encounters (4-6 hours)
-
-**Goal:** Implement enemy encounters and boss fights
-
-**Tasks:**
-
-#### 5.1 Enemy Factory
-```typescript
-// client/src/game/factories/enemy-factory.ts
-export class EnemyFactory {
-  static createEnemy(encounterDef: ChapterEncounter): Enemy {
-    const enemyType = loadEnemyType(encounterDef.enemyType);
+    },
     
-    const enemy = new Enemy({
-      type: encounterDef.enemyType,
-      position: encounterDef.position,
-      behavior: encounterDef.behavior,
-      difficulty: encounterDef.difficulty,
-      stats: enemyType.stats
-    });
+    isQuestComplete(quest) {
+      return quest.objectives
+        .filter(o => !o.optional)
+        .every(o => o.complete);
+    },
     
-    this.setupAI(enemy, encounterDef.behavior);
-    return enemy;
-  }
-  
-  private static setupAI(enemy: Enemy, behavior: EncounterBehavior) {
-    switch (behavior.type) {
-      case 'patrol':
-        enemy.setPatrolPath(behavior.patrolPath);
-        break;
-      case 'guard':
-        enemy.setGuardPosition(behavior.guardRadius);
-        break;
-      case 'chase':
-        enemy.setAggroRadius(behavior.aggroRadius);
-        break;
-    }
-  }
-}
-```
-
-#### 5.2 Boss System
-```typescript
-// client/src/game/entities/bosses/Boss.ts
-export class Boss extends Enemy {
-  private phases: BossPhase[];
-  private currentPhase: number = 0;
-  
-  update(deltaTime: number) {
-    super.update(deltaTime);
-    this.checkPhaseTransition();
-  }
-  
-  private checkPhaseTransition() {
-    const healthPercent = this.health / this.maxHealth;
-    const nextPhase = this.phases[this.currentPhase + 1];
+    completeQuest(quest) {
+      console.log(`Quest complete: ${quest.name}`);
+      this.giveRewards(quest.rewards);
+      activeQuests.delete(quest.id);
+    },
     
-    if (nextPhase && healthPercent <= nextPhase.healthThreshold) {
-      this.enterPhase(this.currentPhase + 1);
-    }
-  }
-  
-  private enterPhase(phaseIndex: number) {
-    this.currentPhase = phaseIndex;
-    const phase = this.phases[phaseIndex];
-    this.setBehavior(phase.behavior);
-    this.spawnAdds(phase.adds);
-  }
-}
-```
-
-**Validation:**
-- [ ] Chapter 2 boss (gatehouse) spawns correctly
-- [ ] Chapter 8 Zephyros boss with multiple phases
-- [ ] Enemy patrol behaviors work
-- [ ] Guard and chase behaviors trigger correctly
-
----
-
-### Phase 6: Cinematics & Story Beats (3-4 hours)
-
-**Goal:** Implement wordless storytelling system
-
-**Tasks:**
-
-#### 6.1 Cinematic System
-```typescript
-// client/src/game/systems/cinematic.ts
-export class CinematicSystem {
-  private currentCinematic: Cinematic | null = null;
-  
-  playCinematic(cinematicId: string) {
-    const cinematicData = loadCinematic(cinematicId);
-    this.currentCinematic = new Cinematic(cinematicData);
-    this.currentCinematic.play();
-  }
-  
-  update(deltaTime: number) {
-    if (this.currentCinematic) {
-      this.currentCinematic.update(deltaTime);
-      if (this.currentCinematic.isComplete()) {
-        this.currentCinematic = null;
+    giveRewards(rewards) {
+      // Give ember shards, achievements, etc.
+      if (rewards.emberShards) {
+        gameState.shards += rewards.emberShards;
+      }
+      if (rewards.achievement) {
+        console.log(`Achievement unlocked: ${rewards.achievement}`);
       }
     }
-  }
-}
-```
-
-#### 6.2 Story Beat System
-```typescript
-// client/src/game/systems/storybeat.ts
-export class StoryBeatSystem {
-  private storyBeats: Map<string, StoryBeat>;
-  private triggeredBeats: Set<string>;
-  
-  loadFromManifest(manifest: ChapterManifest) {
-    for (const beat of manifest.narrative.storyBeats) {
-      this.storyBeats.set(beat.id, new StoryBeat(beat));
-    }
-  }
-  
-  triggerBeat(beatId: string, player: Player) {
-    if (this.triggeredBeats.has(beatId)) return;
-    
-    const beat = this.storyBeats.get(beatId);
-    if (beat) {
-      player.showExpression(beat.expression);
-      // Play moment animation/camera work
-      this.triggeredBeats.add(beatId);
-    }
-  }
+  };
 }
 ```
 
 **Validation:**
-- [ ] Chapter 0 story beats trigger (awakening, the_sign, fathers_blade, etc.)
-- [ ] Finn expressions change (wonder, fear, sorrow, determination, resolve)
-- [ ] Intro cinematic plays on chapter start
-- [ ] Outro cinematic plays on chapter complete
+- [ ] Triggers fire on region enter
+- [ ] Quests track objectives
+- [ ] Quest completion gives rewards
 
 ---
 
-### Phase 7: Integration & Testing (6-8 hours)
+### Phase 4: Complete Integration (JavaScript) (4-6 hours)
 
-**Goal:** Integrate all systems and validate with automated tests
+**Goal:** Wire everything together and test
 
 **Tasks:**
 
-1. Wire all systems together in main game class
-2. Test chapter 0 complete playthrough
-3. Test chapter 1-9 basic loading
-4. Fix integration bugs
-5. Run automated playthrough tests
-6. Capture MP4 videos of each chapter
+1. Create main game class
+2. Integrate all systems
+3. Test chapter 0 fully
+4. Test other chapters load
+5. Fix bugs
+
+**Main Game Structure:**
+```javascript
+// game/src/game/main.js
+
+import { createPhysicsEngine } from './engine.js';
+import { createPlayer } from './player.js';
+import { buildLevel } from '../factories/level-factory.js';
+import { createTriggerSystem } from './trigger-system.js';
+import { createQuestSystem } from './quest-system.js';
+import { drawFinn } from '../rendering/finn.js';
+import { drawParallax } from '../rendering/parallax.js';
+
+export function initGame(canvas) {
+  const ctx = canvas.getContext('2d');
+  const physics = createPhysicsEngine();
+  const player = createPlayer(physics, 100, 300);
+  
+  let currentLevel = null;
+  let triggerSystem = null;
+  let questSystem = null;
+  let camera = { x: 0, y: 0 };
+  
+  const gameState = {
+    health: 5,
+    warmth: 100,
+    shards: 0,
+    chapter: 0,
+    triggersFired: new Set(),
+    lastInteraction: null,
+    enemiesDefeated: 0
+  };
+  
+  async function loadChapter(chapterId) {
+    currentLevel = buildLevel(chapterId, physics);
+    triggerSystem = createTriggerSystem();
+    triggerSystem.loadFromManifest(currentLevel.manifest);
+    questSystem = createQuestSystem();
+    questSystem.loadFromManifest(currentLevel.manifest);
+  }
+  
+  function gameLoop(timestamp) {
+    const deltaTime = 16.67; // 60fps
+    
+    // Update physics
+    physics.update(deltaTime);
+    
+    // Update player
+    player.update(deltaTime);
+    
+    // Update triggers
+    triggerSystem.update(player, gameState);
+    
+    // Update camera
+    camera.x = player.body.position.x - canvas.width / 2;
+    camera.y = player.body.position.y - canvas.height / 2;
+    
+    // Render
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
+    
+    drawParallax(ctx, camera, gameState.chapter);
+    
+    // Draw platforms
+    for (const platform of currentLevel.platforms) {
+      ctx.fillStyle = '#8B4513';
+      const pos = platform.body.position;
+      ctx.fillRect(
+        pos.x - platform.body.bounds.max.x + pos.x,
+        pos.y - platform.body.bounds.max.y + pos.y,
+        platform.body.bounds.max.x - platform.body.bounds.min.x,
+        platform.body.bounds.max.y - platform.body.bounds.min.y
+      );
+    }
+    
+    // Draw NPCs
+    for (const npc of currentLevel.npcs) {
+      npc.render(ctx, camera);
+    }
+    
+    // Draw interactions
+    for (const interaction of currentLevel.interactions) {
+      interaction.render(ctx, camera);
+    }
+    
+    // Draw player
+    drawFinn(ctx, player.getState());
+    
+    ctx.restore();
+    
+    requestAnimationFrame(gameLoop);
+  }
+  
+  // Start game
+  loadChapter(0).then(() => {
+    requestAnimationFrame(gameLoop);
+  });
+  
+  return {
+    loadChapter,
+    gameState
+  };
+}
+```
 
 **Validation:**
-- [ ] All 10 chapters load without errors
-- [ ] Chapter 0 fully playable (cottage → threshold)
-- [ ] NPCs behave correctly
-- [ ] Quests track properly
-- [ ] Triggers fire as expected
-- [ ] Interactions work
-- [ ] Complete journey test passes
-- [ ] Video captures show proper gameplay
+- [ ] Chapter 0 fully playable
+- [ ] All systems working together
+- [ ] No console errors
+- [ ] 60fps maintained
 
 ---
 
-## Timeline Estimate
+## Timeline Estimate (JavaScript)
 
 | Phase | Hours | Description |
 |-------|-------|-------------|
-| 1. TypeScript Foundation | 4-6 | Setup structure, port core systems |
-| 2. DDL & Factories | 6-8 | Load manifests, build levels |
-| 3. NPCs & Quests | 6-8 | Story states, objectives |
-| 4. Interactions & Environment | 4-6 | All interaction types, lighting, particles |
-| 5. Bosses & Encounters | 4-6 | Enemy AI, boss fights |
-| 6. Cinematics & Story | 3-4 | Wordless storytelling |
-| 7. Integration & Testing | 6-8 | Wire together, validate |
-| **Total** | **33-46 hours** | ~1-2 weeks full-time |
+| 1. JavaScript Foundation | 3-4 | Astro + Matter.js + POC patterns |
+| 2. DDL Loaders & Factories | 4-6 | JavaScript loaders, factories |
+| 3. Quest & Triggers | 3-4 | Event system, objectives |
+| 4. Integration & Testing | 4-6 | Wire together, validate |
+| **Total** | **14-20 hours** | ~1 week part-time |
+
+**Much simpler than TypeScript approach!**
 
 ---
 
 ## Success Criteria
 
 ### Technical
+- [ ] Pure JavaScript (no TypeScript compilation)
 - [ ] All 10 chapter manifests load successfully
-- [ ] Factory patterns build game objects from DDL
-- [ ] Zod validation passes for all schemas
-- [ ] TypeScript compiles with no errors
-- [ ] 60fps maintained with all systems
+- [ ] Factory functions build game objects from DDL
+- [ ] 60fps maintained
+- [ ] Follows POC architecture patterns
 
 ### Gameplay
-- [ ] Chapter 0 fully playable with all content:
-  - Mother Riverstone NPC with blessing
-  - Otterblade quest with 3 objectives
-  - Hearth, window, blade, door interactions
-  - All story beats trigger correctly
-  - Cinematic on completion
-- [ ] All chapters loadable
+- [ ] Chapter 0 fully playable with DDL content
 - [ ] Quest system tracks objectives
 - [ ] Trigger system fires events
-- [ ] NPC story states change
+- [ ] NPC interactions work
 
 ### Testing
-- [ ] Complete journey test passes
-- [ ] All 10 chapter playthroughs work
-- [ ] MP4 videos captured
+- [ ] Game runs in browser
 - [ ] No console errors
+- [ ] Manual validation of gameplay
 
 ---
 
 ## What to Keep from Current Implementation
 
-The current simplified game has value:
-- **Physics engine wrapper** - Matter.js setup is solid
-- **Game loop** - 60fps loop works well
-- **Procedural Finn rendering** - Good starting point (needs TypeScript)
-- **HUD components** - Basic UI structure
-- **Camera follow** - Camera system works
-
-These can be ported to TypeScript and integrated with the DDL system.
+- **Matter.js setup** ✅
+- **Game loop** ✅
+- **Procedural Finn rendering** ✅
+- **HUD components** ✅ (port to vanilla JS)
+- **Camera follow** ✅
 
 ---
 
 ## Next Steps
 
-1. **Acknowledge** - Document the architectural misalignment (DONE)
-2. **Study** - Review all existing loaders and schemas (IN PROGRESS)
-3. **Plan** - Create detailed rebuild plan (THIS DOCUMENT)
-4. **Execute** - Rebuild game using factory patterns (NEXT)
-5. **Validate** - Test with automated playthroughs
-6. **Deploy** - GitHub Pages deployment
+1. ✅ Issue acknowledged  
+2. ✅ JavaScript-first plan created
+3. ⏳ Begin Phase 1: JavaScript foundation
+4. ⏳ Execute phases systematically
+5. ⏳ Validate with manual testing
+6. ⏳ Deploy
 
 ---
 
-**This rebuild aligns the implementation with the sophisticated DDL architecture and factory patterns already designed in the codebase.**
+**This JavaScript-first approach follows the POC proven architecture and avoids TypeScript complexity while still loading from DDL manifests using factory patterns.**
