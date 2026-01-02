@@ -8,8 +8,12 @@
     "client/src/game/**/*",
     "client/src/game-main.tsx",
     "client/src/App.tsx",
+    "client/src/main.tsx",
+    "client/src/lib/queryClient.ts",
+    "client/src/lib/theme.ts",
     "client/src/pages/**/*",
-    "client/src/components/**/*"
+    "client/src/components/**/*",
+    "client/src/hooks/**/*"
   ],
   "compilerOptions": {
     "incremental": true,
