@@ -238,7 +238,14 @@ export class PlayerController {
       });
     }
 
-    this.wallSlideTimer = 0.2; // Grace period
+// Better approach: Track roll state with timestamp
+this.rollEndTime = performance.now() + 500;
+
+// In update loop:
+if (performance.now() >= this.rollEndTime && this.player.isRolling) {
+  this.player.isRolling = false;
+  this.player.isInvulnerable = false;
+}
 
     // Wall jump
     if (controls.jump && this.player.canJump) {
