@@ -113,8 +113,11 @@ export function initializeTestAPI(): void {
 
     simulateInput(keys) {
       const store = useStore.getState();
+      const validKeys = ['left', 'right', 'jump', 'attack', 'slink', 'up', 'down', 'interact', 'roll'] as const;
       Object.entries(keys).forEach(([key, value]) => {
-        store.setControl(key as string, value);
+        if (validKeys.includes(key as typeof validKeys[number])) {
+          store.setControl(key as typeof validKeys[number], value);
+        }
       });
     },
   };
