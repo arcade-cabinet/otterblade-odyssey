@@ -101,6 +101,7 @@ export default function TouchControls(props) {
         }}>
           {/* Jump button (top) */}
           <button
+            type="button"
             onTouchStart={handleJump}
             style={{
               width: '70px',
@@ -122,6 +123,7 @@ export default function TouchControls(props) {
 
           {/* Attack button (middle) */}
           <button
+            type="button"
             onTouchStart={handleAttack}
             style={{
               width: '70px',
@@ -143,6 +145,7 @@ export default function TouchControls(props) {
 
           {/* Interact button (bottom) */}
           <button
+            type="button"
             onTouchStart={handleInteract}
             style={{
               width: '70px',

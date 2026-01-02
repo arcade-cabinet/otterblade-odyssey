@@ -626,6 +626,7 @@ export default function OtterbladeGame() {
             A Redwall-inspired woodland epic
           </h2>
           <button
+            type="button"
             onClick={() => setGameStarted(true)}
             style={{
               padding: '15px 40px',

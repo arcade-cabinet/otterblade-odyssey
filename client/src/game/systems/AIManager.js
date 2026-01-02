@@ -22,9 +22,9 @@ import {
  * Base class for typed states with better TypeScript-like behavior
  */
 class TypedState extends State {
-  enter(owner) {}
-  execute(owner) {}
-  exit(owner) {}
+  enter(_owner) {}
+  execute(_owner) {}
+  exit(_owner) {}
 }
 
 /**
@@ -49,7 +49,7 @@ class IdleState extends TypedState {
     this.idleTime++;
 
     // Check for player in aggro range
-    if (enemy.playerTarget && enemy.playerTarget.position) {
+    if (enemy.playerTarget?.position) {
       const distToPlayer = enemy.position.distanceTo(enemy.playerTarget.position);
       if (distToPlayer < enemy.aggroRadius) {
         enemy.target = enemy.playerTarget;
@@ -64,7 +64,7 @@ class IdleState extends TypedState {
     }
   }
 
-  exit(enemy) {}
+  exit(_enemy) {}
 }
 
 class PatrolState extends TypedState {
@@ -83,7 +83,7 @@ class PatrolState extends TypedState {
 
   execute(enemy) {
     // Check for player
-    if (enemy.playerTarget && enemy.playerTarget.position) {
+    if (enemy.playerTarget?.position) {
       const distToPlayer = enemy.position.distanceTo(enemy.playerTarget.position);
       if (distToPlayer < enemy.aggroRadius) {
         enemy.target = enemy.playerTarget;
@@ -120,7 +120,7 @@ class ChaseState extends TypedState {
   }
 
   enter(enemy) {
-    if (enemy.target && enemy.target.position) {
+    if (enemy.target?.position) {
       this.seekBehavior.target = enemy.target.position;
       enemy.steering.behaviors.push(this.seekBehavior);
       enemy.maxSpeed = enemy.chaseSpeed;
@@ -203,7 +203,7 @@ class AttackState extends TypedState {
     }
   }
 
-  exit(enemy) {}
+  exit(_enemy) {}
 }
 
 class FleeState extends TypedState {
@@ -276,7 +276,7 @@ class HurtState extends TypedState {
     }
   }
 
-  exit(enemy) {}
+  exit(_enemy) {}
 }
 
 /**
