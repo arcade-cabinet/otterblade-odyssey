@@ -13,6 +13,9 @@ const { Engine, World, Bodies, Body, Runner } = Matter;
 
 export default function OtterbladeGame() {
   let canvasRef;
+  const setCanvasRef = (el) => {
+    canvasRef = el;
+  };
   const currentChapter = 0; // Static for now, will be dynamic later
   const [health] = createSignal(5);
   const [shards] = createSignal(0);
@@ -113,10 +116,10 @@ export default function OtterbladeGame() {
       const moveForce = 0.005;
       const maxSpeed = 8;
 
-      if (keys['a'] || keys['arrowleft']) {
+      if (keys.a || keys.arrowleft) {
         Body.applyForce(player, player.position, { x: -moveForce, y: 0 });
       }
-      if (keys['d'] || keys['arrowright']) {
+      if (keys.d || keys.arrowright) {
         Body.applyForce(player, player.position, { x: moveForce, y: 0 });
       }
 
@@ -129,7 +132,7 @@ export default function OtterbladeGame() {
       }
 
       // Jump
-      if ((keys[' '] || keys['w'] || keys['arrowup']) && Math.abs(player.velocity.y) < 0.1) {
+      if ((keys[' '] || keys.w || keys.arrowup) && Math.abs(player.velocity.y) < 0.1) {
         Body.setVelocity(player, { x: player.velocity.x, y: -12 });
       }
 
@@ -262,7 +265,7 @@ export default function OtterbladeGame() {
         </div>
       </Show>
 
-      <canvas ref={(el) => (canvasRef = el)} style={{ display: 'block' }} />
+      <canvas ref={setCanvasRef} style={{ display: 'block' }} />
 
       {/* HUD */}
       <Show when={gameStarted()}>
