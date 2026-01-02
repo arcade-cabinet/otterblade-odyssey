@@ -1,0 +1,73 @@
+# CodeRabbit Configuration
+# Front-line automated PR triage - runs first before Ollama/Claude
+
+# Language and framework awareness
+language: en-US
+early_access: true
+
+# Review settings
+reviews:
+  # Request changes only for critical issues
+  request_changes_workflow: true
+  
+  # High-level PR summary
+  high_level_summary: true
+  
+  # Detailed file summaries
+  poem: false
+  
+  # Review profile
+  profile: assertive
+  
+  # Auto-review on PR events
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+  
+  # Scope of review
+  tools:
+    biome: true
+    github-checks: true
+    markdownlint: false
+    languagetool: false
+  
+  # Path-specific instructions
+  path_instructions:
+    - path: "client/**/*.{ts,tsx}"
+      instructions: |
+        - Follow React Three Fiber patterns
+        - Use Miniplex ECS with for...of iteration
+        - Ensure TypeScript strict mode compliance
+        - Check for physics simulation correctness
+    
+    - path: "e2e/**/*.spec.ts"
+      instructions: |
+        - Verify Playwright best practices
+        - Check for proper test isolation
+        - Ensure video capture is configured correctly
+    
+    - path: ".github/workflows/**/*.yml"
+      instructions: |
+        - Validate GitHub Actions syntax
+        - Check for proper secret handling
+        - Verify workflow dependencies and triggers
+        - Ensure proper permissions are set
+
+# Chat settings
+chat:
+  auto_reply: true
+
+# Knowledge base
+knowledge_base:
+  # Game-specific patterns
+  learnings:
+    - "Use pnpm exclusively, never npm or yarn"
+    - "Import assets using @assets alias"
+    - "ECS entities use optional components pattern"
+    - "Miniplex queries use for...of iteration"
+    - "Remove entities in two-pass: collect then remove"
+    - "Biome index bounds checking required"
+    - "React Three Fiber for 3D rendering"
+    - "Rapier for physics simulation"
