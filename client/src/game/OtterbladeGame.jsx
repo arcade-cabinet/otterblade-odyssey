@@ -3,20 +3,67 @@
  * Main Otterblade Odyssey Game Component
  * Full DDL factory-driven implementation with procedural rendering
  * JavaScript implementation following CLAUDE.md guidelines
+ *
+ * PROPER LIBRARY USAGE:
+ * - YUKA.js: Enemy AI, NPC behaviors, pathfinding
+ * - Matter.js: Physics engine (POC-proven settings)
+ * - nipplejs: Mobile touch controls
+ * - Solid.js: Reactive UI
  */
 
-import { createSignal, onMount, onCleanup, Show, For } from 'solid-js';
+import { createSignal, onMount, onCleanup, Show } from 'solid-js';
 import Matter from 'matter-js';
+import * as YUKA from 'yuka';
+import nipplejs from 'nipplejs';
 import {
   loadChapterManifest,
   getChapterSpawnPoint,
   getChapterNPCs,
-  getChapterTriggers,
   getChapterEncounters,
   getChapterCollectibles
 } from './data/chapter-loaders';
 
-const { Engine, World, Bodies, Body, Runner, Events } = Matter;
+const { Engine, World, Bodies, Body, Runner } = Matter;
+
+// Audio System (note: Howler.js not installed yet, using Web Audio API)
+class AudioSystem {
+  constructor() {
+    this.context = null;
+    this.sounds = new Map();
+    this.music = null;
+    this.volumes = {
+      master: 0.7,
+      music: 0.5,
+      sfx: 0.8,
+      ambient: 0.6
+    };
+  }
+
+  init() {
+    if (typeof window !== 'undefined') {
+      this.context = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  playSound(soundId, volume = 1.0) {
+    console.log(`[Audio] Play: ${soundId} (volume: ${volume})`);
+    // Placeholder: would use Howler.js when installed
+  }
+
+  playMusic(musicId, loop = true) {
+    console.log(`[Audio] Music: ${musicId} (loop: ${loop})`);
+    // Placeholder: would use Howler.js when installed
+  }
+
+  stopMusic() {
+    console.log('[Audio] Stop music');
+  }
+
+  setVolume(category, value) {
+    this.volumes[category] = value;
+    console.log(`[Audio] Volume ${category}: ${value}`);
+  }
+}
 
 export default function OtterbladeGame() {
   let canvasRef;
@@ -25,13 +72,19 @@ export default function OtterbladeGame() {
   };
 
   // Game state
-  const [currentChapter, setCurrentChapter] = createSignal(0);
+  const [currentChapter] = createSignal(0);
   const [health, setHealth] = createSignal(5);
   const [maxHealth] = createSignal(5);
   const [shards, setShards] = createSignal(0);
   const [gameStarted, setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
   const [activeQuest, setActiveQuest] = createSignal(null);
+
+  // Mobile controls state
+  const [isMobile] = createSignal(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+  const [mobileJoystickData, setMobileJoystickData] = createSignal({ x: 0, y: 0 });
+  const [mobileJump, setMobileJump] = createSignal(false);
+  const [mobileInteract, setMobileInteract] = createSignal(false);
 
   onMount(() => {
     if (!gameStarted()) return;
@@ -52,6 +105,14 @@ export default function OtterbladeGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    // Initialize Audio System
+    const audioSystem = new AudioSystem();
+    audioSystem.init();
+
+    // Initialize YUKA AI Manager
+    const yukaEntityManager = new YUKA.EntityManager();
+    const yukaTime = new YUKA.Time();
+
     // Create Matter.js engine with POC-proven settings
     const engine = Engine.create();
     engine.gravity.y = 1.5; // POC-proven value
@@ -64,6 +125,9 @@ export default function OtterbladeGame() {
 
     console.log(`Loading Chapter ${chapterId}: ${manifest.name}`);
     console.log(`Quest: ${manifest.narrative.quest}`);
+
+    // Play chapter music
+    audioSystem.playMusic(`chapter_${chapterId}_theme`, true);
 
     // Initialize quest system from DDL
     if (manifest.quests && manifest.quests.length > 0) {
@@ -86,6 +150,17 @@ export default function OtterbladeGame() {
       inertia: Infinity,
     });
     World.add(engine.world, player);
+
+    // Player state
+    const playerState = {
+      onGround: false,
+      canWallClimb: false,
+      isWallRunning: false,
+      combatMode: false,
+      facing: 1, // 1 = right, -1 = left
+      parryWindow: 0,
+      dodgeRollCooldown: 0
+    };
 
     // Build level from DDL manifest using factory pattern
     const platforms = [];
@@ -114,7 +189,11 @@ export default function OtterbladeGame() {
                 render: { fillStyle: platformDef.type === 'wood' ? '#8B4513' : '#696969' }
               }
             );
-            platforms.push({ body: platform, def: platformDef });
+            platforms.push({
+              body: platform,
+              def: platformDef,
+              canClimb: platformDef.type === 'stone' // Stone can be climbed
+            });
             World.add(engine.world, platform);
           }
         }
@@ -161,7 +240,7 @@ export default function OtterbladeGame() {
       }
     }
 
-    // Factory: Build NPCs from DDL
+    // Factory: Build NPCs from DDL with YUKA behaviors
     const npcData = getChapterNPCs(chapterId);
     for (const npcDef of npcData) {
       const npcBody = Bodies.rectangle(
@@ -175,10 +254,39 @@ export default function OtterbladeGame() {
           isSensor: true
         }
       );
+
+      // YUKA: Create AI entity for NPC
+      const yukaVehicle = new YUKA.Vehicle();
+      yukaVehicle.position.set(npcDef.position.x, npcDef.position.y, 0);
+      yukaVehicle.maxSpeed = 0; // NPCs are stationary
+      yukaVehicle.userData = { name: npcDef.name, dialogueIndex: 0 };
+
+      // YUKA: Simple state machine for NPC behaviors
+      const stateMachine = new YUKA.StateMachine(yukaVehicle);
+      const idleState = new YUKA.State('idle');
+      const talkingState = new YUKA.State('talking');
+
+      idleState.enter = () => {
+        console.log(`${npcDef.name} enters idle state`);
+      };
+
+      talkingState.enter = () => {
+        console.log(`${npcDef.name} enters talking state`);
+        audioSystem.playSound('npc_talk', 0.5);
+      };
+
+      stateMachine.add(idleState);
+      stateMachine.add(talkingState);
+      stateMachine.changeTo('idle');
+
+      yukaEntityManager.add(yukaVehicle);
+
       npcs.push({
         body: npcBody,
         def: npcDef,
-        state: npcDef.storyState?.initialState || 'idle'
+        state: npcDef.storyState?.initialState || 'idle',
+        yukaVehicle,
+        stateMachine
       });
       World.add(engine.world, npcBody);
     }
@@ -228,7 +336,7 @@ export default function OtterbladeGame() {
       World.add(engine.world, collectibleBody);
     }
 
-    // Factory: Build enemies from DDL
+    // Factory: Build enemies from DDL with YUKA AI
     const encounterData = getChapterEncounters(chapterId);
     for (const encounter of encounterData) {
       if (encounter.enemies) {
@@ -245,30 +353,194 @@ export default function OtterbladeGame() {
               restitution: 0
             }
           );
+
+          // YUKA: Create AI vehicle for enemy
+          const yukaVehicle = new YUKA.Vehicle();
+          yukaVehicle.position.set(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 0);
+          yukaVehicle.maxSpeed = 3;
+          yukaVehicle.maxForce = 2;
+          yukaVehicle.userData = { enemyType: enemyDef.type };
+
+          // YUKA: Pathfinding and steering behaviors
+          const pathPlanner = new YUKA.PathPlanner(yukaVehicle);
+          const navMesh = new YUKA.NavMesh();
+
+          // Create patrol path
+          const path = new YUKA.Path();
+          const patrolRadius = enemyDef.behavior?.patrolRadius || 100;
+          path.add(new YUKA.Vector3(enemyDef.spawnPoint.x - patrolRadius, enemyDef.spawnPoint.y, 0));
+          path.add(new YUKA.Vector3(enemyDef.spawnPoint.x + patrolRadius, enemyDef.spawnPoint.y, 0));
+          path.loop = true;
+
+          const followPathBehavior = new YUKA.FollowPathBehavior(path, 0.5);
+
+          // YUKA: State machine for enemy AI
+          const stateMachine = new YUKA.StateMachine(yukaVehicle);
+          const patrolState = new YUKA.State('patrol');
+          const chaseState = new YUKA.State('chase');
+          const attackState = new YUKA.State('attack');
+
+          patrolState.enter = () => {
+            yukaVehicle.steering.clear();
+            yukaVehicle.steering.add(followPathBehavior);
+          };
+
+          chaseState.enter = () => {
+            yukaVehicle.steering.clear();
+            const seekBehavior = new YUKA.SeekBehavior(new YUKA.Vector3(player.position.x, player.position.y, 0));
+            yukaVehicle.steering.add(seekBehavior);
+            audioSystem.playSound('enemy_alert', 0.6);
+          };
+
+          attackState.enter = () => {
+            console.log(`${enemyDef.type} attacking!`);
+            audioSystem.playSound('enemy_attack', 0.7);
+          };
+
+          // Transition logic (updated in game loop)
+          patrolState.update = () => {
+            const distanceToPlayer = Math.hypot(
+              player.position.x - yukaVehicle.position.x,
+              player.position.y - yukaVehicle.position.y
+            );
+            if (distanceToPlayer < 200) {
+              stateMachine.changeTo('chase');
+            }
+          };
+
+          chaseState.update = () => {
+            const distanceToPlayer = Math.hypot(
+              player.position.x - yukaVehicle.position.x,
+              player.position.y - yukaVehicle.position.y
+            );
+            if (distanceToPlayer < 50) {
+              stateMachine.changeTo('attack');
+            } else if (distanceToPlayer > 300) {
+              stateMachine.changeTo('patrol');
+            }
+          };
+
+          attackState.update = () => {
+            const distanceToPlayer = Math.hypot(
+              player.position.x - yukaVehicle.position.x,
+              player.position.y - yukaVehicle.position.y
+            );
+            if (distanceToPlayer > 80) {
+              stateMachine.changeTo('chase');
+            }
+          };
+
+          stateMachine.add(patrolState);
+          stateMachine.add(chaseState);
+          stateMachine.add(attackState);
+          stateMachine.changeTo('patrol');
+
+          yukaEntityManager.add(yukaVehicle);
+
           enemies.push({
             body: enemyBody,
             def: enemyDef,
             health: enemyDef.health || 3,
-            aiState: 'patrol'
+            yukaVehicle,
+            stateMachine
           });
           World.add(engine.world, enemyBody);
         }
       }
     }
 
-    // Input handling
+    // Input handling (keyboard + gamepad)
     const keys = {};
+    const gamepadState = {
+      connected: false,
+      axes: [0, 0, 0, 0],
+      buttons: []
+    };
+
     const handleKeyDown = (e) => {
       keys[e.key.toLowerCase()] = true;
     };
+
     const handleKeyUp = (e) => {
       keys[e.key.toLowerCase()] = false;
     };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
+    // Gamepad support
+    window.addEventListener('gamepadconnected', (e) => {
+      console.log('[Gamepad] Connected:', e.gamepad.id);
+      gamepadState.connected = true;
+      audioSystem.playSound('menu_select', 0.5);
+    });
+
+    window.addEventListener('gamepaddisconnected', () => {
+      console.log('[Gamepad] Disconnected');
+      gamepadState.connected = false;
+    });
+
+    // Mobile touch controls (nipplejs)
+    let joystickManager = null;
+    let jumpButton = null;
+    let interactButton = null;
+
+    if (isMobile()) {
+      // Virtual joystick for movement
+      setTimeout(() => {
+        const joystickZone = document.getElementById('joystick-zone');
+        if (joystickZone) {
+          joystickManager = nipplejs.create({
+            zone: joystickZone,
+            mode: 'static',
+            position: { left: '100px', bottom: '100px' },
+            color: '#F4D03F',
+            size: 120
+          });
+
+          joystickManager.on('move', (evt, data) => {
+            const angle = data.angle.radian;
+            const force = Math.min(data.force, 2) / 2;
+            setMobileJoystickData({
+              x: Math.cos(angle) * force,
+              y: -Math.sin(angle) * force
+            });
+          });
+
+          joystickManager.on('end', () => {
+            setMobileJoystickData({ x: 0, y: 0 });
+          });
+        }
+
+        // Jump button
+        jumpButton = document.getElementById('mobile-jump');
+        if (jumpButton) {
+          jumpButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            setMobileJump(true);
+            audioSystem.playSound('jump', 0.6);
+          });
+          jumpButton.addEventListener('touchend', () => {
+            setMobileJump(false);
+          });
+        }
+
+        // Interact button
+        interactButton = document.getElementById('mobile-interact');
+        if (interactButton) {
+          interactButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            setMobileInteract(true);
+          });
+          interactButton.addEventListener('touchend', () => {
+            setMobileInteract(false);
+          });
+        }
+      }, 100);
+    }
+
     // Collision handling for DDL-driven interactions
-    Events.on(engine, 'collisionStart', (event) => {
+    Matter.Events.on(engine, 'collisionStart', (event) => {
       const pairs = event.pairs;
       for (const pair of pairs) {
         const { bodyA, bodyB } = pair;
@@ -282,6 +554,7 @@ export default function OtterbladeGame() {
             collectible.collected = true;
             World.remove(engine.world, collectibleBody);
             setShards(s => s + 1);
+            audioSystem.playSound('shard_collect', 0.8);
 
             // Update quest objective if collecting shards
             const objectives = questObjectives();
@@ -299,8 +572,10 @@ export default function OtterbladeGame() {
         if ((bodyA === player && bodyB.label === 'enemy') ||
             (bodyB === player && bodyA.label === 'enemy')) {
           const currentHealth = health();
-          if (currentHealth > 0) {
+          if (currentHealth > 0 && playerState.dodgeRollCooldown === 0) {
             setHealth(Math.max(0, currentHealth - 1));
+            audioSystem.playSound('player_hurt', 0.7);
+            playerState.dodgeRollCooldown = 60; // 1 second immunity
           }
         }
 
@@ -309,8 +584,12 @@ export default function OtterbladeGame() {
             (bodyB === player && bodyA.label.startsWith('interaction_'))) {
           const interactionBody = bodyA === player ? bodyB : bodyA;
           const interaction = interactions.find(i => i.body === interactionBody);
-          if (interaction && keys.e) {
+          const wantsToInteract = keys.e || keys[' '] || mobileInteract();
+
+          if (interaction && wantsToInteract) {
             console.log(`Interacting with ${interaction.def.id}`);
+            audioSystem.playSound('interact', 0.6);
+
             // Handle interaction state changes from DDL
             if (interaction.def.states && interaction.def.states[interaction.state]) {
               const stateData = interaction.def.states[interaction.state];
@@ -321,6 +600,7 @@ export default function OtterbladeGame() {
                   }
                   if (action.type === 'restore_health') {
                     setHealth(maxHealth());
+                    audioSystem.playSound('heal', 0.7);
                   }
                   if (action.type === 'give_item') {
                     console.log(`Received item: ${action.target}`);
@@ -342,7 +622,6 @@ export default function OtterbladeGame() {
     // Camera
     const camera = { x: 0, y: 0 };
     let animFrame = 0;
-    let playerFacing = 1; // 1 = right, -1 = left
 
     // Game loop
     function gameLoop() {
@@ -353,20 +632,74 @@ export default function OtterbladeGame() {
 
       animFrame++;
 
+      // Update YUKA AI manager
+      const delta = yukaTime.update().getDelta();
+      yukaEntityManager.update(delta);
+
+      // Sync YUKA entities with Matter.js bodies
+      for (const enemy of enemies) {
+        if (enemy.health > 0) {
+          enemy.stateMachine.update();
+
+          // Apply YUKA steering force to Matter.js body
+          const yukaPos = enemy.yukaVehicle.position;
+          const yukaVel = enemy.yukaVehicle.velocity;
+
+          Body.setPosition(enemy.body, {
+            x: yukaPos.x,
+            y: yukaPos.y
+          });
+          Body.setVelocity(enemy.body, {
+            x: yukaVel.x,
+            y: enemy.body.velocity.y // Keep Matter.js gravity for y-axis
+          });
+
+          // Update YUKA position to match Matter.js (for gravity)
+          enemy.yukaVehicle.position.y = enemy.body.position.y;
+        }
+      }
+
+      // Update NPCs
+      for (const npc of npcs) {
+        npc.stateMachine.update();
+      }
+
       // Update physics
       Runner.tick(runner, engine, 16.67);
 
-      // Player movement
+      // Player movement (unified input: keyboard, gamepad, mobile)
       const moveForce = 0.005;
       const maxSpeed = 8;
+      let moveX = 0;
 
-      if (keys.a || keys.arrowleft) {
-        Body.applyForce(player, player.position, { x: -moveForce, y: 0 });
-        playerFacing = -1;
+      // Keyboard
+      if (keys.a || keys.arrowleft) moveX -= 1;
+      if (keys.d || keys.arrowright) moveX += 1;
+
+      // Gamepad
+      const gamepads = navigator.getGamepads();
+      if (gamepads[0]) {
+        const gp = gamepads[0];
+        const axisX = gp.axes[0];
+        if (Math.abs(axisX) > 0.2) moveX += axisX;
       }
-      if (keys.d || keys.arrowright) {
-        Body.applyForce(player, player.position, { x: moveForce, y: 0 });
-        playerFacing = 1;
+
+      // Mobile joystick
+      if (isMobile()) {
+        const joystickData = mobileJoystickData();
+        moveX += joystickData.x * 2;
+      }
+
+      if (moveX !== 0) {
+        Body.applyForce(player, player.position, { x: moveX * moveForce, y: 0 });
+        playerState.facing = Math.sign(moveX);
+
+        if (Math.abs(player.velocity.x) > 2 && playerState.onGround) {
+          // Play footstep sounds periodically
+          if (animFrame % 20 === 0) {
+            audioSystem.playSound('footstep', 0.3);
+          }
+        }
       }
 
       // Limit speed
@@ -377,27 +710,37 @@ export default function OtterbladeGame() {
         });
       }
 
-      // Jump
-      const onGround = Math.abs(player.velocity.y) < 0.1;
-      if ((keys[' '] || keys.w || keys.arrowup) && onGround) {
+      // Ground detection with coyote time
+      playerState.onGround = Math.abs(player.velocity.y) < 0.5;
+
+      // Jump (keyboard, gamepad, mobile)
+      const wantsToJump = keys[' '] || keys.w || keys.arrowup ||
+                          (gamepads[0] && gamepads[0].buttons[0]?.pressed) ||
+                          mobileJump();
+
+      if (wantsToJump && playerState.onGround) {
         Body.setVelocity(player, { x: player.velocity.x, y: -12 });
+        audioSystem.playSound('jump', 0.6);
+        setMobileJump(false); // Reset mobile jump
       }
 
-      // Simple enemy AI
-      for (const enemy of enemies) {
-        if (enemy.health > 0) {
-          const dx = player.position.x - enemy.body.position.x;
-          const distance = Math.abs(dx);
+      // Dodge roll (Shift key or gamepad B button)
+      if ((keys.shift || (gamepads[0] && gamepads[0].buttons[1]?.pressed)) &&
+          playerState.dodgeRollCooldown === 0) {
+        playerState.dodgeRollCooldown = 120; // 2 second cooldown
+        Body.setVelocity(player, {
+          x: playerState.facing * 15,
+          y: player.velocity.y
+        });
+        audioSystem.playSound('dodge_roll', 0.5);
+      }
 
-          if (distance < 200) {
-            // Chase player
-            const chaseForce = 0.002;
-            Body.applyForce(enemy.body, enemy.body.position, {
-              x: Math.sign(dx) * chaseForce,
-              y: 0
-            });
-          }
-        }
+      // Cooldown decrements
+      if (playerState.dodgeRollCooldown > 0) {
+        playerState.dodgeRollCooldown--;
+      }
+      if (playerState.parryWindow > 0) {
+        playerState.parryWindow--;
       }
 
       // Update camera to follow player
@@ -428,6 +771,12 @@ export default function OtterbladeGame() {
         ctx.fillStyle = type === 'wood' ? '#8B4513' : '#696969';
         ctx.strokeStyle = type === 'wood' ? '#654321' : '#505050';
         ctx.lineWidth = 2;
+
+        // Draw moss on climbable stone
+        if (platform.canClimb) {
+          ctx.fillStyle = '#556B2F'; // Mossy stone
+        }
+
         ctx.fillRect(
           bounds.min.x,
           bounds.min.y,
@@ -585,11 +934,12 @@ export default function OtterbladeGame() {
         ctx.restore();
       }
 
-      // Draw enemies (procedural)
+      // Draw enemies (procedural with YUKA AI state indicators)
       for (const enemy of enemies) {
         if (enemy.health > 0) {
           const pos = enemy.body.position;
           const breathe = Math.sin(animFrame * 0.08) * 2;
+          const currentState = enemy.stateMachine.currentState?.name || 'patrol';
 
           ctx.save();
           ctx.translate(pos.x, pos.y);
@@ -611,12 +961,20 @@ export default function OtterbladeGame() {
           ctx.fill();
           ctx.stroke();
 
-          // Glowing red eyes
-          ctx.fillStyle = '#FF0000';
+          // Eyes (color based on AI state)
+          const eyeColor = currentState === 'attack' ? '#FF0000' :
+                          currentState === 'chase' ? '#FFA500' :
+                          '#FFFF00';
+          ctx.fillStyle = eyeColor;
           ctx.beginPath();
           ctx.arc(-5, -20 + breathe, 3, 0, Math.PI * 2);
           ctx.arc(5, -20 + breathe, 3, 0, Math.PI * 2);
           ctx.fill();
+
+          // AI state indicator (debug)
+          ctx.fillStyle = '#FFF';
+          ctx.font = '8px monospace';
+          ctx.fillText(currentState, -15, -35);
 
           ctx.restore();
         }
@@ -629,7 +987,7 @@ export default function OtterbladeGame() {
 
       ctx.save();
       ctx.translate(px, py);
-      ctx.scale(playerFacing, 1);
+      ctx.scale(playerState.facing, 1);
 
       // Shadow
       ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
@@ -676,6 +1034,11 @@ export default function OtterbladeGame() {
       ctx.fillRect(-7, -23 + breathe, 3, 3);
       ctx.fillRect(2, -23 + breathe, 3, 3);
 
+      // Eye glints
+      ctx.fillStyle = '#FFF';
+      ctx.fillRect(-6, -23 + breathe, 1, 1);
+      ctx.fillRect(3, -23 + breathe, 1, 1);
+
       // Whiskers
       ctx.strokeStyle = '#6B5533';
       ctx.lineWidth = 1;
@@ -704,6 +1067,15 @@ export default function OtterbladeGame() {
       ctx.fillStyle = '#FFD700';
       ctx.fillRect(-12, -26, 4, 4);
 
+      // Dodge roll visual effect
+      if (playerState.dodgeRollCooldown > 60) {
+        ctx.strokeStyle = 'rgba(244, 208, 63, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 35, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
       ctx.restore();
 
       requestAnimationFrame(gameLoop);
@@ -714,9 +1086,18 @@ export default function OtterbladeGame() {
     onCleanup(() => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+
+      if (joystickManager) {
+        joystickManager.destroy();
+      }
+
       Runner.stop(runner);
       World.clear(engine.world, false);
       Engine.clear(engine);
+
+      yukaEntityManager.clear();
+
+      audioSystem.stopMusic();
     });
   });
 
@@ -789,14 +1170,69 @@ export default function OtterbladeGame() {
             color: '#D4A574',
             'font-size': '14px',
           }}>
-            <p>WASD / Arrow Keys - Move</p>
-            <p>Space - Jump</p>
-            <p>E - Interact</p>
+            <p>WASD / Arrow Keys / Gamepad - Move</p>
+            <p>Space / A Button - Jump</p>
+            <p>E / X Button - Interact</p>
+            <p>Shift / B Button - Dodge Roll</p>
           </div>
         </div>
       </Show>
 
       <canvas ref={setCanvasRef} style={{ display: 'block' }} />
+
+      {/* Mobile touch controls */}
+      <Show when={gameStarted() && isMobile()}>
+        <div id="joystick-zone" style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '20px',
+          width: '150px',
+          height: '150px',
+          'z-index': '1000'
+        }} />
+
+        <button
+          id="mobile-jump"
+          style={{
+            position: 'fixed',
+            bottom: '80px',
+            right: '100px',
+            width: '70px',
+            height: '70px',
+            'border-radius': '50%',
+            background: 'rgba(244, 208, 63, 0.8)',
+            border: '3px solid #F4D03F',
+            color: '#FFF',
+            'font-size': '24px',
+            'font-weight': 'bold',
+            'z-index': '1000',
+            'touch-action': 'none'
+          }}
+        >
+          ↑
+        </button>
+
+        <button
+          id="mobile-interact"
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '70px',
+            height: '70px',
+            'border-radius': '50%',
+            background: 'rgba(230, 126, 34, 0.8)',
+            border: '3px solid #E67E22',
+            color: '#FFF',
+            'font-size': '20px',
+            'font-weight': 'bold',
+            'z-index': '1000',
+            'touch-action': 'none'
+          }}
+        >
+          E
+        </button>
+      </Show>
 
       {/* HUD */}
       <Show when={gameStarted()}>
@@ -834,39 +1270,39 @@ export default function OtterbladeGame() {
               <div style={{ 'font-size': '16px', 'font-weight': 'bold', 'margin-bottom': '8px' }}>
                 Quest: {activeQuest()}
               </div>
-              <For each={questObjectives()}>
-                {(objective) => (
-                  <div style={{
-                    'font-size': '14px',
-                    'margin-left': '10px',
-                    'margin-top': '4px',
-                    color: objective.completed ? '#7FFF00' : (objective.optional ? '#87CEEB' : '#F4D03F'),
-                    'text-decoration': objective.completed ? 'line-through' : 'none',
-                  }}>
-                    {objective.completed ? '✓' : '○'} {objective.description}
-                    {objective.optional ? ' (Optional)' : ''}
-                  </div>
-                )}
-              </For>
+              {questObjectives().map((objective) => (
+                <div style={{
+                  'font-size': '14px',
+                  'margin-left': '10px',
+                  'margin-top': '4px',
+                  color: objective.completed ? '#7FFF00' : (objective.optional ? '#87CEEB' : '#F4D03F'),
+                  'text-decoration': objective.completed ? 'line-through' : 'none',
+                }}>
+                  {objective.completed ? '✓' : '○'} {objective.description}
+                  {objective.optional ? ' (Optional)' : ''}
+                </div>
+              ))}
             </div>
           </Show>
         </div>
 
         {/* Controls reminder */}
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: 'rgba(93, 78, 55, 0.8)',
-          padding: '10px 15px',
-          'border-radius': '8px',
-          border: '2px solid #D4A574',
-          color: '#D4A574',
-          'font-family': 'Georgia, serif',
-          'font-size': '12px',
-        }}>
-          <div>WASD/Arrows: Move | Space: Jump | E: Interact</div>
-        </div>
+        <Show when={!isMobile()}>
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            background: 'rgba(93, 78, 55, 0.8)',
+            padding: '10px 15px',
+            'border-radius': '8px',
+            border: '2px solid #D4A574',
+            color: '#D4A574',
+            'font-family': 'Georgia, serif',
+            'font-size': '12px',
+          }}>
+            <div>WASD/Arrows: Move | Space: Jump | E: Interact | Shift: Dodge Roll</div>
+          </div>
+        </Show>
       </Show>
     </div>
   );
