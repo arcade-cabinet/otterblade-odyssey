@@ -1,8 +1,34 @@
 # GitHub Copilot Instructions for Otterblade Odyssey
 
+## 🚨 SESSION HANDOFF PROTOCOL (READ FIRST)
+
+**CRITICAL**: You are continuing work across sessions. Before ANY code changes:
+
+1. **Read ALL documentation in `docs/`** - Essential context is there
+2. **Review recent commits** - Use `git log --oneline -15` to understand what was done
+3. **Check the PR description** - Contains current state and goals
+4. **Read comment history** - Understand user's vision and requests
+
+### Key Documents (READ THESE FIRST)
+- `docs/COMPLETE_JOURNEY_VALIDATION.md` - Architecture & validation system
+- `docs/AI.md` - YUKA AI implementation patterns
+- `WORLD.md` - Story, lore, and emotional core
+- `BRAND.md` - Visual/narrative style (wordless storytelling!)
+- `IMPLEMENTATION.md` - Technical architecture
+
+### Tool Preferences
+1. **ALWAYS prefer Playwright MCP over bash** for browser automation
+2. **ALWAYS prefer GitHub MCP over bash** for repo operations
+3. Use MCP tools for deterministic testing and validation
+
 ## Project Overview
 
-Otterblade Odyssey is a React 2.5D platformer with Redwall-inspired woodland-epic aesthetics. This document configures Copilot for optimal code suggestions.
+Otterblade Odyssey is a React 2.5D platformer with Redwall-inspired woodland-epic aesthetics featuring:
+- **Wordless storytelling** (pantomime, British theatre tradition)
+- **Warm, homey, childhood adventure** feel
+- **JSON DDL architecture** - All levels defined in JSON manifests
+- **Procedural generation** - Player and enemies generated (not sprite sheets)
+- **YUKA pathfinding** - AI navigation for enemies and automated tests
 
 > **Note**: See `IMPLEMENTATION.md` for planned Canvas 2D + Matter.js migration. Current production code uses React Three Fiber + Rapier physics.
 
@@ -179,11 +205,72 @@ for (const e of query) { world.remove(e); }  // Collect first
 "target": "ES2021"  // Must be ES2022
 ```
 
+## Automated Testing & Validation
+
+### Complete Journey Validation
+The game has a comprehensive E2E test system that validates all 10 chapters:
+
+```bash
+# REQUIRED first time
+pnpm exec playwright install chromium
+
+# Run all chapter playthroughs
+pnpm test:playthroughs
+
+# Run complete game journey (all 10 chapters)
+pnpm test:journey
+
+# With MCP (headed mode, video capture)
+pnpm test:journey:mcp
+```
+
+### Test Infrastructure
+- **Playthrough Factory** (`tests/factories/playthrough-factory.ts`) - Generates tests from JSON manifests
+- **AI Player** (`tests/factories/ai-player.ts`) - Uses YUKA pathfinding to navigate levels
+- **Level Parser** (`tests/factories/level-parser.ts`) - Converts JSON DDL to navigation graphs
+
+### When Making Changes
+1. Run unit tests: `pnpm test`
+2. Run E2E tests: `pnpm test:e2e`
+3. Validate chapter playthroughs if you changed level definitions
+4. Capture video evidence of gameplay working
+
 ## Brand Compliance
 
-When generating comments, strings, or UI text:
+### Storytelling: Wordless Narrative
+**This game tells its story WITHOUT DIALOGUE** - following British pantomime, silent film, and Studio Ghibli traditions.
+
+When generating:
+- **NO spoken dialogue in cinematics** - Use gesture, expression, camera, music
+- **NO text-heavy UI** - Visual indicators, icons, animations
 - Use warm, hopeful tone ("Rally the defenders" not "Kill all enemies")
-- Reference woodland/abbey themes
+- Reference woodland/abbey themes (hearth, Willowmere, Otterblade legacy)
 - Avoid grimdark, sci-fi, or horror language
 
+### Emotional Core
+- Warmth of hearth against darkness
+- Weight of inherited responsibility  
+- Simple joy of home and community
+- Courage of youth answering the call
+
 See `BRAND.md` for complete visual and narrative guidelines.
+
+## Architecture Notes
+
+### JSON DDL System
+All game content is defined in JSON manifests:
+- `client/src/data/manifests/chapters/*.json` - 10 chapter definitions
+- Each defines: level geometry, quests, NPCs, enemies, triggers, cinematics
+- Parsed at runtime to generate procedural content
+
+### Procedural Generation
+As proven in `pocs/otterblade_odyssey.html`:
+- Player and enemies are procedurally generated (not sprite sheets)
+- Matter.js for physics, React for UI/UX only
+- More scalable and maintains visual consistency
+
+### YUKA AI Integration
+- Enemy pathfinding uses YUKA library
+- FSM (Finite State Machine) for behavior states
+- Steering behaviors for movement
+- Same system used by AI player in automated tests

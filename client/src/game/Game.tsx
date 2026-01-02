@@ -4,6 +4,7 @@ import { Level } from './Level';
 import { PhysicsWrapper } from './Physics';
 import { Player } from './Player';
 import { useStore } from './store';
+import { initializeTestAPI } from './test-api';
 
 function KeyboardControls() {
   const setControl = useStore((s) => s.setControl);
@@ -103,6 +104,11 @@ export default function Game() {
 
   useEffect(() => {
     setHasWebGL(checkWebGLSupport());
+    
+    // Initialize test API for E2E testing
+    if (import.meta.env.MODE !== 'production') {
+      initializeTestAPI();
+    }
   }, []);
 
   if (!hasWebGL) {
