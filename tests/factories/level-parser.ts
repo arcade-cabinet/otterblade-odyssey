@@ -53,7 +53,15 @@ export interface LevelGeometry {
 }
 
 /**
- * Parse a chapter manifest into testable geometry
+ * Convert a chapter manifest into LevelGeometry containing testable world geometry and navigation data.
+ *
+ * @param chapter - The ChapterManifest to parse
+ * @returns A LevelGeometry object containing:
+ *  - `platforms`: parsed platforms with positions, sizes, types, and segment indices
+ *  - `walls`: parsed walls with positions, sizes, and segment indices
+ *  - `navigationGraph`: a Map of NavigationNodes built from platforms
+ *  - `startPosition` and `endPosition`: default or derived start/end coordinates
+ *  - `triggers`: extracted `enter_region` triggers with id, x, y, width, and height
  */
 export function parseLevel(chapter: ChapterManifest): LevelGeometry {
   const platforms: Platform[] = [];
@@ -129,8 +137,14 @@ export function parseLevel(chapter: ChapterManifest): LevelGeometry {
 }
 
 /**
- * Build a navigation graph from platforms
- * Nodes are platform centers, edges represent possible movements
+ * Create a navigation graph where each platform becomes a node and edges represent traversable actions.
+ *
+ * The node position is derived from the platform's center/top surface. Edges are added between nodes
+ * when relative positions allow traversal and are labeled with an action (`walk`, `jump`, or `fall`),
+ * a traversal cost, and the straight-line distance.
+ *
+ * @param platforms - Array of platforms to convert into navigation nodes
+ * @returns A map from platform id to its corresponding NavigationNode (including connections)
  */
 function buildNavigationGraph(platforms: Platform[]): Map<string, NavigationNode> {
   const graph = new Map<string, NavigationNode>();
@@ -196,7 +210,12 @@ function buildNavigationGraph(platforms: Platform[]): Map<string, NavigationNode
 }
 
 /**
- * A* pathfinding through the navigation graph
+ * Finds a path of navigation nodes between two platforms using the A* algorithm.
+ *
+ * @param graph - Map of platform id to NavigationNode representing the navigation graph
+ * @param startPlatformId - Id of the starting platform node
+ * @param endPlatformId - Id of the target platform node
+ * @returns An array of NavigationNodes in traversal order from start to end, or `null` if the start or end node is missing from the graph or no path exists
  */
 export function findPath(
   graph: Map<string, NavigationNode>,
@@ -265,6 +284,14 @@ function heuristic(a: NavigationNode, b: NavigationNode): number {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+/**
+ * Reconstructs the navigation path ending at the specified node.
+ *
+ * @param cameFrom - Map of node id to its predecessor node id in the search tree
+ * @param current - The id of the end node to reconstruct the path for
+ * @param graph - Map of node id to NavigationNode providing node details
+ * @returns The path as an array of NavigationNodes ordered from start to `current`; returns an empty array if the path cannot be reconstructed due to missing nodes
+ */
 function reconstructPath(
   cameFrom: Map<string, string>,
   current: string,
@@ -292,7 +319,13 @@ function reconstructPath(
 }
 
 /**
- * Find the nearest platform to a given position
+ * Selects the platform whose center is closest to the provided world coordinates.
+ *
+ * Distance is computed from each platform's center point (platform.x + platform.width / 2, platform.y).
+ *
+ * @param x - X coordinate in world space to compare against
+ * @param y - Y coordinate in world space to compare against
+ * @returns The nearest `Platform`, or `null` if `platforms` is empty
  */
 export function findNearestPlatform(platforms: Platform[], x: number, y: number): Platform | null {
   if (platforms.length === 0) return null;

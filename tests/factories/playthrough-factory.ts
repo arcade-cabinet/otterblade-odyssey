@@ -33,7 +33,16 @@ export interface PlaythroughResult {
 }
 
 /**
- * Execute an automated playthrough of a level
+ * Run an AI-driven automated playthrough of the specified chapter and return a summary of the outcome.
+ *
+ * The function navigates to the game, skips any intro cinematic, starts the level, and repeatedly queries
+ * the game's player state while driving inputs from an AI player until the goal is reached, the game ends,
+ * or the configured maximum duration elapses. Screenshots are saved at the configured interval.
+ *
+ * @param page - Playwright page used to control and inspect the game UI
+ * @param config - Playthrough configuration containing the chapter manifest and runtime options such as:
+ *                 `maxDuration` (milliseconds until the run times out) and `screenshotInterval` (milliseconds between saved screenshots)
+ * @returns A PlaythroughResult describing success, total duration, saved screenshot paths, final player position, and an optional error message
  */
 export async function executePlaythrough(
   page: Page,
