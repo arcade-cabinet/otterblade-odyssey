@@ -1,0 +1,230 @@
+/* Otterblade Odyssey - UI Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    touch-action: none;
+    background: #1A1A24;
+    font-family: 'Georgia', 'Palatino', serif;
+}
+
+#gameCanvas {
+    display: block;
+    background: #0a0a15;
+    touch-action: none;
+}
+
+/* Overlays */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #2C3E50 0%, #1A1A24 100%);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay-content {
+    text-align: center;
+    color: #F4D03F;
+    max-width: 600px;
+    padding: 30px;
+}
+
+.game-title {
+    font-size: 48px;
+    margin-bottom: 10px;
+    text-shadow: 3px 3px 8px rgba(0,0,0,0.8);
+}
+
+.game-subtitle {
+    font-size: 24px;
+    color: #8FBC8F;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.game-tagline {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #D4A574;
+    margin-bottom: 30px;
+}
+
+.menu-button {
+    padding: 15px 40px;
+    font-size: 20px;
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #E67E22, #C0392B);
+    color: #F4D03F;
+    border: 3px solid #F4D03F;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6);
+}
+
+.menu-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(230, 126, 34, 0.9);
+}
+
+.menu-button:active {
+    transform: scale(0.98);
+}
+
+.controls-hint {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #8FBC8F;
+    line-height: 1.8;
+}
+
+/* HUD */
+.hud {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: #F4D03F;
+    font-size: 16px;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+    background: rgba(93, 78, 55, 0.85);
+    padding: 18px;
+    border-radius: 12px;
+    border: 3px solid #D4A574;
+    min-width: 220px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+
+.hud.hidden {
+    display: none;
+}
+
+.hud-stat {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-bar {
+    width: 140px;
+    height: 18px;
+    background: rgba(26, 26, 36, 0.8);
+    border: 2px solid #5D4E37;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.stat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #E67E22, #C0392B);
+    transition: width 0.3s;
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.6);
+}
+
+.hud-chapter {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(212, 165, 116, 0.3);
+    font-size: 14px;
+}
+
+.hud-chapter strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#questName {
+    font-size: 12px;
+    color: #8FBC8F;
+    font-style: italic;
+}
+
+/* Touch Controls */
+.touch-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.touch-controls.hidden {
+    display: none;
+}
+
+.left-controls, .right-controls {
+    pointer-events: all;
+}
+
+#joystickZone {
+    width: 120px;
+    height: 120px;
+    background: rgba(230, 126, 34, 0.3);
+    border: 3px solid #F4D03F;
+    border-radius: 50%;
+}
+
+.right-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.control-btn {
+    width: 70px;
+    height: 70px;
+    border: 3px solid #F4D03F;
+    border-radius: 10px;
+    background: rgba(230, 126, 34, 0.85);
+    color: #F4D03F;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    touch-action: none;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.6);
+    transition: all 0.1s;
+}
+
+.control-btn:active {
+    transform: scale(0.93);
+    box-shadow: 0 2px 6px rgba(192, 57, 43, 0.8);
+    background: rgba(192, 57, 43, 0.95);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .touch-controls {
+        display: flex;
+    }
+}

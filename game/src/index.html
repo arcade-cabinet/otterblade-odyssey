@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Otterblade Odyssey: Zephyros Rising</title>
+    <link rel="stylesheet" href="./ui/styles.css">
+</head>
+<body>
+    <!-- Start Menu Overlay -->
+    <div id="startOverlay" class="overlay">
+        <div class="overlay-content">
+            <h1 class="game-title">Otterblade Odyssey</h1>
+            <p class="game-subtitle">Zephyros Rising</p>
+            <p class="game-tagline">A woodland-epic adventure awaits. Play as Finn, a brave otter warrior wielding the legendary Otterblade, defending Willowmere Hearthhold against the storm hawk Zephyros.</p>
+            <button id="startButton" class="menu-button">Begin Your Odyssey</button>
+            <div class="controls-hint">
+                <strong>Controls:</strong> Arrow Keys/WASD = Move, Space = Jump, X = Attack, Z = Roll, F = Interact
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-stat">
+            <span>🔥 Warmth:</span>
+            <div class="stat-bar">
+                <div id="warmthBar" class="stat-fill"></div>
+            </div>
+        </div>
+        <div class="hud-stat">
+            <span>❤️ Health:</span>
+            <div class="stat-bar">
+                <div id="healthBar" class="stat-fill"></div>
+            </div>
+        </div>
+        <div class="hud-stat">
+            <span>💎 Shards: <span id="shardsCount">0</span></span>
+        </div>
+        <div class="hud-chapter">
+            <strong id="chapterName">Chapter 0 - The Calling</strong>
+            <div id="questName">Answer the Call</div>
+        </div>
+    </div>
+
+    <!-- Touch Controls -->
+    <div id="touchControls" class="touch-controls hidden">
+        <div class="left-controls">
+            <div id="joystickZone"></div>
+        </div>
+        <div class="right-controls">
+            <button class="control-btn" data-action="jump">⬆<br>JUMP</button>
+            <button class="control-btn" data-action="attack">⚔<br>ATTACK</button>
+            <button class="control-btn" data-action="roll">🌀<br>ROLL</button>
+            <button class="control-btn" data-action="interact">🔥<br>LIGHT</button>
+        </div>
+    </div>
+
+    <!-- Game Over / Victory Overlay -->
+    <div id="gameOverOverlay" class="overlay hidden">
+        <div class="overlay-content">
+            <h2 id="gameOverTitle">The Everember Fades...</h2>
+            <p id="gameOverMessage">Warmth has left Willowmere</p>
+            <button id="restartButton" class="menu-button">Try Again</button>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
