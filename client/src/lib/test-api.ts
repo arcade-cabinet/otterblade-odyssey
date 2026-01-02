@@ -31,6 +31,13 @@ export interface GameTestAPI {
   isReady: () => boolean;
 }
 
+// Extend Window interface to include test API
+declare global {
+  interface Window {
+    __GAME_TEST_API__?: GameTestAPI;
+  }
+}
+
 /**
  * Initialize test API (call once during app startup)
  */
@@ -77,7 +84,7 @@ export function initializeTestAPI(): void {
   };
 
   // Expose on window for Playwright access
-  (window as any).__GAME_TEST_API__ = api;
+  window.__GAME_TEST_API__ = api;
 
   console.log('[Test API] Initialized - test automation enabled');
 }
@@ -86,12 +93,12 @@ export function initializeTestAPI(): void {
  * Get the test API (for use within the game code)
  */
 export function getTestAPI(): GameTestAPI | null {
-  return (window as any).__GAME_TEST_API__ || null;
+  return window.__GAME_TEST_API__ || null;
 }
 
 /**
  * Check if test API is available
  */
 export function isTestAPIEnabled(): boolean {
-  return !!(window as any).__GAME_TEST_API__;
+  return !!window.__GAME_TEST_API__;
 }

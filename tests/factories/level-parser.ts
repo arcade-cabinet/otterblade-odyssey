@@ -149,12 +149,14 @@ function buildNavigationGraph(platforms: Platform[]): Map<string, NavigationNode
 
   // Build edges between platforms
   for (const fromPlatform of platforms) {
-    const fromNode = graph.get(fromPlatform.id)!;
+    const fromNode = graph.get(fromPlatform.id);
+    if (!fromNode) continue;
 
     for (const toPlatform of platforms) {
       if (fromPlatform.id === toPlatform.id) continue;
 
-      const toNode = graph.get(toPlatform.id)!;
+      const toNode = graph.get(toPlatform.id);
+      if (!toNode) continue;
       const dx = toNode.x - fromNode.x;
       const dy = toNode.y - fromNode.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
@@ -211,7 +213,10 @@ export function findPath(
   const endNode = graph.get(endPlatformId);
   if (!endNode) return null;
 
-  fScore.set(startPlatformId, heuristic(graph.get(startPlatformId)!, endNode));
+  const startNode = graph.get(startPlatformId);
+  if (!startNode) return null;
+
+  fScore.set(startPlatformId, heuristic(startNode, endNode));
 
   while (openSet.size > 0) {
     // Get node with lowest fScore
@@ -230,7 +235,8 @@ export function findPath(
     }
 
     openSet.delete(current);
-    const currentNode = graph.get(current)!;
+    const currentNode = graph.get(current);
+    if (!currentNode) continue;
 
     for (const edge of currentNode.connections) {
       const tentativeG = (gScore.get(current) ?? Infinity) + edge.cost;
@@ -239,7 +245,8 @@ export function findPath(
         cameFrom.set(edge.to, current);
         gScore.set(edge.to, tentativeG);
 
-        const neighbor = graph.get(edge.to)!;
+        const neighbor = graph.get(edge.to);
+        if (!neighbor) continue;
         fScore.set(edge.to, tentativeG + heuristic(neighbor, endNode));
 
         openSet.add(edge.to);
@@ -261,11 +268,18 @@ function reconstructPath(
   current: string,
   graph: Map<string, NavigationNode>
 ): NavigationNode[] {
-  const path: NavigationNode[] = [graph.get(current)!];
+  const currentNode = graph.get(current);
+  if (!currentNode) return [];
+
+  const path: NavigationNode[] = [currentNode];
 
   while (cameFrom.has(current)) {
-    current = cameFrom.get(current)!;
-    path.unshift(graph.get(current)!);
+    const next = cameFrom.get(current);
+    if (!next) break;
+    current = next;
+    const node = graph.get(current);
+    if (!node) break;
+    path.unshift(node);
   }
 
   return path;
