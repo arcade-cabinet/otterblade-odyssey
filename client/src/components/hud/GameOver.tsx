@@ -73,9 +73,8 @@ export default function GameOverMenu() {
         </p>
 
         {/* Stats Card */}
-        <div
+        <section
           className="px-6 py-5 bg-stone-800/60 backdrop-blur-md border border-amber-200/20 rounded-lg w-full mb-8"
-          role="region"
           aria-labelledby="stats-heading"
         >
           <h2 id="stats-heading" className="sr-only">
@@ -95,7 +94,7 @@ export default function GameOverMenu() {
             <span className="text-amber-100">Shards Preserved</span>
             <span className="text-yellow-300 font-semibold">{bankedShards}</span>
           </div>
-        </div>
+        </section>
 
         {/* Action Buttons */}
         <div className="flex gap-4 flex-wrap justify-center">

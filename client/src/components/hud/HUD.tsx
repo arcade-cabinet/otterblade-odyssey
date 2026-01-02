@@ -41,7 +41,6 @@ export default function HUD() {
       <header
         className="absolute top-0 left-0 w-full p-4 pointer-events-none select-none z-10"
         data-testid="hud-container"
-        aria-label="Game HUD"
       >
         <h2 className="sr-only">Game Heads-Up Display</h2>
         {/* Top bar: Health left, Score right */}
@@ -51,17 +50,15 @@ export default function HUD() {
         >
           {/* Left side: Hearts and Shards */}
           <div className="flex flex-col gap-2">
-            <div
+            <output
               className="flex gap-1"
               data-testid="health-hearts"
-              role="status"
               aria-label={`Health: ${health} out of ${maxHearts}`}
             >
               {hearts}
-            </div>
-            <div
+            </output>
+            <output
               className="flex items-center gap-2 text-amber-400 text-sm font-medium"
-              role="status"
               aria-label={`Shards: ${shards}, Banked: ${bankedShards}`}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -71,13 +68,12 @@ export default function HUD() {
               {bankedShards > 0 && (
                 <span className="text-amber-600/80 text-xs">(+{bankedShards})</span>
               )}
-            </div>
+            </output>
           </div>
 
           {/* Right side: Score */}
-          <div
+          <output
             className="text-right"
-            role="status"
             aria-live="polite"
             aria-atomic="true"
             aria-label={`Score: ${score}`}
@@ -86,23 +82,22 @@ export default function HUD() {
               <Coins className="w-5 h-5" aria-hidden="true" />
               <span data-testid="score-display">{score.toLocaleString()}</span>
             </div>
-          </div>
+          </output>
         </div>
 
         {/* Quest message ticker - storybook tone */}
-        <div className="mt-3 text-center" role="status" aria-live="polite" aria-atomic="true">
+        <output className="mt-3 text-center" aria-live="polite" aria-atomic="true">
           <div
             className="inline-block bg-stone-900/60 backdrop-blur-sm border border-amber-800/30 rounded px-4 py-1.5"
             data-testid="quest-message"
           >
             <span
               className="text-amber-200/90 text-sm font-medium italic tracking-wide"
-              aria-label={`Current Quest: ${biome.quest || biome.name}`}
             >
               {biome.quest || biome.name}
             </span>
           </div>
-        </div>
+        </output>
 
         <BossBar />
       </header>

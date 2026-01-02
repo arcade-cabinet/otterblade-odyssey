@@ -76,8 +76,12 @@ export function initializeTestAPI(): void {
     },
   };
 
+interface GameTestWindow extends Window {
+  __GAME_TEST_API__?: GameTestAPI;
+}
+
   // Expose on window for Playwright access
-  (window as any).__GAME_TEST_API__ = api;
+(window as GameTestWindow).__GAME_TEST_API__ = api;
 
   console.log('[Test API] Initialized - test automation enabled');
 }
@@ -86,12 +90,12 @@ export function initializeTestAPI(): void {
  * Get the test API (for use within the game code)
  */
 export function getTestAPI(): GameTestAPI | null {
-  return (window as any).__GAME_TEST_API__ || null;
+return (window as GameTestWindow).__GAME_TEST_API__ || null;
 }
 
 /**
  * Check if test API is available
  */
 export function isTestAPIEnabled(): boolean {
-  return !!(window as any).__GAME_TEST_API__;
+return !!(window as GameTestWindow).__GAME_TEST_API__;
 }
