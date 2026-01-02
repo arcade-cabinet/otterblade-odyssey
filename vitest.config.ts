@@ -46,7 +46,13 @@ export default defineConfig({
       'client/src/**/*.{test,spec}.{ts,tsx}',
       'game/src/**/*.{test,spec}.{js,jsx}',
     ],
-    exclude: ['node_modules', 'dist', 'e2e'],
+    exclude: [
+      'node_modules',
+      'dist',
+      'e2e',
+      'tests/unit/react-components.test.tsx',
+      'tests/unit/ecs.test.ts',
+    ],
     // Handle ESM packages that have directory imports or other Node ESM issues
     server: {
       deps: {

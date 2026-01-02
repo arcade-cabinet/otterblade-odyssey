@@ -1,16 +1,9 @@
 /**
  * @fileoverview Vitest test setup configuration
- * Sets up testing environment with proper mocks for React Three Fiber and DOM testing
+ * Sets up testing environment with proper mocks for Matter.js and DOM testing
  */
 
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
-
-// Cleanup after each test
-afterEach(() => {
-  cleanup();
-});
+import { vi } from 'vitest';
 
 // Mock WebGL context for Three.js tests
 const mockWebGLContext = {
