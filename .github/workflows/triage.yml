@@ -1,64 +1,134 @@
-# Ecosystem Triage - Feedback Queue Management
-# Creates and maintains tracking issues as KV store for PR state
+# Triage - Unified Issue & PR Triage Pipeline
+# Consolidates: ai-curator.yml, ecosystem-triage.yml, jules-pr-auto-triage.yml
 #
 # Responsibilities:
-# - Create tracking issue for each PR (the "fixed point")
-# - Gather AI feedback from reviews/threads
-# - Resolve outdated threads
-# - Update tracking issue with synthesized state
-# - Manage state labels (blocked/review/ready)
-#
-# Coordination: Tracking issue is the shared state between workflows
+# - New issue triage and labeling
+# - PR tracking issue management
+# - Daily deduplication
+# - Scheduled maintenance
 
-name: Ecosystem Triage
+name: Triage
 
 on:
-  # PR lifecycle - data plane events
+  # Issue events
+  issues:
+    types: [opened, labeled]
+
+  # PR events
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, closed]
+    types: [opened, synchronize, reopened, ready_for_review, closed, labeled]
   pull_request_review:
     types: [submitted, dismissed]
-  # Manual trigger via comment
+
+  # Comment events
   issue_comment:
     types: [created]
 
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
+  # Scheduled tasks
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC daily
 
-concurrency:
-  group: triage-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: true
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Triage mode'
+        type: choice
+        options:
+          - full
+          - triage-only
+          - dedup-only
+        default: full
+
+env:
+  # AI agent patterns for PR tracking (pipe-separated regex)
+  # Configure via repository variables: AI_AGENT_PATTERNS
+  AI_AGENT_PATTERNS: ${{ vars.AI_AGENT_PATTERNS || 'copilot|github-actions|coderabbitai|gemini|cursor|amazon-q|dependabot|bugbot|claude|sonarcloud|codacy|snyk' }}
+
+permissions: {}
 
 jobs:
   # ════════════════════════════════════════════════════════════════
-  # TRIAGE: Gather → Resolve → Store in Tracking Issue (KV Store)
+  # NEW ISSUE TRIAGE (Claude)
   # ════════════════════════════════════════════════════════════════
-  triage:
-    name: Triage
+  issue-triage:
+    name: Issue Triage
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: issue-triage-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check-key
+        run: |
+          if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::ANTHROPIC_API_KEY not configured"
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout
+        if: steps.check-key.outputs.available == 'true'
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 1
+          # Use workflow-scoped token for checkout (more restrictive than CI_GITHUB_TOKEN)
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Triage with Claude
+        if: steps.check-key.outputs.available == 'true'
+        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
+          prompt: |
+            Triage issue #${{ github.event.issue.number }} in ${{ github.repository }}.
+
+            1. Add appropriate labels (bug/enhancement/docs, priority)
+            2. Check for duplicates - link and close if duplicate
+            3. Add a helpful acknowledgment comment
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,LS,Bash(gh:*),mcp__github__get_issue,mcp__github__update_issue,mcp__github__add_issue_comment,mcp__github__list_issues,mcp__github__search_issues"
+
+  # ════════════════════════════════════════════════════════════════
+  # PR TRACKING ISSUE MANAGEMENT (Ecosystem Triage)
+  # ════════════════════════════════════════════════════════════════
+  pr-tracking:
+    name: PR Tracking
     if: |
       github.event_name == 'pull_request' ||
       github.event_name == 'pull_request_review' ||
-      (github.event_name == 'issue_comment' && 
+      (github.event_name == 'issue_comment' &&
        contains(github.event.comment.body, '@cascade synthesize'))
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    concurrency:
+      group: pr-tracking-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
     outputs:
       tracking_issue: ${{ steps.triage.outputs.tracking_issue }}
       verdict: ${{ steps.triage.outputs.verdict }}
       pr_number: ${{ steps.triage.outputs.pr_number }}
     steps:
-      - name: Triage PR Feedback
+      - name: Manage PR Tracking Issue
         id: triage
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         run: |
-          # ══════════════════════════════════════════════════════════
-          # RESOLVE PR CONTEXT
-          # ══════════════════════════════════════════════════════════
+          # Resolve PR context
           case "${{ github.event_name }}" in
             issue_comment)
-              # Check if comment is on a PR
               if [ -z "${{ github.event.issue.pull_request }}" ]; then
                 echo "Comment not on a PR, skipping"
                 exit 0
@@ -69,10 +139,10 @@ jobs:
               PR_NUM="${{ github.event.pull_request.number }}"
               ;;
           esac
-          
+
           [ -z "$PR_NUM" ] && echo "No PR number" && exit 0
           echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
-          
+
           # Handle PR closed event
           if [ "${{ github.event.action }}" = "closed" ]; then
             echo "🏁 PR #$PR_NUM closed - closing tracking issue..."
@@ -86,7 +156,7 @@ jobs:
             fi
             exit 0
           fi
-          
+
           # Get PR details
           PR_DATA=$(gh pr view $PR_NUM --repo "${{ github.repository }}" --json title,url,author,headRefName,isDraft 2>/dev/null || echo "{}")
           PR_TITLE=$(echo "$PR_DATA" | jq -r '.title // "Unknown"')
@@ -94,39 +164,28 @@ jobs:
           PR_AUTHOR=$(echo "$PR_DATA" | jq -r '.author.login // "unknown"')
           PR_BRANCH=$(echo "$PR_DATA" | jq -r '.headRefName // "unknown"')
           IS_DRAFT=$(echo "$PR_DATA" | jq -r '.isDraft // false')
-          
+
           # Skip drafts
           [ "$IS_DRAFT" = "true" ] && echo "Draft PR, skipping" && exit 0
-          
-          echo "╔════════════════════════════════════════════════════════════╗"
-          echo "║  📦 TRIAGE: PR #$PR_NUM                                    ║"
-          echo "╚════════════════════════════════════════════════════════════╝"
-          
+
           OWNER="${{ github.repository_owner }}"
           REPO="${{ github.event.repository.name }}"
-          AI_AGENTS="copilot|github-actions|coderabbitai|gemini|cursor|amazon-q|dependabot|bugbot|claude|sonarcloud|codacy|snyk"
-          
-          # ══════════════════════════════════════════════════════════
-          # STEP 1: GET OR CREATE TRACKING ISSUE (KV key lookup)
-          # ══════════════════════════════════════════════════════════
-          echo ""
-          echo "🔑 Step 1: KV Lookup..."
-          
+          AI_AGENTS="${{ env.AI_AGENT_PATTERNS }}"
+
+          # Get or create tracking issue
           ISSUE_KEY="synthesis-pr-$PR_NUM"
-          
+
           # Ensure labels exist
           for LABEL in "synthesis:7057FF" "queue-blocked:B60205" "queue-review:FBCA04" "queue-ready:0E8A16"; do
             NAME="${LABEL%%:*}"
             COLOR="${LABEL##*:}"
             gh label create "$NAME" --color "$COLOR" --repo "${{ github.repository }}" 2>/dev/null || true
           done
-          
+
           # Search for existing tracking issue
           TRACKING_ISSUE=$(gh issue list --repo "${{ github.repository }}" --label "synthesis" --search "$ISSUE_KEY in:title" --json number --jq '.[0].number // empty' 2>/dev/null)
-          
+
           if [ -z "$TRACKING_ISSUE" ]; then
-            echo "  Creating new tracking issue..."
-            
             TRACKING_ISSUE=$(gh issue create --repo "${{ github.repository }}" \
               --title "$ISSUE_KEY: $PR_TITLE" \
               --body "# 🔬 Synthesis: PR #$PR_NUM
@@ -144,25 +203,16 @@ jobs:
           | Status | Initializing... |
 
           ---
-          <sub>🤖 Managed by Ecosystem Triage</sub>" \
+          <sub>🤖 Managed by Triage</sub>" \
               --label "synthesis" \
               2>/dev/null | grep -oE '[0-9]+$')
-            
-            # Link tracking issue to PR
+
             gh pr comment $PR_NUM --repo "${{ github.repository }}" --body "📦 **Tracking:** #$TRACKING_ISSUE" 2>/dev/null || true
-            echo "  ✅ Created #$TRACKING_ISSUE"
-          else
-            echo "  ✅ Found #$TRACKING_ISSUE"
           fi
-          
+
           echo "tracking_issue=$TRACKING_ISSUE" >> $GITHUB_OUTPUT
-          
-          # ══════════════════════════════════════════════════════════
-          # STEP 2: GATHER AI FEEDBACK
-          # ══════════════════════════════════════════════════════════
-          echo ""
-          echo "📥 Step 2: Gathering feedback..."
-          
+
+          # Gather AI feedback
           QUERY='query($owner: String!, $repo: String!, $pr: Int!) {
             repository(owner: $owner, name: $repo) {
               pullRequest(number: $pr) {
@@ -176,41 +226,28 @@ jobs:
               }
             }
           }'
-          
+
           RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -F pr="$PR_NUM" 2>/dev/null || echo "{}")
-          
+
           # Count feedback
           REVIEW_COUNT=$(echo "$RESULT" | jq --arg a "$AI_AGENTS" '[.data.repository.pullRequest.reviews.nodes[]? | select(.author.login | test($a; "i"))] | length' 2>/dev/null || echo "0")
           THREAD_COUNT=$(echo "$RESULT" | jq --arg a "$AI_AGENTS" '[.data.repository.pullRequest.reviewThreads.nodes[]? | select(.isResolved == false) | select(.comments.nodes[0].author.login | test($a; "i"))] | length' 2>/dev/null || echo "0")
           CRITICAL_COUNT=$(echo "$RESULT" | jq --arg a "$AI_AGENTS" '[.data.repository.pullRequest.reviewThreads.nodes[]? | select(.isResolved == false) | select(.comments.nodes[0].author.login | test($a; "i")) | select(.comments.nodes[0].body | test("security|vulnerability|critical|breaking"; "i"))] | length' 2>/dev/null || echo "0")
-          
-          echo "  Reviews: $REVIEW_COUNT | Threads: $THREAD_COUNT | Critical: $CRITICAL_COUNT"
-          
-          # ══════════════════════════════════════════════════════════
-          # STEP 3: RESOLVE OUTDATED THREADS
-          # ══════════════════════════════════════════════════════════
-          echo ""
-          echo "🧹 Step 3: Resolving outdated..."
-          
+
+          # Resolve outdated threads
           OUTDATED_IDS=$(echo "$RESULT" | jq -r --arg a "$AI_AGENTS" '
             .data.repository.pullRequest.reviewThreads.nodes[]? |
             select(.isOutdated == true and .isResolved == false) |
             select(.comments.nodes[0].author.login | test($a; "i")) | .id
           ' 2>/dev/null || echo "")
-          
+
           RESOLVED=0
           for TID in $OUTDATED_IDS; do
             [ -z "$TID" ] && continue
             gh api graphql -f query='mutation($id: ID!) { resolveReviewThread(input: {threadId: $id}) { thread { isResolved } } }' -f id="$TID" 2>/dev/null && RESOLVED=$((RESOLVED + 1))
           done
-          echo "  ✅ Resolved: $RESOLVED"
-          
-          # ══════════════════════════════════════════════════════════
-          # STEP 4: DETERMINE VERDICT
-          # ══════════════════════════════════════════════════════════
-          echo ""
-          echo "⚖️ Step 4: Verdict..."
-          
+
+          # Determine verdict
           if [ "$CRITICAL_COUNT" -gt 0 ]; then
             VERDICT="BLOCKED"; VERDICT_EMOJI="🔴"; VERDICT_LABEL="queue-blocked"
           elif [ "$THREAD_COUNT" -gt 0 ]; then
@@ -218,13 +255,10 @@ jobs:
           else
             VERDICT="READY"; VERDICT_EMOJI="✅"; VERDICT_LABEL="queue-ready"
           fi
-          
-          echo "  $VERDICT_EMOJI $VERDICT"
+
           echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
-          
-          # ══════════════════════════════════════════════════════════
-          # STEP 5: BUILD FEEDBACK LIST
-          # ══════════════════════════════════════════════════════════
+
+          # Build feedback list
           FEEDBACK=""
           if [ "$THREAD_COUNT" -gt 0 ]; then
             FEEDBACK=$(echo "$RESULT" | jq -r --arg a "$AI_AGENTS" '
@@ -236,13 +270,8 @@ jobs:
             ' 2>/dev/null || echo "")
           fi
           [ -z "$FEEDBACK" ] && FEEDBACK="_No active feedback._"
-          
-          # ══════════════════════════════════════════════════════════
-          # STEP 6: UPDATE TRACKING ISSUE (KV write)
-          # ══════════════════════════════════════════════════════════
-          echo ""
-          echo "💾 Step 6: KV Write..."
-          
+
+          # Update tracking issue
           BODY="# 🔬 Synthesis: PR #$PR_NUM
 
           > **PR:** $PR_URL
@@ -271,13 +300,57 @@ jobs:
 
           **Commands:** \`@cascade address\` · \`@cascade synthesize\` · \`@cascade merge\`
 
-          <sub>🤖 Ecosystem Triage</sub>"
-          
+          <sub>🤖 Triage</sub>"
+
           gh issue edit $TRACKING_ISSUE --repo "${{ github.repository }}" --body "$BODY" 2>/dev/null || true
-          
-          # Update labels
           gh issue edit $TRACKING_ISSUE --repo "${{ github.repository }}" --remove-label "queue-blocked,queue-review,queue-ready" 2>/dev/null || true
           gh issue edit $TRACKING_ISSUE --repo "${{ github.repository }}" --add-label "$VERDICT_LABEL" 2>/dev/null || true
-          
-          echo ""
-          echo "✅ Tracking issue #$TRACKING_ISSUE updated: $VERDICT"
+
+  # ════════════════════════════════════════════════════════════════
+  # SCHEDULED: ISSUE DEDUPLICATION (Claude)
+  # ════════════════════════════════════════════════════════════════
+  deduplication:
+    name: Issue Deduplication
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.mode != 'triage-only')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: deduplication
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Check API Key
+        id: check-key
+        run: |
+          if [ -n "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout
+        if: steps.check-key.outputs.available == 'true'
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 1
+          # Use workflow-scoped token for checkout (more restrictive than CI_GITHUB_TOKEN)
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dedup with Claude
+        if: steps.check-key.outputs.available == 'true'
+        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
+          prompt: |
+            Scan ${{ github.repository }} for duplicate issues.
+
+            Find similar issues, link duplicates to the canonical issue, and close them.
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,LS,Bash(gh:*),mcp__github__list_issues,mcp__github__search_issues,mcp__github__get_issue,mcp__github__update_issue,mcp__github__add_issue_comment"

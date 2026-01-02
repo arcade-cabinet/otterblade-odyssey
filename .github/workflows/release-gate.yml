@@ -110,15 +110,15 @@ jobs:
           echo ""
           echo "The PR will be removed from the merge queue."
 
-      # Trigger AI fixer (use merge_group head_ref)
-      - name: Trigger AI Fixer
+      # Trigger autoheal workflow
+      - name: Trigger Autoheal
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         run: |
           # Extract branch from merge group ref
           BRANCH="${{ github.event.merge_group.head_ref }}"
 
-          gh workflow run ai-fixer.yml \
+          gh workflow run autoheal.yml \
             --ref "$BRANCH" \
             --repo "${{ github.repository }}" \
             -f run_id="${{ github.run_id }}" \
