@@ -175,10 +175,14 @@ export default function OtterbladeGame() {
       }
     }
 
+    // Build navigation mesh from platforms for AI pathfinding
+    aiManager.buildNavMesh(platforms);
+
     // Build NPCs from DDL with YUKA AI
     const npcData = getChapterNPCs(chapterId);
+    const npcBodies = new Map(); // Track NPC bodies for interaction
     for (const npcDef of npcData) {
-      aiManager.addNPC(npcDef.id, npcDef);
+      const npc = aiManager.addNPC(npcDef.id, npcDef);
 
       // Create physics body for NPC
       const npcBody = Bodies.rectangle(
@@ -190,6 +194,7 @@ export default function OtterbladeGame() {
           isSensor: true
         }
       );
+      npcBodies.set(npcDef.id, { npc, body: npcBody });
       World.add(engine.world, npcBody);
     }
 
@@ -323,6 +328,49 @@ export default function OtterbladeGame() {
           }
         }
 
+        // Player interacts with NPCs
+        if ((bodyA === player && bodyB.label === 'npc') ||
+            (bodyB === player && bodyA.label === 'npc')) {
+          const npcBody = bodyA === player ? bodyB : bodyA;
+
+          // Find NPC by body
+          for (const [npcId, npcData] of npcBodies) {
+            if (npcData.body === npcBody && inputManager.isPressed('interact')) {
+              const npc = npcData.npc;
+              const playerPos = new Vector3(player.position.x, player.position.y, 0);
+
+              // Trigger NPC interaction
+              const interactionData = npc.interact(playerPos);
+              if (interactionData) {
+                console.log(`Interacting with NPC: ${npcId}`);
+                audioManager.playSFX('menu_select');
+
+                // Handle dialogue or quest progression
+                if (interactionData.type === 'dialogue') {
+                  console.log(`Dialogue: ${interactionData.dialogue}`);
+                }
+
+                // Execute interaction actions
+                if (interactionData.actions) {
+                  for (const action of interactionData.actions) {
+                    if (action.type === 'restore_health') {
+                      setHealth(maxHealth());
+                      audioManager.playSFX('bell_ring', { volume: 0.5 });
+                    }
+                    if (action.type === 'give_item') {
+                      const objectives = questObjectives();
+                      const updated = objectives.map(o =>
+                        o.id === action.target ? { ...o, completed: true } : o
+                      );
+                      setQuestObjectives(updated);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         // Player interacts with objects
         if ((bodyA === player && bodyB.label.startsWith('interaction_')) ||
             (bodyB === player && bodyA.label.startsWith('interaction_'))) {
@@ -376,7 +424,7 @@ export default function OtterbladeGame() {
       aiManager.update(16.67 / 1000);
 
       // Sync AI positions with physics bodies
-      for (const [id, enemy] of aiManager.enemies) {
+      for (const enemy of aiManager.enemies.values()) {
         const enemyBody = Array.from(engine.world.bodies).find(b =>
           b.label === 'enemy' && Math.abs(b.position.x - enemy.position.x) < 1
         );
@@ -427,6 +475,31 @@ export default function OtterbladeGame() {
       if (inputManager.isPressed('jump') && onGround) {
         Body.setVelocity(player, { x: player.velocity.x, y: -12 });
         audioManager.playSFX('blade_swing', { rate: 1.5, volume: 0.4 });
+      }
+
+      // Attack
+      if (inputManager.isPressed('attack')) {
+        audioManager.playSFX('blade_swing');
+
+        // Find nearby enemies and damage them
+        const attackRange = 60;
+        const attackDamage = 1;
+
+        for (const enemy of aiManager.enemies.values()) {
+          const dist = Math.sqrt(
+            Math.pow(player.position.x - enemy.position.x, 2) +
+            Math.pow(player.position.y - enemy.position.y, 2)
+          );
+
+          if (dist < attackRange) {
+            // Apply damage to enemy
+            enemy.takeDamage(attackDamage);
+            audioManager.playSFX('blade_hit');
+
+            // Visual feedback could be added here
+            console.log(`Hit enemy! HP: ${enemy.hp}/${enemy.maxHp}`);
+          }
+        }
       }
 
       // Update camera
@@ -562,12 +635,12 @@ export default function OtterbladeGame() {
       }
 
       // Draw NPCs
-      for (const [id, npc] of aiManager.npcs) {
+      for (const npc of aiManager.npcs.values()) {
         drawNPC(ctx, npc, animFrame);
       }
 
       // Draw enemies
-      for (const [id, enemy] of aiManager.enemies) {
+      for (const enemy of aiManager.enemies.values()) {
         if (enemy.hp > 0) {
           drawEnemy(ctx, enemy, animFrame);
         }

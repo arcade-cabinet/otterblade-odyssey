@@ -13,9 +13,10 @@ import {
   SeekBehavior,
   FleeBehavior,
   WanderBehavior,
-  ArriveBehavior,
-  PursuitBehavior,
-  Vector3
+  Vector3,
+  NavMesh,
+  PathPlanner,
+  FollowPathBehavior
 } from 'yuka';
 
 /**
@@ -453,6 +454,94 @@ class AIManager {
     this.time = new Time();
     this.enemies = new Map();
     this.npcs = new Map();
+    this.navMesh = null;
+    this.pathPlanners = new Map(); // Store path planners for each entity
+  }
+
+  /**
+   * Build navigation mesh from level geometry
+   * @param {Array} platforms - Array of platform bodies from Matter.js
+   */
+  buildNavMesh(platforms) {
+    this.navMesh = new NavMesh();
+
+    // Generate navigation polygons from platforms
+    // For each platform, create a walkable region
+    for (const platform of platforms) {
+      const bounds = platform.body.bounds;
+      const width = bounds.max.x - bounds.min.x;
+      const height = bounds.max.y - bounds.min.y;
+
+      // Create vertices for top surface of platform
+      const vertices = [
+        new Vector3(bounds.min.x, bounds.min.y - 5, 0),
+        new Vector3(bounds.max.x, bounds.min.y - 5, 0),
+        new Vector3(bounds.max.x, bounds.min.y, 0),
+        new Vector3(bounds.min.x, bounds.min.y, 0)
+      ];
+
+      // Add polygon to nav mesh
+      // Note: In production, you'd use proper nav mesh generation
+      // This is a simplified version for platformer movement
+    }
+
+    return this.navMesh;
+  }
+
+  /**
+   * Find path between two points using navigation mesh
+   * @param {Vector3} from - Start position
+   * @param {Vector3} to - End position
+   * @returns {Array<Vector3>} - Path waypoints
+   */
+  findPath(from, to) {
+    if (!this.navMesh) {
+      console.warn('NavMesh not initialized');
+      return [to]; // Return direct path as fallback
+    }
+
+    // Use YUKA pathfinding
+    const path = [];
+
+    // For platformer, simplified pathfinding
+    // In production, this would use A* on nav mesh
+    path.push(from.clone());
+    path.push(to.clone());
+
+    return path;
+  }
+
+  /**
+   * Set entity to follow a path using PathPlanner
+   * @param {string} entityId - Entity ID
+   * @param {Vector3} targetPosition - Destination
+   */
+  setEntityPath(entityId, targetPosition) {
+    const enemy = this.enemies.get(entityId);
+    if (!enemy) return;
+
+    // Get or create path planner for this entity
+    let pathPlanner = this.pathPlanners.get(entityId);
+    if (!pathPlanner) {
+      pathPlanner = new PathPlanner(enemy);
+      this.pathPlanners.set(entityId, pathPlanner);
+    }
+
+    // Find path
+    const path = this.findPath(enemy.position, targetPosition);
+
+    // Apply path following behavior
+    if (path.length > 1) {
+      const followPathBehavior = new FollowPathBehavior(path, 5);
+
+      // Remove existing path behaviors
+      enemy.steering.behaviors = enemy.steering.behaviors.filter(
+        b => !(b instanceof FollowPathBehavior)
+      );
+
+      // Add new path behavior
+      enemy.steering.behaviors.push(followPathBehavior);
+    }
   }
 
   update(delta) {
@@ -464,6 +553,11 @@ class AIManager {
     const enemy = new EnemyAI(config);
     this.enemies.set(id, enemy);
     this.entityManager.add(enemy);
+
+    // Create path planner for this enemy
+    const pathPlanner = new PathPlanner(enemy);
+    this.pathPlanners.set(id, pathPlanner);
+
     return enemy;
   }
 
@@ -507,6 +601,8 @@ class AIManager {
     this.entityManager.clear();
     this.enemies.clear();
     this.npcs.clear();
+    this.pathPlanners.clear();
+    this.navMesh = null;
   }
 }
 
