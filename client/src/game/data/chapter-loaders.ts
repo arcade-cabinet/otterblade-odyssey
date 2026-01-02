@@ -109,7 +109,11 @@ export function getChapterNPCs(chapterId: number): ChapterNPC[] {
  */
 export function getChapterSpawnPoint(chapterId: number): { x: number; y: number } {
   const chapter = loadChapterManifest(chapterId);
-  return chapter.level.spawnPoint;
+  const spawnPoint = chapter.level.spawnPoint;
+  return {
+    x: spawnPoint?.x ?? 100,
+    y: spawnPoint?.y ?? 450,
+  };
 }
 
 /**

@@ -130,7 +130,13 @@ export function getCharacterHitbox(
   characterId: string
 ): { width: number; height: number; offsetY?: number } | undefined {
   const character = getCharacterById(characterId);
-  return character?.procedural?.hitbox;
+  const hitbox = character?.procedural?.hitbox;
+  if (!hitbox) return undefined;
+  return {
+    width: hitbox.width ?? 35,
+    height: hitbox.height ?? 55,
+    offsetY: hitbox.offsetY,
+  };
 }
 
 /**
