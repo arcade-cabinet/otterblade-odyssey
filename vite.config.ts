@@ -8,7 +8,10 @@ import { metaImagesPlugin } from './vite-plugin-meta-images';
 
 export default defineConfig({
   plugins: [
+    // React is used for: main app shell, UI components, asset review pages
     react(),
+    // Solid.js is used for: new game implementation (client/src/game/OtterbladeGame.jsx)
+    // Both frameworks coexist: React for UI shell, Solid.js for game engine
     solidPlugin(),
     runtimeErrorOverlay(),
     tailwindcss(),
@@ -46,8 +49,8 @@ export default defineConfig({
           // Vendor chunks for better caching
           'vendor-react': ['react', 'react-dom'],
           'vendor-mui': ['@mui/material', '@mui/icons-material'],
-          'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
-          'vendor-physics': ['@dimforge/rapier2d-compat'],
+          // Note: Old React Three Fiber + Rapier implementation removed
+          // New game uses Matter.js + Solid.js (no chunking needed for game libs)
           'vendor-capacitor': [
             '@capacitor/core',
             '@capacitor/haptics',

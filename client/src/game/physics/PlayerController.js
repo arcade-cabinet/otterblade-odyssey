@@ -97,7 +97,6 @@ export class PlayerController {
   handleMovement(controls, delta) {
     const isSLinking = controls.slink;
     const isInWater = this.player.isInWater;
-    const isClimbing = this.player.isClimbing;
 
     // Horizontal movement
     let moveMultiplier = this.isGrounded ? 1 : PLAYER_PHYSICS.airControl;

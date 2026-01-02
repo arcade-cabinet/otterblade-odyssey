@@ -54,7 +54,6 @@ export class ThreatAssessment {
     const distFar = this.distanceSets.far(distance);
 
     const playerLow = this.healthSets.low(playerHealth);
-    const playerMed = this.healthSets.medium(playerHealth);
     const playerHigh = this.healthSets.high(playerHealth);
 
     const ownLow = this.healthSets.low(ownHealth);

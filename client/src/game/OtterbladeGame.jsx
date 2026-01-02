@@ -578,13 +578,28 @@ export default function OtterbladeGame() {
     const flowPuzzles = [];
     const timingSequences = [];
 
-    // Load chapter manifest
+    // Load chapter manifest with error handling
+    let manifest, spawnPoint;
     const chapterId = currentChapter();
-    const manifest = loadChapterManifest(chapterId);
-    const spawnPoint = getChapterSpawnPoint(chapterId);
 
-    console.log(`Loading Chapter ${chapterId}: ${manifest.name}`);
-    console.log(`Quest: ${manifest.narrative.quest}`);
+    try {
+      manifest = loadChapterManifest(chapterId);
+      spawnPoint = getChapterSpawnPoint(chapterId);
+
+      if (!manifest) {
+        throw new Error(`Failed to load chapter ${chapterId} manifest`);
+      }
+      if (!spawnPoint) {
+        throw new Error(`No spawn point defined for chapter ${chapterId}`);
+      }
+
+      console.log(`Loading Chapter ${chapterId}: ${manifest.name}`);
+      console.log(`Quest: ${manifest.narrative?.quest || 'No quest defined'}`);
+    } catch (error) {
+      console.error('Failed to load chapter data:', error);
+      alert(`Error loading game chapter: ${error.message}`);
+      return;
+    }
 
     // Initialize quest system
     if (manifest.quests && manifest.quests.length > 0) {
@@ -601,13 +616,21 @@ export default function OtterbladeGame() {
     }
 
     // Load chapter audio with Howler.js
-    audioManager.loadChapterAudio(manifest);
+    try {
+      audioManager.loadChapterAudio(manifest);
 
-    // Start background music
-    if (manifest.media?.audio?.music?.[0]) {
-      setTimeout(() => {
-        audioManager.playMusic(manifest.media.audio.music[0].id);
-      }, 500);
+      // Start background music
+      if (manifest.media?.audio?.music?.[0]) {
+        setTimeout(() => {
+          try {
+            audioManager.playMusic(manifest.media.audio.music[0].id);
+          } catch (audioError) {
+            console.warn('Failed to play background music:', audioError);
+          }
+        }, 500);
+      }
+    } catch (error) {
+      console.warn('Audio loading failed (continuing without audio):', error);
     }
 
     // Create player with compound body (head/torso/feet sensors)
@@ -792,52 +815,72 @@ export default function OtterbladeGame() {
     }
 
     // Build navigation mesh from platforms for AI pathfinding
-    aiManager.buildNavMesh(platforms);
+    try {
+      aiManager.buildNavMesh(platforms);
+    } catch (error) {
+      console.warn('NavMesh generation failed, AI pathfinding will be limited:', error);
+    }
 
     // Build NPCs from DDL with YUKA AI
-    const npcData = getChapterNPCs(chapterId);
     const npcBodies = new Map(); // Track NPC bodies for interaction
-    for (const npcDef of npcData) {
-      const npc = aiManager.addNPC(npcDef.id, npcDef);
+    try {
+      const npcData = getChapterNPCs(chapterId);
+      for (const npcDef of npcData) {
+        try {
+          const npc = aiManager.addNPC(npcDef.id, npcDef);
 
-      // Create physics body for NPC
-      const npcBody = Bodies.rectangle(npcDef.position.x, npcDef.position.y, 35, 55, {
-        isStatic: true,
-        label: 'npc',
-        isSensor: true,
-      });
-      npcBodies.set(npcDef.id, { npc, body: npcBody });
-      World.add(engine.world, npcBody);
+          // Create physics body for NPC
+          const npcBody = Bodies.rectangle(
+            npcDef.position?.x || 0,
+            npcDef.position?.y || 0,
+            35,
+            55,
+            {
+              isStatic: true,
+              label: 'npc',
+              isSensor: true,
+            }
+          );
+          npcBodies.set(npcDef.id, { npc, body: npcBody });
+          World.add(engine.world, npcBody);
+        } catch (npcError) {
+          console.error(`Failed to create NPC ${npcDef.id}:`, npcError);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load NPCs (continuing without them):', error);
     }
 
     // Build enemies from DDL with YUKA AI and perception
-    const encounterData = getChapterEncounters(chapterId);
     let bossAI = null;
+    try {
+      const encounterData = getChapterEncounters(chapterId);
 
-    for (const encounter of encounterData) {
-      // Check for boss encounter
-      if (encounter.type === 'boss' && encounter.boss) {
-        const bossDef = encounter.boss;
-        bossAI = new ZephyrosAI(
-          {
-            x: bossDef.spawnPoint?.x || 500,
-            y: bossDef.spawnPoint?.y || 300,
-            health: bossDef.health || 500,
-            damage: bossDef.damage || 35,
-            speed: bossDef.speed || 1.2,
-          },
-          gameStateObj,
-          audioManager
-        );
+      for (const encounter of encounterData) {
+        try {
+          // Check for boss encounter
+          if (encounter.type === 'boss' && encounter.boss) {
+            const bossDef = encounter.boss;
+            bossAI = new ZephyrosAI(
+              {
+                x: bossDef.spawnPoint?.x || 500,
+                y: bossDef.spawnPoint?.y || 300,
+                health: bossDef.health || 500,
+                damage: bossDef.damage || 35,
+                speed: bossDef.speed || 1.2,
+              },
+              gameStateObj,
+              audioManager
+            );
 
-        // Set player as target
-        bossAI.target = playerRef;
+            // Set player as target
+            bossAI.target = playerRef;
 
-        // Register as hearing listener
-        hearingSystem.addListener(bossAI);
+            // Register as hearing listener
+            hearingSystem.addListener(bossAI);
 
-        console.log('Boss spawned: Zephyros');
-      }
+            console.log('Boss spawned: Zephyros');
+          }
 
       // Regular enemies
       if (encounter.enemies) {
@@ -898,6 +941,12 @@ export default function OtterbladeGame() {
           enemyAI.position.copy(new Vector3(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 0));
         }
       }
+        } catch (encounterError) {
+          console.error(`Failed to process encounter:`, encounterError);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load enemies (continuing without them):', error);
     }
 
     // Build interactions from DDL
@@ -1243,7 +1292,7 @@ export default function OtterbladeGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Background
-      const biome = manifest.level.biome;
+      const biome = manifest.level?.biome || 'abbey';
       const bgColors = {
         village: '#2C3E50',
         forest: '#1a3a1a',
