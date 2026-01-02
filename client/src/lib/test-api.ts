@@ -31,6 +31,10 @@ export interface GameTestAPI {
   isReady: () => boolean;
 }
 
+interface GameTestWindow extends Window {
+  __GAME_TEST_API__?: GameTestAPI;
+}
+
 /**
  * Initialize test API (call once during app startup)
  */
@@ -76,12 +80,8 @@ export function initializeTestAPI(): void {
     },
   };
 
-interface GameTestWindow extends Window {
-  __GAME_TEST_API__?: GameTestAPI;
-}
-
   // Expose on window for Playwright access
-(window as GameTestWindow).__GAME_TEST_API__ = api;
+  (window as GameTestWindow).__GAME_TEST_API__ = api;
 
   console.log('[Test API] Initialized - test automation enabled');
 }
