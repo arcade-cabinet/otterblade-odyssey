@@ -38,7 +38,10 @@ export interface GameTestAPI {
 }
 
 /**
- * Initialize test API (call once during app startup)
+ * Initializes and exposes the in-browser Game Test API for automated tests.
+ *
+ * Call once during app startup. The API is attached to `window.__GAME_TEST_API__`
+ * and is only enabled in development or test environments.
  */
 export function initializeTestAPI(): void {
   // Only expose in development/test
@@ -52,7 +55,7 @@ export function initializeTestAPI(): void {
   const api: GameTestAPI = {
     getPlayerState: () => {
       const store = useStore.getState();
-      const isGrounded = ['idle', 'run', 'slide', 'slink', 'sprint', 'land', 'roll'].includes(store.playerState);
+      const isGrounded = ['idle', 'run', 'slide'].includes(store.playerState);
 
       return {
         x: store.playerX,
@@ -103,7 +106,9 @@ export function initializeTestAPI(): void {
 }
 
 /**
- * Get the test API (for use within the game code)
+ * Access the globally exposed test API when available.
+ *
+ * @returns The `GameTestAPI` instance from `window.__GAME_TEST_API__`, or `null` if the API is not present or `window` is undefined.
  */
 export function getTestAPI(): GameTestAPI | null {
   if (typeof window === 'undefined') {
@@ -113,7 +118,9 @@ export function getTestAPI(): GameTestAPI | null {
 }
 
 /**
- * Check if test API is available
+ * Determine whether the in-browser test API has been exposed.
+ *
+ * @returns `true` if the test API is available on `window`, `false` otherwise.
  */
 export function isTestAPIEnabled(): boolean {
   if (typeof window === 'undefined') {
