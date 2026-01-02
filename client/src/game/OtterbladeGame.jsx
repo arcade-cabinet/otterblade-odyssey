@@ -178,7 +178,7 @@ export default function OtterbladeGame() {
     // Build NPCs from DDL with YUKA AI
     const npcData = getChapterNPCs(chapterId);
     for (const npcDef of npcData) {
-      const npcAI = aiManager.addNPC(npcDef.id, npcDef);
+      aiManager.addNPC(npcDef.id, npcDef);
 
       // Create physics body for NPC
       const npcBody = Bodies.rectangle(
