@@ -646,6 +646,9 @@ export default function OtterbladeGame() {
       body: player,
     };
 
+    // Map to track enemy AI to physics body relationships for efficient lookup
+    const enemyBodyMap = new Map();
+
     // Build level geometry from DDL with advanced physics
     const platforms = [];
     const walls = [];
@@ -927,11 +930,15 @@ export default function OtterbladeGame() {
                 onDeath: () => {
                   audioManager.playSFX('enemy_hit');
                   World.remove(engine.world, enemyBody);
+                  enemyBodyMap.delete(enemyDef.id);
                 },
               });
 
               // Set player as target for AI
               enemyAI.playerTarget = playerRef;
+
+              // Add to efficient body lookup map
+              enemyBodyMap.set(enemyDef.id, enemyBody);
 
               // Register as hearing listener
               hearingSystem.addListener(enemyAI);
@@ -1227,11 +1234,9 @@ export default function OtterbladeGame() {
         }
       }
 
-      // Sync AI positions with physics bodies
-      for (const enemy of aiManager.enemies.values()) {
-        const enemyBody = Array.from(engine.world.bodies).find(
-          (b) => b.label === 'enemy' && Math.abs(b.position.x - enemy.position.x) < 50
-        );
+      // Sync AI positions with physics bodies (using efficient Map lookup)
+      for (const [enemyId, enemy] of aiManager.enemies.entries()) {
+        const enemyBody = enemyBodyMap.get(enemyId);
         if (enemyBody) {
           // Copy AI velocity to physics
           Body.setVelocity(enemyBody, {
@@ -1502,20 +1507,31 @@ export default function OtterbladeGame() {
 
       ctx.restore();
 
-      requestAnimationFrame(gameLoop);
+      animationFrameId = requestAnimationFrame(gameLoop);
     }
+
+    // Start game loop
+    let animationFrameId = requestAnimationFrame(gameLoop);
 
     // Register cleanup
     onCleanup(() => {
+      // Cancel animation frame to prevent memory leaks
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       audioManager.stopAll();
       aiManager.destroy();
       inputManager.reset();
+      // Cleanup environmental systems
+      lanternManager?.destroy();
+      bellManager?.destroy();
+      hearthManager?.destroy();
+      timingSequenceManager?.destroy();
       Engine.clear(engine);
       World.clear(engine.world, false);
+      // Clear enemy body map
+      enemyBodyMap.clear();
     });
-
-    // Start game loop
-    requestAnimationFrame(gameLoop);
   });
 
   return (
