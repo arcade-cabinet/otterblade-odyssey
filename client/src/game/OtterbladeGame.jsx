@@ -165,7 +165,8 @@ export default function OtterbladeGame() {
     const ceilings = [];
 
     if (manifest.level?.segments) {
-      for (const segment of manifest.segments) {
+    if (manifest.level?.segments) {
+      for (const segment of manifest.level.segments) {
         // Platforms with type-based friction
         if (segment.platforms) {
           for (const platformDef of segment.platforms) {
