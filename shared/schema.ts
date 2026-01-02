@@ -14,4 +14,10 @@ export const insertUserSchema = z.object({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+
+// Manually define User type to match the table structure
+export type User = {
+  id: string;
+  username: string;
+  password: string;
+};
