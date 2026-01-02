@@ -168,7 +168,7 @@ export const PlatformSchema = z.object({
   x: z.number(),
   y: z.number(),
   width: z.number(),
-  height: z.number(),
+  height: z.number().optional().default(20), // Default platform thickness
   // Flexible platform types for varied level design
   type: z.string(),
   asset: z.string().optional(),
