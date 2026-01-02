@@ -10,7 +10,7 @@ import HUD from '@/components/hud/HUD';
 import PostFX from '@/components/hud/PostFX';
 import StartMenu from '@/components/hud/StartMenu';
 import TouchControls from '@/components/hud/TouchControls';
-import Game from '@/game/Game';
+import Game from '@/game/OtterbladeGame';
 import { useStore } from '@/game/store';
 import {
   initializeGameMode,

@@ -116,7 +116,7 @@ export class BossPattern {
     return performance.now() - this.lastUsed > this.cooldown;
   }
 
-  async execute(boss) {
+  async execute(_boss) {
     this.lastUsed = performance.now();
     // Override in subclasses
   }
@@ -525,7 +525,7 @@ export class ZephyrosAI extends PerceptiveEntity {
     };
   }
 
-  spawnFrostParticles(position, direction) {
+  spawnFrostParticles(_position, _direction) {
     // Particle spawning (handled by particle system)
   }
 

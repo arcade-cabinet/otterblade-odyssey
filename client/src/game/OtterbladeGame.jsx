@@ -1505,10 +1505,7 @@ export default function OtterbladeGame() {
       requestAnimationFrame(gameLoop);
     }
 
-    // Start game loop
-    requestAnimationFrame(gameLoop);
-
-    // Cleanup
+    // Register cleanup
     onCleanup(() => {
       audioManager.stopAll();
       aiManager.destroy();
@@ -1516,6 +1513,9 @@ export default function OtterbladeGame() {
       Engine.clear(engine);
       World.clear(engine.world, false);
     });
+
+    // Start game loop
+    requestAnimationFrame(gameLoop);
   });
 
   return (
