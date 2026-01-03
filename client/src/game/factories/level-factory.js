@@ -220,13 +220,18 @@ function buildSegment(segment, engine, level) {
   // Build walls
   if (segment.walls) {
     for (const wallDef of segment.walls) {
-      const wall = createWall(engine, {
-        x: wallDef.x,
-        y: wallDef.y,
-        width: wallDef.width,
-        height: wallDef.height,
-        asset: wallDef.asset,
-      });
+      const wall = Bodies.rectangle(
+        wallDef.x,
+        wallDef.y,
+        wallDef.width,
+        wallDef.height,
+        {
+          isStatic: true,
+          label: 'wall',
+          friction: 0.1,
+        }
+      );
+      World.add(engine.world, wall);
 
       level.walls.push({
         body: wall,
