@@ -65,14 +65,14 @@ export function buildLevel(chapterId, engine) {
   // Build hazards
   if (manifest.level?.hazards) {
     for (const hazardDef of manifest.level.hazards) {
-      const hazard = new HazardSystem(
-        hazardDef.x,
-        hazardDef.y,
-        hazardDef.width,
-        hazardDef.height,
-        hazardDef.damage || 1,
-        hazardDef.type || 'spikes'
-      );
+      const hazard = new HazardSystem({
+        x: hazardDef.x,
+        y: hazardDef.y,
+        width: hazardDef.width,
+        height: hazardDef.height,
+        damage: hazardDef.damage || 1,
+        type: hazardDef.type || 'spikes',
+      });
       level.hazards.push(hazard);
       World.add(engine.world, hazard.body);
     }
