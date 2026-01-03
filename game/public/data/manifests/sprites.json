@@ -30,7 +30,7 @@
         "subject": "Finn Riverstone - Young river otter warrior (protagonist)",
         "physique": "Athletic build, standing about 4 heads tall, river otter proportions - sleek body, webbed paws, thick rudder tail",
         "fur": "Rich chocolate brown fur with cream-colored chest and muzzle, visible fur texture with individual strands suggested",
-        "face": "Bright intelligent eyes (dark amber), small rounded ears, whiskers, determined but kind expression",
+        "facial_features": "Bright intelligent eyes (dark amber), small rounded ears, whiskers, determined but kind expression",
         "outfit": "Worn leather vest with brass toggles, cloth belt with small pouch, simple iron sword (the Otterblade) in leather sheath on back, travel-worn cloak clasped at shoulder",
         "animation": "Idle breathing cycle - subtle chest rise/fall, tail sway, ear twitch, weight shift between feet. 8 frames for smooth loop.",
         "pose": "Standing profile facing RIGHT, feet shoulder-width apart, one paw resting near belt, alert but relaxed",
