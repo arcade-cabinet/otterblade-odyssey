@@ -23,18 +23,22 @@ jobs:
       SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@48586b01ab3a86f14e6bb9d1dd4167024b2d35c5 # v4.2.2
+
+      - name: Read .nvmrc
+        id: node-version
+        run: echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@a5f1fc9265b0b1f4849b6a9f42c08c37d80c08d5 # v4.1.0
         with:
           version: 10.12.1
           run_install: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version-file: .nvmrc
+          node-version: ${{ steps.node-version.outputs.version }}
           cache: pnpm
 
       - name: Install dependencies
@@ -50,14 +54,14 @@ jobs:
         run: pnpm test:coverage
 
       - name: Upload coverage to Coveralls
-        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
+        uses: coverallsapp/github-action@5798a512e5f0f1f0e87e67ef80544f49dd46a81b # v2.3.5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage/lcov.info
 
       - name: Skip SonarCloud (missing project key or organization)
         if: ${{ env.SONAR_PROJECT_KEY == '' || env.SONAR_ORGANIZATION == '' }}
-        run: echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
+        run: echo "::warning::SONAR_PROJECT_KEY or SONAR_ORGANIZATION is not set; skipping SonarCloud analysis."
 
       - name: Skip SonarCloud (missing SONAR_TOKEN)
         if: ${{ env.SONAR_PROJECT_KEY != '' && env.SONAR_ORGANIZATION != '' && secrets.SONAR_TOKEN == '' }}
@@ -65,7 +69,7 @@ jobs:
 
       - name: SonarCloud analysis
         if: ${{ env.SONAR_PROJECT_KEY != '' && env.SONAR_ORGANIZATION != '' && secrets.SONAR_TOKEN != '' }}
-        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
+        uses: SonarSource/sonarcloud-github-action@46f1a5e1ffccb0e0b39e6d3aaa4e1c21edc8287e # v3.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
@@ -78,7 +82,7 @@ jobs:
   claude_auto_fix:
     name: Claude auto-fix on CI failure
     needs: quality
-    if: needs.quality.result == 'failure' && github.event_name == 'pull_request'
+    if: needs.quality.result == 'failure' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,22 +92,26 @@ jobs:
       id-token: write
     steps:
       - name: Checkout pull request head
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@48586b01ab3a86f14e6bb9d1dd4167024b2d35c5 # v4.2.2
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN }}
 
+      - name: Read .nvmrc
+        id: node-version
+        run: echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"
+
       - name: Set up pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        uses: pnpm/action-setup@a5f1fc9265b0b1f4849b6a9f42c08c37d80c08d5 # v4.1.0
         with:
           version: 10.12.1
           run_install: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version-file: .nvmrc
+          node-version: ${{ steps.node-version.outputs.version }}
           cache: pnpm
 
       - name: Install dependencies
@@ -111,9 +119,9 @@ jobs:
 
       - name: Capture failing job context
         id: failures
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          github-token: ${{ secrets.CI_GITHUB_TOKEN }}
           script: |
             const { data } = await github.rest.actions.listJobsForWorkflowRun({
               owner: context.repo.owner,
@@ -122,9 +130,7 @@ jobs:
             });
 
             const failedJobs = data.jobs.filter(
-              (job) =>
-                ['failure', 'cancelled'].includes(job.conclusion) ||
-                job.status === 'timed_out'
+              (job) => job.conclusion === 'failure'
             );
 
             return {
@@ -141,14 +147,12 @@ jobs:
 
       - name: Claude Code auto-fix
         uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
-          prompt: |
-            # Instructs Claude to analyze CI failures and propose and commit fixes.
+        with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           prompt: |
             /fix-ci
             Workflow run: ${{ fromJSON(steps.failures.outputs.result).runUrl }}
-        with:
             Head branch: ${{ github.event.pull_request.head.ref }}
 
             Failed jobs:
