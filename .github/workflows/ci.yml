@@ -148,8 +148,7 @@ jobs:
           prompt: |
             /fix-ci
             Workflow run: ${{ fromJSON(steps.failures.outputs.result).runUrl }}
-            Repository: ${{ github.repository }}
-            Base branch: ${{ github.event.pull_request.base.ref }}
+        with:
             Head branch: ${{ github.event.pull_request.head.ref }}
 
             Failed jobs:
