@@ -36,7 +36,8 @@ Detailed technical guides:
 | File | Purpose | Audience |
 |------|---------|----------|
 | [TESTING.md](./TESTING.md) | Complete testing guide | Developers, QA |
-| [AI.md](./AI.md) | AI systems (YUKA, steering behaviors) | AI developers |
+| [AI.md](./AI.md) | AI systems overview (YUKA, steering behaviors) | AI developers |
+| [AI_REFERENCE.md](./AI_REFERENCE.md) | Complete AI implementation reference with code examples | AI developers |
 | [PHYSICS.md](./PHYSICS.md) | Physics engine documentation | Physics developers |
 
 ### Coming Soon
@@ -191,7 +192,8 @@ Include as appropriate:
 - [COMPLETE_JOURNEY_VALIDATION.md](./COMPLETE_JOURNEY_VALIDATION.md) - Deterministic chapter and journey validation
 
 **AI & Automation**
-- [AI.md](./AI.md) - YUKA AI systems
+- [AI.md](./AI.md) - YUKA AI systems overview
+- [AI_REFERENCE.md](./AI_REFERENCE.md) - Complete AI implementation with production code
 - [AGENTS.md](../AGENTS.md) - AI agent instructions
 
 **Game Systems**
@@ -207,7 +209,8 @@ Include as appropriate:
 - IMPLEMENTATION.md - Architecture and implementation
 - TESTING.md - Test infrastructure
 - PHYSICS.md - Physics systems
-- AI.md - AI behaviors
+- AI.md - AI systems overview
+- AI_REFERENCE.md - Complete AI implementation examples
 
 **AI Agents:**
 - AGENTS.md - Universal instructions
