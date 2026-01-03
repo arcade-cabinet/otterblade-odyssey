@@ -99,6 +99,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ steps.pr-details.outputs.pr_branch }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Load PR Manager Prompt
         if: steps.check-key.outputs.available == 'true'
