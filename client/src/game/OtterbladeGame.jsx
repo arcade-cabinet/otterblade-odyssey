@@ -33,9 +33,6 @@ const { World, Runner, Engine } = Matter;
 
 function OtterbladeGameContent() {
   let canvasRef;
-  const setCanvasRef = (el) => {
-    canvasRef = el;
-  };
 
   // Game state signals
   const [currentChapter] = createSignal(0);
@@ -43,7 +40,7 @@ function OtterbladeGameContent() {
   const [maxHealth] = createSignal(5);
   const [warmth, setWarmth] = createSignal(100);
   const [maxWarmth] = createSignal(100);
-  const [shards, setShards] = createSignal(0);
+  const [, setShards] = createSignal(0);
   const [gameStarted, setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
   const [activeQuest, setActiveQuest] = createSignal(null);
@@ -322,7 +319,7 @@ function OtterbladeGameContent() {
       </Show>
 
       <Show when={gameStarted()}>
-        <canvas ref={setCanvasRef} style={{ display: 'block' }} />
+        <canvas ref={canvasRef} style={{ display: 'block' }} />
 
         {/* HUD */}
         <div

@@ -471,16 +471,14 @@ class AIManager {
     for (const platform of platforms) {
       const bounds = platform.body.bounds;
 
-      // Create vertices for top surface of platform (walkable area)
-      const vertices = [
+      // Create polygon vertices for top surface of platform (walkable area)
+      // Directly push to polygons array to avoid unused variable
+      polygons.push([
         new Vector3(bounds.min.x, bounds.min.y - 5, 0),
         new Vector3(bounds.max.x, bounds.min.y - 5, 0),
         new Vector3(bounds.max.x, bounds.min.y, 0),
         new Vector3(bounds.min.x, bounds.min.y, 0),
-      ];
-
-      // Create polygon from vertices
-      polygons.push(vertices);
+      ]);
     }
 
     // Build nav mesh from polygons

@@ -165,7 +165,6 @@ export class PlayerController {
     if (this.touchingWall && !this.isGrounded && Math.abs(this.player.velocity.y) > 0.5) {
       this.handleWallSlide(controls);
     } else {
-      this.player.isClimbing = false;
       this.wallSlideTimer = 0;
     }
 
@@ -241,14 +240,7 @@ export class PlayerController {
       });
     }
 
-    // Better approach: Track roll state with timestamp
-    this.rollEndTime = performance.now() + 500;
-
-    // In update loop:
-    if (performance.now() >= this.rollEndTime && this.player.isRolling) {
-      this.player.isRolling = false;
-      this.player.isInvulnerable = false;
-    }
+    this.wallSlideTimer = 0.5; // Track wall slide duration
 
     // Wall jump
     if (controls.jump && this.player.canJump) {
@@ -265,7 +257,7 @@ export class PlayerController {
 
     // Wall climb (hold up while against wall)
     if (controls.up && this.wallSlideTimer > 0) {
-      this.player.isClimbing = true;
+      // Allow climbing up the wall
       Body.setVelocity(this.player, {
         x: this.player.velocity.x * 0.5,
         y: -PLAYER_PHYSICS.climbSpeed,
