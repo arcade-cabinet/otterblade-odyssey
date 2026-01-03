@@ -19,7 +19,7 @@ This package provides a **manifest-driven, idempotent CLI** for generating and v
 │                                                                     │
 │  Manifests (JSON)  →  CLI (cli.ts)  →  AI Providers  →  Assets     │
 │                                                                     │
-│  client/src/data/     manifest-       OpenAI GPT-Image-1           │
+│  game/src/data/     manifest-       OpenAI GPT-Image-1           │
 │  manifests/*.json     generator.ts    Google Veo 3.1               │
 │                                       Google Imagen 3               │
 └─────────────────────────────────────────────────────────────────────┘
@@ -27,7 +27,7 @@ This package provides a **manifest-driven, idempotent CLI** for generating and v
 
 ## Manifest System
 
-All assets are defined in JSON manifests at `client/src/data/manifests/`:
+All assets are defined in JSON manifests at `game/src/data/manifests/`:
 
 | Manifest | Category | Provider | Assets |
 |----------|----------|----------|--------|

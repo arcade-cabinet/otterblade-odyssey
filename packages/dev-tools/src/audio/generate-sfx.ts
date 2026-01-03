@@ -17,8 +17,8 @@ import {
   soundToManifestEntry,
 } from './freesound-client';
 
-const AUDIO_OUTPUT_DIR = 'client/public/audio/sfx';
-const MANIFEST_OUTPUT = 'client/src/data/manifests/sounds-generated.json';
+const AUDIO_OUTPUT_DIR = 'game/public/audio/sfx';
+const MANIFEST_OUTPUT = 'game/src/data/manifests/sounds-generated.json';
 
 /**
  * Generate/acquire all sound effects for the game.
@@ -90,7 +90,7 @@ export async function generateAllSFX(options: {
   };
 
   if (!dryRun) {
-    const manifestDir = join(process.cwd(), 'client/src/data/manifests');
+    const manifestDir = join(process.cwd(), 'game/src/data/manifests');
     if (!existsSync(manifestDir)) {
       mkdirSync(manifestDir, { recursive: true });
     }

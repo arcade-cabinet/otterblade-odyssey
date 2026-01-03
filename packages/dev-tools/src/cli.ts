@@ -127,7 +127,7 @@ Examples:
  * Loads all manifest files from the manifests directory.
  */
 function loadManifests(basePath: string): AssetManifest[] {
-  const manifestDir = path.join(basePath, 'client/src/data/manifests');
+  const manifestDir = path.join(basePath, 'game/src/data/manifests');
   const manifests: AssetManifest[] = [];
 
   if (!fs.existsSync(manifestDir)) {

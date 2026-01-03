@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter3Manifest from '../../client/src/data/manifests/chapters/chapter-3-great-hall.json';
+import chapter3Manifest from '../../game/src/data/manifests/chapters/chapter-3-great-hall.json';
 
 test.describe('Chapter 3: Great Hall - Automated Playthrough', () => {
   test.use({

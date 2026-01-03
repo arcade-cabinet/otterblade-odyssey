@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter1Manifest from '../../client/src/data/manifests/chapters/chapter-1-river-path.json';
+import chapter1Manifest from '../../game/src/data/manifests/chapters/chapter-1-river-path.json';
 
 test.describe('Chapter 1: River Path - Automated Playthrough', () => {
   test.use({

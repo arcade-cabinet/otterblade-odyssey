@@ -89,7 +89,7 @@ otterblade-odyssey/
 │   │   └── constants.js       # Game constants, collision groups
 │   └── ui/
 │       └── styles.css         # Warm Redwall-inspired CSS
-├── client/src/data/
+├── game/src/data/
 │   ├── manifests/             # JSON DDL definitions
 │   │   ├── chapters/          # 10 chapter definitions
 │   │   │   ├── chapter-0-prologue.json
@@ -203,7 +203,7 @@ See **[BRAND.md](./BRAND.md)** for complete visual guidelines.
 | **8. Final Ascent** | High Keep | Storm/Zephyros | "Reach Zephyros" |
 | **9. Epilogue** | Dawn Victory | Warmth Returns | "A New Dawn" |
 
-Each chapter is defined in `client/src/data/manifests/chapters/` as JSON DDL (Data Definition Language).
+Each chapter is defined in `game/src/data/manifests/chapters/` as JSON DDL (Data Definition Language).
 
 ## 🕹️ Gameplay
 
@@ -303,24 +303,6 @@ export default defineConfig({
 2. GitHub Actions workflow (`.github/workflows/cd.yml`) deploys on push to `main`.
 
 3. Access game at: `https://jbdevprimary.github.io/otterblade-odyssey`
-
-### Mobile (Capacitor)
-
-For native Android/iOS builds:
-
-```bash
-# Initialize Capacitor
-pnpm cap:init
-
-# Add Android platform
-pnpm cap:add:android
-
-# Build and sync
-pnpm cap:build:android
-
-# Open in Android Studio
-pnpm cap:open:android
-```
 
 ## 🎨 Asset Generation
 

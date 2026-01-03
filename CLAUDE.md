@@ -58,7 +58,7 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 | Language | JavaScript (ES2022) |
 | Physics | Matter.js 0.20 (POC-proven) |
 | Rendering | Canvas 2D API |
-| AI/Pathfinding | YUKA 0.9 |
+| AI/Pathfinding | YUKA 0.7.8 |
 | State Management | Zustand 5.x (with localStorage) |
 | Audio | Howler.js / Tone.js |
 | Touch Controls | nipplejs / Custom |

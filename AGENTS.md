@@ -29,7 +29,7 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 | **Language** | JavaScript (ES2022) | No TypeScript compilation overhead |
 | **Physics** | Matter.js 0.20 | POC-proven, 2D rigid body physics |
 | **Rendering** | Canvas 2D API | Procedural character rendering, parallax |
-| **AI/Pathfinding** | YUKA 0.9 | Enemy AI, steering behaviors, FSM |
+| **AI/Pathfinding** | YUKA 0.7.8 | Enemy AI, steering behaviors, FSM |
 | **State Management** | Zustand 5.x | Game state with localStorage persistence |
 | **Audio** | Howler.js / Tone.js | Spatial audio, music |
 | **Touch Controls** | nipplejs / Custom | Mobile-first touch joystick |
@@ -88,7 +88,7 @@ game/src/                  # Astro + Solid.js game
 └── ui/
     └── styles.css         # Warm Redwall-inspired CSS
 
-client/src/data/
+game/src/data/
 ├── manifests/             # JSON DDL definitions
 │   ├── chapters/          # 10 chapter definitions
 │   ├── schema/            # JSON schemas
@@ -101,7 +101,7 @@ client/src/data/
 
 ## Data Architecture
 
-### Static Content (JSON files in `client/src/data/`)
+### Static Content (JSON files in `game/src/data/`)
 - Legacy chapter definitions → `chapters.json`
 - Biome configurations → `biomes.json`
 - **Chapter manifests** → `manifests/chapters/chapter-*.json` (comprehensive)
@@ -113,7 +113,7 @@ client/src/data/
 ```javascript
 // Load chapter manifests
 export async function loadChapterManifest(chapterId) {
-  const response = await fetch(`../../client/src/data/manifests/chapters/chapter-${chapterId}.json`);
+  const response = await fetch(`../../game/src/data/manifests/chapters/chapter-${chapterId}.json`);
   return await response.json();
 }
 
@@ -357,10 +357,10 @@ function cleanupEnemies() {
 
 ### Manifest-Driven Architecture
 
-All visual assets are managed through JSON manifests in `client/src/data/manifests/`:
+All visual assets are managed through JSON manifests in `game/src/data/manifests/`:
 
 ```
-client/src/data/manifests/
+game/src/data/manifests/
 ├── sprites.json        # Finn + NPCs (OpenAI GPT-Image-1)
 ├── enemies.json        # 6 enemies + Zephyros boss (OpenAI)
 ├── cinematics.json     # 18 story/boss cinematics (Google Veo 3.1)
@@ -426,13 +426,13 @@ pending → [generate] → complete → [review] → approved
 `https://jbdevprimary.github.io/otterblade-odyssey/assets`
 
 **Approval Storage:**
-- `client/src/data/approvals.json` - Production approvals (committed)
+- `game/src/data/approvals.json` - Production approvals (committed)
 - `localStorage` - Working selections (browser-local)
 
 **Before generating, check:**
 ```bash
 # Check if asset is approved
-jq '.approvals[] | select(.id == "intro_cinematic")' client/src/data/approvals.json
+jq '.approvals[] | select(.id == "intro_cinematic")' game/src/data/approvals.json
 ```
 
 ### Brand Compliance (CRITICAL)
@@ -505,9 +505,9 @@ pnpm analyze:video path/to/video.mp4
 | `WORLD.md` | World-building and lore |
 | `BRAND.md` | Visual style guide |
 | `replit.md` | Project architecture |
-| `client/src/data/*.json` | Game content data |
-| `client/src/game/data/` | Typed data loaders |
-| `client/src/data/manifests/` | Asset generation manifests |
+| `game/src/data/*.json` | Game content data |
+| `game/src/game/data/` | Typed data loaders |
+| `game/src/data/manifests/` | Asset generation manifests |
 | `packages/dev-tools/` | Asset generation tools |
 
 ---

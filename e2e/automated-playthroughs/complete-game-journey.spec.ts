@@ -19,16 +19,16 @@ import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
 
 // Import all chapter manifests
-import chapter0 from '../../client/src/data/manifests/chapters/chapter-0-the-calling.json';
-import chapter1 from '../../client/src/data/manifests/chapters/chapter-1-river-path.json';
-import chapter2 from '../../client/src/data/manifests/chapters/chapter-2-gatehouse.json';
-import chapter3 from '../../client/src/data/manifests/chapters/chapter-3-great-hall.json';
-import chapter4 from '../../client/src/data/manifests/chapters/chapter-4-archives.json';
-import chapter5 from '../../client/src/data/manifests/chapters/chapter-5-deep-cellars.json';
-import chapter6 from '../../client/src/data/manifests/chapters/chapter-6-kitchen-gardens.json';
-import chapter7 from '../../client/src/data/manifests/chapters/chapter-7-bell-tower.json';
-import chapter8 from '../../client/src/data/manifests/chapters/chapter-8-storms-edge.json';
-import chapter9 from '../../client/src/data/manifests/chapters/chapter-9-new-dawn.json';
+import chapter0 from '../../game/src/data/manifests/chapters/chapter-0-the-calling.json';
+import chapter1 from '../../game/src/data/manifests/chapters/chapter-1-river-path.json';
+import chapter2 from '../../game/src/data/manifests/chapters/chapter-2-gatehouse.json';
+import chapter3 from '../../game/src/data/manifests/chapters/chapter-3-great-hall.json';
+import chapter4 from '../../game/src/data/manifests/chapters/chapter-4-archives.json';
+import chapter5 from '../../game/src/data/manifests/chapters/chapter-5-deep-cellars.json';
+import chapter6 from '../../game/src/data/manifests/chapters/chapter-6-kitchen-gardens.json';
+import chapter7 from '../../game/src/data/manifests/chapters/chapter-7-bell-tower.json';
+import chapter8 from '../../game/src/data/manifests/chapters/chapter-8-storms-edge.json';
+import chapter9 from '../../game/src/data/manifests/chapters/chapter-9-new-dawn.json';
 
 const ALL_CHAPTERS = [
   { id: 0, name: 'The Calling', manifest: chapter0, quest: 'Answer the Call' },
