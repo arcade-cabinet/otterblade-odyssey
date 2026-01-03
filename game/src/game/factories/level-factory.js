@@ -68,8 +68,10 @@ export function buildLevel(chapterId, engine) {
       const hazard = new HazardSystem(
         hazardDef.x,
         hazardDef.y,
-        hazardDef.width,
-        hazardDef.height
+        {
+          width: hazardDef.width,
+          height: hazardDef.height,
+        }
       );
       level.hazards.push(hazard);
       World.add(engine.world, hazard.body);
