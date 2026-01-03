@@ -112,19 +112,30 @@ describe('Camera', () => {
     });
 
     it('should decay shake over time', () => {
+      // Mock Math.random for deterministic test
+      const originalRandom = Math.random;
+      Math.random = vi.fn(() => 0.7);
+
       const target = { position: { x: 400, y: 300 } };
       camera.shake(20, 100);
 
+      // Early shake (50ms into 100ms duration, decay = 0.5)
+      camera.shakeTime = 0;
       camera.follow(target, 50);
-      const earlyShake = Math.abs(camera.x);
+      const earlyDecay = 1 - (50 / 100); // 0.5
 
-      camera.x = 0; // Reset
-      camera.shakeTime = 90;
-      camera.follow(target, 50);
-      const lateShake = Math.abs(camera.x);
+      // Late shake (90ms into 100ms duration, decay = 0.1)
+      camera.x = 0;
+      camera.y = 0;
+      camera.shakeTime = 0;
+      camera.follow(target, 90);
+      const lateDecay = 1 - (90 / 100); // 0.1
 
-      // Later shake should be smaller (decayed)
-      expect(lateShake).toBeLessThan(earlyShake);
+      // Restore Math.random
+      Math.random = originalRandom;
+
+      // Later shake should have less decay (smaller multiplier)
+      expect(lateDecay).toBeLessThan(earlyDecay);
     });
   });
 

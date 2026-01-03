@@ -104,32 +104,36 @@ describe('Finn Renderer', () => {
   });
 
   it('should apply bounce animation when moving', () => {
-    const staticCalls = [];
     drawFinn(mockCtx, { x: 0, y: 0 }, 1, 10, { moving: false });
-    staticCalls.push([...mockCtx.ellipse.mock.calls]);
+    const staticBodyY = mockCtx.ellipse.mock.calls[1][1]; // Body ellipse Y
     mockCtx.ellipse.mockClear();
 
-    const movingCalls = [];
     drawFinn(mockCtx, { x: 0, y: 0 }, 1, 10, { moving: true });
-    movingCalls.push([...mockCtx.ellipse.mock.calls]);
+    const movingBodyY = mockCtx.ellipse.mock.calls[1][1]; // Body ellipse Y
 
     // Y coordinates should differ when moving (bounce effect)
-    // Check body ellipse (index 1) not shadow (index 0)
-    expect(staticCalls[0][1][1]).not.toEqual(movingCalls[0][1][1]);
+    // Body ellipse is at index 1, shadow is at index 0
+    expect(staticBodyY).not.toEqual(movingBodyY);
+
+    // Verify we're checking the right ellipse (not the shadow at Y=28)
+    expect(staticBodyY).not.toEqual(28);
+    expect(movingBodyY).not.toEqual(28);
   });
 
   it('should animate breathing over time', () => {
-    const frame0Calls = [];
     drawFinn(mockCtx, { x: 0, y: 0 }, 1, 0);
-    frame0Calls.push([...mockCtx.ellipse.mock.calls]);
+    const frame0BodyY = mockCtx.ellipse.mock.calls[1][1]; // Body ellipse Y
     mockCtx.ellipse.mockClear();
 
-    const frame100Calls = [];
     drawFinn(mockCtx, { x: 0, y: 0 }, 1, 100);
-    frame100Calls.push([...mockCtx.ellipse.mock.calls]);
+    const frame100BodyY = mockCtx.ellipse.mock.calls[1][1]; // Body ellipse Y
 
     // Y coordinates should differ between frames (breathing animation)
-    // Check body ellipse (index 1) not shadow (index 0)
-    expect(frame0Calls[0][1][1]).not.toEqual(frame100Calls[0][1][1]);
+    // Body ellipse is at index 1, shadow is at index 0
+    expect(frame0BodyY).not.toEqual(frame100BodyY);
+
+    // Verify we're checking the right ellipse (not the shadow at Y=28)
+    expect(frame0BodyY).not.toEqual(28);
+    expect(frame100BodyY).not.toEqual(28);
   });
 });
