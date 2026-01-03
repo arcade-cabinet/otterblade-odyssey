@@ -59,16 +59,23 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage/lcov.info
 
-      - name: Skip SonarCloud (missing project key or organization)
-        if: ${{ env.SONAR_PROJECT_KEY == '' || env.SONAR_ORGANIZATION == '' }}
-        run: echo "::warning::SONAR_PROJECT_KEY or SONAR_ORGANIZATION is not set; skipping SonarCloud analysis."
-
-      - name: Skip SonarCloud (missing SONAR_TOKEN)
-        if: ${{ env.SONAR_PROJECT_KEY != '' && env.SONAR_ORGANIZATION != '' && secrets.SONAR_TOKEN == '' }}
-        run: echo "::warning::SONAR_TOKEN secret is missing; skipping SonarCloud analysis."
+      - name: Check SonarCloud configuration
+        id: sonar-check
+        run: |
+          SONAR_ENABLED=true
+          if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          elif [ -z "$SONAR_TOKEN" ]; then
+            echo "::warning::SONAR_TOKEN secret is missing; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          fi
+          echo "enabled=$SONAR_ENABLED" >> "$GITHUB_OUTPUT"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud analysis
-        if: ${{ env.SONAR_PROJECT_KEY != '' && env.SONAR_ORGANIZATION != '' && secrets.SONAR_TOKEN != '' }}
+        if: steps.sonar-check.outputs.enabled == 'true'
         uses: SonarSource/sonarcloud-github-action@46f1a5e1ffccb0e0b39e6d3aaa4e1c21edc8287e # v3.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
