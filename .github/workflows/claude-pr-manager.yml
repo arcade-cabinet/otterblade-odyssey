@@ -54,7 +54,7 @@ jobs:
         if: steps.check-key.outputs.available == 'true'
         id: pr-details
         env:
-          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             PR_NUM="${{ github.event.pull_request.number }}"
@@ -93,7 +93,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ steps.pr-details.outputs.pr_branch }}
-          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Run Claude PR Manager
         if: steps.check-key.outputs.available == 'true'
@@ -106,7 +106,7 @@ jobs:
           AGENT_NAME: ${{ steps.pr-type.outputs.agent_name }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           track_progress: true
           use_commit_signing: true
           allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot],coderabbitai[bot]"

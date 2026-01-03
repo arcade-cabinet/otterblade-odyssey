@@ -46,7 +46,7 @@ jobs:
       - name: Detect AI Agent Feedback
         id: detect
         env:
-          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
           EVENT_NAME: ${{ github.event_name }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENT_USER: ${{ github.event.comment.user.login }}
@@ -182,7 +182,7 @@ jobs:
         with:
           ref: ${{ needs.detect-ai-feedback.outputs.pr_branch }}
           fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Run Auto-Heal
         if: steps.check-key.outputs.available == 'true'
@@ -196,7 +196,7 @@ jobs:
           TARGET_AGENT: ${{ steps.strategy.outputs.agent }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           track_progress: true
           allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot],coderabbitai[bot]"
           

@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: Run Initial Review
         if: steps.check-key.outputs.available == 'true'
@@ -54,7 +54,7 @@ jobs:
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           include_fix_links: true
           allowed_bots: "cursor[bot],jules[bot],google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot],coderabbitai[bot]"
           

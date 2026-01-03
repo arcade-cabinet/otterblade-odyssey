@@ -107,10 +107,10 @@ To enable Claude PR Manager, configure these repository secrets:
    - Get from: https://console.anthropic.com/
    - Permissions: All workflows need this
 
-2. **`CI_GITHUB_TOKEN`** (Optional but recommended)
-   - Enhanced GitHub token with additional permissions
-   - Falls back to default `GITHUB_TOKEN` if not provided
-   - Needed for: Cross-repo operations, enhanced API access
+2. **`CI_GITHUB_TOKEN`** (Required)
+   - Synced Personal Access Token with enhanced permissions
+   - Needed for: Cross-repo operations, enhanced API access, workflow execution
+   - This is a required synced PAT and must be configured
 
 ### Success Criteria
 
