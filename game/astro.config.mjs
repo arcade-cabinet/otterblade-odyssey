@@ -8,7 +8,8 @@ const gamePath = fileURLToPath(new URL('./src/game', import.meta.url));
 const dataPath = fileURLToPath(new URL('./src/data', import.meta.url));
 
 export default defineConfig({
-	integrations: [solid()],
+	output: 'static', // Static site generation - no SSR
+	integrations: [solid({ devtools: true })],
 	site: process.env.SITE_URL || 'http://localhost:4321',
 	base: process.env.BASE_PATH || '/',
 	server: {
