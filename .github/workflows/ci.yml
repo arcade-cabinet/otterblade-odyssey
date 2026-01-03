@@ -125,7 +125,11 @@ jobs:
               run_id: context.runId,
             });
 
-            const failedJobs = data.jobs.filter((job) => ['failure', 'cancelled', 'timed_out'].includes(job.conclusion));
+            const failedJobs = data.jobs.filter(
+              (job) =>
+                ['failure', 'cancelled'].includes(job.conclusion) ||
+                job.status === 'timed_out'
+            );
 
             return {
               runUrl: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
