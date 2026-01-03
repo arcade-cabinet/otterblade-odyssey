@@ -79,7 +79,7 @@ environments:
   - name: release
     wait_timer: 0
     deployment_branch_policy:
-      protected_branches: true  # Only protected branches (main/merge queue) deploy here
+      protected_branches: true  # Only branches configured as protected (e.g., main) can deploy here
   
   # GitHub Pages - Static site deployment target
   - name: github-pages
