@@ -1,0 +1,346 @@
+name: AI-Powered Auto-Update PRs
+
+# Keep all pull requests automatically up-to-date with main branch
+# Uses a three-stage update strategy with AI-powered conflict resolution
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Target specific PR number (leave empty for all)'
+        required: false
+        type: string
+      force_ai_resolution:
+        description: 'Force AI conflict resolution even if standard update works'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  list-prs:
+    name: List PRs needing update
+    runs-on: ubuntu-latest
+    outputs:
+      prs: ${{ steps.list.outputs.prs }}
+      count: ${{ steps.list.outputs.count }}
+    steps:
+      - name: List open PRs behind main
+        id: list
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const targetPrNumber = '${{ inputs.pr_number }}';
+            
+            // Get main branch SHA
+            const { data: mainBranch } = await github.rest.repos.getBranch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              branch: 'main'
+            });
+            const mainSha = mainBranch.commit.sha;
+            
+            // Get all open PRs
+            const { data: allPrs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100
+            });
+            
+            // Filter PRs needing updates
+            const prsToUpdate = [];
+            for (const pr of allPrs) {
+              // Skip if targeting specific PR and this isn't it
+              if (targetPrNumber && pr.number.toString() !== targetPrNumber) {
+                continue;
+              }
+              
+              // Skip draft PRs
+              if (pr.draft) {
+                console.log(`Skipping draft PR #${pr.number}`);
+                continue;
+              }
+              
+              // Check if PR is behind main
+              const { data: comparison } = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: pr.head.sha,
+                head: mainSha
+              });
+              
+              if (comparison.behind_by > 0) {
+                prsToUpdate.push({
+                  number: pr.number,
+                  title: pr.title,
+                  head_ref: pr.head.ref,
+                  head_sha: pr.head.sha,
+                  base_ref: pr.base.ref,
+                  behind_by: comparison.behind_by,
+                  html_url: pr.html_url,
+                  head_repo_full_name: pr.head.repo?.full_name || context.repo.full_name
+                });
+                console.log(`PR #${pr.number} is ${comparison.behind_by} commits behind main`);
+              } else {
+                console.log(`PR #${pr.number} is up to date`);
+              }
+            }
+            
+            console.log(`Found ${prsToUpdate.length} PRs needing update`);
+            core.setOutput('prs', JSON.stringify(prsToUpdate));
+            core.setOutput('count', prsToUpdate.length);
+            
+            return prsToUpdate;
+
+  update-pr:
+    name: Update PR #${{ matrix.pr.number }}
+    needs: list-prs
+    if: needs.list-prs.outputs.count > 0
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        pr: ${{ fromJSON(needs.list-prs.outputs.prs) }}
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ matrix.pr.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Setup git identity
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Fetch main branch
+        run: |
+          git fetch origin main:main
+
+      - name: Attempt rebase update
+        id: rebase
+        continue-on-error: true
+        run: |
+          echo "Attempting rebase update..."
+          if git rebase main; then
+            echo "success=true" >> "$GITHUB_OUTPUT"
+            echo "method=rebase" >> "$GITHUB_OUTPUT"
+            echo "Rebase successful"
+          else
+            echo "success=false" >> "$GITHUB_OUTPUT"
+            echo "Rebase failed, will try merge"
+            git rebase --abort 2>/dev/null || true
+          fi
+
+      - name: Push rebase update
+        if: steps.rebase.outputs.success == 'true'
+        run: |
+          git push --force-with-lease origin ${{ matrix.pr.head_ref }}
+          echo "✅ Successfully updated PR #${{ matrix.pr.number }} via rebase"
+
+      - name: Attempt merge update
+        if: steps.rebase.outputs.success != 'true'
+        id: merge
+        continue-on-error: true
+        run: |
+          echo "Attempting merge update..."
+          if git merge main --no-edit; then
+            echo "success=true" >> "$GITHUB_OUTPUT"
+            echo "method=merge" >> "$GITHUB_OUTPUT"
+            echo "Merge successful"
+          else
+            echo "success=false" >> "$GITHUB_OUTPUT"
+            echo "Merge has conflicts"
+          fi
+
+      - name: Push merge update
+        if: steps.merge.outputs.success == 'true'
+        run: |
+          git push origin ${{ matrix.pr.head_ref }}
+          echo "✅ Successfully updated PR #${{ matrix.pr.number }} via merge"
+
+      - name: Check for conflicts
+        if: steps.rebase.outputs.success != 'true' && steps.merge.outputs.success != 'true'
+        id: conflicts
+        run: |
+          CONFLICTED_FILES=$(git diff --name-only --diff-filter=U | wc -l)
+          echo "conflicted_files=$CONFLICTED_FILES" >> "$GITHUB_OUTPUT"
+          
+          if [ "$CONFLICTED_FILES" -gt 10 ]; then
+            echo "too_many=true" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Too many conflicted files ($CONFLICTED_FILES), may need human review"
+          else
+            echo "too_many=false" >> "$GITHUB_OUTPUT"
+          fi
+          
+          git merge --abort 2>/dev/null || true
+
+      - name: Resolve conflicts with Claude AI
+        if: |
+          (steps.rebase.outputs.success != 'true' && steps.merge.outputs.success != 'true') ||
+          inputs.force_ai_resolution == true
+        id: ai_resolve
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          prompt: |
+            # AI-Powered Merge Conflict Resolution
+            
+            **Repository:** ${{ github.repository }}
+            **PR:** #${{ matrix.pr.number }} - ${{ matrix.pr.title }}
+            **PR URL:** ${{ matrix.pr.html_url }}
+            **Branch:** ${{ matrix.pr.head_ref }}
+            **Commits Behind:** ${{ matrix.pr.behind_by }}
+            **Conflicted Files:** ${{ steps.conflicts.outputs.conflicted_files }}
+            
+            ## Your Task
+            
+            This PR has merge conflicts with the main branch. Your job is to resolve them intelligently while preserving the intent of both changes.
+            
+            ## Instructions
+            
+            1. **Understand the Context**
+               - Read the PR description to understand what this PR is trying to accomplish
+               - Review the conflicted files to understand what changed in both branches
+               - Identify the root cause of the conflicts
+            
+            2. **Intelligent Resolution**
+               - Preserve the PR's intended changes and functionality
+               - Incorporate critical fixes from main branch
+               - Never lose functionality from either branch
+               - Keep all tests from both sides (merge test cases, don't choose one)
+               - Maintain code quality and consistency
+            
+            3. **Resolution Strategy**
+               - Prefer the PR's approach for feature-specific changes
+               - Prefer main's approach for infrastructure/tooling changes
+               - Merge both sides when changes are complementary
+               - If unsure, favor keeping more functionality over less
+            
+            4. **After Resolution**
+               - Run linters and tests to ensure nothing broke
+               - Commit the resolution with a clear message
+               - Push the changes to the PR branch
+               - Add a comment explaining what you did
+            
+            5. **Request Human Review If:**
+               - Conflicts are too complex or deeply intertwined
+               - Changes fundamentally contradict each other
+               - Risk of breaking critical functionality is high
+               - More than 10 files have conflicts
+            
+            ## Commands Available
+            
+            You can use these tools:
+            - `Bash(git:*)` - Git commands for merging and committing
+            - `Bash(pnpm:*)` - Run tests and linters
+            - `Read, Edit, Write` - View and modify files
+            - `Grep, Glob` - Search for patterns
+            
+            ## Expected Outcome
+            
+            Successfully merge main into this PR branch, resolving all conflicts intelligently.
+            Then push the resolved changes and add a comment to the PR explaining the resolution.
+          claude_args: |
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(git:*),Bash(pnpm:*),Bash(gh:*)"
+            --max-turns 30
+
+      - name: Label PR as AI-resolved
+        if: |
+          steps.ai_resolve.outcome == 'success' &&
+          (steps.rebase.outputs.success != 'true' && steps.merge.outputs.success != 'true')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ matrix.pr.number }},
+              labels: ['ai-merge-resolved']
+            });
+
+      - name: Comment on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `## ⚠️ Auto-Update Failed
+            
+            Unable to automatically update this PR with the latest changes from \`main\`.
+            
+            **Attempted methods:**
+            - Rebase: ${{ steps.rebase.outputs.success == 'true' && '✅' || '❌' }}
+            - Merge: ${{ steps.merge.outputs.success == 'true' && '✅' || '❌' }}
+            - AI Resolution: ${{ steps.ai_resolve.outcome == 'success' && '✅' || '❌' }}
+            
+            **Conflicted files:** ${{ steps.conflicts.outputs.conflicted_files || 'Unknown' }}
+            
+            Please manually resolve the conflicts and update this PR.
+            
+            ---
+            *Automated by [AI Auto-Update workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ matrix.pr.number }},
+              body: body
+            });
+
+      - name: Report success
+        if: success()
+        run: |
+          METHOD="${{ steps.rebase.outputs.method || steps.merge.outputs.method || 'ai-resolution' }}"
+          echo "✅ PR #${{ matrix.pr.number }} updated successfully via $METHOD"
+
+  summary:
+    name: Update Summary
+    needs: [list-prs, update-pr]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const count = parseInt('${{ needs.list-prs.outputs.count }}') || 0;
+            const prsJson = '${{ needs.list-prs.outputs.prs }}' || '[]';
+            const prs = JSON.parse(prsJson);
+            
+            let summary = `## 🔄 Auto-Update Summary\n\n`;
+            
+            if (count === 0) {
+              summary += `✅ All open PRs are up-to-date with \`main\`\n`;
+            } else {
+              summary += `📊 Processed ${count} PR(s) that were behind \`main\`\n\n`;
+              summary += `### PRs Updated:\n`;
+              
+              for (const pr of prs) {
+                summary += `- [#${pr.number}](${pr.html_url}) - ${pr.title} (${pr.behind_by} commits behind)\n`;
+              }
+            }
+            
+            summary += `\n---\n`;
+            summary += `*Workflow run: [${context.runId}](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*`;
+            
+            core.summary.addRaw(summary);
+            await core.summary.write();
+            
+            console.log(summary);
