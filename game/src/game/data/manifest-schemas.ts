@@ -1,6 +1,6 @@
 /**
  * @fileoverview Comprehensive Zod schemas for chapter manifests.
- * These schemas mirror the JSON schemas in client/src/data/manifests/schema/
+ * These schemas mirror the JSON schemas in game/src/data/manifests/schema/
  */
 
 import { z } from 'zod';

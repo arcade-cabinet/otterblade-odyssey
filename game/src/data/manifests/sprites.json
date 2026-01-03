@@ -3,7 +3,7 @@
   "category": "sprites",
   "provider": "openai",
   "model": "gpt-image-1",
-  "outputDir": "client/src/assets/images/sprites",
+  "outputDir": "game/src/assets/images/sprites",
   "brandGuidance": {
     "style": "Clean pixel art with defined outlines, storybook aesthetic, warm palette",
     "materials": "Leather, cloth, iron - NO glowing effects, NO energy weapons",

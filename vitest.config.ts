@@ -41,11 +41,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
     },
     // Test both legacy TypeScript and new JavaScript code
-    include: [
-      'tests/**/*.{test,spec}.{ts,tsx,js,jsx}',
-      'client/src/**/*.{test,spec}.{ts,tsx}',
-      'game/src/**/*.{test,spec}.{js,jsx}',
-    ],
+    include: ['tests/**/*.{test,spec}.{ts,tsx,js,jsx}', 'game/src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     exclude: [
       'node_modules',
       'dist',
@@ -70,7 +66,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './client/src'),
+      '@': path.resolve(__dirname, './game/src'),
       '@shared': path.resolve(__dirname, './shared'),
       '@game': path.resolve(__dirname, './game/src'),
     },

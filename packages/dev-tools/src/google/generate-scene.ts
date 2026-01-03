@@ -189,7 +189,7 @@ async function main(): Promise<void> {
   const basePath = path.resolve(process.cwd(), '..', '..');
 
   if (type === 'parallax') {
-    const outputDir = path.join(basePath, 'client/src/assets/images/parallax');
+    const outputDir = path.join(basePath, 'game/src/assets/images/parallax');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -207,7 +207,7 @@ async function main(): Promise<void> {
       log('', '');
     }
   } else if (type === 'chapter-plate') {
-    const outputDir = path.join(basePath, 'client/src/assets/images/chapter-plates');
+    const outputDir = path.join(basePath, 'game/src/assets/images/chapter-plates');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }

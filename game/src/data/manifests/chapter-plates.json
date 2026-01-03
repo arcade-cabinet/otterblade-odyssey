@@ -3,7 +3,7 @@
   "category": "chapter-plates",
   "provider": "google",
   "model": "imagen-3.0-generate-002",
-  "outputDir": "client/src/assets/images/chapter-plates",
+  "outputDir": "game/src/assets/images/chapter-plates",
   "brandGuidance": {
     "style": "Illuminated manuscript meets storybook illustration. Warm, painterly, noble.",
     "format": "16:9 aspect ratio, designed for full-screen chapter transitions",

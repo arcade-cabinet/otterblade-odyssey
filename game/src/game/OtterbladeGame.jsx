@@ -1,4 +1,3 @@
-/** @jsxImportSource solid-js */
 /**
  * Otterblade Odyssey - Main Game Component
  * Orchestrates game systems using modular architecture

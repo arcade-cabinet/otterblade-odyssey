@@ -1,11 +1,9 @@
-/** @jsxImportSource solid-js */
 /**
  * TouchControls.jsx
  * Mobile touch controls using nipplejs
  * Implements touch controls per CLAUDE.md line 64
  */
 
-import nipplejs from 'nipplejs';
 import { onCleanup, onMount, Show } from 'solid-js';
 import { inputManager } from '../systems/InputManager';
 
@@ -23,27 +21,31 @@ export default function TouchControls(_props) {
   onMount(() => {
     if (!isMobile()) return;
 
-    // Create virtual joystick
-    joystickManager = nipplejs.create({
-      zone: joystickZone,
-      mode: 'static',
-      position: { left: '15%', bottom: '20%' },
-      color: '#E67E22', // Hearth orange from WORLD.md
-      size: 120,
-      threshold: 0.1,
-      fadeTime: 0,
-    });
+    // Create virtual joystick (dynamic import to avoid SSR window access)
+    import('nipplejs')
+      .then(({ default: nipplejs }) => {
+        joystickManager = nipplejs.create({
+          zone: joystickZone,
+          mode: 'static',
+          position: { left: '15%', bottom: '20%' },
+          color: '#E67E22', // Hearth orange from WORLD.md
+          size: 120,
+          threshold: 0.1,
+          fadeTime: 0,
+        });
 
-    // Joystick event handlers
-    joystickManager.on('move', (_evt, data) => {
-      if (data.vector) {
-        inputManager.setTouchJoystick(data.vector.x, data.vector.y);
-      }
-    });
+        // Joystick event handlers
+        joystickManager.on('move', (_evt, data) => {
+          if (data.vector) {
+            inputManager.setTouchJoystick(data.vector.x, data.vector.y);
+          }
+        });
 
-    joystickManager.on('end', () => {
-      inputManager.setTouchJoystick(0, 0);
-    });
+        joystickManager.on('end', () => {
+          inputManager.setTouchJoystick(0, 0);
+        });
+      })
+      .catch(() => {});
   });
 
   onCleanup(() => {

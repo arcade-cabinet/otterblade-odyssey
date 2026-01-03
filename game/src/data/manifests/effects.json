@@ -3,7 +3,7 @@
   "category": "effects",
   "provider": "openai",
   "model": "gpt-image-1",
-  "outputDir": "client/src/assets/images/effects",
+  "outputDir": "game/src/assets/images/effects",
   "brandGuidance": {
     "style": "Subtle, natural effects. Particles should feel organic, not digital.",
     "magic": "Warmth-based only - ember motes, firefly lights, NOT energy beams or neon",

@@ -1,20 +1,6 @@
 {
-  "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
-  "exclude": [
-    "node_modules",
-    "build",
-    "dist",
-    "**/*.test.ts",
-    "client/src/game/**/*",
-    "client/src/game-main.tsx",
-    "client/src/App.tsx",
-    "client/src/main.tsx",
-    "client/src/lib/queryClient.ts",
-    "client/src/lib/theme.ts",
-    "client/src/pages/**/*",
-    "client/src/components/**/*",
-    "client/src/hooks/**/*"
-  ],
+  "include": ["game/src/**/*", "shared/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
@@ -31,8 +17,9 @@
     "baseUrl": ".",
     "types": ["node", "vite/client"],
     "paths": {
-      "@/*": ["./client/src/*"],
-      "@shared/*": ["./shared/*"]
+      "@/*": ["./game/src/*"],
+      "@shared/*": ["./shared/*"],
+      "@game/*": ["./game/src/*"]
     }
   }
 }

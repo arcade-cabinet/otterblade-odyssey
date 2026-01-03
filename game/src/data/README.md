@@ -79,8 +79,8 @@ pnpm --filter @otterblade/dev-tools cli -- --force --id player_sprite_sheet
 | Type | Location |
 |------|----------|
 | Sprites | `attached_assets/generated_images/sprites/` |
-| Chapter plates | `client/src/assets/images/chapter-plates/` |
-| Parallax backgrounds | `client/src/assets/images/parallax/` |
+| Chapter plates | `game/src/assets/images/chapter-plates/` |
+| Parallax backgrounds | `game/src/assets/images/parallax/` |
 | Cinematics | `attached_assets/generated_videos/` |
 
 ### Asset Usage (IMPORTANT UPDATE)

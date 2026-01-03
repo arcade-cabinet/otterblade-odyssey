@@ -28,7 +28,7 @@ interface AssetCategory {
 const REQUIRED_ASSETS: AssetCategory[] = [
   {
     name: 'Chapter Plates',
-    directory: 'client/src/assets/images/chapter-plates',
+    directory: 'game/src/assets/images/chapter-plates',
     required: [
       'prologue_village_chapter_plate.png',
       'abbey_approach_chapter_plate.png',
@@ -44,7 +44,7 @@ const REQUIRED_ASSETS: AssetCategory[] = [
   },
   {
     name: 'Parallax Backgrounds',
-    directory: 'client/src/assets/images/parallax',
+    directory: 'game/src/assets/images/parallax',
     required: [
       'village_morning_parallax_background.png',
       'abbey_exterior_parallax_background.png',
@@ -70,7 +70,7 @@ const REQUIRED_ASSETS: AssetCategory[] = [
   },
   {
     name: 'Cinematics',
-    directory: 'client/src/assets/videos',
+    directory: 'game/src/assets/videos',
     required: ["intro_cinematic_otter's_journey.mp4", 'outro_victory_sunrise_scene.mp4'],
   },
 ];

@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter7Manifest from '../../client/src/data/manifests/chapters/chapter-7-bell-tower.json';
+import chapter7Manifest from '../../game/src/data/manifests/chapters/chapter-7-bell-tower.json';
 
 test.describe('Chapter 7: Bell Tower - Automated Playthrough', () => {
   test.use({

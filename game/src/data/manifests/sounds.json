@@ -2,7 +2,7 @@
   "$schema": "./manifest-schema.json",
   "category": "sounds",
   "provider": "freesound",
-  "outputDir": "client/src/assets/audio",
+  "outputDir": "game/src/assets/audio",
   "notes": "Environmental and ambient sounds for Willowmere Hearthhold. Focus on warmth, nature, and the contrast between safety and danger.",
   "assets": [
     {

@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.otterblade.odyssey',
   appName: 'Otterblade Odyssey',
-  webDir: 'dist/public',
+  webDir: 'dist',
   // Server configuration for web platform
   server: {
     // Use the correct hostname for mobile testing

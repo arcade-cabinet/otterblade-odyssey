@@ -3,7 +3,7 @@
   "category": "items",
   "provider": "openai",
   "model": "gpt-image-1",
-  "outputDir": "client/src/assets/images/items",
+  "outputDir": "game/src/assets/images/items",
   "brandGuidance": {
     "style": "Pixel art matching character sprites. Warm palette. Readable at small sizes.",
     "materials": "Natural materials - wood, stone, iron, cloth, glass. NO sci-fi, NO plastic.",

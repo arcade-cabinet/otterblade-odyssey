@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter6Manifest from '../../client/src/data/manifests/chapters/chapter-6-kitchen-gardens.json';
+import chapter6Manifest from '../../game/src/data/manifests/chapters/chapter-6-kitchen-gardens.json';
 
 test.describe('Chapter 6: Kitchen Gardens - Automated Playthrough', () => {
   test.use({

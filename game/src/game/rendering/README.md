@@ -71,4 +71,4 @@ Unit tests verify:
 - Proper transforms (translate, scale, rotate)
 - Color palette compliance
 
-Run tests: `pnpm test client/src/game/rendering`
+Run tests: `pnpm test game/src/game/rendering`

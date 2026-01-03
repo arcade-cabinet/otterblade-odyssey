@@ -3,7 +3,7 @@
   "category": "cinematics",
   "provider": "google",
   "model": "veo-3.1",
-  "outputDir": "client/src/assets/videos",
+  "outputDir": "game/src/assets/videos",
   "brandGuidance": {
     "style": "Storybook cinematography - painterly, warm, noble. Think Redwall animated sequences.",
     "characters": "Anthropomorphic woodland animals ONLY. Finn is a river otter. NO humans ever.",

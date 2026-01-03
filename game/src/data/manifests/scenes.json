@@ -3,7 +3,7 @@
   "category": "scenes",
   "provider": "google",
   "model": "imagen-3.0-generate-002",
-  "outputDir": "client/src/assets/images",
+  "outputDir": "game/src/assets/images",
   "assets": [
     {
       "id": "parallax_village",

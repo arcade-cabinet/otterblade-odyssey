@@ -3,7 +3,7 @@
   "category": "enemies",
   "provider": "openai",
   "model": "gpt-image-1",
-  "outputDir": "client/src/assets/images/sprites",
+  "outputDir": "game/src/assets/images/sprites",
   "brandGuidance": {
     "faction": "The Galeborn - followers of Zephyros the storm hawk, creatures of cold wind and frost",
     "aesthetic": "Weathered, cold-adapted, practical gear - bone, iron, leather, fur. Cold blue-gray palette.",
