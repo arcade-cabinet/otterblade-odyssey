@@ -11,7 +11,6 @@ import Matter from 'matter-js';
 import { getChapterSpawnPoint, loadChapterManifest } from '../data/chapter-loaders';
 import {
   createPlatform,
-  createWall,
   HazardSystem,
   MovingPlatform,
   WaterZone,
