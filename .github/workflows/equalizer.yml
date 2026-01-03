@@ -1,0 +1,185 @@
+name: Claude Equalizer
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: equalizer-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: read
+
+jobs:
+  resolve:
+    if: >
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@equalizer') &&
+      github.event.comment.user.type != 'Bot' &&
+      !endsWith(github.event.comment.user.login, '[bot]')
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.context.outputs.pr_number }}
+      head_ref: ${{ steps.context.outputs.head_ref }}
+      strategy: ${{ steps.strategy.outputs.strategy }}
+      run_reason: ${{ steps.finalize.outputs.run_reason }}
+      trigger_url: ${{ steps.context.outputs.trigger_url }}
+      comment_body: ${{ steps.context.outputs.comment_body }}
+      comment_author: ${{ steps.context.outputs.comment_author }}
+      override_strategy: ${{ steps.override.outputs.override_strategy }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Resolve PR context
+        id: context
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            const pr_number = pr.number.toString();
+            const head_ref = pr.head.ref;
+            const run_reason = `issue_comment by @${context.payload.comment.user?.login || 'unknown'}`;
+            const trigger_url = context.payload.comment.html_url;
+            const comment_body = context.payload.comment.body || '';
+            const comment_author = context.payload.comment.user?.login || '';
+
+            core.setOutput('pr_number', pr_number);
+            core.setOutput('head_ref', head_ref);
+            core.setOutput('run_reason', run_reason);
+            core.setOutput('trigger_url', trigger_url);
+            core.setOutput('comment_body', comment_body);
+            const pr_number = pr.number.toString();
+            const head_ref = pr.head.ref;
+            const run_reason = `issue_comment by @${context.payload.comment.user?.login || 'unknown'}`;
+            const trigger_url = context.payload.comment.html_url;
+            const comment_body = context.payload.comment.body || '';
+            const comment_author = context.payload.comment.user?.login || '';
+
+            core.setOutput('pr_number', pr_number);
+            core.setOutput('head_ref', head_ref);
+            core.setOutput('run_reason', run_reason);
+            core.setOutput('trigger_url', trigger_url);
+            core.setOutput('comment_body', comment_body);
+            core.setOutput('comment_author', comment_author);
+      - name: Check IDDQD override
+        id: override
+        uses: actions/github-script@v7
+        env:
+          COMMENT_BODY: ${{ steps.context.outputs.comment_body }}
+          COMMENT_AUTHOR: ${{ steps.context.outputs.comment_author }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const body = (process.env.COMMENT_BODY || '').toLowerCase();
+            const author = process.env.COMMENT_AUTHOR || '';
+            const hasOverride = body.includes('iddqd');
+
+            if (!hasOverride) {
+              core.setOutput('override_strategy', '');
+              core.setOutput('override_reason', '');
+              return;
+            }
+
+            const owner = context.repo.owner.toLowerCase();
+            let permission = '';
+
+            if (author) {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: author,
+              });
+              permission = data.permission || '';
+            }
+
+            const allowed = author.toLowerCase() === owner || ['admin', 'maintain', 'write'].includes(permission);
+            if (!allowed) {
+              core.setFailed('IDDQD override requires repository owner/admin/write permissions');
+              return;
+            }
+
+            core.setOutput('override_strategy', 'autonomous');
+            core.setOutput('override_reason', `IDDQD override by @${author || 'unknown'}`);
+
+      - name: Finalize run reason
+        id: finalize
+        run: |
+          REASON="${BASE_REASON}"
+          if [ -n "${OVERRIDE_REASON}" ]; then
+            REASON="${REASON} | ${OVERRIDE_REASON}"
+          fi
+          echo "run_reason=${REASON}" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_REASON: ${{ steps.context.outputs.run_reason }}
+          OVERRIDE_REASON: ${{ steps.override.outputs.override_reason }}
+
+      - name: Determine strategy from config
+        id: strategy
+        uses: actions/github-script@v7
+        env:
+          HEAD_REF: ${{ steps.context.outputs.head_ref }}
+          OVERRIDE_STRATEGY: ${{ steps.override.outputs.override_strategy }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github/claude-config.json');
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const special = config.pr_management?.special_branches || {};
+            const defaultStrategy = config.pr_management?.default_strategy?.strategy || 'autonomous';
+            const headRef = process.env.HEAD_REF;
+            const wildcardToRegex = (input) => {
+              const escaped = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              return new RegExp(`^${escaped.replace(/\*/g, '.*')}$`);
+            };
+
+            let strategy = process.env.OVERRIDE_STRATEGY || defaultStrategy;
+            for (const pattern of Object.keys(special)) {
+              if (wildcardToRegex(pattern).test(headRef)) {
+                strategy = special[pattern].strategy || 'collaborative';
+                break;
+              }
+            }
+
+            core.setOutput('strategy', strategy);
+
+  orchestrate:
+    needs: resolve
+    if: needs.resolve.result == 'success'
+    uses: ./.github/workflows/equalizer-core.yml
+    secrets: inherit
+    with:
+      pr_number: ${{ needs.resolve.outputs.pr_number }}
+      head_ref: ${{ needs.resolve.outputs.head_ref }}
+      strategy: ${{ needs.resolve.outputs.strategy }}
+      comment_body: ${{ needs.resolve.outputs.comment_body }}
+      comment_author: ${{ needs.resolve.outputs.comment_author }}
+      run_reason: ${{ needs.resolve.outputs.run_reason }}
+      trigger_url: ${{ needs.resolve.outputs.trigger_url }}
+
+  autonomous-ops:
+    name: Autonomous follow-up
+    needs: [resolve, orchestrate]
+    if: >
+      needs.resolve.result == 'success' &&
+      needs.resolve.outputs.strategy != 'collaborative'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log autonomous permission
+        run: echo "Autonomous mode enabled for branch ${{ needs.resolve.outputs.head_ref }}. Direct fixes may proceed in downstream workflows."
