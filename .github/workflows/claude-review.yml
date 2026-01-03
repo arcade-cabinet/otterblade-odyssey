@@ -44,14 +44,27 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN }}
+          persist-credentials: false
+
+      - name: Sanitize Inputs
+        if: steps.check-key.outputs.available == 'true'
+        id: sanitize
+        run: |
+          # Sanitize PR title: remove quotes, backticks, dollar signs, exclamation marks, limit to 100 chars
+          SAFE_TITLE=$(echo "${{ github.event.pull_request.title }}" | tr -d '"' | tr -d "'" | tr -d '`' | tr -d '$' | tr -d '!' | cut -c1-100)
+          echo "pr_title=$SAFE_TITLE" >> $GITHUB_OUTPUT
+          
+          # Sanitize author: alphanumeric + underscore/dash only
+          SAFE_AUTHOR=$(echo "${{ github.event.pull_request.user.login }}" | tr -cd 'a-zA-Z0-9_-')
+          echo "pr_author=$SAFE_AUTHOR" >> $GITHUB_OUTPUT
 
       - name: Run Initial Review
         if: steps.check-key.outputs.available == 'true'
         uses: anthropics/claude-code-action@b17b541bbc4d94ffa42edf2e2384ffe702e59370
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_TITLE: ${{ steps.sanitize.outputs.pr_title }}
+          PR_AUTHOR: ${{ steps.sanitize.outputs.pr_author }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
