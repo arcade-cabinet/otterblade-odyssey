@@ -1,14 +1,18 @@
 /**
  * BossAI.js
  * Zephyros boss with multi-phase system, fuzzy logic, attack patterns
- * per AI.md:1052-1182
+ * 
+ * @see docs/AI.md - High-level boss AI concepts
+ * @see docs/AI_REFERENCE.md#fuzzy-logic-for-nuanced-behavior - Complete fuzzy logic implementation
+ * @see docs/AI_REFERENCE.md#boss-ai-multi-phase-system - Multi-phase boss patterns
  */
 
 import { Vector3 } from 'yuka';
 import { PerceptiveEntity } from './PerceptionSystem';
 
 /**
- * Fuzzy logic for threat assessment (AI.md:870-953)
+ * Fuzzy logic for threat assessment
+ * @see docs/AI_REFERENCE.md#fuzzy-logic-for-nuanced-behavior (lines 649-761)
  */
 export class ThreatAssessment {
   constructor() {
@@ -102,6 +106,7 @@ export class ThreatAssessment {
 
 /**
  * Boss attack pattern base
+ * @see docs/AI_REFERENCE.md#attack-pattern-architecture (lines 775-794)
  */
 export class BossPattern {
   constructor(name, minPhase, cooldown, warmthDrain) {
@@ -123,7 +128,8 @@ export class BossPattern {
 }
 
 /**
- * Frost Wave pattern (AI.md:1152-1182)
+ * Frost Wave pattern
+ * @see docs/AI_REFERENCE.md#example-patterns (lines 798-835)
  */
 export class FrostWavePattern extends BossPattern {
   constructor() {
@@ -302,7 +308,9 @@ export class AbsoluteZeroPattern extends BossPattern {
 }
 
 /**
- * Zephyros Boss AI (AI.md:1052-1182)
+/**
+ * Zephyros Boss AI - Multi-phase boss with fuzzy logic decision making
+ * @see docs/AI_REFERENCE.md#zephyros-boss-implementation (lines 875-973)
  */
 export class ZephyrosAI extends PerceptiveEntity {
   constructor(config, gameState, audioManager) {

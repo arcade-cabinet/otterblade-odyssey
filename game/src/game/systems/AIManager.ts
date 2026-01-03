@@ -1,7 +1,11 @@
 /**
  * AIManager.ts
  * YUKA-based AI system for enemies and NPCs
- * Implements proper AI system per CLAUDE.md line 61 and docs/AI.md
+ * 
+ * @see docs/AI.md - High-level AI concepts and integration patterns
+ * @see docs/AI_REFERENCE.md#fsm-state-machines - Complete FSM implementation
+ * @see docs/AI_REFERENCE.md#steering-behaviors - YUKA steering behavior examples
+ * @see docs/AI_REFERENCE.md#path-planning--navigation - Navigation mesh and A* pathfinding
  */
 
 import {
@@ -39,7 +43,8 @@ interface EnemyVehicle extends Vehicle {
 }
 
 /**
- * Base class for typed states with better TypeScript-like behavior
+ * Base class for typed states
+ * @see docs/AI_REFERENCE.md#state-architecture (lines 62-74)
  */
 class TypedState extends State {
   enter(_owner: EnemyVehicle): void {}
@@ -48,7 +53,8 @@ class TypedState extends State {
 }
 
 /**
- * Enemy AI States
+ * Enemy AI States - 6-state FSM
+ * @see docs/AI_REFERENCE.md#all-enemy-states (lines 76-336)
  */
 
 class IdleState extends TypedState {
@@ -303,7 +309,8 @@ class HurtState extends TypedState {
 }
 
 /**
- * Enemy AI entity
+ * Enemy AI entity with FSM
+ * @see docs/AI_REFERENCE.md#fsm-setup (lines 338-354)
  */
 class EnemyAI extends Vehicle {
   constructor(config) {
@@ -539,7 +546,8 @@ class NPCAI {
 }
 
 /**
- * Main AI Manager
+ * Main AI Manager - YUKA EntityManager integration
+ * @see docs/AI_REFERENCE.md#wiring-yuka-into-the-game-loop (lines 26-55)
  */
 class AIManager {
   constructor() {
@@ -553,6 +561,7 @@ class AIManager {
   /**
    * Build navigation mesh from level geometry
    * @param {Array} platforms - Array of platform bodies from Matter.js
+   * @see docs/AI_REFERENCE.md#build-navigation-mesh (lines 1106-1134)
    */
   buildNavMesh(platforms) {
     this.navMesh = new NavMesh();
@@ -592,6 +601,7 @@ class AIManager {
    * @param {Vector3} from - Start position
    * @param {Vector3} to - End position
    * @returns {Array<Vector3>} - Path waypoints
+   * @see docs/AI_REFERENCE.md#a-pathfinding (lines 1138-1224)
    */
   findPath(from, to) {
     if (!this.navMesh) {

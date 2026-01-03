@@ -2,6 +2,9 @@
  * Enemy AI State Machine States
  * Finite State Machine (FSM) states for enemy AI behavior
  * Uses YUKA.js State base class for transitions
+ * 
+ * @see docs/AI.md - High-level FSM concepts
+ * @see docs/AI_REFERENCE.md#fsm-state-machines - Complete FSM implementation with all states
  */
 
 import { FleeBehavior, SeekBehavior, State, WanderBehavior } from 'yuka';
@@ -9,6 +12,7 @@ import { FleeBehavior, SeekBehavior, State, WanderBehavior } from 'yuka';
 /**
  * Base class for typed states with proper lifecycle methods
  * @extends State
+ * @see docs/AI_REFERENCE.md#state-architecture (lines 62-74)
  */
 class TypedState extends State {
   enter(_owner) {}
@@ -20,6 +24,7 @@ class TypedState extends State {
  * Idle State - Enemy waits and watches for player
  * Transitions to patrol after random timeout
  * Transitions to chase if player enters aggro range
+ * @see docs/AI_REFERENCE.md#1-idle-state (lines 80-117)
  */
 export class IdleState extends TypedState {
   constructor() {
@@ -61,6 +66,7 @@ export class IdleState extends TypedState {
  * Patrol State - Enemy wanders within bounds using wander behavior
  * Transitions to chase if player detected
  * Occasionally transitions to idle
+ * @see docs/AI_REFERENCE.md#2-patrol-state (lines 119-165)
  */
 export class PatrolState extends TypedState {
   constructor() {
@@ -112,6 +118,7 @@ export class PatrolState extends TypedState {
  * Chase State - Enemy pursues target using seek behavior
  * Transitions to attack when in range
  * Transitions to patrol if target lost
+ * @see docs/AI_REFERENCE.md#3-chase-state (lines 167-214)
  */
 export class ChaseState extends TypedState {
   constructor() {
@@ -169,6 +176,7 @@ export class ChaseState extends TypedState {
  * Attack State - Enemy stops and attacks target
  * Cooldown-based attack execution
  * Transitions to chase if target escapes
+ * @see docs/AI_REFERENCE.md#4-attack-state (lines 216-258)
  */
 export class AttackState extends TypedState {
   constructor() {
@@ -215,6 +223,7 @@ export class AttackState extends TypedState {
  * Flee State - Enemy runs from threat when low health
  * Uses flee behavior to escape
  * Transitions to patrol when safe or healed
+ * @see docs/AI_REFERENCE.md#5-flee-state (lines 260-301)
  */
 export class FleeState extends TypedState {
   constructor() {
@@ -262,6 +271,7 @@ export class FleeState extends TypedState {
  * Hurt State - Enemy staggers after taking damage
  * Brief invulnerability period
  * Transitions based on health and context
+ * @see docs/AI_REFERENCE.md#6-hurt-state (lines 303-335)
  */
 export class HurtState extends TypedState {
   constructor() {
