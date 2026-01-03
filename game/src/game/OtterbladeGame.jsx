@@ -168,6 +168,12 @@ function OtterbladeGameContent() {
     // Wait for manifests to load before starting game
     if (!manifestsLoaded() || !gameStarted()) return;
 
+    // Guard against Matter.js not being loaded (bundler timing issue)
+    if (typeof Matter === 'undefined' || !Matter.Engine) {
+      console.error('Matter.js not loaded - check bundler configuration');
+      return;
+    }
+
     const canvas = canvasRef;
     if (!canvas) {
       console.error('Canvas ref not available');
