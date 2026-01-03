@@ -144,9 +144,17 @@ jobs:
             const normalize = (entry) => ({
               author: entry.user?.login,
               body: entry.body || '',
-              url: entry.html_url,
-              created_at: entry.submitted_at || entry.created_at,
-            });
+            const isFromTrusted = (login) =>
+              !!login && trusted.some((id) => login.toLowerCase().includes(id));
+
+            const filterTrustedEntries = (entries) =>
+              entries
+                .filter((entry) => isFromTrusted(entry.user?.login))
+                .map(normalize);
+
+            const aiFeedback = [
+              ...filterTrustedEntries(issueComments),
+              ...filterTrustedEntries(prReviews),
 
             const aiFeedback = [
               ...issueComments.filter((comment) => trusted.some((id) => comment.user?.login?.toLowerCase().includes(id))).map(normalize),
