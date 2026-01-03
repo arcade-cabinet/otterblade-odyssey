@@ -19,9 +19,12 @@ export async function initializeGame() {
   }
   
   if (!Matter) {
+    console.log('[Game] Loading Matter.js dynamically...');
     Matter = (await import('matter-js')).default;
     window.Matter = Matter; // Global access
-    console.log('[Game] Matter.js loaded');
+    console.log('[Game] ✅ Matter.js loaded successfully', Matter);
+  } else {
+    console.log('[Game] Matter.js already initialized');
   }
   
   return Matter;
@@ -29,7 +32,11 @@ export async function initializeGame() {
 
 // Helper to get Matter modules (after init)
 function M() {
-  if (!Matter) throw new Error('Call initializeGame() first');
+  if (!Matter) {
+    console.error('[Game] ❌ Matter.js not initialized! Call initializeGame() first.');
+    console.trace('Stack trace for Matter.js access before initialization:');
+    throw new Error('Matter.js not initialized. Call initializeGame() and await it before using game functions.');
+  }
   return Matter;
 }
 
@@ -64,7 +71,7 @@ const PLAYER_PHYSICS = {
   jumpBufferMs: 100,
 };
 
-const CHAPTER_FILES = [
+export const CHAPTER_FILES = [
   'chapter-0-the-calling',
   'chapter-1-river-path',
   'chapter-2-gatehouse',
@@ -82,6 +89,7 @@ const CHAPTER_FILES = [
 // ============================================================================
 
 export function createPhysicsEngine() {
+  console.log('[Game] Creating physics engine...');
   const { Engine } = M();
   const engine = Engine.create({
     gravity: { x: 0, y: 1.5 },
@@ -89,6 +97,7 @@ export function createPhysicsEngine() {
   });
   engine.positionIterations = 8;
   engine.velocityIterations = 6;
+  console.log('[Game] ✅ Physics engine created');
   return engine;
 }
 
@@ -681,24 +690,4 @@ export function createGameLoop(params) {
   return { start, stop };
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export {
-  initializeGame,
-  createPhysicsEngine,
-  createFinnBody,
-  createPlatform,
-  checkGrounded,
-  PlayerController,
-  AudioManager,
-  audioManager,
-  InputManager,
-  inputManager,
-  AIManager,
-  aiManager,
-  initializeChapter,
-  createGameLoop,
-  CHAPTER_FILES,
-};
+// All functions exported inline above
