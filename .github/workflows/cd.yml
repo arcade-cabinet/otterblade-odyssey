@@ -20,7 +20,14 @@ permissions:
 
 jobs:
   e2e:
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    # Only run this gate when:
+    # - The triggering event is a workflow_run
+    # - The workflow_run concluded successfully
+    # - The workflow_run was for the main branch
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
     name: Playwright gate
     runs-on: ubuntu-latest
     environment: release
