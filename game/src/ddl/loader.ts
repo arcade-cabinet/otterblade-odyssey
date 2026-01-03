@@ -622,7 +622,7 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
 
   // Preload chapters
   if (manifestTypes.includes('chapters')) {
-    for (let i = 0; i <= 9; i++) {
+    for (let i = 0; i < TOTAL_CHAPTERS; i++) {
       loaders.push(
         loadChapterManifest(i)
           .then(() => {
