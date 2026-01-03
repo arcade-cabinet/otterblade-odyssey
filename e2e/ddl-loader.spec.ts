@@ -296,8 +296,88 @@ test.describe('DDL Manifest Loader', () => {
 
     expect(gameInitialized).toBe(true);
 
-    // Take screenshot of running game
-    await page.waitForTimeout(2000); // Let game render
+    // Wait for game to render frames
+    await page.waitForTimeout(2000);
+
+    // VISUAL VALIDATION: Verify actual rendering is happening
+    const renderingValidation = await page.evaluate(() => {
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+      if (!canvas) return { error: 'Canvas not found' };
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return { error: 'Canvas context not available' };
+
+      // Sample pixels from the canvas
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+
+      // Check for non-trivial rendering (not all black, not all white)
+      let nonBlackPixels = 0;
+      let nonWhitePixels = 0;
+      let coloredPixels = 0;
+      const sampleSize = Math.min(10000, pixels.length / 4); // Sample 10k pixels or less
+
+      for (let i = 0; i < sampleSize; i++) {
+        const idx = i * 4;
+        const r = pixels[idx];
+        const g = pixels[idx + 1];
+        const b = pixels[idx + 2];
+        const a = pixels[idx + 3];
+
+        // Check if pixel is not black (accounting for alpha)
+        if (a > 0 && (r > 10 || g > 10 || b > 10)) {
+          nonBlackPixels++;
+        }
+
+        // Check if pixel is not white
+        if (!(r > 240 && g > 240 && b > 240)) {
+          nonWhitePixels++;
+        }
+
+        // Check for actual color variation (game graphics should have varied colors)
+        if (a > 0 && (r !== g || g !== b || r !== b)) {
+          coloredPixels++;
+        }
+      }
+
+      const hasContent = nonBlackPixels > sampleSize * 0.1; // At least 10% non-black
+      const hasVariation = nonWhitePixels > sampleSize * 0.1; // At least 10% non-white
+      const hasColors = coloredPixels > sampleSize * 0.05; // At least 5% with color variation
+
+      return {
+        canvasSize: { width: canvas.width, height: canvas.height },
+        sampleSize,
+        nonBlackPixels,
+        nonWhitePixels,
+        coloredPixels,
+        hasContent,
+        hasVariation,
+        hasColors,
+        renderingDetected: hasContent && hasVariation && hasColors,
+      };
+    });
+
+    console.log('Visual validation results:', JSON.stringify(renderingValidation, null, 2));
+
+    // Assertions for visual validation
+    expect(renderingValidation.hasContent).toBe(true); // Canvas has non-black pixels
+    expect(renderingValidation.hasVariation).toBe(true); // Canvas has non-white pixels
+    expect(renderingValidation.hasColors).toBe(true); // Canvas has color variation
+    expect(renderingValidation.renderingDetected).toBe(true); // Overall rendering detected
+
+    // Verify Matter.js physics is initialized
+    const physicsInitialized = await page.evaluate(() => {
+      return (
+        typeof window.Matter !== 'undefined' &&
+        window.gameEngine !== null &&
+        window.gameEngine !== undefined
+      );
+    });
+
+    expect(physicsInitialized).toBe(true);
+    console.log('✓ Matter.js physics engine initialized');
+
+    // Take screenshot of running game for manual inspection
     await page.screenshot({ path: '/tmp/ddl-loader-game-running.png', fullPage: false });
     console.log('Screenshot saved: /tmp/ddl-loader-game-running.png');
   });
