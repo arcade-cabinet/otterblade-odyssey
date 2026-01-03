@@ -54,13 +54,20 @@ jobs:
             const base = { comment_body: '', comment_author: '', trigger_url: '' };
 
             if (eventName === 'workflow_dispatch') {
-              return {
+              const result = {
                 ...base,
                 pr_number: '${{ inputs.pr_number }}',
                 head_ref: '',
                 run_reason: 'manual autoheal dispatch',
                 trigger_url: '',
               };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
             }
 
             if (eventName === 'workflow_run') {
@@ -75,13 +82,20 @@ jobs:
                 return;
               }
 
-              return {
+              const result = {
                 ...base,
                 pr_number: pr.number.toString(),
                 head_ref: pr.head_branch,
                 run_reason: `workflow_run failure: ${context.payload.workflow_run.name}`,
                 trigger_url: context.payload.workflow_run.html_url,
               };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
             }
 
             if (eventName === 'issue_comment') {
@@ -95,7 +109,7 @@ jobs:
                 return;
               }
 
-              return {
+              const result = {
                 ...base,
                 pr_number: context.payload.issue.number.toString(),
                 head_ref: '',
@@ -104,6 +118,13 @@ jobs:
                 comment_body: context.payload.comment.body || '',
                 comment_author: context.payload.comment.user?.login || '',
               };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
             }
 
             if (eventName === 'pull_request_review') {
@@ -112,7 +133,7 @@ jobs:
                 return;
               }
 
-              return {
+              const result = {
                 ...base,
                 pr_number: context.payload.pull_request.number.toString(),
                 head_ref: context.payload.pull_request.head.ref,
@@ -121,6 +142,13 @@ jobs:
                 comment_body: context.payload.review.body || '',
                 comment_author: context.payload.review.user?.login || '',
               };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
             }
 
             core.setFailed(`Unsupported event: ${eventName}`);
@@ -216,7 +244,7 @@ jobs:
             const defaultStrategy = config.pr_management?.default_strategy?.strategy || 'autonomous';
             const headRef = process.env.HEAD_REF;
             const wildcardToRegex = (input) => {
-              const escaped = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const escaped = input.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
               return new RegExp(`^${escaped.replace(/\*/g, '.*')}$`);
             };
 

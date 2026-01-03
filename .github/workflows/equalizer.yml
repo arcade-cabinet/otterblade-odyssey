@@ -63,18 +63,6 @@ jobs:
             core.setOutput('run_reason', run_reason);
             core.setOutput('trigger_url', trigger_url);
             core.setOutput('comment_body', comment_body);
-            const pr_number = pr.number.toString();
-            const head_ref = pr.head.ref;
-            const run_reason = `issue_comment by @${context.payload.comment.user?.login || 'unknown'}`;
-            const trigger_url = context.payload.comment.html_url;
-            const comment_body = context.payload.comment.body || '';
-            const comment_author = context.payload.comment.user?.login || '';
-
-            core.setOutput('pr_number', pr_number);
-            core.setOutput('head_ref', head_ref);
-            core.setOutput('run_reason', run_reason);
-            core.setOutput('trigger_url', trigger_url);
-            core.setOutput('comment_body', comment_body);
             core.setOutput('comment_author', comment_author);
       - name: Check IDDQD override
         id: override
@@ -145,7 +133,7 @@ jobs:
             const defaultStrategy = config.pr_management?.default_strategy?.strategy || 'autonomous';
             const headRef = process.env.HEAD_REF;
             const wildcardToRegex = (input) => {
-              const escaped = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const escaped = input.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
               return new RegExp(`^${escaped.replace(/\*/g, '.*')}$`);
             };
 
