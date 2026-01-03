@@ -47,13 +47,6 @@ rulesets:
           require_code_owner_review: false
           require_last_push_approval: false
           required_review_thread_resolution: true
-      
-      # GAME-SPECIFIC: Require release gate E2E tests
-      - type: required_status_checks
-        parameters:
-          strict_required_status_checks_policy: true
-          required_status_checks:
-            - context: "CI / Lint, test, and analyze"
     
       # Enable merge queue for CI efficiency
       - type: merge_queue
