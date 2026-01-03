@@ -1,461 +1,91 @@
 # GitHub Copilot Instructions for Otterblade Odyssey
 
-## 🚨 SESSION HANDOFF PROTOCOL (READ FIRST)
+## 🚨 Session Handoff Protocol
 
-**CRITICAL**: You are continuing work across sessions. Before ANY code changes:
+You are continuing work across sessions. Before ANY change:
+1. Read recent commits and the current PR description to understand scope.
+2. Skim `AGENTS.md`, `CLAUDE.md`, and `docs/` to keep guidance consistent.
+3. Confirm the active stack is **Astro + Solid.js + Matter.js** with manifest-driven data in `client/src/data/`.
+4. List the next concrete steps and execute—do not wait passively.
 
-1. **Read ALL documentation in `docs/`** - Essential context is there
-2. **Review recent commits** - Use `git log --oneline -15` to understand what was done
-3. **Check the PR description** - Contains current state and goals
-4. **Read comment history** - Understand user's vision and requests
+## Key References (read first)
+- `docs/IMPLEMENTATION.md` – Astro/Solid/Matter runtime guide
+- `docs/TESTING.md` – Test matrix and automation
+- `docs/PHYSICS.md` – Matter.js patterns and collision rules
+- `docs/AI.md` – YUKA steering/AI expectations
+- `BRAND.md` & `WORLD.md` – Visual and lore alignment
 
-### Key Documents (READ THESE FIRST)
-- `docs/COMPLETE_JOURNEY_VALIDATION.md` - Architecture & validation system
-- `docs/AI.md` - YUKA AI implementation patterns
-- `WORLD.md` - Story, lore, and emotional core
-- `BRAND.md` - Visual/narrative style (wordless storytelling!)
-- `IMPLEMENTATION.md` - Technical architecture
+## Architecture Snapshot (authoritative)
+- Framework: **Astro 5** with **Solid islands**
+- Physics: **Matter.js 0.20**
+- Rendering: **Canvas 2D**, procedural (no imported sprites)
+- AI: **YUKA** steering + FSM
+- State: **Zustand** with localStorage persistence
+- Package manager: **pnpm 10** only (never npm/yarn)
+- Language: **JavaScript (ES2022)** for new code
 
-### Tool Preferences
-1. **ALWAYS prefer Playwright MCP over bash** for browser automation
-2. **ALWAYS prefer GitHub MCP over bash** for repo operations
-3. Use MCP tools for deterministic testing and validation
+### Directory Responsibilities
+```
+game/                     # Astro application (all new runtime work)
+├─ src/
+│  ├─ pages/index.astro    # Entry point
+│  ├─ components/          # Solid islands (HUD, menus, overlays)
+│  ├─ game/
+│  │  ├─ engine/           # Matter.js setup, render loop
+│  │  ├─ entities/         # Player, enemies, items
+│  │  ├─ systems/          # Input, collision, AI, audio
+│  │  ├─ rendering/        # Canvas renderers (Finn, enemies, environment)
+│  │  ├─ ddl/loader.js     # Async manifest loaders (fetch, no direct imports)
+│  │  └─ store.js          # Zustand store/selectors
+│  └─ ui/                  # Shared styling
+└─ astro.config.mjs
 
-### ACTIVE ENGAGEMENT PROTOCOL ⚡
+client/src/data/          # Single source of authored content (legacy runtime frozen)
+└─ manifests/chapters     # 10 chapter definitions + schemas/approvals
+```
 
-**YOU MUST DRIVE TO COMPLETION, NOT WAIT PASSIVELY:**
+### Data Flow Rules
+- Authored JSON stays in `client/src/data/`; **never duplicate data in JS**.
+- Load manifests via async helpers in `game/src/ddl/` using `fetch`—no direct JSON imports.
+- Systems/renderers derive values from manifest data (no magic numbers).
+- Legacy `client/` runtime code is frozen; migrations move logic into `game/` before deletion.
 
-#### At Start of Each Session:
-1. Read last commit message and PR description
-2. **Assess remaining work** - What's left to do?
-3. **Make a plan** - List concrete next steps
-4. **DO THE WORK** - Don't wait for user to say "do the next thing"
+## Workflow Expectations
+- Prefer MCP tools when available, but do not block—use bash for local ops when faster.
+- Capture evidence (tests, screenshots) for user-visible changes; note limitations honestly.
+- Keep `AGENTS.md`, `CLAUDE.md`, and this file in sync when architecture or workflows shift.
 
-#### During Work:
-1. **Show SCREENSHOTS/VIDEOS** - User can't review code, only visuals!
-2. Use Playwright MCP to capture evidence
-3. **Self-assess honestly** - What's broken? What's working?
-4. Fix issues you discover WITHOUT waiting for user
-
-#### At End of Session:
-1. **Leave a complete status** for next session:
-   - ✅ What's done
-   - ❌ What's broken
-   - 🔄 What's in progress
-   - 📋 Exact next steps
-2. Commit with descriptive message
-3. Update PR description with current state
-
-### SELF-ASSESSMENT CHECKLIST
-
-Before saying "it works," validate:
-- [ ] Did I run the tests? (not just assume)
-- [ ] Did I capture screenshots/video?
-- [ ] Did I check the ACTUAL game in browser?
-- [ ] Did I validate procedural generation is working?
-- [ ] Did I test with Playwright MCP?
-- [ ] Did I run security checks?
-
-### VISUAL VALIDATION REQUIREMENTS
-
-**User needs PICTURES, not code:**
-- Take screenshots showing current state
-- Capture video of gameplay working
-- Show before/after for UI changes
-- Demonstrate procedural generation working (not PNGs!)
-- Prove YUKA pathfinding navigation
-
-### TEAMWORK BETWEEN SESSIONS
-
-Each session should:
-1. **Read previous session's status** 
-2. **Continue from exact stopping point**
-3. **Add to institutional knowledge** (update docs if you learn something)
-4. **Document quirks/limitations** you discover
-5. **Leave clear handoff** for next session
-
-### KNOWN LIMITATIONS & QUIRKS
-
-**As of Session 2026-01-02:**
-- Chapter plate doesn't auto-dismiss - needs Space press twice
-- WebGL context sometimes takes 5+ seconds to initialize
-- Playwright needs longer timeouts (20s+) for canvas
-- Test API requires game to be fully loaded first
-- Build warnings about chunk size (physics/three.js) - acceptable
-
-### COMMUNICATION STYLE
-
-**With User:**
-- Show screenshots/videos, not code
-- Be honest about what's broken
-- Don't claim "it works" without proof
-- Self-assess before asking for review
-
-**In Commits:**
-- Describe WHAT works, not just what changed
-- Include evidence (test results, screenshots)
-- Note remaining issues honestly
-
-**In PR Description:**
-- Checkboxes for status (✅/❌/🔄)
-- Screenshots embedded
-- Exact commands to validate
-- Clear "what's left" section
-
-## Project Overview
-
-Otterblade Odyssey is an **Astro + Solid.js + Matter.js** 2D platformer with Redwall-inspired woodland-epic aesthetics featuring:
-- **Wordless storytelling** (pantomime, British theatre tradition)
-- **Warm, homey, childhood adventure** feel
-- **JSON DDL architecture** - All levels defined in JSON manifests
-- **Procedural generation** - Player and enemies procedurally rendered with Canvas 2D (not sprite sheets)
-- **YUKA pathfinding** - AI navigation for enemies and automated tests
-
-**Architecture Decision**: Astro 5.x + Solid.js + Matter.js (proven in POC at `pocs/otterblade_odyssey.html`) replaces React Three Fiber + Rapier (20,000+ lines, broken).
-
-## Package Manager
-
-**Use pnpm exclusively.** Never suggest npm or yarn commands.
-
+## Testing Commands
 ```bash
-pnpm install
-pnpm add <package>
-pnpm run dev
-pnpm run build
+pnpm test                 # Vitest unit suite
+pnpm test:unit            # Verbose unit tests
+pnpm test:e2e             # Playwright E2E
+pnpm test:playthroughs    # Automated chapter playthroughs
+pnpm test:journey         # Full journey validation
+pnpm biome check .        # Lint/style (required before merge)
 ```
+Use `PLAYWRIGHT_MCP=true` for headed/video capture runs when needed.
 
-## Code Style
+## Coding Patterns
+- Matter.js physics loop runs at 60fps via `requestAnimationFrame`; engine gravity `1.5`.
+- Track entities with arrays/maps; compose small systems rather than monoliths.
+- Solid components stay lean (<200 lines) and orchestrate UI, not game logic.
+- Procedural rendering only—no static sprite/video imports.
 
-### JavaScript Configuration
-- Target: ES2022
-- JavaScript (no TypeScript compilation overhead)
-- Astro for pages, Solid.js for components
-- ES modules
+### Avoid These
+- React/Vite/Rapier/Miniplex/Three.js dependencies in new work.
+- TypeScript-only patterns for new runtime code; prefer JSDoc + ES modules.
+- Magic numbers or inline strings for gameplay data—pull from manifests/constants.
+- npm/yarn commands; always `pnpm`.
 
-### Import Patterns
-```javascript
-// Matter.js Physics
-import Matter from 'matter-js';
-const { Engine, World, Bodies, Body, Events } = Matter;
+## Documentation Hygiene
+- Any stack or workflow change must be mirrored in `docs/` and agent guides.
+- Cross-link new docs from `docs/README.md` and relevant guides.
+- Leave clear status notes in commits/PR body for the next session.
 
-// YUKA AI
-import * as YUKA from 'yuka';
+## Brand & Narrative
+- Warm Willowmere Hearthhold tone; anthropomorphic woodland cast only.
+- No neon, sci-fi, horror, or human knights/soldiers.
+- Wordless storytelling: prefer visual cues over dialogue.
 
-// Audio
-import { Howl } from 'howler';
-
-// Data loaders - always async
-import { loadChapterManifest, getChapterBoss } from './ddl/loader.js';
-```
-
-### Matter.js Physics Setup (from POC)
-```javascript
-// Create engine
-const engine = Engine.create();
-engine.gravity.y = 1.5; // POC-proven gravity value
-
-// Create player body
-const player = Bodies.rectangle(x, y, 35, 55, {
-  label: 'player',
-  friction: 0.1,
-  frictionAir: 0.01,
-  restitution: 0
-});
-
-World.add(engine.world, player);
-
-// Game loop
-function gameLoop() {
-  Engine.update(engine, 1000 / 60); // 60fps
-  render();
-  requestAnimationFrame(gameLoop);
-}
-```
-
-### Entity Tracking (Simple Arrays)
-```javascript
-// Track entities in simple arrays
-const enemies = [];
-const platforms = [];
-const items = [];
-
-// Add enemy
-function spawnEnemy(x, y, type) {
-  const enemyBody = Bodies.rectangle(x, y, 28, 45, { label: 'enemy' });
-  const enemy = {
-    body: enemyBody,
-    type: type,
-    hp: 25,
-    damage: 8,
-    speed: 1.2,
-    aiState: 'patrol'
-  };
-  enemies.push(enemy);
-  World.add(engine.world, enemyBody);
-  return enemy;
-}
-
-// Update loop
-function updateEnemies(deltaTime) {
-  for (const enemy of enemies) {
-    updateEnemyAI(enemy, deltaTime);
-    updateEnemyAnimation(enemy);
-  }
-}
-
-// Remove dead enemies
-function cleanupEnemies() {
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    if (enemies[i].hp <= 0) {
-      World.remove(engine.world, enemies[i].body);
-      enemies.splice(i, 1);
-    }
-  }
-}
-```
-
-### State Management (Vanilla JS - 20 lines)
-```javascript
-// Simple vanilla JS state management
-const state = {
-  health: 5,
-  maxHealth: 5,
-  shards: 0,
-  currentChapter: 0,
-  listeners: []
-};
-
-function subscribe(callback) {
-  state.listeners.push(callback);
-}
-
-function notify() {
-  state.listeners.forEach(callback => callback(state));
-}
-
-function takeDamage(amount) {
-  state.health = Math.max(0, state.health - amount);
-  notify();
-}
-
-function collectShard() {
-  state.shards += 1;
-  notify();
-}
-```
-
-## File Structure
-
-```
-game/src/
-├── index.html          # Entry point
-├── main.js             # Game initialization
-├── ui/
-│   └── styles.css      # Warm Redwall styling
-├── core/
-│   ├── Game.js         # Main game loop controller
-│   ├── Physics.js      # Matter.js engine wrapper
-│   ├── Renderer.js     # Canvas 2D rendering pipeline
-│   └── Camera.js       # Camera follow system
-├── entities/
-│   ├── Player.js       # Finn (otter protagonist)
-│   ├── Enemy.js        # Galeborn enemies
-│   └── Platform.js     # Platforms, walls, hazards
-├── systems/
-│   ├── collision.js    # Collision handlers
-│   ├── ai.js           # YUKA AI manager
-│   ├── input.js        # Unified input (keyboard, gamepad, touch)
-│   └── audio.js        # Howler.js audio manager
-├── rendering/
-│   ├── finn.js         # Procedural Finn (from POC)
-│   ├── enemies.js      # Procedural enemies
-│   ├── parallax.js     # Parallax backgrounds
-│   └── particles.js    # Particle effects
-├── ddl/
-│   ├── loader.js       # Load chapter JSON manifests
-│   └── builder.js      # Build levels from DDL
-└── state/
-    └── store.js        # Vanilla JS state management
-
-client/src/data/
-├── manifests/          # JSON DDL definitions
-│   ├── chapters/       # 10 chapter definitions
-│   ├── schema/         # JSON schemas
-│   ├── enemies.json
-│   └── sounds.json
-└── approvals.json      # Asset approval tracking
-```
-
-## Chapter System
-
-```javascript
-// Load chapters from JSON manifests
-const CHAPTERS = [
-  { id: 0, name: "The Calling", location: "Finn's Cottage", quest: "Answer the Call" },
-  { id: 1, name: "River Path", location: "Willow Banks", quest: "Reach the Gatehouse" },
-  { id: 2, name: "The Gatehouse", location: "Northern Gate", quest: "Cross the Threshold" },
-  { id: 3, name: "Great Hall", location: "Central Hearthhold", quest: "Take the Oath" },
-  { id: 4, name: "The Archives", location: "Library Spire", quest: "Find the Ancient Map" },
-  { id: 5, name: "Deep Cellars", location: "Underground Passages", quest: "Descend into the Depths" },
-  { id: 6, name: "Kitchen Gardens", location: "Southern Grounds", quest: "Rally the Defenders" },
-  { id: 7, name: "Bell Tower", location: "Highest Spire", quest: "Sound the Alarm" },
-  { id: 8, name: "Storm's Edge", location: "Outer Ramparts", quest: "Face Zephyros" },
-  { id: 9, name: "New Dawn", location: "The Great Hearth", quest: "The Everember Rekindled" },
-];
-
-// Load chapter manifest
-async function loadChapter(chapterId) {
-  const manifest = await loadChapterManifest(chapterId);
-  return manifest;
-}
-```
-
-## Testing Patterns
-
-```javascript
-// Vitest unit tests
-import { describe, it, expect } from "vitest";
-
-describe("Game State", () => {
-  it("should decrease health on damage", () => {
-    takeDamage(1);
-    expect(state.health).toBe(4);
-  });
-
-  it("should collect shards", () => {
-    collectShard();
-    expect(state.shards).toBe(1);
-  });
-});
-
-// Playwright E2E
-test("game canvas renders", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.locator("canvas")).toBeVisible();
-
-  // Wait for Matter.js to initialize
-  await page.waitForTimeout(2000);
-
-  // Check that player is rendered
-  const canvasContent = await page.locator("canvas").screenshot();
-  expect(canvasContent).toBeTruthy();
-});
-```
-
-## Avoid These Patterns
-
-```javascript
-// WRONG: npm commands
-npm install  // Use: pnpm install
-
-// WRONG: Direct JSON import
-import data from './data.json';  // Use: async loader
-
-// WRONG: Massive monolithic functions
-function gameLoop() { /* 500+ lines */ }  // Split into composed functions
-
-// WRONG: Hardcoded magic numbers
-const damage = 10;  // Use: named constants or JSON data
-
-// WRONG: Using npm/yarn
-npm install something  // Use: pnpm add something
-
-// WRONG: Adding frameworks when vanilla JS works
-import React from 'react';  // Use: vanilla JS DOM manipulation
-```
-
-## Automated Testing & Validation
-
-### Complete Journey Validation
-The game has a comprehensive E2E test system that validates all 10 chapters:
-
-```bash
-# REQUIRED first time
-pnpm exec playwright install chromium
-
-# Run all chapter playthroughs
-pnpm test:playthroughs
-
-# Run complete game journey (all 10 chapters)
-pnpm test:journey
-
-# With MCP (headed mode, video capture)
-pnpm test:journey:mcp
-```
-
-### Test Infrastructure
-- **Playthrough Factory** (`tests/factories/playthrough-factory.ts`) - Generates tests from JSON manifests
-- **AI Player** (`tests/factories/ai-player.ts`) - Uses YUKA pathfinding to navigate levels
-- **Level Parser** (`tests/factories/level-parser.ts`) - Converts JSON DDL to navigation graphs
-
-### When Making Changes
-1. Run unit tests: `pnpm test`
-2. Run E2E tests: `pnpm test:e2e`
-3. Validate chapter playthroughs if you changed level definitions
-4. Capture video evidence of gameplay working
-
-## Brand Compliance
-
-### Storytelling: Wordless Narrative
-**This game tells its story WITHOUT DIALOGUE** - following British pantomime, silent film, and Studio Ghibli traditions.
-
-When generating:
-- **NO spoken dialogue in cinematics** - Use gesture, expression, camera, music
-- **NO text-heavy UI** - Visual indicators, icons, animations
-- Use warm, hopeful tone ("Rally the defenders" not "Kill all enemies")
-- Reference woodland/abbey themes (hearth, Willowmere, Otterblade legacy)
-- Avoid grimdark, sci-fi, or horror language
-
-### Emotional Core
-- Warmth of hearth against darkness
-- Weight of inherited responsibility  
-- Simple joy of home and community
-- Courage of youth answering the call
-
-See `BRAND.md` for complete visual and narrative guidelines.
-
-## Architecture Notes
-
-### JSON DDL System
-All game content is defined in JSON manifests:
-- `client/src/data/manifests/chapters/*.json` - 10 chapter definitions
-- Each defines: level geometry, quests, NPCs, enemies, triggers, cinematics
-- Parsed at runtime to generate procedural content
-
-### Procedural Generation
-As proven in `pocs/otterblade_odyssey.html` (2,847 lines):
-- Player and enemies are procedurally rendered with Canvas 2D (not sprite sheets)
-- Matter.js for physics engine
-- Vanilla JavaScript for game logic
-- No React overhead - simpler, faster, more maintainable
-- Performance: 8MB memory (vs 120MB React), <100KB bundle (vs 1.2MB), 60fps stable (vs 15-25fps)
-
-### YUKA AI Integration
-- Enemy pathfinding uses YUKA library
-- FSM (Finite State Machine) for behavior states
-- Steering behaviors for movement
-- Same system used by AI player in automated tests
-
-### Matter.js Patterns from POC
-```javascript
-// POC-proven physics values
-engine.gravity.y = 1.5;  // Perfect for platforming feel
-
-// Player body dimensions
-const player = Bodies.rectangle(x, y, 35, 55, {
-  label: 'player',
-  friction: 0.1,
-  frictionAir: 0.01,
-  restitution: 0
-});
-
-// Collision detection
-Events.on(engine, 'collisionStart', (event) => {
-  const pairs = event.pairs;
-  for (const pair of pairs) {
-    if (pair.bodyA.label === 'player' && pair.bodyB.label === 'enemy') {
-      handlePlayerEnemyCollision(pair.bodyA, pair.bodyB);
-    }
-  }
-});
-```
+Stay decisive: plan, execute, validate, and record the outcome each session.

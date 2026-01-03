@@ -107,20 +107,27 @@ client/src/data/
 └── approvals.json         # Asset approval tracking
 ```
 
+## Data Flow Rules
+
+- Authored content (chapters, sprites, cinematics, approvals) lives in `client/src/data/` and stays immutable at runtime.
+- Load JSON through async helpers under `game/src/ddl/` using `fetch`; never import JSON directly or copy content into JavaScript constants.
+- Systems and renderers derive runtime state from the loaded manifests to avoid magic numbers and keep tests deterministic.
+- The legacy `client/` runtime is frozen—new runtime code belongs in `game/` alongside the Astro + Solid shell.
+
 ## 10-Chapter Story Structure
 
-| # | Chapter | Biome | Quest |
-|---|---------|-------|-------|
-| 0 | Prologue | Village | "Answer the Call" |
-| 1 | Abbey Approach | Forest/Bridge | "Reach the Gatehouse" |
-| 2 | Gatehouse | Entry | "Cross the Threshold" |
-| 3 | Great Hall | Interior | "Defend the Great Hall" |
-| 4 | Library | Interior | "Find the Ancient Map" |
-| 5 | Dungeon | Catacombs | "Descend into the Depths" |
-| 6 | Courtyard | Gardens | "Rally the Defenders" |
-| 7 | Rooftops | Rafters | "Ascend to the Bells" |
-| 8 | Final Ascent | High Keep | "Reach Zephyros" |
-| 9 | Epilogue | Victory | "A New Dawn" |
+| # | Chapter | Location | Quest |
+|---|---------|----------|-------|
+| 0 | The Calling | Finn's Cottage | Answer the Call |
+| 1 | River Path | Willow Banks | Reach the Gatehouse |
+| 2 | The Gatehouse | Northern Gate | Cross the Threshold |
+| 3 | Great Hall | Central Hearthhold | Take the Oath |
+| 4 | The Archives | Library Spire | Find the Ancient Map |
+| 5 | Deep Cellars | Underground Passages | Descend into the Depths |
+| 6 | Kitchen Gardens | Southern Grounds | Rally the Defenders |
+| 7 | Bell Tower | Highest Spire | Sound the Alarm |
+| 8 | Storm's Edge | Outer Ramparts | Face Zephyros |
+| 9 | New Dawn | The Great Hearth | The Everember Rekindled |
 
 ## Code Patterns
 
