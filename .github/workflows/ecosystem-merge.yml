@@ -1,15 +1,12 @@
 # Ecosystem Merge - Merge Queue Consumer
 # Reads tracking issue state and executes merge decisions
 #
-# ⚠️  IMPORTANT: This workflow DEFERS to Claude PR Manager (.github/workflows/claude-pr-manager.yml)
-#    for final merge decisions on PRs. Claude is the central authority for PR approvals.
-#
 # Responsibilities:
 # - Read verdict from tracking issue (KV store)
 # - Check CI status
-# - Auto-approve eligible PRs (if Claude hasn't already)
+# - Auto-approve eligible PRs
 # - Auto-rebase when needed
-# - Execute merge (following Claude's approval)
+# - Execute merge
 #
 # Coordination: Triggered by CI completion or tracking issue state changes
 

@@ -1,9 +1,6 @@
 # Ecosystem Agents - Scheduled AI Agent Runners
 # Dispatches bespoke agents nightly using Claude Haiku 4.5 (cost-efficient)
 #
-# ℹ️  NOTE: For PR-specific tasks, Claude PR Manager (.github/workflows/claude-pr-manager.yml) 
-#    is the central authority. These agents handle scheduled maintenance tasks.
-#
 # Agents:
 # - Bolt ⚡ (Performance)
 # - Sentinel 🛡️ (Security)
@@ -11,7 +8,7 @@
 # - Scribe 📚 (Documentation)
 # - Triage 🔍 (Issue/PR management)
 #
-# Model: claude-haiku-4-5-20251001 (fast, cost-efficient, 73% SWE-bench)
+# Model: claude-3-5-haiku-latest (fast, cost-efficient, good at coding)
 
 name: Ecosystem Agents
 
