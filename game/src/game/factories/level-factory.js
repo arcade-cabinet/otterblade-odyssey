@@ -85,9 +85,9 @@ export function buildLevel(chapterId, engine) {
         waterDef.x,
         waterDef.y,
         waterDef.width,
-        waterDef.height,
-        waterDef.current || { x: 0, y: 0 }
+        waterDef.height
       );
+      water.current = waterDef.current || { x: 0, y: 0 };
       level.waterZones.push(water);
       World.add(engine.world, water.sensor);
     }
