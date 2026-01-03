@@ -385,6 +385,12 @@ class NPCAI {
 
     // Interaction data
     this.interaction = config.interaction;
+
+    // Follow behavior config
+    this.followTarget = null;
+    this.followDistance = config.behavior?.followDistance || 80;
+    this.followSpeed = config.behavior?.followSpeed || 1.5;
+    this.stoppingDistance = config.behavior?.stoppingDistance || 50;
   }
 
   update(delta) {
@@ -426,8 +432,71 @@ class NPCAI {
     }
   }
 
-  updateFollow(_delta) {
-    // Follow logic would need player reference
+  updateFollow(delta) {
+    if (!this.followTarget || !this.followTarget.position) {
+      this.currentAnimation = 'idle';
+      return;
+    }
+
+    // Get player position (followTarget should have Matter.js body or position)
+    const targetPos =
+      this.followTarget.position instanceof Vector3
+        ? this.followTarget.position
+        : new Vector3(this.followTarget.position.x, this.followTarget.position.y, 0);
+
+    // Calculate distance to player
+    const distanceToPlayer = this.position.distanceTo(targetPos);
+
+    // If too far, move towards player
+    if (distanceToPlayer > this.followDistance) {
+      // Calculate direction to player
+      const direction = new Vector3().subVectors(targetPos, this.position).normalize();
+
+      // Move towards player
+      const moveSpeed = this.followSpeed * delta;
+      this.position.add(direction.multiplyScalar(moveSpeed));
+
+      // Update facing direction
+      this.facingDirection = direction.x > 0 ? 1 : -1;
+
+      // Set animation to walk
+      this.currentAnimation = 'walk';
+    } else if (distanceToPlayer > this.stoppingDistance) {
+      // Within follow range but not at stopping distance - slow approach
+      const direction = new Vector3().subVectors(targetPos, this.position).normalize();
+
+      // Slower movement when close
+      const moveSpeed = this.followSpeed * delta * 0.5;
+      this.position.add(direction.multiplyScalar(moveSpeed));
+
+      // Update facing direction
+      this.facingDirection = direction.x > 0 ? 1 : -1;
+
+      // Set animation to walk
+      this.currentAnimation = 'walk';
+    } else {
+      // Close enough, stop and face player
+      this.facingDirection = targetPos.x > this.position.x ? 1 : -1;
+      this.currentAnimation = 'idle';
+    }
+  }
+
+  /**
+   * Set the target to follow (usually the player)
+   * @param {Object} target - Target with position property (Matter.js body or Vector3)
+   */
+  setFollowTarget(target) {
+    this.followTarget = target;
+    this.behaviorType = 'follow';
+  }
+
+  /**
+   * Stop following and return to idle
+   */
+  stopFollowing() {
+    this.followTarget = null;
+    this.behaviorType = 'idle';
+    this.currentAnimation = 'idle';
   }
 
   interact(playerPos) {
@@ -507,14 +576,158 @@ class AIManager {
       return [to]; // Return direct path as fallback
     }
 
-    // Use YUKA pathfinding
-    const path = [];
+    try {
+      // Use YUKA's native findPath method with A* algorithm
+      const path = [];
+      this.navMesh.findPath(from, to, path);
 
-    // For platformer, simplified pathfinding
-    // In production, this would use A* on nav mesh
-    path.push(from.clone());
-    path.push(to.clone());
+      // If YUKA pathfinding succeeds, return the path
+      if (path.length > 0) {
+        return path;
+      }
 
+      // Fallback: try A* implementation
+      return this.aStarPathfinding(from, to);
+    } catch (error) {
+      console.warn('Pathfinding failed, using direct path:', error);
+      return [from.clone(), to.clone()];
+    }
+  }
+
+  /**
+   * A* pathfinding implementation for 2D platformer
+   * @param {Vector3} start - Start position
+   * @param {Vector3} goal - Goal position
+   * @returns {Array<Vector3>} - Path waypoints
+   */
+  aStarPathfinding(start, goal) {
+    // Get navmesh regions
+    const regions = this.navMesh.regions || [];
+
+    if (regions.length === 0) {
+      return [start.clone(), goal.clone()];
+    }
+
+    // Find start and goal regions
+    const startRegion = this.findNearestRegion(start, regions);
+    const goalRegion = this.findNearestRegion(goal, regions);
+
+    if (!startRegion || !goalRegion) {
+      return [start.clone(), goal.clone()];
+    }
+
+    // If same region, direct path
+    if (startRegion === goalRegion) {
+      return [start.clone(), goal.clone()];
+    }
+
+    // A* algorithm
+    const openSet = new Set([startRegion]);
+    const closedSet = new Set();
+    const cameFrom = new Map();
+    const gScore = new Map([[startRegion, 0]]);
+    const fScore = new Map([[startRegion, this.heuristic(startRegion.centroid, goal)]]);
+
+    while (openSet.size > 0) {
+      // Find node with lowest fScore
+      let current = null;
+      let lowestF = Infinity;
+      for (const region of openSet) {
+        const f = fScore.get(region) || Infinity;
+        if (f < lowestF) {
+          lowestF = f;
+          current = region;
+        }
+      }
+
+      // Reached goal
+      if (current === goalRegion) {
+        return this.reconstructPath(cameFrom, current, start, goal);
+      }
+
+      openSet.delete(current);
+      closedSet.add(current);
+
+      // Check neighbors
+      const neighbors = this.getRegionNeighbors(current, regions);
+      for (const neighbor of neighbors) {
+        if (closedSet.has(neighbor)) continue;
+
+        const tentativeG =
+          (gScore.get(current) || Infinity) + current.centroid.distanceTo(neighbor.centroid);
+
+        if (!openSet.has(neighbor)) {
+          openSet.add(neighbor);
+        } else if (tentativeG >= (gScore.get(neighbor) || Infinity)) {
+          continue;
+        }
+
+        cameFrom.set(neighbor, current);
+        gScore.set(neighbor, tentativeG);
+        fScore.set(neighbor, tentativeG + this.heuristic(neighbor.centroid, goal));
+      }
+    }
+
+    // No path found, return direct
+    return [start.clone(), goal.clone()];
+  }
+
+  /**
+   * Find nearest navigable region to a point
+   */
+  findNearestRegion(point, regions) {
+    let nearest = null;
+    let minDist = Infinity;
+
+    for (const region of regions) {
+      const dist = region.centroid.distanceTo(point);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = region;
+      }
+    }
+
+    return nearest;
+  }
+
+  /**
+   * Get neighboring regions
+   */
+  getRegionNeighbors(region, regions) {
+    const neighbors = [];
+    const threshold = 100; // Max distance for adjacent regions
+
+    for (const other of regions) {
+      if (other === region) continue;
+
+      const dist = region.centroid.distanceTo(other.centroid);
+      if (dist < threshold) {
+        neighbors.push(other);
+      }
+    }
+
+    return neighbors;
+  }
+
+  /**
+   * Heuristic for A* (Euclidean distance)
+   */
+  heuristic(from, to) {
+    return from.distanceTo(to);
+  }
+
+  /**
+   * Reconstruct path from A* cameFrom map
+   */
+  reconstructPath(cameFrom, current, start, goal) {
+    const path = [goal.clone()];
+
+    while (cameFrom.has(current)) {
+      path.unshift(current.centroid.clone());
+      current = cameFrom.get(current);
+    }
+
+    path.unshift(start.clone());
     return path;
   }
 

@@ -137,45 +137,139 @@ class AudioManager {
 
   /**
    * Load chapter-specific audio from DDL manifest
+   * Supports new DDL format with media.musicTracks and media.ambientSounds
    */
   loadChapterAudio(manifest) {
-    if (!manifest.media || !manifest.media.audio) return;
+    if (!manifest.media) {
+      console.warn('No media section in chapter manifest');
+      return;
+    }
 
-    const { music, ambience } = manifest.media.audio;
+    // Initialize music map if needed
+    if (!this.music) {
+      this.music = new Map();
+    }
 
-    // Load music tracks
-    if (music) {
-      for (const track of music) {
-        if (!this.music) {
-          this.music = new Map();
-        }
+    // Load music tracks from DDL format
+    if (manifest.media.musicTracks) {
+      const { exploration, tension, combat, boss, victory } = manifest.media.musicTracks;
+
+      // Load exploration music
+      if (exploration && !this.music.has(exploration)) {
         this.music.set(
-          track.id,
+          exploration,
           new Howl({
-            src: [track.url],
+            src: [`/audio/music/${exploration}.mp3`, `/audio/music/${exploration}.ogg`],
             volume: this.volumes.music,
-            loop: track.loop !== false,
-            onend: () => {
-              if (track.nextTrack) {
-                this.playMusic(track.nextTrack);
-              }
-            },
+            loop: true,
+          })
+        );
+      }
+
+      // Load tension music
+      if (tension && !this.music.has(tension)) {
+        this.music.set(
+          tension,
+          new Howl({
+            src: [`/audio/music/${tension}.mp3`, `/audio/music/${tension}.ogg`],
+            volume: this.volumes.music,
+            loop: true,
+          })
+        );
+      }
+
+      // Load combat music
+      if (combat && !this.music.has(combat)) {
+        this.music.set(
+          combat,
+          new Howl({
+            src: [`/audio/music/${combat}.mp3`, `/audio/music/${combat}.ogg`],
+            volume: this.volumes.music,
+            loop: true,
+          })
+        );
+      }
+
+      // Load boss music
+      if (boss && !this.music.has(boss)) {
+        this.music.set(
+          boss,
+          new Howl({
+            src: [`/audio/music/${boss}.mp3`, `/audio/music/${boss}.ogg`],
+            volume: this.volumes.music,
+            loop: true,
+          })
+        );
+      }
+
+      // Load victory music
+      if (victory && !this.music.has(victory)) {
+        this.music.set(
+          victory,
+          new Howl({
+            src: [`/audio/music/${victory}.mp3`, `/audio/music/${victory}.ogg`],
+            volume: this.volumes.music,
+            loop: false,
           })
         );
       }
     }
 
-    // Load ambient sounds
-    if (ambience) {
-      for (const ambient of ambience) {
-        this.ambience.set(
-          ambient.id,
-          new Howl({
-            src: [ambient.url],
-            volume: this.volumes.ambient * (ambient.volume || 1),
-            loop: ambient.loop !== false,
-          })
-        );
+    // Load ambient sounds from DDL format
+    if (manifest.media.ambientSounds) {
+      for (const ambientId of manifest.media.ambientSounds) {
+        if (!this.ambience.has(ambientId)) {
+          this.ambience.set(
+            ambientId,
+            new Howl({
+              src: [`/audio/ambient/${ambientId}.mp3`, `/audio/ambient/${ambientId}.ogg`],
+              volume: this.volumes.ambient,
+              loop: true,
+            })
+          );
+        }
+      }
+    }
+
+    // Support legacy format (old audio.music, audio.ambience structure)
+    if (manifest.media.audio) {
+      const { music, ambience } = manifest.media.audio;
+
+      // Load music tracks (legacy)
+      if (music) {
+        for (const track of music) {
+          if (!this.music.has(track.id)) {
+            this.music.set(
+              track.id,
+              new Howl({
+                src: [track.url],
+                volume: this.volumes.music,
+                loop: track.loop !== false,
+                onend: () => {
+                  if (track.nextTrack) {
+                    this.playMusic(track.nextTrack);
+                  }
+                },
+              })
+            );
+          }
+        }
+      }
+
+      // Load ambient sounds (legacy)
+      if (ambience) {
+        for (const ambient of ambience) {
+          if (!this.ambience.has(ambient.id)) {
+            this.ambience.set(
+              ambient.id,
+              new Howl({
+                src: [ambient.url],
+                volume: this.volumes.ambient * (ambient.volume || 1),
+                loop: ambient.loop !== false,
+              })
+            );
+          }
+        }
       }
     }
   }

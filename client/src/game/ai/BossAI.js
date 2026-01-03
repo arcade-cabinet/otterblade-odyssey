@@ -372,6 +372,9 @@ export class ZephyrosAI extends PerceptiveEntity {
     // Update hazard zones
     this.updateHazardZones();
 
+    // Update frost particles
+    this.updateFrostParticles(delta);
+
     // Face target
     if (this.target) {
       this.facingDirection = this.target.position.x > this.position.x ? 1 : -1;
@@ -533,8 +536,121 @@ export class ZephyrosAI extends PerceptiveEntity {
     };
   }
 
-  spawnFrostParticles(_position, _direction) {
-    // Particle spawning (handled by particle system)
+  /**
+   * Spawn frost particles for visual effects
+   * @param {Vector3} position - Spawn position
+   * @param {number} direction - Direction multiplier (1 or -1)
+   */
+  spawnFrostParticles(position, direction) {
+    if (!this.frostParticles) {
+      this.frostParticles = [];
+    }
+
+    // Create burst of frost particles
+    const particleCount = 15 + Math.floor(Math.random() * 10);
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI - Math.PI / 2; // -90 to +90 degrees
+      const speed = 2 + Math.random() * 4;
+      const size = 3 + Math.random() * 5;
+      const lifetime = 500 + Math.random() * 1000; // 0.5-1.5 seconds
+
+      const particle = {
+        x: position.x + (Math.random() - 0.5) * 20,
+        y: position.y + (Math.random() - 0.5) * 20,
+        vx: Math.cos(angle) * speed * direction,
+        vy: Math.sin(angle) * speed,
+        size: size,
+        opacity: 1.0,
+        lifetime: lifetime,
+        age: 0,
+        createdAt: performance.now(),
+        color: this.getFrostParticleColor(),
+      };
+
+      this.frostParticles.push(particle);
+    }
+  }
+
+  /**
+   * Get random frost particle color (blues and whites)
+   */
+  getFrostParticleColor() {
+    const colors = [
+      'rgba(173, 216, 230, ', // Light blue
+      'rgba(135, 206, 250, ', // Sky blue
+      'rgba(176, 224, 230, ', // Powder blue
+      'rgba(240, 248, 255, ', // Alice blue
+      'rgba(255, 255, 255, ', // White
+    ];
+
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  /**
+   * Update frost particles (call each frame)
+   * @param {number} delta - Delta time
+   */
+  updateFrostParticles(delta) {
+    if (!this.frostParticles) return;
+
+    const now = performance.now();
+
+    for (let i = this.frostParticles.length - 1; i >= 0; i--) {
+      const particle = this.frostParticles[i];
+
+      // Update position
+      particle.x += particle.vx * delta;
+      particle.y += particle.vy * delta;
+
+      // Apply gravity (slight downward drift)
+      particle.vy += 0.1 * delta;
+
+      // Update age and opacity
+      particle.age = now - particle.createdAt;
+      particle.opacity = 1.0 - particle.age / particle.lifetime;
+
+      // Shrink over time
+      particle.size *= 0.98;
+
+      // Remove if expired
+      if (particle.age >= particle.lifetime || particle.opacity <= 0) {
+        this.frostParticles.splice(i, 1);
+      }
+    }
+  }
+
+  /**
+   * Render frost particles to canvas
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {Object} camera - Camera with x, y offset
+   */
+  renderFrostParticles(ctx, camera) {
+    if (!this.frostParticles) return;
+
+    ctx.save();
+
+    for (const particle of this.frostParticles) {
+      // Screen position
+      const screenX = particle.x - (camera?.x || 0);
+      const screenY = particle.y - (camera?.y || 0);
+
+      // Draw particle
+      ctx.globalAlpha = particle.opacity;
+      ctx.fillStyle = `${particle.color}${particle.opacity})`;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Add glow effect
+      ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity * 0.3})`;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, particle.size * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1.0;
+    ctx.restore();
   }
 
   spawnIcePillar(x, y) {
