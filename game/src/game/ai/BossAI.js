@@ -312,6 +312,9 @@ export class AbsoluteZeroPattern extends BossPattern {
  * Zephyros Boss AI - Multi-phase boss with fuzzy logic decision making
  * @see docs/AI_REFERENCE.md#zephyros-boss-implementation (lines 875-973)
  */
+ * Zephyros Boss AI - Multi-phase boss with fuzzy logic decision making
+ * @see docs/AI_REFERENCE.md#zephyros-boss-implementation (lines 875-973)
+ */
 export class ZephyrosAI extends PerceptiveEntity {
   constructor(config, gameState, audioManager) {
     super({
