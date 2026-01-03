@@ -87,7 +87,7 @@ function OtterbladeGameContent() {
     // Initialize chapter data
     const chapterId = currentChapter();
     const { manifest, spawnPoint } = initializeChapterData(chapterId);
-
+      const { manifest } = initializeChapterData(chapterId);
     // Initialize quest system
     initializeQuests(manifest, setActiveQuest, setQuestObjectives);
 
