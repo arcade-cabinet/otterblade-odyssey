@@ -51,17 +51,10 @@ rulesets:
       # GAME-SPECIFIC: Require release gate E2E tests
       - type: required_status_checks
         parameters:
-          strict_required_status_checks_policy: false
+          strict_required_status_checks_policy: true
           required_status_checks:
-            - context: "E2E Tests"
-            - context: "Build & Lint"
-      
-      # GAME-SPECIFIC: Require deployment to release environment
-      - type: required_deployments
-        parameters:
-          required_deployment_environments:
-            - release
-      
+            - context: "CI / Lint, test, and analyze"
+    
       # Enable merge queue for CI efficiency
       - type: merge_queue
         parameters:
@@ -86,15 +79,14 @@ environments:
   - name: release
     wait_timer: 0
     deployment_branch_policy:
-      custom_branches:
-        - "*"  # Any branch can deploy to release for E2E testing
+      protected_branches: true  # Only branches configured as protected (e.g., main) can deploy here
   
-  # Production - Actual game deployment (GitHub Pages)
-  - name: production
+  # GitHub Pages - Static site deployment target
+  - name: github-pages
     wait_timer: 0
     reviewers: []  # No manual review needed - automated after release gate passes
     deployment_branch_policy:
-      protected_branches: true  # Only main can deploy to production
+      protected_branches: true  # Pages deploys only from protected branches
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Labels - Game-Specific Labels
