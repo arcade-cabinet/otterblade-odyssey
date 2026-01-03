@@ -176,7 +176,8 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
   if (
     typeof chapterId !== 'number' ||
     !Number.isInteger(chapterId) ||
-    !(chapterId in CHAPTER_FILENAMES)
+    chapterId < 0 ||
+    chapterId >= TOTAL_CHAPTERS
   ) {
     throw new Error(`Invalid chapter ID: ${chapterId}.`);
   }
@@ -724,7 +725,7 @@ export const TOTAL_CHAPTERS = 10;
  * Checks if a chapter ID is valid.
  */
 export function isValidChapterId(chapterId: number): boolean {
-  return Number.isInteger(chapterId) && chapterId >= 0 && chapterId <= 9;
+  return Number.isInteger(chapterId) && chapterId >= 0 && chapterId < TOTAL_CHAPTERS;
 }
 
 /**
