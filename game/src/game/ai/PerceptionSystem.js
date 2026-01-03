@@ -1,12 +1,16 @@
 /**
  * PerceptionSystem.js
- * Vision cones, memory system, hearing per AI.md:673-780
+ * Vision cones, memory system, hearing
+ * 
+ * @see docs/AI.md - High-level perception concepts
+ * @see docs/AI_REFERENCE.md#perception-systems - Complete perception implementation (lines 448-647)
  */
 
 import { Vector3 } from 'yuka';
 
 /**
- * Vision system with field of view (AI.md:673-724)
+ * Vision system with field of view
+ * @see docs/AI_REFERENCE.md#vision-system (lines 452-485)
  */
 export class VisionSystem {
   constructor(owner, fieldOfView = Math.PI * 0.6, range = 300) {
@@ -74,7 +78,8 @@ export class VisionSystem {
 }
 
 /**
- * Memory system for tracking entities (AI.md:673-724)
+ * Memory system for tracking entities
+ * @see docs/AI_REFERENCE.md#memory-system (lines 488-537)
  */
 export class MemorySystem {
   constructor(owner, memorySpan = 3) {
@@ -148,7 +153,8 @@ export class MemorySystem {
 }
 
 /**
- * Sound event for hearing system (AI.md:729-780)
+ * Sound event for hearing system
+ * @see docs/AI_REFERENCE.md#hearing-system (lines 540-590)
  */
 export class SoundEvent {
   constructor(position, loudness, type, source) {
@@ -162,6 +168,7 @@ export class SoundEvent {
 
 /**
  * Hearing system for sound propagation
+ * @see docs/AI_REFERENCE.md#hearing-system (lines 540-590)
  */
 export class HearingSystem {
   constructor() {
@@ -219,7 +226,8 @@ export class HearingSystem {
 }
 
 /**
- * Perceptive enemy with vision and memory (AI.md:669-724)
+ * Perceptive entity with vision, memory, and hearing
+ * @see docs/AI_REFERENCE.md#perceptive-entity-pattern (lines 593-638)
  */
 export class PerceptiveEntity {
   constructor(config) {
