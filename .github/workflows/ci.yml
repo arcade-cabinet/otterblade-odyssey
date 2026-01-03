@@ -85,7 +85,7 @@ jobs:
   claude_auto_fix:
     name: Claude auto-fix on CI failure
     needs: quality
-    if: failure() && github.event_name == 'pull_request'
+    if: needs.quality.result == 'failure' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
