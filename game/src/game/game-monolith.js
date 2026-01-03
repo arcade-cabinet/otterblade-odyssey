@@ -733,111 +733,508 @@ export class Camera {
 
 /**
  * Procedural renderer for Finn (otter protagonist)
- * Based on POC otterblade_odyssey.html proven rendering
+ * Ported from POC otterblade_odyssey.html lines 575-818
+ * Full character with tail wag, breathing, vest, Otterblade, warmth aura
  */
-export function renderFinn(ctx, body, animation = 'idle') {
+export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, warmth: 100, maxWarmth: 100, animFrame: 0 }) {
   const { position, angle } = body;
+  const { animation, facing, warmth, maxWarmth, animFrame } = state;
   
   ctx.save();
   ctx.translate(position.x, position.y);
-  ctx.rotate(angle);
+  if (facing < 0) ctx.scale(-1, 1);
   
-  // Body (brown otter)
-  ctx.fillStyle = '#8B4513';
+  const frame = Math.floor(animFrame / 10) % 4;
+  const breathe = Math.sin(animFrame * 0.05) * 2;
+  
+  // Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
   ctx.beginPath();
-  ctx.ellipse(0, 0, 14, 20, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 28, 20, 6, 0, 0, Math.PI * 2);
   ctx.fill();
   
-  // Belly (cream colored)
-  ctx.fillStyle = '#F5DEB3';
+  // Glow aura (warmth indicator)
+  const warmthGlow = warmth / maxWarmth;
+  const glowGradient = ctx.createRadialGradient(0, -10, 5, 0, -10, 40);
+  glowGradient.addColorStop(0, `rgba(230, 126, 34, ${warmthGlow * 0.3})`);
+  glowGradient.addColorStop(1, 'rgba(230, 126, 34, 0)');
+  ctx.fillStyle = glowGradient;
   ctx.beginPath();
-  ctx.ellipse(0, 2, 10, 15, 0, 0, Math.PI * 2);
+  ctx.arc(0, -10, 40, 0, Math.PI * 2);
   ctx.fill();
+  
+  // Tail with wag animation
+  ctx.fillStyle = '#8B6F47';
+  ctx.strokeStyle = '#6B5D4F';
+  ctx.lineWidth = 2;
+  const tailWag = Math.sin(frame * Math.PI / 2) * 8;
+  ctx.beginPath();
+  ctx.moveTo(-8, 10);
+  ctx.quadraticCurveTo(-20 + tailWag, 15, -25, 20);
+  ctx.quadraticCurveTo(-28 + tailWag, 22, -25, 25);
+  ctx.quadraticCurveTo(-15 + tailWag, 20, -8, 15);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  
+  // Back leg with walking animation
+  ctx.fillStyle = '#8B6F47';
+  if (animation === 'walking') {
+    const legSwing = Math.sin(frame * Math.PI / 2 + Math.PI) * 8;
+    ctx.fillRect(-12 - legSwing, 12, 7, 16);
+    ctx.beginPath();
+    ctx.arc(-8 - legSwing, 28, 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.fillRect(-12, 12, 7, 16);
+    ctx.beginPath();
+    ctx.arc(-8, 28, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Body (otter torso) with breathing
+  ctx.fillStyle = '#8B6F47';
+  ctx.strokeStyle = '#6B5D4F';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0 + breathe, 16, 22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Chest fur (lighter tan)
+  ctx.fillStyle = '#D4A574';
+  ctx.beginPath();
+  ctx.ellipse(2, 2 + breathe, 10, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Leather vest
+  ctx.fillStyle = '#654321';
+  ctx.beginPath();
+  ctx.moveTo(-10, -8 + breathe);
+  ctx.lineTo(-8, 8 + breathe);
+  ctx.lineTo(8, 8 + breathe);
+  ctx.lineTo(10, -8 + breathe);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Belt with golden buckle
+  ctx.fillStyle = '#5D4E37';
+  ctx.fillRect(-10, 8 + breathe, 20, 4);
+  ctx.fillStyle = '#F4D03F';
+  ctx.fillRect(-2, 8 + breathe, 4, 4);
+  
+  // Front leg with walking animation
+  ctx.fillStyle = '#8B6F47';
+  if (animation === 'walking') {
+    const legSwing = Math.sin(frame * Math.PI / 2) * 8;
+    ctx.fillRect(5 + legSwing, 12, 7, 16);
+    ctx.beginPath();
+    ctx.arc(8 + legSwing, 28, 4, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.fillRect(5, 12, 7, 16);
+    ctx.beginPath();
+    ctx.arc(8, 28, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
   
   // Head
-  ctx.fillStyle = '#8B4513';
+  ctx.fillStyle = '#8B6F47';
+  ctx.strokeStyle = '#6B5D4F';
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.arc(0, -20, 12, 0, Math.PI * 2);
+  ctx.arc(0, -18 + breathe, 11, 0, Math.PI * 2);
   ctx.fill();
+  ctx.stroke();
   
-  // Face details
-  ctx.fillStyle = '#F5DEB3';
+  // Snout
+  ctx.fillStyle = '#D4A574';
   ctx.beginPath();
-  ctx.ellipse(0, -18, 8, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Eyes
-  ctx.fillStyle = '#000';
-  ctx.beginPath();
-  ctx.arc(-4, -22, 2, 0, Math.PI * 2);
-  ctx.arc(4, -22, 2, 0, Math.PI * 2);
+  ctx.ellipse(8, -16 + breathe, 6, 5, -0.3, 0, Math.PI * 2);
   ctx.fill();
   
   // Nose
-  ctx.fillStyle = '#654321';
+  ctx.fillStyle = '#2C3E50';
   ctx.beginPath();
-  ctx.arc(0, -16, 2, 0, Math.PI * 2);
+  ctx.arc(12, -16 + breathe, 2, 0, Math.PI * 2);
   ctx.fill();
   
-  // Otterblade (sword on back)
-  ctx.strokeStyle = '#C0C0C0';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(-8, -10);
-  ctx.lineTo(-8, -25);
-  ctx.stroke();
+  // Whiskers
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(8, -16 + i * 2 + breathe);
+    ctx.lineTo(18, -15 + i * 2 + breathe);
+    ctx.stroke();
+  }
   
-  // Sword hilt
-  ctx.fillStyle = '#8B4513';
-  ctx.fillRect(-10, -27, 4, 4);
+  // Eyes
+  ctx.fillStyle = '#2C3E50';
+  ctx.beginPath();
+  ctx.arc(-3, -20 + breathe, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(3, -20 + breathe, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Eye gleam
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.fillRect(-4, -21 + breathe, 1, 1);
+  ctx.fillRect(2, -21 + breathe, 1, 1);
+  
+  // Ears
+  ctx.fillStyle = '#8B6F47';
+  ctx.beginPath();
+  ctx.arc(-7, -24 + breathe, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(7, -24 + breathe, 4, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Back arm
+  ctx.fillStyle = '#8B6F47';
+  const armAngle = animation === 'walking' ? Math.sin(frame * Math.PI / 2 + Math.PI) * 0.3 : 0;
+  ctx.save();
+  ctx.translate(-10, -5 + breathe);
+  ctx.rotate(armAngle);
+  ctx.fillRect(-3, 0, 6, 15);
+  ctx.beginPath();
+  ctx.arc(0, 15, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  
+  // The Otterblade (when attacking)
+  if (animation === 'attacking') {
+    ctx.save();
+    ctx.translate(18, -8 + breathe);
+    ctx.rotate(-Math.PI / 3);
+    
+    // Blade glow
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#E67E22';
+    
+    // Blade with gradient
+    const bladeGradient = ctx.createLinearGradient(0, -30, 0, 0);
+    bladeGradient.addColorStop(0, '#ECF0F1');
+    bladeGradient.addColorStop(0.5, '#BDC3C7');
+    bladeGradient.addColorStop(1, '#95A5A6');
+    ctx.fillStyle = bladeGradient;
+    ctx.fillRect(-3, -30, 6, 30);
+    
+    // Blade edge gleam
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillRect(-1, -30, 2, 30);
+    
+    // Everember glow on blade
+    ctx.fillStyle = 'rgba(230, 126, 34, 0.5)';
+    ctx.fillRect(-2, -30, 4, 15);
+    
+    // Guard
+    ctx.fillStyle = '#5D4E37';
+    ctx.fillRect(-6, 0, 12, 3);
+    
+    // Handle
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(-2, 3, 4, 10);
+    
+    // Pommel
+    ctx.fillStyle = '#F4D03F';
+    ctx.beginPath();
+    ctx.arc(0, 13, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Legacy marks on handle
+    ctx.strokeStyle = '#2C3E50';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-1, 5 + i * 2);
+      ctx.lineTo(1, 5 + i * 2);
+      ctx.stroke();
+    }
+    
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+  
+  // Front arm
+  ctx.fillStyle = '#8B6F47';
+  const frontArmAngle = animation === 'walking' ? Math.sin(frame * Math.PI / 2) * 0.3 : 
+                        animation === 'attacking' ? -Math.PI / 4 : 0;
+  ctx.save();
+  ctx.translate(10, -5 + breathe);
+  ctx.rotate(frontArmAngle);
+  ctx.fillRect(-3, 0, 6, 15);
+  ctx.beginPath();
+  ctx.arc(0, 15, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  
+  // Roll indicator
+  if (animation === 'rolling') {
+    ctx.globalAlpha = 0.7;
+    ctx.strokeStyle = '#5DADE2';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, 30, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   
   ctx.restore();
 }
 
 /**
  * Procedural renderer for enemies (Galeborn)
+ * Ported from POC otterblade_odyssey.html lines 821-1010
+ * Scout (stoat), Warrior (larger), Boss (massive) with cold auras
  */
-export function renderEnemy(ctx, body, enemyType = 'scout') {
+export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 0 }) {
   const { position, angle } = body;
+  const { enemyType, animFrame } = state;
   
   ctx.save();
   ctx.translate(position.x, position.y);
-  ctx.rotate(angle);
   
-  // Different colors per enemy type
-  const colors = {
-    scout: { body: '#4A5568', eyes: '#E53E3E' },
-    warrior: { body: '#2D3748', eyes: '#F56565' },
-    boss: { body: '#1A202C', eyes: '#FC8181' },
-  };
+  const frame = Math.floor(animFrame / 15) % 3;
   
-  const color = colors[enemyType] || colors.scout;
-  
-  // Body (shadowy creature)
-  ctx.fillStyle = color.body;
+  // Cold aura (all Galeborn have this)
+  const coldGradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 30);
+  coldGradient.addColorStop(0, 'rgba(93, 173, 226, 0.3)');
+  coldGradient.addColorStop(1, 'rgba(93, 173, 226, 0)');
+  ctx.fillStyle = coldGradient;
   ctx.beginPath();
-  ctx.ellipse(0, 0, 12, 18, 0, 0, Math.PI * 2);
+  ctx.arc(0, 0, 30, 0, Math.PI * 2);
   ctx.fill();
   
-  // Glowing eyes
-  ctx.fillStyle = color.eyes;
-  ctx.shadowBlur = 10;
-  ctx.shadowColor = color.eyes;
+  // Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   ctx.beginPath();
-  ctx.arc(-4, -8, 3, 0, Math.PI * 2);
-  ctx.arc(4, -8, 3, 0, Math.PI * 2);
+  ctx.ellipse(0, 20, 18, 5, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.shadowBlur = 0;
   
-  // Claws/weapons
-  ctx.strokeStyle = color.body;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(-10, 10);
-  ctx.lineTo(-15, 15);
-  ctx.moveTo(10, 10);
-  ctx.lineTo(15, 15);
-  ctx.stroke();
+  if (enemyType === 'scout') {
+    // Galeborn Scout (Stoat/Weasel design)
+    ctx.fillStyle = '#7F8C8D';
+    ctx.strokeStyle = '#5D6D7E';
+    ctx.lineWidth = 2;
+    
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(0, -5, 12, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Head
+    ctx.beginPath();
+    ctx.ellipse(0, -20, 8, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Ears
+    ctx.beginPath();
+    ctx.arc(-5, -26, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(5, -26, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Cold eyes (glowing blue)
+    ctx.fillStyle = '#5DADE2';
+    ctx.fillRect(-3, -21, 2, 3);
+    ctx.fillRect(1, -21, 2, 3);
+    
+    // Frost breath particles
+    ctx.fillStyle = 'rgba(236, 240, 241, 0.5)';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(8 + i * 4, -18 + Math.random() * 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Arms with spear
+    ctx.strokeStyle = '#5D6D7E';
+    ctx.lineWidth = 3;
+    const armSwing = Math.sin(frame * Math.PI) * 0.2;
+    ctx.save();
+    ctx.rotate(armSwing);
+    ctx.strokeStyle = '#5D4E37';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(8, -10);
+    ctx.lineTo(20, -15);
+    ctx.stroke();
+    // Spear tip
+    ctx.fillStyle = '#7F8C8D';
+    ctx.beginPath();
+    ctx.moveTo(20, -15);
+    ctx.lineTo(25, -17);
+    ctx.lineTo(23, -13);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    
+  } else if (enemyType === 'warrior') {
+    // Galeborn Warrior (larger, more menacing)
+    ctx.fillStyle = '#5D6D7E';
+    ctx.strokeStyle = '#34495E';
+    ctx.lineWidth = 2.5;
+    
+    // Larger body
+    ctx.beginPath();
+    ctx.ellipse(0, -5, 16, 24, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Head
+    ctx.beginPath();
+    ctx.ellipse(0, -25, 10, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Horned ears
+    ctx.beginPath();
+    ctx.moveTo(-7, -32);
+    ctx.lineTo(-9, -38);
+    ctx.lineTo(-5, -33);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(7, -32);
+    ctx.lineTo(9, -38);
+    ctx.lineTo(5, -33);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Fierce cold eyes
+    ctx.fillStyle = '#3498DB';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#3498DB';
+    ctx.fillRect(-4, -26, 3, 4);
+    ctx.fillRect(1, -26, 3, 4);
+    ctx.shadowBlur = 0;
+    
+    // Ice crystals on body
+    ctx.fillStyle = 'rgba(174, 214, 241, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(-8, -10);
+    ctx.lineTo(-6, -15);
+    ctx.lineTo(-4, -10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(4, -5);
+    ctx.lineTo(6, -10);
+    ctx.lineTo(8, -5);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Large weapon
+    ctx.strokeStyle = '#2C3E50';
+    ctx.lineWidth = 4;
+    const weaponSwing = Math.sin(frame * Math.PI) * 0.3;
+    ctx.save();
+    ctx.rotate(weaponSwing);
+    ctx.beginPath();
+    ctx.moveTo(10, -15);
+    ctx.lineTo(28, -20);
+    ctx.stroke();
+    // Weapon head
+    ctx.fillStyle = '#2C3E50';
+    ctx.beginPath();
+    ctx.moveTo(28, -20);
+    ctx.lineTo(34, -23);
+    ctx.lineTo(32, -17);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    
+  } else if (enemyType === 'boss') {
+    // Galeborn Boss (massive, terrifying)
+    ctx.fillStyle = '#34495E';
+    ctx.strokeStyle = '#1A202C';
+    ctx.lineWidth = 3;
+    
+    // Massive body
+    ctx.beginPath();
+    ctx.ellipse(0, -5, 24, 32, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Large head
+    ctx.beginPath();
+    ctx.ellipse(0, -32, 14, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Crown-like horns
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * 8, -42);
+      ctx.lineTo(i * 10, -52);
+      ctx.lineTo(i * 6, -43);
+      ctx.closePath();
+      ctx.fill();
+    }
+    
+    // Piercing cold eyes with intense glow
+    ctx.fillStyle = '#2980B9';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#2980B9';
+    ctx.fillRect(-6, -34, 4, 5);
+    ctx.fillRect(2, -34, 4, 5);
+    ctx.shadowBlur = 0;
+    
+    // Eye gleam
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fillRect(-5, -35, 2, 2);
+    ctx.fillRect(3, -35, 2, 2);
+    
+    // Frost armor plates
+    ctx.fillStyle = 'rgba(189, 195, 199, 0.7)';
+    ctx.strokeStyle = '#BDC3C7';
+    ctx.lineWidth = 1;
+    for (let i = -2; i <= 2; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * 6, -15);
+      ctx.lineTo(i * 7 - 3, -10);
+      ctx.lineTo(i * 7 + 3, -10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    
+    // Frost breath (constant for boss)
+    ctx.fillStyle = 'rgba(236, 240, 241, 0.6)';
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.arc(12 + i * 5, -30 + Math.random() * 4, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Massive clawed arms
+    ctx.strokeStyle = '#1A202C';
+    ctx.lineWidth = 6;
+    const bossArmSwing = Math.sin(frame * Math.PI) * 0.15;
+    ctx.save();
+    ctx.rotate(bossArmSwing);
+    ctx.beginPath();
+    ctx.moveTo(15, -20);
+    ctx.lineTo(32, -25);
+    ctx.stroke();
+    // Claws
+    ctx.fillStyle = '#2C3E50';
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(32 + i * 3, -25);
+      ctx.lineTo(38 + i * 3, -28);
+      ctx.lineTo(36 + i * 3, -22);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
   
   ctx.restore();
 }
@@ -1310,10 +1707,10 @@ export class EnemyAI {
     return this.hp;
   }
 
-  render(ctx) {
+  render(ctx, animFrame = 0) {
     if (this.state === 'dead') return;
     
-    renderEnemy(ctx, this.body, this.type);
+    renderEnemy(ctx, this.body, { enemyType: this.type, animFrame });
     
     // Health bar
     const { position } = this.body;
