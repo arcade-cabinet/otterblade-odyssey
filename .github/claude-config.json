@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Claude PR Management Configuration",
+  "description": "Configuration for Claude as the central PR manager and orchestrator",
+  
+  "pr_management": {
+    "description": "PR lifecycle management settings",
+    "auto_approve_after_passing_checks": true,
+    "auto_merge_strategy": "squash",
+    "required_approvals": 1,
+    "merge_queue_enabled": true,
+    
+    "special_branches": {
+      "description": "Branch patterns with special handling",
+      "copilot/*": {
+        "strategy": "collaborative",
+        "description": "PRs from GitHub Copilot - Claude coordinates via comments",
+        "agent": "@copilot",
+        "auto_merge": false,
+        "requires_agent_confirmation": true
+      },
+      "jules/*": {
+        "strategy": "collaborative",
+        "description": "PRs from Google Jules - Claude coordinates via comments",
+        "agent": "@jules",
+        "auto_merge": false,
+        "requires_agent_confirmation": true
+      }
+    },
+    
+    "default_strategy": {
+      "strategy": "autonomous",
+      "description": "Standard PRs - Claude has full authority to fix and merge",
+      "auto_merge": true,
+      "requires_agent_confirmation": false
+    }
+  },
+  
+  "ai_agents": {
+    "description": "Trusted AI agents whose feedback should be processed",
+    "trusted": [
+      "codeql",
+      "coderabbit",
+      "coderabbitai",
+      "gemini",
+      "copilot",
+      "copilot-swe-agent",
+      "jules",
+      "google-labs-jules",
+      "dependabot",
+      "renovate"
+    ],
+    
+    "feedback_processing": {
+      "threshold": "actionable",
+      "description": "Only process feedback that is actionable and realistic",
+      "synthesis_required": true,
+      "priority_levels": ["critical", "high", "medium", "low"],
+      "auto_fix_enabled": true,
+      "max_fix_attempts": 3
+    },
+    
+    "feedback_triggers": {
+      "description": "Events that trigger Claude auto-heal",
+      "triggers": [
+        "issue_comment",
+        "pull_request_review",
+        "check_run_failure",
+        "workflow_run_failure",
+        "code_scanning_alert"
+      ]
+    }
+  },
+  
+  "healing": {
+    "description": "Continuous auto-healing configuration",
+    "enabled": true,
+    "continuous": true,
+    "max_iterations": 50,
+    "timeout_minutes": 45,
+    "retry_failed_checks": true,
+    "flaky_test_detection": true,
+    
+    "strategies": {
+      "collaborative": {
+        "description": "For copilot/* and jules/* branches",
+        "mode": "coordinate",
+        "actions": ["synthesize", "comment", "monitor"],
+        "no_direct_changes": true
+      },
+      "autonomous": {
+        "description": "For standard PRs",
+        "mode": "fix",
+        "actions": ["synthesize", "fix", "test", "commit", "verify"],
+        "direct_changes_allowed": true
+      }
+    }
+  },
+  
+  "models": {
+    "description": "Claude models used for different tasks",
+    "pr_manager": {
+      "model": "claude-haiku-4-5-20251001",
+      "version": "4.5",
+      "description": "Fast, cost-effective for PR orchestration - matches Sonnet 4 coding at 1/3 cost",
+      "max_turns": 50,
+      "pricing": {
+        "input": "$1 per million tokens",
+        "output": "$5 per million tokens"
+      },
+      "capabilities": {
+        "swe_bench_score": "73%",
+        "context_window": "200K tokens",
+        "max_output": "64K tokens",
+        "speed": "2x faster than Sonnet"
+      }
+    },
+    "auto_heal": {
+      "model": "claude-haiku-4-5-20251001",
+      "version": "4.5",
+      "description": "Fast, cost-effective for healing tasks",
+      "max_turns": 30
+    },
+    "initial_review": {
+      "model": "claude-haiku-4-5-20251001",
+      "version": "4.5",
+      "description": "Fast initial reviews with inline comments",
+      "max_turns": 20
+    }
+  },
+  
+  "success_criteria": {
+    "description": "Criteria that must be met before PR approval and merge",
+    "required": [
+      "all_workflows_passing",
+      "all_ai_feedback_addressed",
+      "no_security_vulnerabilities",
+      "code_quality_standards_met",
+      "tests_passing",
+      "no_merge_conflicts"
+    ],
+    
+    "workflow_checks": {
+      "required_workflows": ["CI", "Build", "Test"],
+      "optional_workflows": ["Lint", "E2E"],
+      "allow_skipped": false
+    },
+    
+    "security_checks": {
+      "max_critical_vulnerabilities": 0,
+      "max_high_vulnerabilities": 0,
+      "allow_medium_with_justification": true
+    }
+  },
+  
+  "notifications": {
+    "description": "Notification settings for PR events",
+    "pr_comment_on_approval": true,
+    "pr_comment_on_merge": true,
+    "pr_comment_on_issues_found": true,
+    "tag_original_author": true,
+    "progress_updates": true
+  },
+  
+  "permissions": {
+    "description": "Required GitHub permissions for workflows",
+    "pr_manager": {
+      "contents": "write",
+      "pull-requests": "write",
+      "issues": "write",
+      "checks": "read",
+      "actions": "read",
+      "id-token": "write"
+    },
+    "auto_heal": {
+      "contents": "write",
+      "pull-requests": "write",
+      "actions": "read",
+      "checks": "read",
+      "id-token": "write"
+    },
+    "initial_review": {
+      "contents": "read",
+      "pull-requests": "write",
+      "id-token": "write",
+      "actions": "read"
+    }
+  },
+  
+  "version": "1.0.0",
+  "last_updated": "2025-01-03"
+}
