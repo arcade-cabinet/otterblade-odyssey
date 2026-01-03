@@ -64,3 +64,10 @@ replit.nix
 
 # Legacy Replit static assets removed - game uses procedural generation
 attached_assets/
+
+# gemini-cli settings
+.gemini/
+
+# GitHub App credentials
+gha-creds-*.json
+

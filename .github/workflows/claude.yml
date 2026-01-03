@@ -1,73 +1,58 @@
-name: Claude On-Demand Review/Fix
+name: Claude Code
 
 on:
-  workflow_dispatch:
-    inputs:
-      target-ref:
-        description: Git ref (branch or SHA) to review or fix
-        required: true
-        type: string
-        default: main
-      mode:
-        description: Choose Claude mode
-        required: true
-        type: choice
-        options:
-          - review
-          - fix
-        default: review
-      instructions:
-        description: Extra context or goals for Claude
-        required: false
-        type: string
-
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  actions: read
-  id-token: write
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read # Required for Claude to read CI results on PRs
     steps:
-      - name: Checkout target ref
-        uses: actions/checkout@48586b01ab3a86f14e6bb9d1dd4167024b2d35c5 # v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.target-ref }}
-          fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN }}
-
-      - name: Read .nvmrc
-        id: node-version
-        run: echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@a5f1fc9265b0b1f4849b6a9f42c08c37d80c08d5 # v4.1.0
-        with:
-          version: 10.12.1
-          run_install: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
-        with:
-          node-version: ${{ steps.node-version.outputs.version }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          fetch-depth: 1
 
       - name: Run Claude Code
-        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        id: claude
+        uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
-          prompt: |
-            /${{ inputs.mode }}
-            Target ref: ${{ inputs.target-ref }}
-            Repository: ${{ github.repository }}
 
-            ${{ inputs.instructions }}
-          claude_args: >-
-            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(node:*),Bash(git:*),Bash(gh:*)"
+          # Optional: Customize the trigger phrase (default: @claude)
+          # trigger_phrase: "/claude"
+
+          # Optional: Trigger when specific user is assigned to an issue
+          # assignee_trigger: "claude-bot"
+
+          # Optional: Configure Claude's behavior with CLI arguments
+          # claude_args: |
+          #   --model claude-opus-4-1-20250805
+          #   --max-turns 10
+          #   --allowedTools "Bash(npm install),Bash(npm run build),Bash(npm run test:*),Bash(npm run lint:*)"
+          #   --system-prompt "Follow our coding standards. Ensure all new code has tests. Use TypeScript for new files."
+
+          # Optional: Advanced settings configuration
+          # settings: |
+          #   {
+          #     "env": {
+          #       "NODE_ENV": "test"
+          #     }
+          #   }

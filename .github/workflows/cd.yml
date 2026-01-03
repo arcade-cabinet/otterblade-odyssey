@@ -1,14 +1,9 @@
 name: CD
 
 on:
-  workflow_run:
-    # NOTE: This CD workflow depends on the CI workflow being named exactly "CI".
-    #       Keep this in sync with the "name:" in .github/workflows/ci.yml – if the CI
-    #       workflow's `name:` is changed, update the list below to match.
-    workflows: ["CI"]
+  push:
     branches: [main]
-    types: [completed]
-
+    
 concurrency:
   group: cd-${{ github.event.workflow_run.head_branch || 'main' }}
   cancel-in-progress: false
@@ -81,7 +76,6 @@ jobs:
 
   deploy:
     needs: e2e
-    if: needs.e2e.result == 'success'
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     environment:
