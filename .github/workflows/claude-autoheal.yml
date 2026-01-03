@@ -11,8 +11,6 @@ on:
     types: [submitted]
   check_run:
     types: [completed]
-  workflow_run:
-    types: [completed]
 
 # No workflow-level permissions - job level only
 permissions: {}
