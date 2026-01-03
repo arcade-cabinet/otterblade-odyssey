@@ -400,7 +400,26 @@ export class GameState {
       const data = localStorage.getItem(`otterblade_save_${slot}`);
       if (!data) return false;
 
-      this.deserialize(JSON.parse(data));
+  load(slot = 'default') {
+    try {
+      const data = localStorage.getItem(`otterblade_save_${slot}`);
+      if (!data) return false;
+
+      const parsed = JSON.parse(data);
+      
+      // Basic validation
+      if (typeof parsed !== 'object' || parsed === null) {
+        console.error('Invalid save data format');
+        return false;
+      }
+
+      this.deserialize(parsed);
+      return true;
+    } catch (error) {
+      console.error('Failed to load game:', error);
+      return false;
+    }
+  }
       return true;
     } catch (error) {
       console.error('Failed to load game:', error);
