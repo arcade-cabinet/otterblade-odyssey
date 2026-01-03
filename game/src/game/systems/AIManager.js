@@ -19,6 +19,13 @@ import {
 } from 'yuka';
 
 /**
+ * Pathfinding constants
+ */
+const PATH_RECALC_INTERVAL = 60; // frames (~1 second at 60fps)
+const TARGET_MOVEMENT_THRESHOLD = 30; // units - recalculate if target moves this far
+const LINE_OF_SIGHT_DISTANCE = 150; // units - max distance for direct path
+
+/**
  * Base class for typed states with better TypeScript-like behavior
  */
 class TypedState extends State {
@@ -118,7 +125,7 @@ class ChaseState extends TypedState {
     super();
     this.seekBehavior = new SeekBehavior();
     this.followPathBehavior = null;
-    this.pathRecalcInterval = 60; // frames (~1 second at 60fps)
+    this.pathRecalcInterval = PATH_RECALC_INTERVAL;
     this.pathAge = 0;
     this.currentPath = null;
     this.lastTargetPosition = null;
@@ -163,7 +170,8 @@ class ChaseState extends TypedState {
 
     // Check if we need to recalculate path
     const targetMoved =
-      this.lastTargetPosition && this.lastTargetPosition.distanceTo(enemy.target.position) > 30;
+      this.lastTargetPosition &&
+      this.lastTargetPosition.distanceTo(enemy.target.position) > TARGET_MOVEMENT_THRESHOLD;
     const needsNewPath =
       !this.currentPath || this.pathAge >= this.pathRecalcInterval || targetMoved;
 
@@ -836,7 +844,7 @@ class AIManager {
     const distance = from.distanceTo(to);
     // For now, consider points close together to have line of sight
     // In a full implementation, this would check for obstacles
-    return distance < 150; // Max direct path distance
+    return distance < LINE_OF_SIGHT_DISTANCE;
   }
 
   /**
@@ -872,7 +880,10 @@ class AIManager {
 
   addEnemy(id, config) {
     const enemy = new EnemyAI(config);
-    enemy.aiManager = this; // Reference to AIManager for pathfinding
+    // Inject AIManager reference for pathfinding access
+    // Note: This creates coupling but is necessary for state machine access to pathfinding
+    // Alternative would be callback-based approach, but this is simpler and more direct
+    enemy.aiManager = this;
     this.enemies.set(id, enemy);
     this.entityManager.add(enemy);
 
