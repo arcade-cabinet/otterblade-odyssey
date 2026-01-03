@@ -53,7 +53,7 @@ rulesets:
         parameters:
           strict_required_status_checks_policy: true
           required_status_checks:
-            - context: "CI / quality"
+            - context: "CI / Lint, test, and analyze"
     
       # Enable merge queue for CI efficiency
       - type: merge_queue
