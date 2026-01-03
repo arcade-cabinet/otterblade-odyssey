@@ -96,18 +96,16 @@ export function buildLevel(chapterId, engine) {
   // Build moving platforms
   if (manifest.level?.movingPlatforms) {
     for (const platformDef of manifest.level.movingPlatforms) {
-      const movingPlatform = new MovingPlatform(
-        platformDef.startX,
-        platformDef.startY,
-        platformDef.endX,
-        platformDef.endY,
-        {
-          width: platformDef.width,
-          height: platformDef.height,
-          speed: platformDef.speed || 2,
-          pauseDuration: platformDef.pauseDuration || 1000,
-        }
-      );
+      const movingPlatform = new MovingPlatform({
+        startX: platformDef.startX,
+        startY: platformDef.startY,
+        endX: platformDef.endX,
+        endY: platformDef.endY,
+        width: platformDef.width,
+        height: platformDef.height,
+        speed: platformDef.speed || 2,
+        pauseDuration: platformDef.pauseDuration || 1000,
+      });
       level.movingPlatforms.push(movingPlatform);
       World.add(engine.world, movingPlatform.body);
     }
