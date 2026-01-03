@@ -29,20 +29,23 @@ import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './
 let ddlLoader: typeof import('../../ddl/loader') | null = null;
 
 // Kick off dynamic import without using top-level await to maintain SSR/build compatibility.
+// Only attempt the import in browser context to avoid unnecessary failed imports during SSR/build.
 // NOTE: This import runs asynchronously at module initialization. Calls to
 // `loadChapterManifest(chapterId)` that occur before this import resolves will
 // intentionally fall back to static imports for that invocation. Once the import
 // completes, subsequent `loadChapterManifest` calls may use the DDL loader cache
 // via `ddlLoader.getChapterManifestSync`. This timing-dependent behavior is
 // expected and is part of the compatibility bridge between static and DDL loading.
-import('../../ddl/loader')
-  .then((module) => {
-    ddlLoader = module;
-  })
-  .catch(() => {
-    // DDL loader not available (e.g. SSR/build context) - will always use static imports
-    console.log('[chapter-loaders] Using static imports (SSR/build mode)');
-  });
+if (typeof window !== 'undefined') {
+  import('../../ddl/loader')
+    .then((module) => {
+      ddlLoader = module;
+    })
+    .catch(() => {
+      // DDL loader not available - will use static imports
+      console.log('[chapter-loaders] Using static imports (DDL loader unavailable)');
+    });
+}
 /** All chapter data indexed by ID */
 const CHAPTER_DATA_MAP: Record<number, unknown> = {
   0: chapter0Data,
