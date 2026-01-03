@@ -1,6 +1,4 @@
 import { World } from 'miniplex';
-import createReactAPI from 'miniplex-react';
-import type { Object3D } from 'three';
 import type { Chapter, StoryEventType } from '../constants';
 
 export type Entity = {
@@ -19,8 +17,6 @@ export type Entity = {
   platform?: { width: number; height: number };
   checkpoint?: { roomIndex: number };
   shard?: true;
-
-  object3d?: Object3D;
 
   facingRight?: boolean;
   grounded?: boolean;
@@ -80,8 +76,6 @@ export type Entity = {
 };
 
 export const world = new World<Entity>();
-
-export const ECS = createReactAPI(world);
 
 export const queries = {
   players: world.with('player', 'position'),
