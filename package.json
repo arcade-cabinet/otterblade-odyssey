@@ -75,7 +75,7 @@
     "vite-plugin-solid": "^2.11.10",
     "wouter": "^3.9.0",
     "ws": "^8.18.3",
-    "yuka": "^0.9.0",
+    "yuka": "^0.7.8",
     "zod": "^3.25.76",
     "zod-validation-error": "^3.5.4",
     "zustand": "^5.0.9"
