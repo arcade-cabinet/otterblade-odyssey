@@ -351,26 +351,282 @@ describe('DDL Loader', () => {
 
 **Current test coverage**: 7.32% (needs improvement to 80%+)
 
+### Troubleshooting
+
+#### Common Issues and Solutions
+
+**1. "Chapter X not loaded. Call preloadManifests() first"**
+
+**Cause**: Attempting to use sync accessor before data is loaded.
+
+**Solution**:
+```javascript
+// Ensure preload completes before using sync accessors
+await preloadManifests();
+const chapter = getChapterManifestSync(0); // Now safe
+```
+
+**2. "Failed to fetch manifest at /data/manifests/...": 404**
+
+**Cause**: Manifest file missing from public directory.
+
+**Solution**:
+```bash
+# Verify manifest files exist
+ls game/public/data/manifests/chapters/
+ls game/public/data/manifests/*.json
+
+# Rebuild if missing
+pnpm build
+```
+
+**3. "Invalid JSON in manifest"**
+
+**Cause**: Malformed JSON file (syntax error, trailing comma, etc.).
+
+**Solution**:
+```bash
+# Validate JSON syntax
+cat game/public/data/manifests/chapter-0.json | jq .
+
+# Fix JSON errors, then clear cache
+clearManifestCache(); // In browser console
+```
+
+**4. "Corrupted manifest in cache"**
+
+**Cause**: Data in cache failed validation (new in this PR - runtime type guards).
+
+**Solution**:
+```javascript
+// Clear cache and reload
+import { clearManifestCache, preloadManifests } from '../ddl/loader';
+
+clearManifestCache();
+await preloadManifests();
+```
+
+**5. Loading screen stuck at "Loading manifests..."**
+
+**Cause**: Network request hung or manifest file too large.
+
+**Solution**:
+```javascript
+// Check browser console for fetch errors
+// Check network tab for failed requests
+
+// Add timeout to preload
+const timeoutPromise = new Promise((_, reject) =>
+  setTimeout(() => reject(new Error('Preload timeout')), 10000)
+);
+
+try {
+  await Promise.race([preloadManifests(), timeoutPromise]);
+} catch (error) {
+  console.error('Preload failed:', error);
+  // Show error UI
+}
+```
+
+#### Debugging Tips
+
+**Check Cache State**:
+```javascript
+import { getCacheStats } from '../ddl/loader';
+const stats = getCacheStats();
+console.log('Cache size:', stats.size);
+console.log('Cached keys:', stats.keys);
+// Expected: size = 19 (10 chapters + 9 manifests)
+```
+
+**Inspect Loaded Manifest**:
+```javascript
+const chapter = getChapterManifestSync(0);
+console.log('Chapter:', {
+  id: chapter.id,
+  name: chapter.name,
+  hasLevel: !!chapter.level,
+  segmentCount: chapter.level?.segments?.length
+});
+```
+
+**Monitor Fetch Requests**:
+```javascript
+// Track manifest fetches
+performance.getEntriesByType('resource')
+  .filter(r => r.name.includes('/data/manifests/'))
+  .forEach(r => console.log(`${r.name}: ${r.duration}ms`));
+```
+
+**Test Validation**:
+```javascript
+import { ChapterManifestSchema } from '../game/data/manifest-schemas';
+
+const testData = { /* your test object */ };
+const result = ChapterManifestSchema.safeParse(testData);
+if (!result.success) {
+  console.error('Validation errors:', result.error.issues);
+}
+```
+
 ### Migration from Static Imports
+
+#### When to Use DDL Loader vs. Static Imports
+
+**Use DDL Loader** (Recommended):
+- ✅ Runtime content loading (dynamic chapters, enemies)
+- ✅ Hot reloading during development
+- ✅ A/B testing different manifests
+- ✅ Deterministic testing with fixtures
+- ✅ Keeping manifests out of bundle (smaller JS files)
+
+**Use Static Imports** (Legacy):
+- ⚠️ SSR/SSG pre-rendering (Astro build time)
+- ⚠️ TypeScript strict type checking at compile time
+- ⚠️ Compatibility with old code (temporary)
+
+**Note**: The compatibility bridge in `chapter-loaders.ts` supports both patterns during migration.
+
+#### Migration Steps
+
+**Step 1: Replace Static Imports**
 
 **Before:**
 ```javascript
 import chapter0 from '@data/manifests/chapters/chapter-0-the-calling.json';
+import enemiesData from '@data/manifests/enemies.json';
 
 function loadLevel() {
   buildLevel(chapter0);
+  spawnEnemies(enemiesData);
 }
 ```
 
 **After:**
 ```javascript
-import { getChapterManifestSync } from '../ddl/loader';
+import { getChapterManifestSync, getEnemiesManifestSync } from '../ddl/loader';
 
 function loadLevel() {
   const chapter0 = getChapterManifestSync(0);
+  const enemiesData = getEnemiesManifestSync();
+
   buildLevel(chapter0);
+  spawnEnemies(enemiesData);
 }
 ```
+
+**Step 2: Add Preload to Game Initialization**
+
+```javascript
+import { preloadManifests } from '../ddl/loader';
+
+async function initGame() {
+  // Show loading screen
+  showLoadingScreen();
+
+  // Preload all manifests
+  await preloadManifests({
+    manifestTypes: ['chapters', 'enemies', 'npcs', 'sprites'],
+    logProgress: true
+  });
+
+  // Hide loading screen
+  hideLoadingScreen();
+
+  // Now safe to use sync accessors
+  startGame();
+}
+```
+
+**Step 3: Update Solid.js Components**
+
+```javascript
+import { createResource } from 'solid-js';
+import { preloadManifests } from '../ddl/loader';
+
+function GameComponent() {
+  const [manifestsLoaded] = createResource(() => preloadManifests());
+
+  return (
+    <Show when={!manifestsLoaded.loading} fallback={<LoadingScreen />}>
+      <GameCanvas />
+    </Show>
+  );
+}
+```
+
+**Step 4: Handle SSR Compatibility**
+
+If you need SSR (Astro build-time rendering), use the compatibility bridge:
+
+```javascript
+// game/src/game/data/chapter-loaders.ts already provides this:
+import { loadChapterManifest } from './chapter-loaders';
+
+// Works in both SSR and browser:
+const chapter = await loadChapterManifest(0);
+```
+
+The bridge automatically uses:
+- DDL loader in browser (runtime fetch)
+- Static imports during SSR (compile-time)
+
+**Step 5: Update Tests**
+
+```javascript
+import { describe, it, beforeEach } from 'vitest';
+import { clearManifestCache, loadChapterManifest } from '../ddl/loader';
+
+describe('Level System', () => {
+  beforeEach(async () => {
+    clearManifestCache();
+
+    // Mock fetch for testing
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ /* test manifest */ })
+    });
+
+    // Preload test data
+    await loadChapterManifest(0);
+  });
+
+  it('should build level from manifest', () => {
+    const chapter = getChapterManifestSync(0);
+    const level = buildLevel(chapter);
+    expect(level.platforms.length).toBeGreaterThan(0);
+  });
+});
+```
+
+#### SSR vs. Runtime Behavior
+
+**Server-Side Rendering (Astro Build)**:
+- Static imports used (manifests bundled into JS)
+- No fetch() calls
+- Data available synchronously at build time
+- TypeScript validates at compile time
+
+**Client-Side Runtime (Browser)**:
+- DDL loader uses fetch() to load manifests
+- Data loaded asynchronously on startup
+- Manifests served as static JSON files
+- Zod validates at runtime
+
+**Compatibility Bridge** (`chapter-loaders.ts`):
+```javascript
+export async function loadChapterManifest(id: number) {
+  if (typeof window !== 'undefined') {
+    // Browser: Use DDL loader
+    return getChapterManifestSync(id);
+  } else {
+    // SSR: Use static import
+    return (await import(`../data/manifests/chapters/chapter-${id}.json`)).default;
+  }
+}
+```
+
+This enables gradual migration - you can mix both approaches during transition.
 
 ### API Reference
 
