@@ -299,7 +299,7 @@ test.describe('DDL Manifest Loader', () => {
     // Wait for game to render frames
     await page.waitForTimeout(2000);
 
-    // VISUAL VALIDATION: Verify actual rendering is happening
+    // VISUAL VALIDATION: Verify actual game rendering (not just pixel noise)
     const renderingValidation = await page.evaluate(() => {
       const canvas = document.querySelector('canvas') as HTMLCanvasElement;
       if (!canvas) return { error: 'Canvas not found' };
@@ -311,11 +311,13 @@ test.describe('DDL Manifest Loader', () => {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const pixels = imageData.data;
 
-      // Check for non-trivial rendering (not all black, not all white)
+      // Enhanced validation: Check for game-specific visual signatures
       let nonBlackPixels = 0;
       let nonWhitePixels = 0;
       let coloredPixels = 0;
-      const sampleSize = Math.min(10000, pixels.length / 4); // Sample 10k pixels or less
+      let brownPixels = 0; // Finn the otter is brown
+      let warmColors = 0; // Warm Redwall palette (orange, brown, tan)
+      const sampleSize = Math.min(10000, pixels.length / 4);
 
       for (let i = 0; i < sampleSize; i++) {
         const idx = i * 4;
@@ -324,8 +326,11 @@ test.describe('DDL Manifest Loader', () => {
         const b = pixels[idx + 2];
         const a = pixels[idx + 3];
 
-        // Check if pixel is not black (accounting for alpha)
-        if (a > 0 && (r > 10 || g > 10 || b > 10)) {
+        // Skip transparent pixels
+        if (a < 10) continue;
+
+        // Check if pixel is not black
+        if (r > 10 || g > 10 || b > 10) {
           nonBlackPixels++;
         }
 
@@ -334,36 +339,121 @@ test.describe('DDL Manifest Loader', () => {
           nonWhitePixels++;
         }
 
-        // Check for actual color variation (game graphics should have varied colors)
-        if (a > 0 && (r !== g || g !== b || r !== b)) {
+        // Check for actual color variation
+        if (r !== g || g !== b || r !== b) {
           coloredPixels++;
+        }
+
+        // Check for brown tones (Finn's fur: #8B6F47 range)
+        // Brown: R > G, G > B, moderate saturation
+        if (r > 100 && r < 180 && g > 80 && g < 150 && b > 40 && b < 100) {
+          brownPixels++;
+        }
+
+        // Check for warm palette colors (Redwall aesthetic)
+        // Orange/tan/amber tones
+        if ((r > 150 && g > 100 && b < 150) || // Orange-ish
+            (r > 180 && g > 140 && b < 100)) {  // Warm tan
+          warmColors++;
         }
       }
 
       const hasContent = nonBlackPixels > sampleSize * 0.1; // At least 10% non-black
       const hasVariation = nonWhitePixels > sampleSize * 0.1; // At least 10% non-white
       const hasColors = coloredPixels > sampleSize * 0.05; // At least 5% with color variation
+      const hasBrownTones = brownPixels > sampleSize * 0.01; // At least 1% brown (Finn present)
+      const hasWarmPalette = warmColors > sampleSize * 0.02; // At least 2% warm colors
+
+      // Check for platform/geometry patterns (horizontal lines)
+      const hasHorizontalStructures = checkForHorizontalPatterns(imageData, canvas.width, canvas.height);
 
       return {
         canvasSize: { width: canvas.width, height: canvas.height },
         sampleSize,
-        nonBlackPixels,
-        nonWhitePixels,
-        coloredPixels,
-        hasContent,
-        hasVariation,
-        hasColors,
+        pixelCounts: {
+          nonBlackPixels,
+          nonWhitePixels,
+          coloredPixels,
+          brownPixels,
+          warmColors,
+        },
+        percentages: {
+          nonBlack: (nonBlackPixels / sampleSize * 100).toFixed(1),
+          colored: (coloredPixels / sampleSize * 100).toFixed(1),
+          brown: (brownPixels / sampleSize * 100).toFixed(1),
+          warm: (warmColors / sampleSize * 100).toFixed(1),
+        },
+        validations: {
+          hasContent,
+          hasVariation,
+          hasColors,
+          hasBrownTones,
+          hasWarmPalette,
+          hasHorizontalStructures,
+        },
         renderingDetected: hasContent && hasVariation && hasColors,
+        gameGraphicsDetected: hasContent && hasColors && (hasBrownTones || hasWarmPalette),
       };
+
+      // Helper: Detect horizontal platform-like patterns
+      function checkForHorizontalPatterns(imgData: ImageData, width: number, height: number): boolean {
+        const data = imgData.data;
+        let horizontalEdges = 0;
+
+        // Sample 20 horizontal lines across canvas
+        for (let y = 0; y < height; y += Math.floor(height / 20)) {
+          let prevGray = 0;
+          let edgesInRow = 0;
+
+          for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            const gray = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+
+            // Detect edge (sharp brightness change)
+            if (Math.abs(gray - prevGray) > 50) {
+              edgesInRow++;
+            }
+            prevGray = gray;
+          }
+
+          // Platforms should create multiple edges per row
+          if (edgesInRow > 5) horizontalEdges++;
+        }
+
+        // At least 5 rows with platform-like structures
+        return horizontalEdges > 5;
+      }
     });
 
     console.log('Visual validation results:', JSON.stringify(renderingValidation, null, 2));
 
-    // Assertions for visual validation
-    expect(renderingValidation.hasContent).toBe(true); // Canvas has non-black pixels
-    expect(renderingValidation.hasVariation).toBe(true); // Canvas has non-white pixels
-    expect(renderingValidation.hasColors).toBe(true); // Canvas has color variation
+    // Assertions for enhanced visual validation
+    if ('error' in renderingValidation) {
+      throw new Error(`Visual validation failed: ${renderingValidation.error}`);
+    }
+
+    // Basic rendering checks
+    expect(renderingValidation.validations.hasContent).toBe(true); // Canvas has non-black pixels
+    expect(renderingValidation.validations.hasVariation).toBe(true); // Canvas has non-white pixels
+    expect(renderingValidation.validations.hasColors).toBe(true); // Canvas has color variation
     expect(renderingValidation.renderingDetected).toBe(true); // Overall rendering detected
+
+    // Game-specific checks (verify Finn and level geometry render)
+    console.log(`Brown pixels: ${renderingValidation.percentages.brown}% (Finn's fur)`);
+    console.log(`Warm colors: ${renderingValidation.percentages.warm}% (Redwall palette)`);
+    console.log(`Horizontal structures: ${renderingValidation.validations.hasHorizontalStructures} (platforms)`);
+
+    // At least one game-specific validation should pass
+    // (Either Finn is visible OR level geometry is visible OR warm palette is rendered)
+    const hasGameVisuals =
+      renderingValidation.validations.hasBrownTones ||
+      renderingValidation.validations.hasWarmPalette ||
+      renderingValidation.validations.hasHorizontalStructures;
+
+    expect(hasGameVisuals).toBe(true); // Game-specific graphics detected
+    expect(renderingValidation.gameGraphicsDetected).toBe(true); // Overall game rendering detected
+
+    console.log('✓ Visual validation passed: Game graphics detected');
 
     // Verify Matter.js physics is initialized
     const physicsInitialized = await page.evaluate(() => {
