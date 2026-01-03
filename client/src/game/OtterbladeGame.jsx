@@ -40,7 +40,7 @@ function OtterbladeGameContent() {
   const [maxHealth] = createSignal(5);
   const [warmth, setWarmth] = createSignal(100);
   const [maxWarmth] = createSignal(100);
-  const [, setShards] = createSignal(0);
+  const [shards, setShards] = createSignal(0);
   const [gameStarted, setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
   const [activeQuest, setActiveQuest] = createSignal(null);
