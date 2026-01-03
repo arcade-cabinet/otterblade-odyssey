@@ -59,16 +59,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          SONAR_ENABLED=true
           if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
-            echo "::error::SONAR_PROJECT_KEY and SONAR_ORGANIZATION must be set as repository or organization variables."
-            exit 1
-          fi
-          if [ -z "$SONAR_TOKEN" ]; then
-            echo "::error::SONAR_TOKEN secret is missing."
-            exit 1
+            echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
+          elif [ -z "$SONAR_TOKEN" ]; then
+            echo "::warning::SONAR_TOKEN secret is missing; skipping SonarCloud analysis."
+            SONAR_ENABLED=false
           fi
 
+          echo "SONAR_ENABLED=$SONAR_ENABLED" >> "$GITHUB_ENV"
+
       - name: SonarCloud analysis
+        if: env.SONAR_ENABLED == 'true'
         uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
