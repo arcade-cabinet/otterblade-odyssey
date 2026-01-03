@@ -173,8 +173,12 @@ const CHAPTER_FILENAMES: Record<number, string> = {
  * ```
  */
 export async function loadChapterManifest(chapterId: number): Promise<ChapterManifest> {
-  if (typeof chapterId !== 'number' || !Number.isInteger(chapterId) || chapterId < 0 || chapterId > 9) {
-    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
+  if (
+    typeof chapterId !== 'number' ||
+    !Number.isInteger(chapterId) ||
+    !(chapterId in CHAPTER_FILENAMES)
+  ) {
+    throw new Error(`Invalid chapter ID: ${chapterId}.`);
   }
 
   const path = CHAPTER_FILENAMES[chapterId];
