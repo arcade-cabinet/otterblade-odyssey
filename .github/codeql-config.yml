@@ -1,0 +1,24 @@
+name: "CodeQL Config"
+paths:
+  include:
+    - src
+    - client
+    - game
+    - packages
+  exclude:
+    - .github/workflows
+    - tests
+    - "**/*.test.js"
+    - "**/*.test.ts"
+    - node_modules
+    - dist
+    - build
+
+languages:
+  - javascript
+  - typescript
+
+queries:
+  - uses: codeql/javascript-queries
+
+disable-default-queries: true
