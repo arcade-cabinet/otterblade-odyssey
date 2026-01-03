@@ -679,3 +679,195 @@ export type Secret = z.infer<typeof SecretSchema>;
 export type Media = z.infer<typeof MediaSchema>;
 export type Environment = z.infer<typeof EnvironmentSchema>;
 export type MotionChallenge = z.infer<typeof MotionChallengeSchema>;
+
+// ============================================================================
+// NON-CHAPTER MANIFEST SCHEMAS
+// ============================================================================
+
+/**
+ * Schema for asset configuration (sprite sheets, images, etc.)
+ */
+export const AssetConfigSchema = z.object({
+  columns: z.number().optional(),
+  rows: z.number().optional(),
+  frameWidth: z.number().optional(),
+  frameHeight: z.number().optional(),
+  size: z.string().optional(),
+  quality: z.string().optional(),
+  transparent: z.boolean().optional(),
+  fps: z.number().optional(),
+}).passthrough();
+
+/**
+ * Schema for generation prompts
+ */
+export const GenerationPromptSchema = z.object({
+  subject: z.string().optional(),
+  physique: z.string().optional(),
+  fur: z.string().optional(),
+  outfit: z.string().optional(),
+  expression: z.string().optional(),
+  animation: z.string().optional(),
+  behavior: z.string().optional(),
+  style: z.string().optional(),
+  negative: z.string().optional(),
+  setting: z.string().optional(),
+  mood: z.string().optional(),
+  visualElements: z.string().optional(),
+  palette: z.string().optional(),
+}).passthrough();
+
+/**
+ * Schema for a single asset entry
+ */
+export const AssetEntrySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  filename: z.string(),
+  status: z.enum(['pending', 'complete', 'needs_regeneration', 'approved', 'rejected']),
+  type: z.string(),
+  config: AssetConfigSchema.optional(),
+  prompt: GenerationPromptSchema.optional(),
+}).passthrough();
+
+/**
+ * Enemies manifest schema
+ */
+export const EnemiesManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('enemies'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  brandGuidance: z.object({
+    faction: z.string(),
+    aesthetic: z.string(),
+    tone: z.string(),
+    style: z.string(),
+  }).passthrough().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Species definition for NPCs
+ */
+export const SpeciesDefinitionSchema = z.object({
+  description: z.string(),
+  physique: z.string(),
+  personality: z.array(z.string()),
+  roles: z.array(z.string()),
+  colors: z.object({
+    fur: z.array(z.string()).optional(),
+    belly: z.array(z.string()).optional(),
+    stripes: z.array(z.string()).optional(),
+  }).passthrough(),
+}).passthrough();
+
+/**
+ * NPCs manifest schema
+ */
+export const NPCsManifestSchema = z.object({
+  $schema: z.string().optional(),
+  version: z.string(),
+  category: z.literal('npcs'),
+  description: z.string(),
+  species: z.record(z.string(), SpeciesDefinitionSchema),
+  npcs: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Sprites manifest schema
+ */
+export const SpritesManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('sprites'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Cinematics manifest schema
+ */
+export const CinematicsManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('cinematics'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Sounds manifest schema
+ */
+export const SoundsManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('sounds'),
+  provider: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Effects manifest schema
+ */
+export const EffectsManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('effects'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Items manifest schema
+ */
+export const ItemsManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('items'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Scenes manifest schema
+ */
+export const ScenesManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('scenes'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+/**
+ * Chapter plates manifest schema
+ */
+export const ChapterPlatesManifestSchema = z.object({
+  $schema: z.string().optional(),
+  category: z.literal('chapter-plates'),
+  provider: z.string().optional(),
+  model: z.string().optional(),
+  outputDir: z.string().optional(),
+  assets: z.array(AssetEntrySchema),
+}).passthrough();
+
+// Export inferred types
+export type AssetEntry = z.infer<typeof AssetEntrySchema>;
+export type AssetConfig = z.infer<typeof AssetConfigSchema>;
+export type GenerationPrompt = z.infer<typeof GenerationPromptSchema>;
+export type EnemiesManifest = z.infer<typeof EnemiesManifestSchema>;
+export type NPCsManifest = z.infer<typeof NPCsManifestSchema>;
+export type SpritesManifest = z.infer<typeof SpritesManifestSchema>;
+export type CinematicsManifest = z.infer<typeof CinematicsManifestSchema>;
+export type SoundsManifest = z.infer<typeof SoundsManifestSchema>;
+export type EffectsManifest = z.infer<typeof EffectsManifestSchema>;
+export type ItemsManifest = z.infer<typeof ItemsManifestSchema>;
+export type ScenesManifest = z.infer<typeof ScenesManifestSchema>;
+export type ChapterPlatesManifest = z.infer<typeof ChapterPlatesManifestSchema>;
