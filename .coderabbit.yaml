@@ -9,21 +9,23 @@ early_access: true
 reviews:
   # Request changes only for critical issues
   request_changes_workflow: true
-  
+
   # High-level PR summary
   high_level_summary: true
-  
+
   # Detailed file summaries
   poem: false
-  
+
   # Review profile
   profile: assertive
-  
+
   # Auto-review on PR events
   auto_review:
     enabled: true
     drafts: false
-  
+    base_branches:
+      - main
+
   # Scope of review
   tools:
     biome:
@@ -34,7 +36,7 @@ reviews:
       enabled: false
     languagetool:
       enabled: false
-  
+
   # Path-specific instructions
   path_instructions:
     - path: "game/src/**/*.{js,jsx}"
@@ -74,11 +76,13 @@ chat:
 knowledge_base:
   # Game-specific patterns (updated for Astro + Solid.js architecture)
   learnings:
-    package_manager: "Use pnpm exclusively, never npm or yarn"
-    rendering: "Procedural rendering with Canvas 2D, no static PNG/MP4 imports"
-    physics: "Matter.js for physics simulation (proven in POC)"
-    ui_framework: "Solid.js for reactive UI components"
-    static_site_gen: "Astro for static site generation"
-    language_preference: "JavaScript preferred over TypeScript for simplicity"
-    architecture: "DDL-driven architecture with JSON manifests"
-    aesthetic: "Warm Redwall-inspired aesthetic (BRAND.md)"
+    scope: "repo"
+    items:
+      - "Use pnpm exclusively, never npm or yarn"
+      - "Procedural rendering with Canvas 2D, no static PNG/MP4 imports"
+      - "Matter.js for physics simulation (proven in POC)"
+      - "Solid.js for reactive UI components"
+      - "Astro for static site generation"
+      - "JavaScript preferred over TypeScript for simplicity"
+      - "DDL-driven architecture with JSON manifests"
+      - "Warm Redwall-inspired aesthetic (BRAND.md)"

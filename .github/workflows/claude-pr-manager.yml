@@ -53,15 +53,13 @@ jobs:
       - name: Get PR Details
         if: steps.check-key.outputs.available == 'true'
         id: pr-details
-        env:
-          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             PR_NUM="${{ github.event.pull_request.number }}"
             PR_BRANCH="${{ github.event.pull_request.head.ref }}"
           else
-            PR_NUM="${{ github.event.issue.number }}"
-            PR_BRANCH=$(gh pr view "$PR_NUM" --json headRefName --jq '.headRefName' 2>/dev/null || echo "unknown")
+            echo "::error::This workflow only supports pull_request events."
+            exit 1
           fi
           
           echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
@@ -100,7 +98,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ steps.pr-details.outputs.pr_branch }}
-          token: ${{ secrets.CI_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Load PR Manager Prompt
         if: steps.check-key.outputs.available == 'true'
