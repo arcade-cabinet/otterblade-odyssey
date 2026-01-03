@@ -82,11 +82,7 @@ env:
   ISSUE_BODY: ${{ inputs.issue_body || github.event.issue.body }}
   COMMENT_BODY: ${{ inputs.comment_body || github.event.comment.body }}
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  actions: write
+permissions: {}
 
 jobs:
   # ============================================
@@ -99,6 +95,9 @@ jobs:
       (github.event_name == 'workflow_call' && (contains(inputs.comment_body, '/jules') || contains(inputs.comment_body, '/cursor'))) ||
       (github.event_name == 'workflow_dispatch' && (contains(inputs.comment_body, '/jules') || contains(inputs.comment_body, '/cursor')))
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -189,6 +188,10 @@ jobs:
       (github.event_name == 'workflow_call' && contains(inputs.comment_body, '@claude')) ||
       (github.event_name == 'workflow_dispatch' && contains(inputs.comment_body, '@claude'))
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      id-token: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
