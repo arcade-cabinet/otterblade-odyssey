@@ -1,0 +1,493 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "interactions-schema.json",
+  "title": "Otterblade Odyssey Interactions Schema",
+  "description": "Defines interactive objects and trigger systems for gameplay",
+
+  "definitions": {
+    "position2D": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      },
+      "required": ["x", "y"]
+    },
+
+    "region": {
+      "type": "object",
+      "description": "A rectangular region in world space",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      },
+      "required": ["x", "y", "width", "height"]
+    },
+
+    "triggerAction": {
+      "type": "object",
+      "description": "An action executed when a trigger fires",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "show_toast",
+            "spawn_enemies",
+            "spawn_npc",
+            "change_music",
+            "play_sound",
+            "restore_warmth",
+            "drain_warmth",
+            "restore_health",
+            "damage_player",
+            "shake_screen",
+            "slow_motion",
+            "start_sequence",
+            "complete_quest",
+            "complete_chapter",
+            "unlock_checkpoint",
+            "unlock_achievement",
+            "play_cinematic",
+            "npc_action",
+            "actor_gesture",
+            "player_animation",
+            "player_control",
+            "camera",
+            "lighting_change",
+            "particle_effect",
+            "interaction_state",
+            "spawn_boss",
+            "apply_buff",
+            "remove_buff",
+            "open_door",
+            "close_door",
+            "activate_trap",
+            "deactivate_trap",
+            "move_platform",
+            "toggle_barrier",
+            "set_flag",
+            "timer"
+          ]
+        },
+        "target": {
+          "type": "string",
+          "description": "Target ID or key for the action"
+        },
+        "value": {
+          "description": "Value for the action (type depends on action type)"
+        },
+        "delay": {
+          "type": "number",
+          "description": "Delay in milliseconds before executing",
+          "minimum": 0
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration in milliseconds for timed actions"
+        },
+        "async": {
+          "type": "boolean",
+          "description": "If true, don't wait for this action to complete",
+          "default": false
+        }
+      },
+      "required": ["type"]
+    },
+
+    "trigger": {
+      "type": "object",
+      "description": "A game trigger that fires actions when conditions are met",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this trigger"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "enter_region",
+            "exit_region",
+            "interact",
+            "defeat_enemies",
+            "collect_item",
+            "timer",
+            "health_below",
+            "warmth_below",
+            "boss_health",
+            "quest_complete",
+            "flag_set",
+            "npc_proximity",
+            "damage_taken",
+            "combo_performed",
+            "death",
+            "respawn"
+          ],
+          "description": "What activates this trigger"
+        },
+        "region": {
+          "$ref": "#/definitions/region",
+          "description": "For enter_region/exit_region triggers"
+        },
+        "targetId": {
+          "type": "string",
+          "description": "For interact triggers - the interaction ID"
+        },
+        "threshold": {
+          "type": "number",
+          "description": "For health_below, warmth_below, boss_health (0-1 ratio)"
+        },
+        "delay": {
+          "type": "number",
+          "description": "For timer triggers - delay in ms"
+        },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Other trigger IDs that must fire first"
+        },
+        "once": {
+          "type": "boolean",
+          "description": "If true, trigger only fires once per playthrough",
+          "default": true
+        },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/triggerAction" },
+          "description": "Actions to execute when trigger fires"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether trigger starts enabled",
+          "default": true
+        }
+      },
+      "required": ["id", "type", "actions"]
+    },
+
+    "interactionState": {
+      "type": "object",
+      "description": "A state for an interactive object",
+      "properties": {
+        "asset": {
+          "type": "string",
+          "description": "Asset ID or procedural function name"
+        },
+        "solid": {
+          "type": "boolean",
+          "description": "Whether this state has collision",
+          "default": true
+        },
+        "animation": {
+          "type": "string",
+          "description": "Animation to play in this state"
+        },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/triggerAction" },
+          "description": "Actions to execute on entering this state"
+        },
+        "loopSound": {
+          "type": "string",
+          "description": "Sound to loop while in this state"
+        },
+        "particleEffect": {
+          "type": "string",
+          "description": "Particle effect active in this state"
+        },
+        "glowColor": {
+          "type": "string",
+          "description": "Glow color for interactive indication"
+        }
+      },
+      "required": ["asset"]
+    },
+
+    "interaction": {
+      "type": "object",
+      "description": "An interactive object in the game world",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "shrine",
+            "chest",
+            "door",
+            "lever",
+            "button",
+            "brazier",
+            "well",
+            "signpost",
+            "npc",
+            "destructible",
+            "trap",
+            "moving_platform",
+            "portal",
+            "savepoint",
+            "shop",
+            "upgrade_station",
+            "lore_object",
+            "secret_wall",
+            "pressure_plate"
+          ],
+          "description": "Type of interaction"
+        },
+        "position": {
+          "$ref": "#/definitions/position2D"
+        },
+        "asset": {
+          "type": "string",
+          "description": "Visual asset ID"
+        },
+        "activateRadius": {
+          "type": "number",
+          "description": "Distance within which interaction is possible",
+          "default": 60
+        },
+        "initialState": {
+          "type": "string",
+          "description": "Starting state key"
+        },
+        "states": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/interactionState" },
+          "description": "Map of state name to state config"
+        },
+        "requires": {
+          "type": "object",
+          "properties": {
+            "item": { "type": "string", "description": "Required item ID" },
+            "quest": { "type": "string", "description": "Required quest ID" },
+            "trigger": { "type": "string", "description": "Required trigger ID" },
+            "flag": { "type": "string", "description": "Required flag name" }
+          },
+          "description": "Requirements to interact"
+        },
+        "cooldown": {
+          "type": "number",
+          "description": "Cooldown between interactions in ms"
+        },
+        "hint": {
+          "type": "string",
+          "description": "UI hint shown when near"
+        },
+        "interactKey": {
+          "type": "string",
+          "description": "Override key for interaction",
+          "default": "interact"
+        }
+      },
+      "required": ["id", "type", "position"]
+    },
+
+    "checkpoint": {
+      "type": "object",
+      "description": "A respawn checkpoint",
+      "properties": {
+        "id": { "type": "string" },
+        "position": { "$ref": "#/definitions/position2D" },
+        "type": {
+          "type": "string",
+          "enum": ["brazier", "campfire", "shrine", "battle_standard", "bell"],
+          "default": "brazier"
+        },
+        "requiresTrigger": {
+          "type": "string",
+          "description": "Trigger that must fire to unlock this checkpoint"
+        },
+        "restoresWarmth": {
+          "type": "number",
+          "description": "Warmth restored on respawn here",
+          "default": 50
+        },
+        "restoresHealth": {
+          "type": "number",
+          "description": "Health restored on respawn here",
+          "default": 100
+        }
+      },
+      "required": ["id", "position"]
+    },
+
+    "collectible": {
+      "type": "object",
+      "description": "A collectable item",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "ember_shard",
+            "hearthstone",
+            "health_pickup",
+            "warmth_pickup",
+            "lore_fragment",
+            "upgrade_material",
+            "key_item",
+            "secret_item"
+          ]
+        },
+        "position": { "$ref": "#/definitions/position2D" },
+        "value": {
+          "type": "number",
+          "description": "Value amount (shards, health, etc.)"
+        },
+        "spawnedBy": {
+          "type": "string",
+          "description": "Trigger that spawns this (if not always present)"
+        },
+        "requiresAbility": {
+          "type": "string",
+          "description": "Ability required to collect"
+        }
+      },
+      "required": ["id", "type", "position"]
+    },
+
+    "secret": {
+      "type": "object",
+      "description": "A hidden secret area or item",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "hidden_room",
+            "hidden_wall",
+            "hidden_platform",
+            "buried_treasure",
+            "invisible_path",
+            "timed_challenge"
+          ]
+        },
+        "entrance": { "$ref": "#/definitions/region" },
+        "hint": {
+          "type": "string",
+          "description": "Subtle hint for player"
+        },
+        "discoverMethod": {
+          "type": "string",
+          "enum": ["attack", "roll", "interact", "jump_from_below", "fall_through", "wait"],
+          "default": "interact"
+        },
+        "rewards": {
+          "type": "object",
+          "properties": {
+            "emberShards": { "type": "number" },
+            "hearthstones": { "type": "number" },
+            "achievement": { "type": "string" },
+            "loreFragment": { "type": "string" },
+            "upgradePoint": { "type": "number" }
+          }
+        },
+        "achievement": {
+          "type": "string",
+          "description": "Achievement unlocked on discovery"
+        }
+      },
+      "required": ["id", "name", "type", "entrance"]
+    },
+
+    "hazard": {
+      "type": "object",
+      "description": "An environmental hazard",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "spikes",
+            "frost_trap",
+            "falling_icicle",
+            "wind_gust",
+            "fire",
+            "poison_cloud",
+            "crushing_wall",
+            "rising_water",
+            "collapsing_floor",
+            "swinging_blade"
+          ]
+        },
+        "position": { "$ref": "#/definitions/position2D" },
+        "region": { "$ref": "#/definitions/region" },
+        "damage": {
+          "type": "number",
+          "description": "Damage dealt"
+        },
+        "warmthDrain": {
+          "type": "number",
+          "description": "Warmth drained"
+        },
+        "knockback": {
+          "type": "number",
+          "description": "Knockback force"
+        },
+        "cooldown": {
+          "type": "number",
+          "description": "Time between damage ticks"
+        },
+        "pattern": {
+          "type": "object",
+          "properties": {
+            "type": { 
+              "type": "string", 
+              "enum": ["constant", "periodic", "triggered", "random"] 
+            },
+            "interval": { "type": "number" },
+            "duration": { "type": "number" },
+            "offset": { "type": "number" }
+          }
+        },
+        "canBeDestroyed": {
+          "type": "boolean",
+          "default": false
+        },
+        "warningTime": {
+          "type": "number",
+          "description": "Warning duration before activation"
+        }
+      },
+      "required": ["id", "type"]
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string" },
+    "category": { "const": "interactions" },
+    "description": { "type": "string" },
+
+    "interactions": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/interaction" }
+    },
+    "triggers": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/trigger" }
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/checkpoint" }
+    },
+    "collectibles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/collectible" }
+    },
+    "secrets": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/secret" }
+    },
+    "hazards": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/hazard" }
+    }
+  },
+  "required": ["$schema", "version", "category"]
+}

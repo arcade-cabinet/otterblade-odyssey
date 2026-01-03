@@ -70,9 +70,586 @@ The legacy `client/` React/Vite/ECS code is frozen; only the JSON data remains c
 
 ## Implementation Checklist
 
-- [ ] Loader functions fetch data from `client/src/data/**/*.json`.
+- [x] Loader functions fetch data from `client/src/data/**/*.json`.
 - [ ] Systems accept manifest-derived configs (no magic numbers).
 - [ ] Canvas renderers are pure and side-effect free beyond drawing.
 - [ ] Solid components stay <200 lines and focus on composition.
 - [ ] Biome passes locally (`pnpm biome check .`).
 - [ ] No React/Rapier/Miniplex imports in new code.
+
+---
+
+## DDL Manifest Loader (Detailed Usage)
+
+### Overview
+
+The DDL (Data Definition Language) loader system provides fetch-based, asynchronous loading of all game content from JSON manifests. Located in `game/src/ddl/loader.ts`, it replaces static imports with runtime loading.
+
+### Key Benefits
+
+- **Dynamic content updates** without recompilation
+- **Separation of data and code** - manifests are data, not bundled code
+- **Deterministic testing** with controlled data fixtures
+- **Cache-first loading** for performance (Map-based, O(1) lookups)
+- **Type safety** via Zod validation on every load
+
+### Architecture
+
+**Manifest Storage**: All manifests live in `game/public/data/manifests/`:
+```
+game/public/data/manifests/
+├── chapters/           # 10 chapter manifests
+│   ├── chapter-0-the-calling.json
+│   ├── chapter-1-river-path.json
+│   └── ... (through chapter-9)
+├── enemies.json        # Galeborn enemy definitions
+├── npcs.json           # Woodland folk NPCs
+├── sprites.json        # Character sprite metadata
+├── cinematics.json     # Cutscene video metadata
+├── sounds.json         # Audio asset references
+├── effects.json        # Particle/visual effects
+├── items.json          # Collectibles, doors, hazards
+├── scenes.json         # Parallax backgrounds
+└── chapter-plates.json # Storybook chapter transitions
+```
+
+**Cache Layer**: Simple Map-based cache with O(1) lookups. Manifests are cached after first load and reused for subsequent access.
+
+### Usage Patterns
+
+#### 1. Game Initialization (Recommended)
+
+Preload ALL manifests at game startup in parallel:
+
+```javascript
+import { preloadManifests } from '../ddl/loader';
+
+async function initializeGame() {
+  await preloadManifests({
+    manifestTypes: ['chapters', 'enemies', 'npcs', 'sprites',
+                    'cinematics', 'sounds', 'effects', 'items',
+                    'scenes', 'chapter-plates'],
+    logProgress: true,
+    throwOnError: false, // Don't fail entire game if one manifest fails
+  });
+
+  // After preload, use synchronous accessors
+  const chapter0 = getChapterManifestSync(0);
+  const enemies = getEnemiesManifestSync();
+  console.log(`Loaded chapter: ${chapter0.name}`);
+}
+```
+
+#### 2. Individual Manifest Loading
+
+Load specific manifests on-demand:
+
+```javascript
+import { loadChapterManifest, loadEnemiesManifest } from '../ddl/loader';
+
+async function loadChapter(id) {
+  const chapter = await loadChapterManifest(id);
+  console.log(`Loaded: ${chapter.name} at ${chapter.location}`);
+  return chapter;
+}
+
+async function loadEnemies() {
+  const enemies = await loadEnemiesManifest();
+  console.log(`Loaded ${enemies.assets.length} enemy types`);
+  return enemies;
+}
+```
+
+#### 3. Synchronous Access After Preload
+
+Once manifests are preloaded, use synchronous accessors for zero-latency access:
+
+```javascript
+import {
+  getChapterManifestSync,
+  getEnemiesManifestSync,
+  getNPCsManifestSync
+} from '../ddl/loader';
+
+function buildLevel(chapterId) {
+  // No await needed - data is already cached
+  const chapter = getChapterManifestSync(chapterId);
+  const enemies = getEnemiesManifestSync();
+  const npcs = getNPCsManifestSync();
+
+  // Build level from manifest data
+  buildLevelGeometry(chapter.level);
+  spawnEnemies(chapter.encounters, enemies);
+  spawnNPCs(chapter.npcs, npcs);
+}
+```
+
+**⚠️ Important**: Sync accessors throw errors if data isn't preloaded. Always call `preloadManifests()` first!
+
+#### 4. Progress Tracking
+
+Track loading progress for UI feedback:
+
+```javascript
+async function preloadWithProgress(setProgress) {
+  const totalSteps = 19; // 10 chapters + 9 manifests
+  let completed = 0;
+
+  // Load chapters
+  for (let i = 0; i <= 9; i++) {
+    await loadChapterManifest(i);
+    completed++;
+    setProgress(Math.floor((completed / totalSteps) * 100));
+  }
+
+  // Load other manifests...
+}
+```
+
+### Manifest Types
+
+#### Chapter Manifests
+
+```javascript
+import { loadChapterManifest, getChapterManifestSync } from '../ddl/loader';
+
+const chapter = await loadChapterManifest(5);
+console.log(chapter.name); // "Deep Cellars"
+console.log(chapter.boss.name); // "Frostclaw"
+
+// After preload, sync access:
+const chapter0 = getChapterManifestSync(0);
+```
+
+**Chapter manifest structure:**
+- `narrative`: Theme, quest, story beats, emotional arc
+- `level`: Platforms, walls, segments, spawn points, water zones
+- `encounters`: Enemy placements and AI behaviors
+- `boss`: Boss stats, phases, attacks
+- `npcs`: Character positions, dialogue trees
+- `triggers`: Event system (enter_region, defeat_enemies, etc.)
+- `media`: Cinematic and audio references
+
+#### Entity Manifests
+
+```javascript
+import { loadEnemiesManifest, loadNPCsManifest } from '../ddl/loader';
+
+// Enemies
+const enemies = await loadEnemiesManifest();
+const scout = enemies.assets.find(e => e.id === 'enemy_skirmisher');
+console.log(scout.name); // "Galeborn Skirmisher"
+
+// NPCs
+const npcs = await loadNPCsManifest();
+console.log(npcs.species.otter.description); // "Brave, loyal, skilled swimmers..."
+```
+
+#### Asset Manifests
+
+```javascript
+import {
+  loadSpritesManifest,
+  loadCinematicsManifest,
+  loadSoundsManifest
+} from '../ddl/loader';
+
+// Sprites
+const sprites = await loadSpritesManifest();
+const finnIdle = sprites.assets.find(s => s.id === 'finn_idle');
+
+// Cinematics (Veo 3.1 generated videos)
+const cinematics = await loadCinematicsManifest();
+const intro = cinematics.assets.find(c => c.id === 'intro_cinematic');
+
+// Sounds (Freesound/custom audio)
+const sounds = await loadSoundsManifest();
+const music = sounds.assets.filter(s => s.type === 'music');
+```
+
+### Validation
+
+All manifests are validated with Zod schemas on load:
+
+```javascript
+// Chapter manifests validated against ChapterManifestSchema
+const chapter = await loadChapterManifest(0);
+// TypeScript knows: chapter.narrative.theme is a string
+// TypeScript knows: chapter.boss.stats.health is a number
+
+// Asset manifests validated against specific schemas
+const enemies = await loadEnemiesManifest();
+// TypeScript knows: enemies.category is 'enemies'
+// TypeScript knows: enemies.assets is an array
+```
+
+**Validation errors** provide detailed messages:
+```
+Invalid chapter-0 manifest: Expected object, received null at "narrative"
+Invalid enemies manifest: Required at "assets[0].filename"
+```
+
+### Error Handling
+
+```javascript
+// Async loading with error handling
+try {
+  const chapter = await loadChapterManifest(5);
+} catch (error) {
+  // Handles: 404 Not Found, network failures, invalid JSON, schema validation
+  console.error('Failed to load chapter:', error.message);
+  // Fallback to safe default
+  const fallback = await loadChapterManifest(0);
+}
+
+// Sync access error handling
+try {
+  const chapter = getChapterManifestSync(0);
+} catch (error) {
+  // Thrown if manifest not preloaded
+  console.error('Chapter not in cache. Did you call preloadManifests()?');
+}
+```
+
+### Performance
+
+**Caching**: Map-based cache with O(1) lookups. Manifests stay cached for session lifetime (~268KB total).
+
+**Parallel Loading**: `preloadManifests()` loads all manifests in parallel (~200-500ms for 19 files).
+
+**No Refetching**: Cached data is reused. Fetch only happens once per manifest per session.
+
+### Testing
+
+#### Unit Tests
+
+Located in `game/src/ddl/loader.test.ts`:
+
+```javascript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { loadChapterManifest, clearManifestCache } from './loader';
+
+describe('DDL Loader', () => {
+  beforeEach(() => {
+    clearManifestCache();
+    vi.clearAllMocks();
+  });
+
+  it('should cache manifests', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 0, name: 'Test', /* ... */ }),
+    });
+
+    await loadChapterManifest(0);
+    await loadChapterManifest(0); // Should use cache
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+**Current test coverage**: 7.32% (needs improvement to 80%+)
+
+### Troubleshooting
+
+#### Common Issues and Solutions
+
+**1. "Chapter X not loaded. Call preloadManifests() first"**
+
+**Cause**: Attempting to use sync accessor before data is loaded.
+
+**Solution**:
+```javascript
+// Ensure preload completes before using sync accessors
+await preloadManifests();
+const chapter = getChapterManifestSync(0); // Now safe
+```
+
+**2. "Failed to fetch manifest at /data/manifests/...": 404**
+
+**Cause**: Manifest file missing from public directory.
+
+**Solution**:
+```bash
+# Verify manifest files exist
+ls game/public/data/manifests/chapters/
+ls game/public/data/manifests/*.json
+
+# Rebuild if missing
+pnpm build
+```
+
+**3. "Invalid JSON in manifest"**
+
+**Cause**: Malformed JSON file (syntax error, trailing comma, etc.).
+
+**Solution**:
+```bash
+# Validate JSON syntax
+cat game/public/data/manifests/chapter-0.json | jq .
+
+# Fix JSON errors, then clear cache
+clearManifestCache(); // In browser console
+```
+
+**4. "Corrupted manifest in cache"**
+
+**Cause**: Data in cache failed validation (new in this PR - runtime type guards).
+
+**Solution**:
+```javascript
+// Clear cache and reload
+import { clearManifestCache, preloadManifests } from '../ddl/loader';
+
+clearManifestCache();
+await preloadManifests();
+```
+
+**5. Loading screen stuck at "Loading manifests..."**
+
+**Cause**: Network request hung or manifest file too large.
+
+**Solution**:
+```javascript
+// Check browser console for fetch errors
+// Check network tab for failed requests
+
+// Add timeout to preload
+const timeoutPromise = new Promise((_, reject) =>
+  setTimeout(() => reject(new Error('Preload timeout')), 10000)
+);
+
+try {
+  await Promise.race([preloadManifests(), timeoutPromise]);
+} catch (error) {
+  console.error('Preload failed:', error);
+  // Show error UI
+}
+```
+
+#### Debugging Tips
+
+**Check Cache State**:
+```javascript
+import { getCacheStats } from '../ddl/loader';
+const stats = getCacheStats();
+console.log('Cache size:', stats.size);
+console.log('Cached keys:', stats.keys);
+// Expected: size = 19 (10 chapters + 9 manifests)
+```
+
+**Inspect Loaded Manifest**:
+```javascript
+const chapter = getChapterManifestSync(0);
+console.log('Chapter:', {
+  id: chapter.id,
+  name: chapter.name,
+  hasLevel: !!chapter.level,
+  segmentCount: chapter.level?.segments?.length
+});
+```
+
+**Monitor Fetch Requests**:
+```javascript
+// Track manifest fetches
+performance.getEntriesByType('resource')
+  .filter(r => r.name.includes('/data/manifests/'))
+  .forEach(r => console.log(`${r.name}: ${r.duration}ms`));
+```
+
+**Test Validation**:
+```javascript
+import { ChapterManifestSchema } from '../game/data/manifest-schemas';
+
+const testData = { /* your test object */ };
+const result = ChapterManifestSchema.safeParse(testData);
+if (!result.success) {
+  console.error('Validation errors:', result.error.issues);
+}
+```
+
+### Migration from Static Imports
+
+#### When to Use DDL Loader vs. Static Imports
+
+**Use DDL Loader** (Recommended):
+- ✅ Runtime content loading (dynamic chapters, enemies)
+- ✅ Hot reloading during development
+- ✅ A/B testing different manifests
+- ✅ Deterministic testing with fixtures
+- ✅ Keeping manifests out of bundle (smaller JS files)
+
+**Use Static Imports** (Legacy):
+- ⚠️ SSR/SSG pre-rendering (Astro build time)
+- ⚠️ TypeScript strict type checking at compile time
+- ⚠️ Compatibility with old code (temporary)
+
+**Note**: The compatibility bridge in `chapter-loaders.ts` supports both patterns during migration.
+
+#### Migration Steps
+
+**Step 1: Replace Static Imports**
+
+**Before:**
+```javascript
+import chapter0 from '@data/manifests/chapters/chapter-0-the-calling.json';
+import enemiesData from '@data/manifests/enemies.json';
+
+function loadLevel() {
+  buildLevel(chapter0);
+  spawnEnemies(enemiesData);
+}
+```
+
+**After:**
+```javascript
+import { getChapterManifestSync, getEnemiesManifestSync } from '../ddl/loader';
+
+function loadLevel() {
+  const chapter0 = getChapterManifestSync(0);
+  const enemiesData = getEnemiesManifestSync();
+
+  buildLevel(chapter0);
+  spawnEnemies(enemiesData);
+}
+```
+
+**Step 2: Add Preload to Game Initialization**
+
+```javascript
+import { preloadManifests } from '../ddl/loader';
+
+async function initGame() {
+  // Show loading screen
+  showLoadingScreen();
+
+  // Preload all manifests
+  await preloadManifests({
+    manifestTypes: ['chapters', 'enemies', 'npcs', 'sprites'],
+    logProgress: true
+  });
+
+  // Hide loading screen
+  hideLoadingScreen();
+
+  // Now safe to use sync accessors
+  startGame();
+}
+```
+
+**Step 3: Update Solid.js Components**
+
+```javascript
+import { createResource } from 'solid-js';
+import { preloadManifests } from '../ddl/loader';
+
+function GameComponent() {
+  const [manifestsLoaded] = createResource(() => preloadManifests());
+
+  return (
+    <Show when={!manifestsLoaded.loading} fallback={<LoadingScreen />}>
+      <GameCanvas />
+    </Show>
+  );
+}
+```
+
+**Step 4: Handle SSR Compatibility**
+
+If you need SSR (Astro build-time rendering), use the compatibility bridge:
+
+```javascript
+// game/src/game/data/chapter-loaders.ts already provides this:
+import { loadChapterManifest } from './chapter-loaders';
+
+// Works in both SSR and browser:
+const chapter = await loadChapterManifest(0);
+```
+
+The bridge automatically uses:
+- DDL loader in browser (runtime fetch)
+- Static imports during SSR (compile-time)
+
+**Step 5: Update Tests**
+
+```javascript
+import { describe, it, beforeEach } from 'vitest';
+import { clearManifestCache, loadChapterManifest } from '../ddl/loader';
+
+describe('Level System', () => {
+  beforeEach(async () => {
+    clearManifestCache();
+
+    // Mock fetch for testing
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ /* test manifest */ })
+    });
+
+    // Preload test data
+    await loadChapterManifest(0);
+  });
+
+  it('should build level from manifest', () => {
+    const chapter = getChapterManifestSync(0);
+    const level = buildLevel(chapter);
+    expect(level.platforms.length).toBeGreaterThan(0);
+  });
+});
+```
+
+#### SSR vs. Runtime Behavior
+
+**Server-Side Rendering (Astro Build)**:
+- Static imports used (manifests bundled into JS)
+- No fetch() calls
+- Data available synchronously at build time
+- TypeScript validates at compile time
+
+**Client-Side Runtime (Browser)**:
+- DDL loader uses fetch() to load manifests
+- Data loaded asynchronously on startup
+- Manifests served as static JSON files
+- Zod validates at runtime
+
+**Compatibility Bridge** (`chapter-loaders.ts`):
+```javascript
+export async function loadChapterManifest(id: number) {
+  if (typeof window !== 'undefined') {
+    // Browser: Use DDL loader
+    return getChapterManifestSync(id);
+  } else {
+    // SSR: Use static import
+    return (await import(`../data/manifests/chapters/chapter-${id}.json`)).default;
+  }
+}
+```
+
+This enables gradual migration - you can mix both approaches during transition.
+
+### API Reference
+
+**Core Functions**:
+- `loadManifest(path)` - Base fetch function with caching
+- `loadChapterManifest(id)` - Load chapter by ID (0-9)
+- `getChapterManifestSync(id)` - Get cached chapter (post-preload)
+- `loadEnemiesManifest()` / `getEnemiesManifestSync()` - Enemies
+- `loadNPCsManifest()` / `getNPCsManifestSync()` - NPCs
+- `loadSpritesManifest()` - Sprites
+- `loadCinematicsManifest()` - Cinematics
+- `loadSoundsManifest()` - Sounds
+- `loadEffectsManifest()` - Effects
+- `loadItemsManifest()` - Items
+- `loadScenesManifest()` - Scenes
+- `loadChapterPlatesManifest()` - Chapter plates
+- `preloadManifests(options)` - Batch preload all manifests
+- `clearManifestCache()` - Clear cache (dev/testing)
+- `getCacheStats()` - Get cache info
+
+**Constants**:
+- `ALL_CHAPTER_IDS` - `[0, 1, 2, ..., 9]`
+- `TOTAL_CHAPTERS` - `10`
+- `isValidChapterId(id)` - Validator function
+
+**Types**: All types exported from `game/src/game/data/manifest-schemas.ts` (ChapterManifest, EnemiesManifest, NPCsManifest, etc.)

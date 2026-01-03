@@ -1,0 +1,324 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otterblade-odyssey.game/schemas/sequences.json",
+  "title": "Scripted Sequences Schema",
+  "description": "Choreographed events, environmental hazards, and dramatic moments using Yuka pathfinding",
+  "type": "object",
+
+  "definitions": {
+    "point": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      },
+      "required": ["x", "y"]
+    },
+
+    "path": {
+      "type": "object",
+      "properties": {
+        "waypoints": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/point" },
+          "minItems": 2
+        },
+        "navigationMode": {
+          "type": "string",
+          "enum": ["walk", "run", "jump", "climb", "fall", "fly"],
+          "default": "walk"
+        },
+        "speed": { "type": "number", "default": 1.0 },
+        "easing": {
+          "type": "string",
+          "enum": ["linear", "easeIn", "easeOut", "easeInOut"],
+          "default": "linear"
+        }
+      },
+      "required": ["waypoints"]
+    },
+
+    "actorMovement": {
+      "type": "object",
+      "description": "Move an NPC or object along a path using Yuka navigation",
+      "properties": {
+        "actorId": { "type": "string" },
+        "path": { "$ref": "#/definitions/path" },
+        "animation": { "type": "string" },
+        "faceDirection": { "type": "boolean", "default": true },
+        "usePathfinding": { 
+          "type": "boolean", 
+          "default": true,
+          "description": "If true, use Yuka to navigate obstacles. If false, follow path directly."
+        },
+        "onArrival": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/sequenceAction" }
+        }
+      },
+      "required": ["actorId", "path"]
+    },
+
+    "cameraMovement": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["pan", "follow", "shake", "zoom", "lock", "unlock"]
+        },
+        "target": { 
+          "oneOf": [
+            { "$ref": "#/definitions/point" },
+            { "type": "string", "description": "Actor ID to follow" }
+          ]
+        },
+        "duration": { "type": "number" },
+        "easing": { "type": "string" },
+        "intensity": { "type": "number", "description": "For shake effect" },
+        "zoom": { "type": "number", "description": "Zoom level, 1.0 = normal" }
+      },
+      "required": ["type"]
+    },
+
+    "environmentalHazard": {
+      "type": "object",
+      "description": "Falling debris, collapsing floors, rising water, etc.",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "falling_debris",
+            "collapsing_floor", 
+            "rising_water",
+            "spreading_ice",
+            "rolling_boulder",
+            "swinging_obstacle",
+            "timed_platform",
+            "pressure_trap",
+            "falling_icicle",
+            "crumbling_ceiling"
+          ]
+        },
+        "region": { "$ref": "#/definitions/region" },
+        "spawns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "position": { "$ref": "#/definitions/point" },
+              "delay": { "type": "number" },
+              "velocity": { "$ref": "#/definitions/point" },
+              "rotation": { "type": "number" },
+              "asset": { "type": "string" },
+              "damage": { "type": "number" },
+              "warmthDrain": { "type": "number" }
+            }
+          }
+        },
+        "pattern": {
+          "type": "string",
+          "enum": ["random", "sequential", "wave", "cascade"],
+          "default": "sequential"
+        },
+        "interval": { "type": "number", "description": "ms between spawns" },
+        "duration": { "type": "number", "description": "Total hazard duration in ms" },
+        "warningTime": { "type": "number", "description": "ms of warning before hazard activates" },
+        "warningEffect": { "type": "string", "description": "Visual/audio warning" }
+      },
+      "required": ["id", "type", "region"]
+    },
+
+    "region": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      },
+      "required": ["x", "y", "width", "height"]
+    },
+
+    "sequenceAction": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "move_actor",
+            "spawn_actor",
+            "despawn_actor",
+            "actor_gesture",
+            "actor_animation",
+            "actor_face",
+            "camera",
+            "play_sound",
+            "play_music",
+            "stop_music",
+            "show_toast",
+            "particle_effect",
+            "lighting_change",
+            "slow_motion",
+            "pause",
+            "spawn_hazard",
+            "stop_hazard",
+            "spawn_enemies",
+            "trigger_interaction",
+            "set_flag",
+            "branch",
+            "loop",
+            "parallel",
+            "player_control",
+            "screen_effect"
+          ]
+        },
+        "delay": { "type": "number", "default": 0 },
+        "duration": { "type": "number" },
+        "target": { "type": "string" },
+        "value": {},
+        "async": { 
+          "type": "boolean", 
+          "default": false,
+          "description": "If true, don't wait for this action to complete"
+        }
+      },
+      "required": ["type"]
+    },
+
+    "sequence": {
+      "type": "object",
+      "description": "A choreographed sequence of events",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "trigger": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["enter_region", "interact", "defeat_enemies", "timer", "flag", "chapter_start"]
+            },
+            "target": { "type": "string" },
+            "region": { "$ref": "#/definitions/region" }
+          }
+        },
+        "playerControl": {
+          "type": "string",
+          "enum": ["full", "limited", "none"],
+          "default": "full",
+          "description": "Player control during sequence: full = normal, limited = can move but not attack, none = cinematic"
+        },
+        "skippable": { "type": "boolean", "default": false },
+        "once": { "type": "boolean", "default": true },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/sequenceAction" }
+        },
+        "onComplete": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/sequenceAction" }
+        },
+        "onSkip": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/sequenceAction" }
+        }
+      },
+      "required": ["id", "actions"]
+    },
+
+    "chaseSequence": {
+      "type": "object",
+      "description": "Player must escape while hazards/enemies pursue",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "chase" },
+        "trigger": { "$ref": "#/definitions/sequenceAction" },
+        "pursuer": {
+          "type": "object",
+          "properties": {
+            "actorId": { "type": "string" },
+            "speed": { "type": "number" },
+            "behavior": {
+              "type": "string",
+              "enum": ["direct_chase", "patrol_ahead", "flank", "ambush"]
+            }
+          }
+        },
+        "hazards": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/environmentalHazard" }
+        },
+        "escapePoint": { "$ref": "#/definitions/point" },
+        "failCondition": {
+          "type": "string",
+          "enum": ["caught", "damage", "time"],
+          "default": "caught"
+        },
+        "timeLimit": { "type": "number" },
+        "cameraMode": {
+          "type": "string",
+          "enum": ["follow", "ahead", "wide"],
+          "default": "ahead"
+        }
+      },
+      "required": ["id", "type", "escapePoint"]
+    },
+
+    "setpieceSequence": {
+      "type": "object",
+      "description": "Dramatic moment with specific choreography",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "setpiece" },
+        "name": { "type": "string" },
+        "emotionalBeat": { "type": "string" },
+        "actors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "spawnPoint": { "$ref": "#/definitions/point" },
+              "initialAnimation": { "type": "string" }
+            }
+          }
+        },
+        "choreography": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/sequence" }
+        },
+        "parallaxShift": {
+          "type": "object",
+          "description": "Shift background/midground/foreground for dramatic effect",
+          "properties": {
+            "background": { "$ref": "#/definitions/point" },
+            "midground": { "$ref": "#/definitions/point" },
+            "foreground": { "$ref": "#/definitions/point" }
+          }
+        }
+      },
+      "required": ["id", "type", "choreography"]
+    }
+  },
+
+  "properties": {
+    "sequences": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/sequence" }
+    },
+    "chaseSequences": {
+      "type": "array", 
+      "items": { "$ref": "#/definitions/chaseSequence" }
+    },
+    "setpieces": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/setpieceSequence" }
+    },
+    "hazards": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/environmentalHazard" }
+    }
+  }
+}

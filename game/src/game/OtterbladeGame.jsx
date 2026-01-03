@@ -5,8 +5,17 @@
  */
 
 import Matter from 'matter-js';
-import { createEffect, createSignal, ErrorBoundary, For, onCleanup, Show } from 'solid-js';
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  ErrorBoundary,
+  For,
+  onCleanup,
+  Show,
+} from 'solid-js';
 import { Vector3 } from 'yuka';
+import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
 import { loadChapterManifest } from './data/chapter-loaders';
 import { createGameLoop } from './engine/gameLoop';
@@ -28,10 +37,104 @@ import { audioManager } from './systems/AudioManager';
 import { setupCollisionHandlers } from './systems/collision';
 import { inputManager } from './systems/InputManager';
 
-const { World, Runner, Engine } = Matter;
+/**
+ * Preload all game manifests using the DDL loader with progress tracking.
+ * This runs once at game startup to fetch all JSON data.
+ *
+ * @param {(percent: number) => void} [onProgress] Optional callback invoked with
+ *   the current preload progress percentage (0–100) after each manifest step.
+ * @returns {Promise<{ success: true }>} Promise that resolves when all manifests
+ *   have finished preloading successfully.
+ */
+async function preloadGameManifests(onProgress) {
+  try {
+    // Dynamic import to avoid SSR issues
+    const {
+      loadChapterManifest,
+      loadEnemiesManifest,
+      loadNPCsManifest,
+      loadSpritesManifest,
+      loadCinematicsManifest,
+      loadSoundsManifest,
+      loadEffectsManifest,
+      loadItemsManifest,
+      loadScenesManifest,
+      loadChapterPlatesManifest,
+    } = await import('../ddl/loader');
+
+    const totalSteps = 19; // 10 chapters + 9 manifests
+    let completed = 0;
+
+    const updateProgress = () => {
+      completed++;
+      const percent = Math.floor((completed / totalSteps) * 100);
+      onProgress?.(percent);
+      console.log(`[DDL] Progress: ${percent}% (${completed}/${totalSteps})`);
+    };
+
+    // Load all manifests in parallel with progress tracking
+    const loaders = [];
+
+    // Load 10 chapters
+    for (let i = 0; i <= 9; i++) {
+      loaders.push(
+        loadChapterManifest(i)
+          .then(() => {
+            updateProgress();
+            console.log(`[DDL] ✓ Chapter ${i} loaded`);
+          })
+          .catch((error) => {
+            console.warn(`[DDL] ✗ Failed to load chapter ${i}:`, error.message);
+            updateProgress(); // Still count as progress even if failed
+          })
+      );
+    }
+
+    // Load entity and asset manifests
+    const manifestLoaders = [
+      { loader: loadEnemiesManifest, name: 'Enemies' },
+      { loader: loadNPCsManifest, name: 'NPCs' },
+      { loader: loadSpritesManifest, name: 'Sprites' },
+      { loader: loadCinematicsManifest, name: 'Cinematics' },
+      { loader: loadSoundsManifest, name: 'Sounds' },
+      { loader: loadEffectsManifest, name: 'Effects' },
+      { loader: loadItemsManifest, name: 'Items' },
+      { loader: loadScenesManifest, name: 'Scenes' },
+      { loader: loadChapterPlatesManifest, name: 'Chapter Plates' },
+    ];
+
+    for (const { loader, name } of manifestLoaders) {
+      loaders.push(
+        loader()
+          .then(() => {
+            updateProgress();
+            console.log(`[DDL] ✓ ${name} loaded`);
+          })
+          .catch((error) => {
+            console.warn(`[DDL] ✗ Failed to load ${name}:`, error.message);
+            updateProgress();
+          })
+      );
+    }
+
+    await Promise.all(loaders);
+
+    console.log('[DDL] Preload complete');
+    return { success: true };
+  } catch (error) {
+    console.error('[Game] Manifest preload failed:', error);
+    throw new Error(`Failed to load game data: ${error.message}`);
+  }
+}
 
 function OtterbladeGameContent() {
   let canvasRef;
+
+  // Track loading progress
+  const [loadingProgress, setLoadingProgress] = createSignal(0);
+
+  // Preload manifests using createResource with progress tracking
+  const [manifestsLoaded] = createResource(() => preloadGameManifests(setLoadingProgress));
 
   // Game state signals
   const [currentChapter] = createSignal(0);
@@ -62,7 +165,8 @@ function OtterbladeGameContent() {
   };
 
   createEffect(() => {
-    if (!gameStarted()) return;
+    // Wait for manifests to load before starting game
+    if (!manifestsLoaded() || !gameStarted()) return;
 
     const canvas = canvasRef;
     if (!canvas) {
@@ -91,11 +195,11 @@ function OtterbladeGameContent() {
 
     // Create physics engine
     const engine = createPhysicsEngine();
-    const runner = Runner.create();
+    const runner = Matter.Runner.create();
 
     // Create player
     const player = createFinnBody(spawnPoint.x, spawnPoint.y);
-    World.add(engine.world, player);
+    Matter.World.add(engine.world, player);
 
     // Create player controller
     const playerController = new PlayerController(player, engine, gameStateObj, audioManager);
@@ -255,15 +359,30 @@ function OtterbladeGameContent() {
       for (const sequence of timingSequences) {
         sequence?.destroy?.();
       }
-      Engine.clear(engine);
-      World.clear(engine.world, false);
+      Matter.Engine.clear(engine);
+      Matter.World.clear(engine.world, false);
       enemyBodyMap.clear();
     });
   });
 
   return (
     <>
-      <Show when={!gameStarted()}>
+      {/* Loading Screen - Show while manifests are loading */}
+      <Show when={manifestsLoaded.loading}>
+        <LoadingScreen progress={loadingProgress()} status="Loading game manifests..." />
+      </Show>
+
+      {/* Error Screen - Show if manifest loading failed */}
+      <Show when={manifestsLoaded.error}>
+        <LoadingScreen
+          progress={0}
+          status="Failed to load game data"
+          error={manifestsLoaded.error?.message || 'Unknown error occurred'}
+        />
+      </Show>
+
+      {/* Start Menu - Show after manifests load but before game starts */}
+      <Show when={!manifestsLoaded.loading && !manifestsLoaded.error && !gameStarted()}>
         <div
           style={{
             position: 'fixed',
@@ -311,13 +430,15 @@ function OtterbladeGameContent() {
               cursor: 'pointer',
               'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
             }}
+            disabled={manifestsLoaded.loading}
           >
             Begin Journey
           </button>
         </div>
       </Show>
 
-      <Show when={gameStarted()}>
+      {/* Game Canvas - Show when game is started and manifests are loaded */}
+      <Show when={gameStarted() && manifestsLoaded()}>
         <canvas ref={canvasRef} style={{ display: 'block' }} />
 
         {/* HUD */}

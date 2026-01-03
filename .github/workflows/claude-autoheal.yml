@@ -1,0 +1,284 @@
+name: Claude Auto-Heal
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  issue_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Target PR number to heal"
+        required: true
+        type: string
+
+concurrency:
+  group: equalizer-autoheal-${{ github.event.workflow_run.id || github.event.issue.number || github.event.pull_request.number || inputs.pr_number || github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.context.outputs.pr_number }}
+      head_ref: ${{ steps.final_head.outputs.head_ref }}
+      strategy: ${{ steps.strategy.outputs.strategy }}
+      run_reason: ${{ steps.finalize.outputs.run_reason }}
+      trigger_url: ${{ steps.context.outputs.trigger_url }}
+      comment_body: ${{ steps.context.outputs.comment_body }}
+      comment_author: ${{ steps.context.outputs.comment_author }}
+      override_strategy: ${{ steps.override.outputs.override_strategy }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Resolve context
+        id: context
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const eventName = context.eventName;
+            const base = { comment_body: '', comment_author: '', trigger_url: '' };
+
+            if (eventName === 'workflow_dispatch') {
+              const result = {
+                ...base,
+                pr_number: '${{ inputs.pr_number }}',
+                head_ref: '',
+                run_reason: 'manual autoheal dispatch',
+                trigger_url: '',
+              };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
+            }
+
+            if (eventName === 'workflow_run') {
+              if (context.payload.workflow_run.conclusion !== 'failure') {
+                core.setFailed('workflow_run is not a failure; skipping');
+                return;
+              }
+
+              const pr = context.payload.workflow_run.pull_requests?.[0];
+              if (!pr) {
+                core.setFailed('No PR associated with workflow_run; skipping');
+                return;
+              }
+
+              const result = {
+                ...base,
+                pr_number: pr.number.toString(),
+                head_ref: pr.head_branch,
+                run_reason: `workflow_run failure: ${context.payload.workflow_run.name}`,
+                trigger_url: context.payload.workflow_run.html_url,
+              };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
+            }
+
+            if (eventName === 'issue_comment') {
+              if (!context.payload.issue.pull_request) {
+                core.setFailed('Issue comment is not on a PR');
+                return;
+              }
+
+              if (context.payload.comment.user?.type === 'Bot' || (context.payload.comment.user?.login || '').endsWith('[bot]')) {
+                core.setFailed('Skipping bot-authored comment to prevent loops');
+                return;
+              }
+
+              const result = {
+                ...base,
+                pr_number: context.payload.issue.number.toString(),
+                head_ref: '',
+                run_reason: `issue_comment by @${context.payload.comment.user?.login || 'unknown'}`,
+                trigger_url: context.payload.comment.html_url,
+                comment_body: context.payload.comment.body || '',
+                comment_author: context.payload.comment.user?.login || '',
+              };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
+            }
+
+            if (eventName === 'pull_request_review') {
+              if (context.payload.review.user?.type === 'Bot' || (context.payload.review.user?.login || '').endsWith('[bot]')) {
+                core.setFailed('Skipping bot-authored review to prevent loops');
+                return;
+              }
+
+              const result = {
+                ...base,
+                pr_number: context.payload.pull_request.number.toString(),
+                head_ref: context.payload.pull_request.head.ref,
+                run_reason: `pull_request_review by @${context.payload.review.user?.login || 'unknown'}`,
+                trigger_url: context.payload.review.html_url,
+                comment_body: context.payload.review.body || '',
+                comment_author: context.payload.review.user?.login || '',
+              };
+              core.setOutput('pr_number', result.pr_number);
+              core.setOutput('head_ref', result.head_ref);
+              core.setOutput('run_reason', result.run_reason);
+              core.setOutput('trigger_url', result.trigger_url);
+              core.setOutput('comment_body', result.comment_body);
+              core.setOutput('comment_author', result.comment_author);
+              return;
+            }
+
+            core.setFailed(`Unsupported event: ${eventName}`);
+
+      - name: Check IDDQD override
+        id: override
+        uses: actions/github-script@v7
+        env:
+          COMMENT_BODY: ${{ steps.context.outputs.comment_body }}
+          COMMENT_AUTHOR: ${{ steps.context.outputs.comment_author }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const body = (process.env.COMMENT_BODY || '').toLowerCase();
+            const author = process.env.COMMENT_AUTHOR || '';
+            const hasOverride = body.includes('iddqd');
+
+            if (!hasOverride) {
+              core.setOutput('override_strategy', '');
+              core.setOutput('override_reason', '');
+              return;
+            }
+
+            const owner = context.repo.owner.toLowerCase();
+            let permission = '';
+
+            if (author) {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: author,
+              });
+              permission = data.permission || '';
+            }
+
+            const allowed = author.toLowerCase() === owner || ['admin', 'maintain', 'write'].includes(permission);
+            if (!allowed) {
+              core.setFailed('IDDQD override requires repository owner/admin/write permissions');
+              return;
+            }
+
+            core.setOutput('override_strategy', 'autonomous');
+            core.setOutput('override_reason', `IDDQD override by @${author || 'unknown'}`);
+
+      - name: Finalize run reason
+        id: finalize
+        run: |
+          REASON="${BASE_REASON}"
+          if [ -n "${OVERRIDE_REASON}" ]; then
+            REASON="${REASON} | ${OVERRIDE_REASON}"
+          fi
+          echo "run_reason=${REASON}" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_REASON: ${{ steps.context.outputs.run_reason }}
+          OVERRIDE_REASON: ${{ steps.override.outputs.override_reason }}
+
+      - name: Populate head ref when missing
+        if: steps.context.outputs.head_ref == ''
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = Number('${{ steps.context.outputs.pr_number }}');
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            core.setOutput('head_ref', pr.head.ref);
+
+      - name: Finalize head ref
+        id: final_head
+        run: echo "head_ref=${HEAD_REF_OVERRIDE:-${BASE_HEAD_REF}}" >> "$GITHUB_OUTPUT"
+        env:
+          BASE_HEAD_REF: ${{ steps.context.outputs.head_ref }}
+          HEAD_REF_OVERRIDE: ${{ steps.pr.outputs.head_ref }}
+
+      - name: Determine strategy from config
+        id: strategy
+        uses: actions/github-script@v7
+        env:
+          HEAD_REF: ${{ steps.final_head.outputs.head_ref }}
+          OVERRIDE_STRATEGY: ${{ steps.override.outputs.override_strategy }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github/claude-config.json');
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const special = config.pr_management?.special_branches || {};
+            const defaultStrategy = config.pr_management?.default_strategy?.strategy || 'autonomous';
+            const headRef = process.env.HEAD_REF;
+            const wildcardToRegex = (input) => {
+              const escaped = input.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+              return new RegExp(`^${escaped.replace(/\*/g, '.*')}$`);
+            };
+
+            let strategy = process.env.OVERRIDE_STRATEGY || defaultStrategy;
+            for (const pattern of Object.keys(special)) {
+              if (wildcardToRegex(pattern).test(headRef)) {
+                strategy = special[pattern].strategy || 'collaborative';
+                break;
+              }
+            }
+
+            core.setOutput('strategy', strategy);
+
+  orchestrate:
+    needs: resolve
+    if: needs.resolve.result == 'success'
+    uses: ./.github/workflows/equalizer-core.yml
+    secrets: inherit
+    with:
+      pr_number: ${{ needs.resolve.outputs.pr_number }}
+      head_ref: ${{ needs.resolve.outputs.head_ref }}
+      strategy: ${{ needs.resolve.outputs.strategy }}
+      comment_body: ${{ needs.resolve.outputs.comment_body }}
+      comment_author: ${{ needs.resolve.outputs.comment_author }}
+      run_reason: ${{ needs.resolve.outputs.run_reason }}
+      trigger_url: ${{ needs.resolve.outputs.trigger_url }}
+
+  autonomous-heal:
+    name: Autonomous heal gate
+    needs: [resolve, orchestrate]
+    if: >
+      needs.resolve.result == 'success' &&
+      needs.resolve.outputs.strategy != 'collaborative'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Signal autonomous permission
+        run: echo "Autonomous healing permitted for PR #${{ needs.resolve.outputs.pr_number }} on ${{ needs.resolve.outputs.head_ref }}."
