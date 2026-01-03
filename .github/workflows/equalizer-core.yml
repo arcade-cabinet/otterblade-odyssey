@@ -259,7 +259,7 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ github.repository }}
         run: |
-          TITLE="Equalizer: PR #${PR_NUMBER}"
+          TITLE="Equalizer: PR #${PR_NUMBER//[^0-9]/}"
 
           # Ensure tracking label exists (idempotent)
           if ! gh api repos/$REPO/labels/equalizer-plan >/dev/null 2>&1; then
