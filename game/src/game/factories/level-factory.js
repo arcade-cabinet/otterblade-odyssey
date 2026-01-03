@@ -65,12 +65,7 @@ export function buildLevel(chapterId, engine) {
   // Build hazards
   if (manifest.level?.hazards) {
     for (const hazardDef of manifest.level.hazards) {
-      const hazard = new HazardSystem(
-        hazardDef.x,
-        hazardDef.y,
-        hazardDef.width,
-        hazardDef.height
-      );
+      const hazard = new HazardSystem(hazardDef.x, hazardDef.y, hazardDef.width, hazardDef.height);
       hazard.damage = hazardDef.damage || 1;
       hazard.type = hazardDef.type || 'spikes';
       level.hazards.push(hazard);
@@ -81,12 +76,7 @@ export function buildLevel(chapterId, engine) {
   // Build water zones
   if (manifest.level?.waterZones) {
     for (const waterDef of manifest.level.waterZones) {
-      const water = new WaterZone(
-        waterDef.x,
-        waterDef.y,
-        waterDef.width,
-        waterDef.height
-      );
+      const water = new WaterZone(waterDef.x, waterDef.y, waterDef.width, waterDef.height);
       water.current = waterDef.current || { x: 0, y: 0 };
       level.waterZones.push(water);
       World.add(engine.world, water.sensor);
