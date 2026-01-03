@@ -375,26 +375,15 @@ game/src/data/manifests/
 └── sounds.json         # 18 ambient, SFX, music (Freesound)
 ```
 
-### dev-tools Package
+### Asset Generation (Enterprise)
 
-The `@otterblade/dev-tools` package provides idempotent asset generation:
+Asset generation uses the `jbcom/control-center` enterprise binary:
+- **Veo 3.1** - Video/cinematic generation
+- **Imagen 3** - Image/sprite generation
+- Parallel generation at scale
+- Built-in brand enforcement
 
-```bash
-# Located at: packages/dev-tools/
-
-# Generate all missing assets
-pnpm --filter @otterblade/dev-tools cli
-
-# Generate by category
-pnpm --filter @otterblade/dev-tools cli -- --category sprites
-pnpm --filter @otterblade/dev-tools cli -- --category cinematics
-
-# Preview without generating
-pnpm --filter @otterblade/dev-tools cli -- --dry-run
-
-# Force regeneration
-pnpm --filter @otterblade/dev-tools cli -- --force
-```
+See issue #45 for archived documentation of the previous dev-tools implementation.
 
 ### Asset Status Workflow
 
@@ -417,7 +406,7 @@ pending → [generate] → complete → [review] → approved
 **Idempotency Rule**: Approved assets are NEVER regenerated.
 
 ```
-1. GENERATE  → pnpm --filter @otterblade/dev-tools cli
+1. GENERATE  → via jbcom/control-center
 2. DEPLOY    → Push to main → CD deploys to GitHub Pages
 3. REVIEW    → Visit /assets on GitHub Pages
 4. APPROVE   → Select assets → Click "Approve Selected"
@@ -455,16 +444,6 @@ All generation prompts enforce these rules from `BRAND.md`:
 - Glowing energy weapons or magic beams
 - Anime/JRPG styling
 
-### GitHub Actions Integration
-
-The `assets.yml` workflow automates generation:
-
-1. Triggered via `workflow_dispatch` (manual)
-2. Validates API keys (OPENAI_API_KEY, GEMINI_API_KEY)
-3. Runs dev-tools CLI with selected options
-4. Creates PR with generated assets
-5. PR includes brand compliance checklist
-
 ### Provider Selection Matrix
 
 | Asset Type | Provider | Model | Why |
@@ -473,32 +452,6 @@ The `assets.yml` workflow automates generation:
 | Enemies | OpenAI | gpt-image-1 | Consistent style |
 | Cinematics | Google | veo-3.1 | Native audio, long duration |
 | Scenes | Google | imagen-3.0 | Painterly, wide format |
-
-### Validation Commands
-
-```bash
-# Validate all assets exist
-pnpm validate:assets
-
-# Audit cinematics for brand violations
-pnpm audit:cinematics
-
-# Analyze sprite quality
-pnpm analyze:sprite path/to/sprite.png
-
-# Analyze video compliance
-pnpm analyze:video path/to/video.mp4
-```
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `packages/dev-tools/src/cli.ts` | Main CLI entry point |
-| `packages/dev-tools/src/manifest-generator.ts` | Asset generation logic |
-| `packages/dev-tools/src/shared/prompts.ts` | Brand-aligned prompts |
-| `packages/dev-tools/src/shared/config.ts` | API clients, models |
-| `.github/workflows/assets.yml` | GitHub Actions workflow |
 
 ---
 
@@ -512,7 +465,6 @@ pnpm analyze:video path/to/video.mp4
 | `game/src/data/*.json` | Game content data |
 | `game/src/game/data/` | Typed data loaders |
 | `game/src/data/manifests/` | Asset generation manifests |
-| `packages/dev-tools/` | Asset generation tools |
 
 ---
 

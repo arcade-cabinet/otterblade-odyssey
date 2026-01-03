@@ -34,15 +34,7 @@
     "test:journey:mcp": "PLAYWRIGHT_MCP=true playwright test e2e/automated-playthroughs/complete-game-journey.spec.ts --headed",
     "test:validate-all": "pnpm test:unit && pnpm test:journey",
     "test:all": "pnpm test:unit && pnpm test:e2e",
-    "db:push": "drizzle-kit push",
-    "generate:sprites": "pnpm --filter @otterblade/dev-tools generate:sprites",
-    "generate:enemy-sprites": "pnpm --filter @otterblade/dev-tools generate:enemy-sprites",
-    "generate:cinematic": "pnpm --filter @otterblade/dev-tools generate:cinematic",
-    "generate:scene": "pnpm --filter @otterblade/dev-tools generate:scene",
-    "analyze:sprite": "pnpm --filter @otterblade/dev-tools analyze:sprite",
-    "analyze:video": "pnpm --filter @otterblade/dev-tools analyze:video",
-    "audit:cinematics": "pnpm --filter @otterblade/dev-tools audit:cinematics",
-    "validate:assets": "pnpm --filter @otterblade/dev-tools validate:assets"
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

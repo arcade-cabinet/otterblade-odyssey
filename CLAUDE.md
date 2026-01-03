@@ -247,34 +247,19 @@ All game assets are managed through JSON manifests in `client/src/data/manifests
 | `effects.json` | Particles, combat effects, weather | OpenAI GPT-Image-1 |
 | `sounds.json` | 18 ambient, SFX, and music tracks | Freesound/Custom |
 
-### dev-tools Package
+### Asset Generation (Enterprise)
 
-The `@otterblade/dev-tools` package handles all asset generation:
+Asset generation has moved to the `jbcom/control-center` enterprise binary which includes:
+- **Veo 3.1** - Video/cinematic generation
+- **Imagen 3** - Image/sprite generation
+- Parallel generation at scale
+- Built-in brand enforcement prompts
 
-```bash
-# Generate all missing assets
-pnpm --filter @otterblade/dev-tools cli
-
-# Generate specific category
-pnpm --filter @otterblade/dev-tools cli -- --category sprites
-
-# Dry run to preview
-pnpm --filter @otterblade/dev-tools cli -- --dry-run
-
-# Force regeneration
-pnpm --filter @otterblade/dev-tools cli -- --force --id intro_cinematic
-```
-
-### GitHub Actions Workflow
-
-Use `assets.yml` workflow for automated generation:
-- Validates API keys (OPENAI_API_KEY, GEMINI_API_KEY)
-- Creates PR with generated assets
-- Includes brand compliance checklist
+See issue #45 for archived documentation of the previous `dev-tools` implementation.
 
 ### Brand Enforcement
 
-All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
+All asset generation must enforce:
 - **Anthropomorphic woodland animals ONLY** - NO humans ever
 - **Warm storybook aesthetic** - NO neon, sci-fi, horror
 - **Consistent protagonist** - Finn the otter warrior
@@ -298,7 +283,7 @@ All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
 
 **Workflow:**
 ```
-1. Generate assets → pnpm --filter @otterblade/dev-tools cli
+1. Generate assets → via jbcom/control-center
 2. Push to main → CD deploys to GitHub Pages
 3. Visit /assets → Review in gallery
 4. Select + Approve assets
@@ -310,12 +295,7 @@ All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
 **Approval Storage:** `client/src/data/approvals.json`
 
 **Before generating, respect approvals:**
-```typescript
-// Skip approved assets
-if (approvalsJson.approvals.find(a => a.id === asset.id)) {
-  continue; // Don't regenerate
-}
-```
+Assets marked as `approved` in `approvals.json` should never be regenerated.
 
 ## Testing Commands
 

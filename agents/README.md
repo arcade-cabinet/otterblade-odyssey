@@ -13,7 +13,6 @@ For comprehensive agent guidance, see:
 
 ## Specialized Agents
 
-- **[asset_agent.md](./asset_agent.md)** - Asset generation, validation, brand compliance
 - **[gameplay_agent.md](./gameplay_agent.md)** - Game mechanics, physics, combat
 - **[render_agent.md](./render_agent.md)** - Visual fidelity, shaders, performance
 
@@ -21,32 +20,14 @@ For comprehensive agent guidance, see:
 
 | Agent Type | Primary Focus | Key Files |
 |------------|--------------|-----------|
-| **Asset** | Generation, validation, brand | `packages/dev-tools/`, `manifests/*.json` |
-| **Gameplay** | Movement, combat, AI | `client/src/game/Player.tsx`, `store.ts` |
-| **Render** | Graphics, shaders, performance | `client/src/game/Level.tsx`, postprocessing |
-| **UI/UX** | HUD, menus, touch controls | `client/src/components/hud/` |
-| **ECS** | Entity management | `client/src/game/ecs/world.ts` |
+| **Gameplay** | Movement, combat, AI | `game/src/game/`, `store.js` |
+| **Render** | Graphics, shaders, performance | `game/src/game/rendering/` |
+| **UI/UX** | HUD, menus, touch controls | `game/src/components/` |
 
-## Asset Generation Quick Start
+## Asset Generation
 
-```bash
-# Generate missing assets
-pnpm --filter @otterblade/dev-tools cli
-
-# Generate specific category
-pnpm --filter @otterblade/dev-tools cli -- --category sprites
-
-# Preview without generating
-pnpm --filter @otterblade/dev-tools cli -- --dry-run
-
-# Validate assets exist
-pnpm validate:assets
-
-# Audit cinematics for brand violations
-pnpm audit:cinematics
-```
-
-See **[asset_agent.md](./asset_agent.md)** for complete asset generation documentation.
+Asset generation uses the `jbcom/control-center` enterprise binary (Veo 3.1 + Imagen 3).
+See issue #45 for archived documentation of the previous dev-tools implementation.
 
 ## Package Manager
 

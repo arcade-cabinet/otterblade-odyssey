@@ -58,21 +58,8 @@ Each manifest follows this schema:
 
 ### Generating Assets
 
-Use the `@otterblade/dev-tools` CLI:
-
-```bash
-# Generate all missing assets
-pnpm --filter @otterblade/dev-tools cli
-
-# Generate specific category
-pnpm --filter @otterblade/dev-tools cli -- --category sprites
-
-# Preview what would be generated
-pnpm --filter @otterblade/dev-tools cli -- --dry-run
-
-# Force regeneration
-pnpm --filter @otterblade/dev-tools cli -- --force --id player_sprite_sheet
-```
+Asset generation uses the `jbcom/control-center` enterprise binary (Veo 3.1 + Imagen 3).
+See issue #45 for archived documentation.
 
 ### Asset Locations
 
@@ -132,7 +119,7 @@ Each JSON file should include a `$schema` field pointing to a JSON Schema for ID
 
 1. **Define in manifest**: Add entry to appropriate `manifests/*.json`
 2. **Set status**: Use `pending` for new assets
-3. **Run generation**: `pnpm --filter @otterblade/dev-tools cli`
+3. **Generate via control-center**: Use `jbcom/control-center`
 4. **Verify brand compliance**: Check against BRAND.md
 5. **Update status**: Change to `complete` after validation
 
@@ -155,5 +142,4 @@ This provides:
 |----------|---------|
 | [BRAND.md](../../../BRAND.md) | Visual style guide |
 | [WORLD.md](../../../WORLD.md) | World-building and lore |
-| [packages/dev-tools/README.md](../../../packages/dev-tools/README.md) | Asset generation CLI |
-| [agents/asset_agent.md](../../../agents/asset_agent.md) | Asset agent instructions |
+| [Issue #45](https://github.com/arcade-cabinet/otterblade-odyssey/issues/45) | Archived asset generation docs |
