@@ -1,62 +1,32 @@
 /**
- * @fileoverview Cross-platform storage adapter for Zustand persist middleware
- * Uses Capacitor Preferences on native, falls back to localStorage on web
+ * @fileoverview Web storage adapter for Zustand persist middleware.
+ * Uses localStorage; wrapped in async shape for compatibility.
  */
 
-import { Capacitor } from '@capacitor/core';
-import { Preferences } from '@capacitor/preferences';
 import type { StateStorage } from 'zustand/middleware';
 
 /**
- * Check if we're running on a native platform
+ * Async wrapper around localStorage so Zustand's persist middleware
+ * can hydrate consistently in SSR/client transitions.
  */
-const isNative = Capacitor.isNativePlatform();
-
-/**
- * Custom storage adapter for Zustand's persist middleware
- *
- * On native (iOS/Android): Uses Capacitor Preferences (UserDefaults/SharedPreferences)
- * On web: Uses localStorage (Preferences falls back to this automatically on web PWAs)
- *
- * This is ASYNC storage, so Zustand will handle hydration properly
- */
-export const capacitorStorage: StateStorage = {
+export const webStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     try {
-      const { value } = await Preferences.get({ key: name });
-      return value;
-    } catch (error) {
-      console.warn(`[Storage] Failed to get "${name}" from Preferences:`, error);
-      // Fallback to localStorage for web or error cases
-      try {
-        return localStorage.getItem(name);
-      } catch {
-        return null;
-      }
+      return localStorage.getItem(name);
+    } catch {
+      return null;
     }
   },
 
   setItem: async (name: string, value: string): Promise<void> => {
     try {
-      await Preferences.set({ key: name, value });
-    } catch (error) {
-      console.warn(`[Storage] Failed to set "${name}" in Preferences:`, error);
-      // Fallback to localStorage
-      try {
-        localStorage.setItem(name, value);
-      } catch (localError) {
-        console.error('[Storage] localStorage fallback also failed:', localError);
-      }
+      localStorage.setItem(name, value);
+    } catch {
+      // Ignore write errors (private mode, quotas, etc.)
     }
   },
 
   removeItem: async (name: string): Promise<void> => {
-    try {
-      await Preferences.remove({ key: name });
-    } catch (error) {
-      console.warn(`[Storage] Failed to remove "${name}" from Preferences:`, error);
-    }
-    // Also clean localStorage fallback
     try {
       localStorage.removeItem(name);
     } catch {
@@ -66,8 +36,7 @@ export const capacitorStorage: StateStorage = {
 };
 
 /**
- * Synchronous localStorage adapter for development/testing
- * Use this when you don't need Capacitor integration
+ * Synchronous helper used in tests where async storage is unnecessary.
  */
 export const localStorageAdapter: StateStorage = {
   getItem: (name: string): string | null => {
@@ -81,8 +50,8 @@ export const localStorageAdapter: StateStorage = {
   setItem: (name: string, value: string): void => {
     try {
       localStorage.setItem(name, value);
-    } catch (error) {
-      console.error('[Storage] localStorage.setItem failed:', error);
+    } catch {
+      // Ignore write errors
     }
   },
 
@@ -96,14 +65,10 @@ export const localStorageAdapter: StateStorage = {
 };
 
 /**
- * Get the appropriate storage adapter based on platform
- * - Native: Capacitor Preferences (async)
- * - Web: localStorage (sync, but wrapped as async for consistency)
+ * Get the storage adapter for the current environment.
  */
 export function getStorageAdapter(): StateStorage {
-  // Always use capacitorStorage - it handles fallbacks internally
-  // and Capacitor Preferences uses localStorage on web PWAs anyway
-  return capacitorStorage;
+  return webStorage;
 }
 
 /**
@@ -127,19 +92,11 @@ export const STORAGE_KEYS = {
 export async function isStorageAvailable(): Promise<boolean> {
   try {
     const testKey = '__storage_test__';
-    await Preferences.set({ key: testKey, value: 'test' });
-    await Preferences.remove({ key: testKey });
+    localStorage.setItem(testKey, 'test');
+    localStorage.removeItem(testKey);
     return true;
   } catch {
-    // Check localStorage fallback
-    try {
-      const testKey = '__storage_test__';
-      localStorage.setItem(testKey, 'test');
-      localStorage.removeItem(testKey);
-      return true;
-    } catch {
-      return false;
-    }
+    return false;
   }
 }
 
@@ -147,14 +104,7 @@ export async function isStorageAvailable(): Promise<boolean> {
  * Clear all game data (for debugging or user request)
  */
 export async function clearAllGameData(): Promise<void> {
-  try {
-    // Clear Capacitor Preferences
-    await Preferences.clear();
-  } catch (error) {
-    console.warn('[Storage] Failed to clear Preferences:', error);
-  }
-
-  // Also clear any localStorage items with our prefix
+  // Clear any localStorage items with our prefix
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -176,7 +126,7 @@ export async function clearAllGameData(): Promise<void> {
  */
 export function getStorageInfo(): { platform: string; isNative: boolean } {
   return {
-    platform: Capacitor.getPlatform(),
-    isNative,
+    platform: 'web',
+    isNative: false,
   };
 }

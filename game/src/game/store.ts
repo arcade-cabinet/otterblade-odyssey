@@ -8,7 +8,7 @@
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { capacitorStorage, STORAGE_KEYS } from '../lib/storage';
+import { STORAGE_KEYS, webStorage } from '../lib/storage';
 import { BIOMES } from './constants';
 
 // ============================================================================
@@ -38,7 +38,7 @@ interface Controls {
 
 /**
  * Persisted state - survives page refresh and app restarts
- * Stored via Capacitor Preferences (native) or localStorage (web)
+ * Stored via localStorage
  */
 interface PersistedState {
   // High scores
@@ -537,7 +537,7 @@ export const useStore = create<GameState>()(
     }),
     {
       name: STORAGE_KEYS.GAME_SAVE,
-      storage: createJSONStorage(() => capacitorStorage),
+      storage: createJSONStorage(() => webStorage),
 
       // Only persist certain fields (not runtime state)
       partialize: (state): PersistedState => ({
@@ -580,8 +580,6 @@ export const useStore = create<GameState>()(
       onRehydrateStorage: () => (state, error) => {
         if (error) {
           console.error('[Store] Failed to rehydrate state:', error);
-        } else if (state) {
-          console.log('[Store] State hydrated, best score:', state.bestScore);
         }
       },
     }

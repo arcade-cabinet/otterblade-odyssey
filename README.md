@@ -304,24 +304,6 @@ export default defineConfig({
 
 3. Access game at: `https://jbdevprimary.github.io/otterblade-odyssey`
 
-### Mobile (Capacitor)
-
-For native Android/iOS builds:
-
-```bash
-# Initialize Capacitor
-pnpm cap:init
-
-# Add Android platform
-pnpm cap:add:android
-
-# Build and sync
-pnpm cap:build:android
-
-# Open in Android Studio
-pnpm cap:open:android
-```
-
 ## 🎨 Asset Generation
 
 Assets are generated from JSON manifests using **idempotent GenAI pipelines**.
