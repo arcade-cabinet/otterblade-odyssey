@@ -72,6 +72,17 @@ reviews:
 chat:
   auto_reply: true
 
+# Issue enrichment - auto-planning on labeled issues
+issue_enrichment:
+  auto_enrich:
+    enabled: true
+    labels:
+      - "enhancement"
+      - "bug"
+      - "game/ecs"
+      - "game/physics"
+      - "documentation"
+
 # Knowledge base
 knowledge_base:
   # Game-specific patterns (updated for Astro + Solid.js architecture)
