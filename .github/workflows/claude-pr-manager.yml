@@ -78,10 +78,11 @@ jobs:
   }
             }
 
-            if (!prData) {
-              core.setFailed(`Unsupported event: ${eventName}`);
-              return;
-            }
+if (!prData) {
+  core.info(`Event name: ${eventName}, context keys: ${Object.keys(context.payload).join(', ')}`);
+  core.setFailed(`Unsupported event: ${eventName}`);
+  return;
+}
 
             core.setOutput('pr_number', prData.number);
             core.setOutput('pr_branch', prData.head.ref);
