@@ -60,7 +60,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           SONAR_ENABLED=true
-          if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
+            echo "::error::SONAR_PROJECT_KEY and SONAR_ORGANIZATION environment variables must be sourced from configured GitHub repository or organization variables."
             echo "::warning::SONAR_PROJECT_KEY and/or SONAR_ORGANIZATION are not set; skipping SonarCloud analysis."
             SONAR_ENABLED=false
           elif [ -z "$SONAR_TOKEN" ]; then
