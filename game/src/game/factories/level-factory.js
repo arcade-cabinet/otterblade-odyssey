@@ -197,15 +197,7 @@ function buildSegment(segment, engine, level) {
   // Build platforms
   if (segment.platforms) {
     for (const platformDef of segment.platforms) {
-      const platform = createPlatform(engine, {
-        x: platformDef.x,
-        y: platformDef.y,
-        width: platformDef.width,
-        height: platformDef.height,
-        friction: platformDef.friction || 0.8,
-        asset: platformDef.asset,
-        type: platformDef.type || 'solid',
-      });
+      const platform = createPlatform(engine);
 
       level.platforms.push({
         body: platform,
