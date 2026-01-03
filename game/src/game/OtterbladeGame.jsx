@@ -168,7 +168,7 @@ function OtterbladeGameContent() {
     );
 
     // Setup collision handlers with O(1) Map lookups
-    setupCollisionHandlers(
+    const collisionHandlers = setupCollisionHandlers(
       engine,
       player,
       {
@@ -249,9 +249,11 @@ function OtterbladeGameContent() {
       audioManager.stopAll();
       aiManager.destroy();
       inputManager.reset();
+      collisionHandlers?.cleanup?.();
       lanternSystem?.destroy?.();
       bellSystem?.destroy?.();
       hearthSystem?.destroy?.();
+      hazardSystem?.destroy?.();
       for (const sequence of timingSequences) {
         sequence?.destroy?.();
       }

@@ -3,7 +3,7 @@
  * Handles all game collision events with O(1) lookups using Maps
  */
 
-import { World } from 'matter-js';
+import Matter, { World } from 'matter-js';
 import { Vector3 } from 'yuka';
 
 /**
@@ -44,7 +44,8 @@ export function setupCollisionHandlers(
     interactionMap.set(i.body.id, i);
   }
 
-  Events.on(engine, 'collisionStart', (event) => {
+  // Define collision handler function for proper cleanup
+  const handleCollisionStart = (event) => {
     for (const pair of event.pairs) {
       const { bodyA, bodyB } = pair;
 
@@ -152,11 +153,18 @@ export function setupCollisionHandlers(
         }
       }
     }
-  });
+  };
 
+  // Register collision event listener
+  Events.on(engine, 'collisionStart', handleCollisionStart);
+
+  // Return cleanup function along with maps
   return {
     collectibleMap,
     interactionMap,
+    cleanup: () => {
+      Events.off(engine, 'collisionStart', handleCollisionStart);
+    },
   };
 }
 
