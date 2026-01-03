@@ -369,11 +369,25 @@ export class GameState {
 
     // Safe property assignment - avoid prototype pollution
     const safeKeys = [
-      'currentChapter', 'health', 'maxHealth', 'warmth', 'maxWarmth',
-      'shards', 'inventory', 'completedQuests', 'activeQuests',
-      'discoveredSecrets', 'activatedCheckpoints', 'defeatedEnemies',
-      'defeatedEnemiesByType', 'enemyGroups', 'unlockedDoors',
-      'playTime', 'deaths', 'lastCheckpoint', 'settings'
+      'currentChapter',
+      'health',
+      'maxHealth',
+      'warmth',
+      'maxWarmth',
+      'shards',
+      'inventory',
+      'completedQuests',
+      'activeQuests',
+      'discoveredSecrets',
+      'activatedCheckpoints',
+      'defeatedEnemies',
+      'defeatedEnemiesByType',
+      'enemyGroups',
+      'unlockedDoors',
+      'playTime',
+      'deaths',
+      'lastCheckpoint',
+      'settings',
     ];
 
     for (const key of safeKeys) {

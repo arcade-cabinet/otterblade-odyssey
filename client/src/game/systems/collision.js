@@ -3,8 +3,8 @@
  * Handles all game collision events with O(1) lookups using Maps
  */
 
-import { Vector3 } from 'yuka';
 import { World } from 'matter-js';
+import { Vector3 } from 'yuka';
 
 /**
  * Setup collision handlers for game entities
@@ -28,12 +28,7 @@ export function setupCollisionHandlers(
 ) {
   const { Events } = Matter;
   const { inputManager, audioManager } = managers;
-  const {
-    collectibles,
-    npcBodies,
-    interactions,
-    _enemyBodyMap,
-  } = collections;
+  const { collectibles, npcBodies, interactions, _enemyBodyMap } = collections;
   const { setHealth, setShards, setQuestObjectives } = setters;
   const { health, maxHealth, questObjectives } = getters;
   const { _playerController } = controllers;

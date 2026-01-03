@@ -74,19 +74,19 @@ jobs:
           PR_NUM: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          # Sanitize PR title for safe usage
-          SAFE_TITLE=$(echo "$PR_TITLE" | tr -d '\n\r' | head -c 100)
-          
+          # Sanitize PR title for safe usage - escape all shell metacharacters
+          SAFE_TITLE=$(printf '%s' "$PR_TITLE" | tr -d '\n\r' | head -c 100 | sed 's/[`$()\\]/\\&/g')
+
           # Check for existing review comment
           EXISTING=$(gh pr view "$PR_NUM" --json comments --jq '.comments[] | select(.body | contains("🤖 **Ecosystem Review**")) | .id' | head -1)
-          
+
           if [ -n "$EXISTING" ]; then
             echo "Review already posted, skipping"
             exit 0
           fi
-          
+
           # Post initial review acknowledgment
-          gh pr comment $PR_NUM --body "🤖 **Ecosystem Review**
+          gh pr comment "$PR_NUM" --body "🤖 **Ecosystem Review**
 
           Reviewing PR: **${SAFE_TITLE}**
 
