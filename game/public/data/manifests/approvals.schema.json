@@ -32,8 +32,12 @@
         "properties": {
           "id": {
             "type": "string",
+<<<<<<< HEAD
             "pattern": "^[a-z_]+$",
             "description": "Asset ID matching manifest (lowercase with underscores)"
+=======
+            "description": "Asset ID matching manifest"
+>>>>>>> main
           },
           "approved": {
             "type": "boolean",
@@ -51,10 +55,17 @@
             "type": "string",
             "description": "If a specific variant was approved"
           }
+<<<<<<< HEAD
         },
         "additionalProperties": false
       }
     }
   },
   "additionalProperties": false
+=======
+        }
+      }
+    }
+  }
+>>>>>>> main
 }

@@ -1,0 +1,556 @@
+name: Unified Auto-Heal
+
+# Fully automatic CI auto-heal system with multi-AI synthesis
+# Runs on: CI failures, nightly scans, and manual triggers
+# NO manual approval required - fully autonomous
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Nightly at midnight UTC
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      force_scan:
+        description: 'Force scan even if no CI failure'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  issues: write
+  id-token: write
+
+env:
+  OLLAMA_HOST: https://ollama.com
+  OLLAMA_MODEL: glm-4.6:cloud
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  # JOB 1: Detect failures (CI failure or nightly scan)
+  # ════════════════════════════════════════════════════════════════
+  detect-failures:
+    name: Detect Failures
+    runs-on: ubuntu-latest
+    outputs:
+      has_failures: ${{ steps.detect.outputs.has_failures }}
+      failure_context: ${{ steps.detect.outputs.failure_context }}
+      pr_number: ${{ steps.detect.outputs.pr_number }}
+      branch: ${{ steps.detect.outputs.branch }}
+      is_fork: ${{ steps.detect.outputs.is_fork }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect failures
+        id: detect
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          HAS_FAILURES="false"
+          FAILURE_CONTEXT=""
+          PR_NUM=""
+          BRANCH=""
+          IS_FORK="false"
+          
+          # Handle different trigger types
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            # CI failure triggered this
+            if [ "${{ github.event.workflow_run.conclusion }}" = "failure" ]; then
+              HAS_FAILURES="true"
+              
+              # Check if fork PR
+              HEAD_REPO="${{ github.event.workflow_run.head_repository.full_name }}"
+              BASE_REPO="${{ github.event.workflow_run.repository.full_name }}"
+              if [ "$HEAD_REPO" != "$BASE_REPO" ]; then
+                IS_FORK="true"
+              fi
+              
+              # Get PR info
+              BRANCH="${{ github.event.workflow_run.head_branch }}"
+              PR_NUM=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
+              
+              # Get failure logs
+              echo "📋 Fetching failure logs from workflow run..."
+              LOGS=$(gh run view "${{ github.event.workflow_run.id }}" --repo "${{ github.repository }}" --log-failed 2>&1 | tail -500 || echo "Could not fetch logs")
+              
+              FAILURE_CONTEXT="CI Failure in workflow run ${{ github.event.workflow_run.id }}
+Branch: $BRANCH
+PR: $PR_NUM
+URL: ${{ github.event.workflow_run.html_url }}
+
+Failure Logs:
+$LOGS"
+            fi
+          elif [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.force_scan }}" = "true" ]; then
+            # Nightly scan - check for open PRs with failing CI
+            echo "🌙 Running nightly scan for failing PRs..."
+            
+            # Find open PRs with failing CI
+            FAILING_PRS=$(gh pr list --repo "${{ github.repository }}" --json number,headRefName,statusCheckRollup \
+              --jq '.[] | select(.statusCheckRollup[]? | select(.conclusion == "FAILURE")) | "\(.number):\(.headRefName)"' 2>/dev/null || echo "")
+            
+            if [ -n "$FAILING_PRS" ]; then
+              # Take first failing PR
+              FIRST_PR=$(echo "$FAILING_PRS" | head -1)
+              PR_NUM=$(echo "$FIRST_PR" | cut -d: -f1)
+              BRANCH=$(echo "$FIRST_PR" | cut -d: -f2)
+              HAS_FAILURES="true"
+              
+              FAILURE_CONTEXT="Nightly scan detected failing PR #$PR_NUM
+Branch: $BRANCH"
+            else
+              echo "✅ No failing PRs found during nightly scan"
+            fi
+          fi
+          
+          # Output results
+          echo "has_failures=$HAS_FAILURES" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "is_fork=$IS_FORK" >> $GITHUB_OUTPUT
+          
+          # Save failure context to file for artifact
+          echo "$FAILURE_CONTEXT" > /tmp/failure-context.txt
+          echo "failure_context<<EOF" >> $GITHUB_OUTPUT
+          cat /tmp/failure-context.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "Detection complete: has_failures=$HAS_FAILURES, pr=$PR_NUM, branch=$BRANCH, fork=$IS_FORK"
+
+      - name: Upload failure context
+        if: steps.detect.outputs.has_failures == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-context
+          path: /tmp/failure-context.txt
+          retention-days: 1
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 2: Generate fix with Claude Haiku 4.5
+  # ════════════════════════════════════════════════════════════════
+  fix-with-claude-haiku:
+    name: Fix with Claude Haiku 4.5
+    needs: detect-failures
+    if: |
+      needs.detect-failures.outputs.has_failures == 'true' &&
+      needs.detect-failures.outputs.is_fork != 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      haiku_fix: ${{ steps.haiku.outputs.fix_suggestion }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.detect-failures.outputs.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download failure context
+        uses: actions/download-artifact@v4
+        with:
+          name: failure-context
+          path: /tmp
+
+      - name: Generate fix with Claude Haiku 4.5
+        id: haiku
+        uses: anthropics/claude-code-action@v1
+        with:
+          model: claude-haiku-4-5-20250102
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are a CI/CD expert fixing build and test failures.
+            
+            Failure Context:
+            ${{ needs.detect-failures.outputs.failure_context }}
+            
+            Analyze the failure and generate a fix. Output your suggested changes as a JSON object:
+            {
+              "analysis": "Brief analysis of root cause",
+              "fix_strategy": "High-level approach to fix",
+              "files_to_change": ["file1.js", "file2.js"],
+              "changes": [
+                {
+                  "file": "file1.js",
+                  "change": "Description of change",
+                  "code": "Actual code changes"
+                }
+              ]
+            }
+          claude_args: >-
+            --allowedTools "Read,Glob,Grep,LS,Bash(pnpm:*),Bash(node:*),Bash(git:*)"
+
+      - name: Save Haiku fix
+        run: |
+          echo '${{ steps.haiku.outputs.structured_output }}' > /tmp/haiku-fix.json
+
+      - name: Upload Haiku fix
+        uses: actions/upload-artifact@v4
+        with:
+          name: haiku-fix
+          path: /tmp/haiku-fix.json
+          retention-days: 1
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 3: Generate fix with Ollama GLM
+  # ════════════════════════════════════════════════════════════════
+  fix-with-ollama:
+    name: Fix with Ollama GLM
+    needs: detect-failures
+    if: |
+      needs.detect-failures.outputs.has_failures == 'true' &&
+      needs.detect-failures.outputs.is_fork != 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      ollama_fix: ${{ steps.ollama.outputs.fix_suggestion }}
+    steps:
+      - name: Download failure context
+        uses: actions/download-artifact@v4
+        with:
+          name: failure-context
+          path: /tmp
+
+      - name: Query Ollama for fix
+        id: ollama
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+        run: |
+          if [ -z "$OLLAMA_API_KEY" ]; then
+            echo "⚠️ No OLLAMA_API_KEY configured, skipping Ollama fix"
+            echo '{"analysis": "Skipped - no API key", "fix_strategy": "N/A"}' > /tmp/ollama-fix.json
+            exit 0
+          fi
+          
+          FAILURE_CONTEXT=$(cat /tmp/failure-context.txt)
+          
+          # Build prompt
+          PROMPT=$(cat <<PROMPT_EOF
+          You are a CI/CD expert fixing build and test failures.
+          
+          Failure Context:
+          $FAILURE_CONTEXT
+          
+          Analyze the failure and generate a fix. Output your suggested changes as a JSON object:
+          {
+            "analysis": "Brief analysis of root cause",
+            "fix_strategy": "High-level approach to fix",
+            "files_to_change": ["file1.js", "file2.js"],
+            "changes": [
+              {
+                "file": "file1.js",
+                "change": "Description of change",
+                "code": "Actual code changes"
+              }
+            ]
+          }
+          PROMPT_EOF
+          )
+
+          echo "🤖 Querying Ollama GLM 4.6..."
+          
+          RESPONSE=$(curl -sf "${{ env.OLLAMA_HOST }}/api/chat" \
+            -H "Authorization: Bearer $OLLAMA_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg model "${{ env.OLLAMA_MODEL }}" \
+              --arg prompt "$PROMPT" \
+              '{
+                model: $model,
+                messages: [{"role": "user", "content": $prompt}],
+                stream: false
+              }')" 2>&1) || RESPONSE=""
+          
+          if [ -z "$RESPONSE" ]; then
+            echo "⚠️ Ollama API call failed"
+            echo '{"analysis": "API call failed", "fix_strategy": "N/A"}' > /tmp/ollama-fix.json
+          else
+            SUGGESTION=$(echo "$RESPONSE" | jq -r '.message.content // "No suggestion"')
+            echo "$SUGGESTION" > /tmp/ollama-fix.json
+          fi
+
+      - name: Upload Ollama fix
+        uses: actions/upload-artifact@v4
+        with:
+          name: ollama-fix
+          path: /tmp/ollama-fix.json
+          retention-days: 1
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 4: Gather similar AI PR feedback
+  # ════════════════════════════════════════════════════════════════
+  gather-ai-feedback:
+    name: Gather AI PR Feedback
+    needs: detect-failures
+    if: |
+      needs.detect-failures.outputs.has_failures == 'true' &&
+      needs.detect-failures.outputs.is_fork != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Search for AI feedback patterns
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Searching for similar AI feedback in recent PRs..."
+          
+          # Get recent merged PRs with AI comments
+          AI_FEEDBACK=$(gh pr list \
+            --repo "${{ github.repository }}" \
+            --state merged \
+            --limit 20 \
+            --json number,title,comments \
+            --jq '.[] | select(.comments > 0) | {number: .number, title: .title}' 2>/dev/null || echo "[]")
+          
+          # Get comments from recent PRs that mention common patterns
+          PATTERNS=""
+          
+          # Search for CodeRabbit, Claude, Copilot feedback
+          for pr_num in $(echo "$AI_FEEDBACK" | jq -r '.number' 2>/dev/null | head -5); do
+            echo "Checking PR #$pr_num..."
+            COMMENTS=$(gh pr view "$pr_num" \
+              --repo "${{ github.repository }}" \
+              --json comments \
+              --jq '.comments[] | select(.author.login | test("coderabbit|claude|Copilot|gemini")) | .body' 2>/dev/null || echo "")
+            
+            if [ -n "$COMMENTS" ]; then
+              PATTERNS="$PATTERNS
+
+PR #$pr_num feedback:
+$COMMENTS
+---"
+            fi
+          done
+          
+          if [ -z "$PATTERNS" ]; then
+            PATTERNS="No similar AI feedback found in recent PRs."
+          fi
+          
+          echo "$PATTERNS" > /tmp/ai-feedback.txt
+
+      - name: Upload AI feedback
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-feedback
+          path: /tmp/ai-feedback.txt
+          retention-days: 1
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 5: Synthesize fix with Sonnet 4.5
+  # ════════════════════════════════════════════════════════════════
+  synthesize-fix:
+    name: Synthesize Fix with Sonnet 4.5
+    needs: 
+      - detect-failures
+      - fix-with-claude-haiku
+      - fix-with-ollama
+      - gather-ai-feedback
+    if: |
+      needs.detect-failures.outputs.has_failures == 'true' &&
+      needs.detect-failures.outputs.is_fork != 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      final_fix: ${{ steps.synthesize.outputs.final_fix }}
+      should_apply: ${{ steps.synthesize.outputs.should_apply }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.detect-failures.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/artifacts
+
+      - name: Synthesize with Claude Sonnet 4.5
+        id: synthesize
+        uses: anthropics/claude-code-action@v1
+        with:
+          model: claude-sonnet-4-5-20250102
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          prompt: |
+            You are a senior engineer synthesizing multiple AI-generated fix proposals.
+            
+            # Context
+            Failure: ${{ needs.detect-failures.outputs.failure_context }}
+            
+            # Fix Proposal 1: Claude Haiku 4.5
+            $(cat /tmp/artifacts/haiku-fix/haiku-fix.json 2>/dev/null || echo "No Haiku fix available")
+            
+            # Fix Proposal 2: Ollama GLM
+            $(cat /tmp/artifacts/ollama-fix/ollama-fix.json 2>/dev/null || echo "No Ollama fix available")
+            
+            # Similar AI Feedback from Recent PRs
+            $(cat /tmp/artifacts/ai-feedback/ai-feedback.txt 2>/dev/null || echo "No AI feedback available")
+            
+            # Your Task
+            1. Compare the two fix proposals
+            2. Incorporate insights from similar PR feedback
+            3. Generate the BEST possible fix by synthesizing all inputs
+            4. Apply the fix to the codebase
+            5. Test the fix to ensure it works
+            6. Commit with a clear message
+            
+            Rules:
+            - Preserve intent from both proposals
+            - Use patterns from successful AI feedback
+            - Be conservative - only fix what's broken
+            - Ensure tests pass after your changes
+            - Document your reasoning
+            
+            After applying the fix, set output variables:
+            - should_apply: "true" if fix is ready to push
+            - commit_message: Clear description of what was fixed
+          claude_args: >-
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(node:*),Bash(git:*)"
+
+      - name: Check if fix applied
+        id: check_fix
+        run: |
+          # Check if there are changes
+          git --no-pager diff --stat
+          
+          if git diff --quiet; then
+            echo "No changes made by synthesis"
+            echo "should_apply=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected, ready to apply"
+            echo "should_apply=true" >> $GITHUB_OUTPUT
+            
+            # Create patch for next job
+            git diff > /tmp/fix.patch
+          fi
+
+      - name: Upload fix patch
+        if: steps.check_fix.outputs.should_apply == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: fix-patch
+          path: /tmp/fix.patch
+          retention-days: 1
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 6: Auto-commit and push (NO APPROVAL NEEDED)
+  # ════════════════════════════════════════════════════════════════
+  apply-fix:
+    name: Apply Fix Automatically
+    needs:
+      - detect-failures
+      - synthesize-fix
+    if: |
+      needs.detect-failures.outputs.has_failures == 'true' &&
+      needs.detect-failures.outputs.is_fork != 'true' &&
+      needs.synthesize-fix.outputs.should_apply == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.detect-failures.outputs.branch }}
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Setup git identity
+        run: |
+          git config --global user.email "auto-heal[bot]@users.noreply.github.com"
+          git config --global user.name "Auto-Heal Bot"
+
+      - name: Download fix patch
+        uses: actions/download-artifact@v4
+        with:
+          name: fix-patch
+          path: /tmp
+
+      - name: Apply fix
+        run: |
+          echo "Applying synthesized fix..."
+          git apply /tmp/fix.patch
+          
+          # Verify changes
+          git --no-pager diff --stat
+          git status
+
+      - name: Commit and push
+        env:
+          BRANCH: ${{ needs.detect-failures.outputs.branch }}
+        run: |
+          # Stage all changes
+          git add -A
+          
+          # Commit with descriptive message
+          git commit -m "🤖 Auto-heal: Fix CI failure with multi-AI synthesis
+
+Synthesized fix from:
+- Claude Haiku 4.5 analysis
+- Ollama GLM analysis  
+- Similar AI feedback patterns
+
+Auto-applied by unified-auto-heal workflow
+No manual approval required
+
+[skip ci]"
+          
+          # Push to branch
+          git push origin "$BRANCH"
+          
+          echo "✅ Fix successfully pushed to $BRANCH"
+
+      - name: Comment on PR
+        if: needs.detect-failures.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ needs.detect-failures.outputs.pr_number }}
+        run: |
+          gh pr comment "$PR_NUM" --repo "${{ github.repository }}" --body "$(cat <<'EOF'
+## 🤖 Auto-Heal Applied
+
+The unified auto-heal system has automatically fixed the CI failure.
+
+**Process:**
+1. ✅ Analyzed failure with Claude Haiku 4.5
+2. ✅ Analyzed failure with Ollama GLM 4.6
+3. ✅ Gathered similar AI feedback patterns from recent PRs
+4. ✅ Synthesized optimal fix with Claude Sonnet 4.5
+5. ✅ Applied and pushed fix automatically
+
+**Changes:** Committed to this PR branch
+
+The fix has been automatically committed and pushed. CI will re-run to verify the fix.
+
+---
+<sub>🤖 Generated by Unified Auto-Heal System</sub>
+EOF
+          )"
+
+  # ════════════════════════════════════════════════════════════════
+  # NOTIFY: Report to fork PRs (cannot auto-fix)
+  # ════════════════════════════════════════════════════════════════
+  notify-fork:
+    name: Notify Fork PR
+    needs: detect-failures
+    if: |
+      needs.detect-failures.outputs.has_failures == 'true' &&
+      needs.detect-failures.outputs.is_fork == 'true' &&
+      needs.detect-failures.outputs.pr_number != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post notice
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ needs.detect-failures.outputs.pr_number }}
+        run: |
+          gh pr comment "$PR_NUM" --repo "${{ github.repository }}" --body "$(cat <<'EOF'
+⚠️ **Auto-heal unavailable for fork PRs**
+
+For security reasons, automatic CI fixes are disabled for fork PRs.
+Please fix the CI failure manually.
+EOF
+          )"

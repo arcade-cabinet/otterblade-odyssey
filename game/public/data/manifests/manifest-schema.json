@@ -111,6 +111,7 @@
         },
         "validation": {
           "type": "object",
+<<<<<<< HEAD
           "description": "Validation rules for brand compliance and file requirements",
           "properties": {
             "noHumans": { "type": "boolean" },
@@ -126,6 +127,13 @@
               "minimum": 0,
               "description": "Maximum file size in bytes"
             }
+=======
+          "description": "Validation rules for brand compliance",
+          "properties": {
+            "noHumans": { "type": "boolean" },
+            "protagonistIsOtter": { "type": "boolean" },
+            "warmPalette": { "type": "boolean" }
+>>>>>>> main
           }
         },
         "variants": {

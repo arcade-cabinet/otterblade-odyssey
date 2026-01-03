@@ -276,8 +276,12 @@
         "y": { "type": "number" },
         "width": { "type": "number" },
         "height": { "type": "number" }
+<<<<<<< HEAD
       },
       "required": ["x", "y", "width", "height"]
+=======
+      }
+>>>>>>> main
     },
 
     "npc": {

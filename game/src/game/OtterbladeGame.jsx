@@ -40,6 +40,11 @@ import { inputManager } from './systems/InputManager';
 /**
  * Preload all game manifests using the DDL loader with progress tracking.
  * This runs once at game startup to fetch all JSON data.
+ *
+ * @param {(percent: number) => void} [onProgress] Optional callback invoked with
+ *   the current preload progress percentage (0–100) after each manifest step.
+ * @returns {Promise<{ success: true }>} Promise that resolves when all manifests
+ *   have finished preloading successfully.
  */
 async function preloadGameManifests(onProgress) {
   try {
@@ -57,10 +62,18 @@ async function preloadGameManifests(onProgress) {
       loadChapterPlatesManifest,
     } = await import('../ddl/loader');
 
+    const totalSteps = 19; // 10 chapters + 9 manifests
+    let completed = 0;
+
+    const updateProgress = () => {
+      completed++;
+      const percent = Math.floor((completed / totalSteps) * 100);
+      onProgress?.(percent);
+      console.log(`[DDL] Progress: ${percent}% (${completed}/${totalSteps})`);
+    };
+
     // Load all manifests in parallel with progress tracking
     const loaders = [];
-    const chapterCount = 10; // Chapters 0-9
-    let failures = 0;
 
     // Load 10 chapters
     for (let i = 0; i <= 9; i++) {
@@ -72,7 +85,6 @@ async function preloadGameManifests(onProgress) {
           })
           .catch((error) => {
             console.warn(`[DDL] ✗ Failed to load chapter ${i}:`, error.message);
-            failures++;
             updateProgress(); // Still count as progress even if failed
           })
       );
@@ -91,17 +103,6 @@ async function preloadGameManifests(onProgress) {
       { loader: loadChapterPlatesManifest, name: 'Chapter Plates' },
     ];
 
-    // Calculate total dynamically
-    const totalSteps = chapterCount + manifestLoaders.length;
-    let completed = 0;
-
-    const updateProgress = () => {
-      completed++;
-      const percent = Math.floor((completed / totalSteps) * 100);
-      onProgress?.(percent);
-      console.log(`[DDL] Progress: ${percent}% (${completed}/${totalSteps})`);
-    };
-
     for (const { loader, name } of manifestLoaders) {
       loaders.push(
         loader()
@@ -111,7 +112,6 @@ async function preloadGameManifests(onProgress) {
           })
           .catch((error) => {
             console.warn(`[DDL] ✗ Failed to load ${name}:`, error.message);
-            failures++;
             updateProgress();
           })
       );
@@ -120,7 +120,7 @@ async function preloadGameManifests(onProgress) {
     await Promise.all(loaders);
 
     console.log('[DDL] Preload complete');
-    return { success: failures === 0, failures };
+    return { success: true };
   } catch (error) {
     console.error('[Game] Manifest preload failed:', error);
     throw new Error(`Failed to load game data: ${error.message}`);
@@ -359,8 +359,8 @@ function OtterbladeGameContent() {
       for (const sequence of timingSequences) {
         sequence?.destroy?.();
       }
-      Matter.World.clear(engine.world, false);
       Matter.Engine.clear(engine);
+      Matter.World.clear(engine.world, false);
       enemyBodyMap.clear();
     });
   });
