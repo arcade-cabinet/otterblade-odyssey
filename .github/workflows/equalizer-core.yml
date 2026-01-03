@@ -266,7 +266,7 @@ jobs:
             gh api -X POST repos/$REPO/labels \
               -f name='equalizer-plan' \
               -f color='6A5ACD' \
-              -f description='Auto-managed Equalizer planning tracker' >/dev/null 2>&1 || true
+              -f description='Auto-managed Equalizer planning tracker' 2>&1 | tee -a equalizer_label_errors.log >/dev/null || true
           fi
 
           EXISTING=$(gh issue list --repo "$REPO" \
