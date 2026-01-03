@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otterblade-odyssey.game/schemas/input.json",
+  "title": "Input & Motion Schema",
+  "description": "Multi-platform input handling including gyroscope, touch, keyboard with fallback alternatives",
+  "type": "object",
+
+  "definitions": {
+    "inputBinding": {
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "keyboard": {
+          "type": "object",
+          "properties": {
+            "primary": { "type": "string" },
+            "secondary": { "type": "string" }
+          }
+        },
+        "gamepad": {
+          "type": "object",
+          "properties": {
+            "button": { "type": "string" },
+            "axis": { "type": "string" },
+            "threshold": { "type": "number" }
+          }
+        },
+        "touch": {
+          "type": "object",
+          "properties": {
+            "gesture": {
+              "type": "string",
+              "enum": ["tap", "double_tap", "long_press", "swipe_left", "swipe_right", "swipe_up", "swipe_down", "pinch", "spread", "rotate"]
+            },
+            "zone": {
+              "type": "string",
+              "enum": ["left", "right", "center", "top", "bottom", "full"]
+            },
+            "virtualButton": { "type": "string" }
+          }
+        },
+        "motion": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["tilt", "shake", "rotate", "flip"]
+            },
+            "axis": { "type": "string", "enum": ["x", "y", "z", "alpha", "beta", "gamma"] },
+            "threshold": { "type": "number" },
+            "sensitivity": { "type": "number", "default": 1.0 }
+          }
+        }
+      }
+    },
+
+    "motionChallenge": {
+      "type": "object",
+      "description": "A gyroscope-based puzzle or challenge with non-motion alternative",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "balance_beam",
+            "tilt_maze",
+            "shake_free",
+            "rotate_lock",
+            "steady_hands",
+            "dodge_tilt",
+            "aim_gyro"
+          ]
+        },
+        "description": { "type": "string" },
+        
+        "motionInput": {
+          "type": "object",
+          "properties": {
+            "primaryAxis": { "type": "string", "enum": ["x", "y", "z", "alpha", "beta", "gamma"] },
+            "secondaryAxis": { "type": "string" },
+            "sensitivity": { "type": "number", "default": 1.0 },
+            "deadzone": { "type": "number", "default": 0.1 },
+            "smoothing": { "type": "number", "default": 0.5 },
+            "calibrationRequired": { "type": "boolean", "default": true }
+          }
+        },
+        
+        "alternativeInput": {
+          "type": "object",
+          "description": "Non-motion fallback for desktop/accessibility",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["mouse_position", "arrow_keys", "wasd", "analog_stick", "button_mash", "qte_sequence"]
+            },
+            "config": { "type": "object" }
+          },
+          "required": ["type"]
+        },
+        
+        "visualFeedback": {
+          "type": "object",
+          "properties": {
+            "indicator": {
+              "type": "string",
+              "enum": ["cursor", "reticle", "balance_bar", "tilt_arrow", "shake_meter"]
+            },
+            "showGuides": { "type": "boolean", "default": true }
+          }
+        },
+        
+        "hapticFeedback": {
+          "type": "object",
+          "properties": {
+            "onSuccess": { "type": "string" },
+            "onFail": { "type": "string" },
+            "continuous": { 
+              "type": "object",
+              "properties": {
+                "patternId": { "type": "string" },
+                "modulatedBy": { "type": "string", "enum": ["accuracy", "danger", "progress"] }
+              }
+            }
+          }
+        },
+        
+        "failCondition": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["threshold", "time", "damage", "fall"] },
+            "value": { "type": "number" },
+            "penalty": {
+              "type": "object",
+              "properties": {
+                "damage": { "type": "number" },
+                "warmthDrain": { "type": "number" },
+                "restart": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        
+        "successReward": {
+          "type": "object",
+          "properties": {
+            "emberShards": { "type": "integer" },
+            "achievement": { "type": "string" },
+            "unlocks": { "type": "string" }
+          }
+        }
+      },
+      "required": ["id", "type", "motionInput", "alternativeInput"]
+    },
+
+    "balanceChallenge": {
+      "type": "object",
+      "description": "Balance-beam style challenge using device tilt",
+      "allOf": [{ "$ref": "#/definitions/motionChallenge" }],
+      "properties": {
+        "type": { "const": "balance_beam" },
+        "beam": {
+          "type": "object",
+          "properties": {
+            "length": { "type": "number" },
+            "width": { "type": "number" },
+            "wobble": { "type": "number", "default": 0 },
+            "wind": {
+              "type": "object",
+              "properties": {
+                "direction": { "type": "number" },
+                "strength": { "type": "number" },
+                "gusts": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "alternativeInput": {
+          "properties": {
+            "type": { "const": "arrow_keys" },
+            "config": {
+              "type": "object",
+              "properties": {
+                "leftKey": { "type": "string", "default": "ArrowLeft" },
+                "rightKey": { "type": "string", "default": "ArrowRight" },
+                "sensitivity": { "type": "number", "default": 0.5 }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "shakeChallenge": {
+      "type": "object",
+      "description": "Shake device to break free / warm up",
+      "allOf": [{ "$ref": "#/definitions/motionChallenge" }],
+      "properties": {
+        "type": { "const": "shake_free" },
+        "shakeConfig": {
+          "type": "object",
+          "properties": {
+            "requiredShakes": { "type": "integer" },
+            "shakeThreshold": { "type": "number", "default": 15 },
+            "timeLimit": { "type": "number" },
+            "decayRate": { "type": "number", "description": "Progress decay per second" }
+          }
+        },
+        "alternativeInput": {
+          "properties": {
+            "type": { "const": "button_mash" },
+            "config": {
+              "type": "object",
+              "properties": {
+                "keys": { "type": "array", "items": { "type": "string" }, "default": ["Space", "KeyE"] },
+                "pressesRequired": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "narrative": {
+          "type": "string",
+          "description": "What is the player shaking off/free from?",
+          "examples": ["ice_encasement", "web_trap", "frozen_limbs", "grapple_escape"]
+        }
+      }
+    },
+
+    "tiltAimChallenge": {
+      "type": "object",
+      "description": "Aim using device orientation",
+      "allOf": [{ "$ref": "#/definitions/motionChallenge" }],
+      "properties": {
+        "type": { "const": "aim_gyro" },
+        "aimConfig": {
+          "type": "object",
+          "properties": {
+            "targetType": { "type": "string", "enum": ["static", "moving", "multiple"] },
+            "aimSpeed": { "type": "number" },
+            "autoCorrect": { "type": "number", "description": "Aim assist strength 0-1" }
+          }
+        },
+        "alternativeInput": {
+          "properties": {
+            "type": { "const": "mouse_position" },
+            "config": {
+              "type": "object",
+              "properties": {
+                "cursorVisible": { "type": "boolean", "default": true },
+                "smoothing": { "type": "number", "default": 0.8 }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "touchGesture": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "tap",
+            "double_tap",
+            "long_press",
+            "swipe",
+            "drag",
+            "pinch",
+            "spread",
+            "rotate",
+            "multi_finger"
+          ]
+        },
+        "fingers": { "type": "integer", "default": 1 },
+        "direction": {
+          "type": "string",
+          "enum": ["any", "left", "right", "up", "down", "horizontal", "vertical"]
+        },
+        "minDistance": { "type": "number" },
+        "maxDuration": { "type": "number" },
+        "minDuration": { "type": "number" }
+      }
+    },
+
+    "virtualControl": {
+      "type": "object",
+      "description": "On-screen virtual control definition",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["joystick", "dpad", "button", "button_group", "slider", "wheel"]
+        },
+        "position": {
+          "type": "object",
+          "properties": {
+            "anchor": { "type": "string", "enum": ["bottom-left", "bottom-right", "bottom-center", "top-left", "top-right", "center"] },
+            "offsetX": { "type": "number" },
+            "offsetY": { "type": "number" }
+          }
+        },
+        "size": { "type": "number" },
+        "opacity": { "type": "number", "default": 0.7 },
+        "hideWhenIdle": { "type": "boolean", "default": false },
+        "hapticOnPress": { "type": "boolean", "default": true },
+        "action": { "type": "string" },
+        "style": {
+          "type": "object",
+          "properties": {
+            "baseColor": { "type": "string" },
+            "activeColor": { "type": "string" },
+            "icon": { "type": "string" }
+          }
+        }
+      },
+      "required": ["id", "type", "position", "action"]
+    }
+  },
+
+  "properties": {
+    "version": { "type": "string" },
+    
+    "bindings": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/inputBinding" }
+    },
+    
+    "motionChallenges": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/motionChallenge" }
+    },
+    
+    "virtualControls": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "layout": {
+          "type": "string",
+          "enum": ["default", "minimal", "custom"]
+        },
+        "controls": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/virtualControl" }
+        }
+      }
+    },
+    
+    "accessibility": {
+      "type": "object",
+      "properties": {
+        "motionChallengesOptional": { 
+          "type": "boolean", 
+          "default": true,
+          "description": "Allow skipping motion challenges entirely"
+        },
+        "alternativeInputsAlwaysAvailable": {
+          "type": "boolean",
+          "default": true
+        },
+        "reducedMotionMode": {
+          "type": "boolean",
+          "description": "Respect prefers-reduced-motion"
+        },
+        "oneHandedMode": {
+          "type": "boolean"
+        },
+        "autoAim": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "strength": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    
+    "calibration": {
+      "type": "object",
+      "properties": {
+        "gyroscopeCalibration": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean", "default": true },
+            "persistCalibration": { "type": "boolean", "default": true },
+            "recalibrateOnResume": { "type": "boolean", "default": false }
+          }
+        },
+        "deadZones": {
+          "type": "object",
+          "properties": {
+            "joystick": { "type": "number", "default": 0.15 },
+            "gyroscope": { "type": "number", "default": 0.05 },
+            "trigger": { "type": "number", "default": 0.1 }
+          }
+        }
+      }
+    }
+  }
+}
