@@ -50,25 +50,37 @@ Approval & Auto-Merge
 - $1/$5 per million tokens (5x cheaper than Opus 4.5)
 - 2x faster than Sonnet
 
-#### 2. Claude Auto-Heal (`.github/workflows/claude-autoheal.yml`)
-**Continuous healing** when AI agents post feedback.
+#### 2. Claude Equalizer (`.github/workflows/equalizer.yml`)
+**Comment-driven orchestrator** for PR-specific healing and coordination.
 
 **Triggers:**
-- Issue comments on PRs (from CodeRabbit, Gemini, etc.)
+- Issue comments containing `@equalizer` on pull requests (non-bot authors)
+
+**Modes:**
+- **Collaborative Mode:** Activated for branches matching `special_branches` in `.github/claude-config.json` (e.g., `copilot/*`, `jules/*`). Equalizer posts synthesized tasks and blocks direct pushes.
+- **Autonomous Mode:** Default. Equalizer posts a plan and downstream jobs may proceed with fixes.
+- **Owner Override:** Comment `@equalizer IDDQD` (admin/maintain/write only) to force collaborative branches into autonomous mode for urgent ownership takeovers.
+
+**Shared Core:** Delegates planning, status synthesis, and tracking to `equalizer-core.yml` to keep comment handling DRY across workflows.
+
+#### 3. Claude Auto-Heal (`.github/workflows/claude-autoheal.yml`)
+**Continuous healing** when AI agents post feedback or CI fails.
+
+**Triggers:**
+- Issue comments on PRs (human-authored)
 - PR reviews submitted
 - Check runs fail
 - Workflow runs fail
+- Manual dispatch
 
 **Actions:**
-- Detects AI agent feedback automatically
-- Determines PR strategy (collaborative vs autonomous)
-- Responds appropriately:
-  - **Collaborative**: Posts synthesized feedback for agent
-  - **Autonomous**: Implements fixes directly
+- Determines PR strategy (collaborative vs autonomous) via `.github/claude-config.json`
+- Reuses `equalizer-core.yml` for trusted AI feedback synthesis, status checks, and planning comments
+- Collaboration branches emit plan-only comments (no direct pushes); autonomous paths can proceed with healing steps downstream
 
 **Model:** Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
 
-#### 3. Claude Initial Review (`.github/workflows/claude-review.yml`)
+#### 4. Claude Initial Review (`.github/workflows/claude-review.yml`)
 **Fast initial review** when PR is opened.
 
 **Triggers:**
