@@ -538,11 +538,7 @@
     "chapterPlate": "library_map_table_chapter_plate",
     "parallaxBackground": "abbey_interior_parallax_background",
     "introCinematic": null,
-<<<<<<< HEAD
-    "outroCinematic": "chapter_4_archives",
-=======
     "outroCinematic": "chapter_4_map_discovered",
->>>>>>> main
     "bossIntroCinematic": null,
     
     "musicTracks": {
