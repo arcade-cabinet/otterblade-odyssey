@@ -34,10 +34,10 @@ export function drawFinn(ctx, position, facing = 1, animFrame = 0, state = {}) {
   const breathe = Math.sin(animFrame * 0.05) * 2;
   const bounce = state.moving ? Math.abs(Math.sin(animFrame * 0.15)) * 3 : 0;
 
-  // Shadow
+  // Shadow (follows body animation)
   ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
   ctx.beginPath();
-  ctx.ellipse(0, 28, 20, 6, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 28 + breathe - bounce, 20, 6, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Body (warm brown otter)
