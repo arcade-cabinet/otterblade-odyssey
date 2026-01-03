@@ -110,12 +110,14 @@ jobs:
       - name: Gather trusted AI feedback
         id: feedback
         uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
         with:
           github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const path = require('path');
-            const prNumber = Number(core.getInput('pr_number'));
+            const prNumber = Number(process.env.PR_NUMBER);
             const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github/claude-config.json');
             const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
             const trusted = (config.ai_agents?.trusted || []).map((id) => id.toLowerCase());
