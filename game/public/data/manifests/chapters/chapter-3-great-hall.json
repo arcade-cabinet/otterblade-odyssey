@@ -456,7 +456,7 @@
       "id": "wave_2_start",
       "type": "defeat_enemies",
       "once": true,
-      "requires": ["attack_begins"],
+      "requires": ["wave_1_complete"],
       "actions": [
         { "type": "spawn_enemies", "value": ["wave_2_frostwolf_1", "wave_2_frostwolf_2", "wave_2_icebat_1", "wave_2_icebat_2"] },
         { "type": "shake_screen", "value": 0.4 }
@@ -486,7 +486,7 @@
       "id": "specter_spawn",
       "type": "defeat_enemies",
       "once": true,
-      "requires": ["wave_2_start"],
+      "requires": ["wave_2_complete"],
       "actions": [
         { "type": "spawn_enemies", "value": ["frost_specter"] },
         { "type": "slow_motion", "value": 800 },

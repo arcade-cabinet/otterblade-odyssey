@@ -57,18 +57,10 @@ async function preloadGameManifests(onProgress) {
       loadChapterPlatesManifest,
     } = await import('../ddl/loader');
 
-    const totalSteps = 19; // 10 chapters + 9 manifests
-    let completed = 0;
-
-    const updateProgress = () => {
-      completed++;
-      const percent = Math.floor((completed / totalSteps) * 100);
-      onProgress?.(percent);
-      console.log(`[DDL] Progress: ${percent}% (${completed}/${totalSteps})`);
-    };
-
     // Load all manifests in parallel with progress tracking
     const loaders = [];
+    const chapterCount = 10; // Chapters 0-9
+    let failures = 0;
 
     // Load 10 chapters
     for (let i = 0; i <= 9; i++) {
@@ -80,6 +72,7 @@ async function preloadGameManifests(onProgress) {
           })
           .catch((error) => {
             console.warn(`[DDL] ✗ Failed to load chapter ${i}:`, error.message);
+            failures++;
             updateProgress(); // Still count as progress even if failed
           })
       );
@@ -98,6 +91,17 @@ async function preloadGameManifests(onProgress) {
       { loader: loadChapterPlatesManifest, name: 'Chapter Plates' },
     ];
 
+    // Calculate total dynamically
+    const totalSteps = chapterCount + manifestLoaders.length;
+    let completed = 0;
+
+    const updateProgress = () => {
+      completed++;
+      const percent = Math.floor((completed / totalSteps) * 100);
+      onProgress?.(percent);
+      console.log(`[DDL] Progress: ${percent}% (${completed}/${totalSteps})`);
+    };
+
     for (const { loader, name } of manifestLoaders) {
       loaders.push(
         loader()
@@ -107,6 +111,7 @@ async function preloadGameManifests(onProgress) {
           })
           .catch((error) => {
             console.warn(`[DDL] ✗ Failed to load ${name}:`, error.message);
+            failures++;
             updateProgress();
           })
       );
@@ -115,7 +120,7 @@ async function preloadGameManifests(onProgress) {
     await Promise.all(loaders);
 
     console.log('[DDL] Preload complete');
-    return { success: true };
+    return { success: failures === 0, failures };
   } catch (error) {
     console.error('[Game] Manifest preload failed:', error);
     throw new Error(`Failed to load game data: ${error.message}`);

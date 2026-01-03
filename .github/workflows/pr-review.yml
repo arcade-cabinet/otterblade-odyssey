@@ -10,6 +10,7 @@ on:
 jobs:
   review-with-tracking:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write
@@ -18,14 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: PR Review with Progress Tracking
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_bots: "*"
-          github_token: ${{ secrets.Ci_GITHUB_TOKEN }}
+          allowed_bots: "copilot,dependabot,renovate"
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           
           # Enable progress tracking
           track_progress: true

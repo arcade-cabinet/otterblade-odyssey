@@ -53,7 +53,7 @@ export default function LoadingScreen(props) {
         <div
           class="loading-bar"
           style={{
-            width: `${props.progress || 0}%`,
+            width: `${Math.max(0, Math.min(100, props.progress || 0))}%`,
             height: '100%',
             background: 'linear-gradient(90deg, #D4A574 0%, #E5C9A8 100%)',
             'border-radius': '2px',
