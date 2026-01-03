@@ -2,9 +2,9 @@ name: CD
 
 on:
   workflow_run:
-    # NOTE: Keep this in sync with the "name:" in .github/workflows/ci.yml
     # NOTE: This CD workflow depends on the CI workflow being named exactly "CI".
-    # If the CI workflow's `name:` is changed, update this list to match.
+    #       Keep this in sync with the "name:" in .github/workflows/ci.yml – if the CI
+    #       workflow's `name:` is changed, update the list below to match.
     workflows: ["CI"]
     branches: [main]
     types: [completed]
