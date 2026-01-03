@@ -237,16 +237,8 @@ export function getChapterManifestSync(chapterId: number): ChapterManifest {
     );
   }
 
-  const cachedData = manifestCache.get(path);
-
-  // Runtime type guard: Validate cached data structure
-  const result = ChapterManifestSchema.safeParse(cachedData);
-  if (!result.success) {
-    const error = fromError(result.error);
-    throw new Error(`Corrupted chapter-${chapterId} manifest in cache: ${error.message}`);
-  }
-
-  return result.data;
+  // Data was already validated during load - trust the cache
+  return manifestCache.get(path) as ChapterManifest;
 }
 
 // ============================================================================
