@@ -69,10 +69,10 @@ export function buildLevel(chapterId, engine) {
         hazardDef.x,
         hazardDef.y,
         hazardDef.width,
-        hazardDef.height,
-        hazardDef.damage || 1,
-        hazardDef.type || 'spikes'
+        hazardDef.height
       );
+      hazard.damage = hazardDef.damage || 1;
+      hazard.type = hazardDef.type || 'spikes';
       level.hazards.push(hazard);
       World.add(engine.world, hazard.body);
     }
