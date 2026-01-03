@@ -1,0 +1,565 @@
+{
+  "$schema": "./manifest-schema.json",
+  "category": "cinematics",
+  "provider": "google",
+  "model": "veo-3.1",
+  "outputDir": "game/src/assets/videos",
+  "brandGuidance": {
+    "style": "Storybook cinematography - painterly, warm, noble. Think Redwall animated sequences.",
+    "characters": "Anthropomorphic woodland animals ONLY. Finn is a river otter. NO humans ever.",
+    "tone": "Epic but intimate. Heroism is quiet courage, not bombast.",
+    "palette": "Warm ambers, forest greens, stone grays. Cold blues ONLY for Galeborn/Zephyros.",
+    "audio": "Orchestral, Celtic-influenced. Nature sounds woven in. NO modern music."
+  },
+  "assets": [
+    {
+      "id": "intro_cinematic",
+      "name": "Opening Cinematic - The Calling",
+      "filename": "intro_cinematic_otters_journey.mp4",
+      "status": "needs_regeneration",
+      "reason": "Previous version contained human characters",
+      "config": {
+        "duration": 45,
+        "aspectRatio": "16:9",
+        "includeAudio": true,
+        "resolution": "1080p"
+      },
+      "prompt": {
+        "scene": "Opening cinematic - Finn answers the call to adventure",
+        "setting": "Small riverside hamlet at dawn. Thatched-roof cottages with round windows, willow trees trailing in the water, morning mist rising from the river. Warm lantern light in windows.",
+        "characters": {
+          "finn": "Young river otter, athletic build, rich brown fur with cream chest. Leather vest, cloth belt, the Otterblade (simple iron sword) strapped to back. Determined but kind eyes.",
+          "parents": "Elderly otter couple (NOT mice, NOT humans) - gray-muzzled, wearing simple wool clothing, worried but proud expressions."
+        },
+        "action": [
+          "Open on cottage at dawn, smoke curling from chimney",
+          "Finn emerges, looks back at cottage where elderly otter parents watch from doorway",
+          "Close-up: Finn's paw touches the Otterblade's hilt - passed down from his grandfather",
+          "He gives a small nod to his parents, turns toward the rising sun",
+          "Wide shot: Finn walks along dirt path, cottage getting smaller behind him",
+          "Final shot: silhouette of Finn against sunrise, the road to Willowmere ahead"
+        ],
+        "mood": "Bittersweet departure, quiet determination, warmth of home being left behind for duty",
+        "camera": "Intimate close-ups mixed with epic wide shots. Slow, deliberate movement. Linger on emotional beats.",
+        "audio": {
+          "music": "Soft wooden flute melody (the Hearth Leitmotif), building to hopeful strings",
+          "ambience": "Birdsong, flowing river, crackling morning fire",
+          "dialogue": "None - purely visual storytelling"
+        },
+        "colorGrade": "Golden hour warmth, soft diffused light, slight vignette"
+      },
+      "validation": {
+        "noHumans": true,
+        "protagonistIsOtter": true,
+        "warmPalette": true
+      }
+    },
+    {
+      "id": "chapter_1_arrival",
+      "name": "Chapter 1 - First Sight of Willowmere",
+      "filename": "chapter_1_arrival_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 20,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn sees Willowmere Hearthhold for the first time",
+        "setting": "Willow-lined river path. Ancient stone walls of Willowmere visible through the trees - massive, moss-covered, with towers and banners.",
+        "action": [
+          "Finn walks along the river path, travel-worn but determined",
+          "He pauses at a carved waystone covered in moss, traces the ancient runes",
+          "Looks up - camera follows his gaze through the canopy",
+          "Reveal: Willowmere Hearthhold in full majesty, afternoon light gilding the stone",
+          "Finn's expression: wonder, hope, a sense of destiny"
+        ],
+        "mood": "Anticipation, wonder at the ancient sanctuary, arriving where you belong",
+        "audio": {
+          "music": "Gentle strings building to fuller orchestra as Hearthhold is revealed",
+          "ambience": "Flowing river, rustling willow leaves, distant bells"
+        }
+      }
+    },
+    {
+      "id": "chapter_2_threshold",
+      "name": "Chapter 2 - Crossing the Threshold",
+      "filename": "chapter_2_threshold_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 25,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn is admitted through the Northern Gatehouse",
+        "setting": "Massive stone gatehouse with iron-banded doors. Old stone bridge spanning a river moat. Lanterns lit along the bridge despite daylight. Faded banners stir in the breeze.",
+        "characters": {
+          "finn": "Standing at the bridge's edge, looking up at the imposing gate",
+          "gatekeeper": "Elderly hedgehog, round spectacles, suspicious squint, holding a lantern on a pole. Wears heavy wool tunic with keys at belt."
+        },
+        "action": [
+          "Finn approaches the bridge, boots on ancient stone",
+          "He stops before the closed gate, uncertain",
+          "Creaking sound - a small window opens in the gate, hedgehog peers out",
+          "Hedgehog's eyes scan Finn, then widen seeing the Otterblade",
+          "Slow, meaningful nod from hedgehog",
+          "Great chains clatter, gate begins to open, warm light spills from within",
+          "Finn steps through - camera holds on his back, then he looks over his shoulder with a small smile",
+          "Gate closes behind him - he's inside now"
+        ],
+        "mood": "Threshold moment - being tested, accepted, crossing into a new life",
+        "audio": {
+          "sfx": "Boots on stone, chain mechanisms, creaking wood, gate grinding open",
+          "music": "Quiet tension, then warm resolution as gate opens"
+        }
+      }
+    },
+    {
+      "id": "chapter_3_everember",
+      "name": "Chapter 3 - The Everember",
+      "filename": "chapter_3_everember_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 30,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn enters the Great Hall and witnesses the Everember for the first time",
+        "setting": "Vast vaulted stone hall. At the center, the Everember - a great hearth fire that has burned for centuries, warm golden flames. Tapestries on walls depicting woodland heroes of old.",
+        "characters": {
+          "finn": "Entering the hall, dwarfed by its grandeur, firelight on his face",
+          "elder_badger": "Ancient badger in brown robes, silver-streaked fur, wise kind eyes. Keeper of the Everember."
+        },
+        "action": [
+          "Great wooden doors open, Finn steps into the hall - his breath catches",
+          "Camera slowly reveals the immense space, pillars rising into shadow",
+          "The Everember blazes at center - not just a fire, but a presence",
+          "Finn walks toward it, other creatures (mice, squirrels) watch from the edges",
+          "Elder Badger emerges from beside the hearth, staff in paw",
+          "He speaks no words, simply gestures for Finn to approach the fire",
+          "Finn reaches out - the warmth touches him, and something changes in his eyes",
+          "He understands now. This is what he's protecting."
+        ],
+        "mood": "Awe, reverence, sense of ancient tradition. The warmth conquering uncertainty.",
+        "audio": {
+          "music": "The Hearth Leitmotif in full strings, solemn choir undertone",
+          "ambience": "Deep crackling fire, echoing footsteps, distant murmured voices"
+        },
+        "lighting": "Warm firelight dominating, candlelight accents, deep shadows in the vaulted ceiling"
+      }
+    },
+    {
+      "id": "meet_elder_badger",
+      "name": "Meeting the Elder Badger",
+      "filename": "meet_elder_badger_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 20,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "The Elder Badger tells Finn about Zephyros and the coming storm",
+        "setting": "Small study adjoining the Great Hall. Books, scrolls, a crackling smaller fire. Map of the region on a table.",
+        "characters": {
+          "finn": "Seated, attentive, slightly overwhelmed",
+          "elder_badger": "Standing by a window, looking out at gathering clouds. Speaks gravely."
+        },
+        "action": [
+          "Elder Badger traces the map, showing where Galeborn have been spotted",
+          "He points to a mountain peak - speaks of Zephyros, the Storm Hawk",
+          "Cut to: brief vision of ice-blue eyes in storm clouds (NOT detailed, just a hint)",
+          "Back to study - Finn's determined expression",
+          "Elder Badger places a paw on Finn's shoulder, nods with trust",
+          "Finn draws the Otterblade slightly, firelight catching on the steel"
+        ],
+        "mood": "Gravity of the mission, passing of responsibility, trust earned",
+        "audio": {
+          "music": "Low strings, hint of the Cold/Storm motif for Zephyros mention",
+          "ambience": "Fire crackle, wind rising outside"
+        }
+      }
+    },
+    {
+      "id": "chapter_4_archives",
+      "name": "Chapter 4 - The Ancient Map",
+      "filename": "chapter_4_archives_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 20,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn discovers the ancient Archives and finds the map showing Zephyros's approach",
+        "setting": "Towering bookshelves in a spiral tower. Dusty scrolls, candles and oil lamps, motes of dust in light beams. A great map table in the center.",
+        "characters": {
+          "finn": "Climbing the spiral staircase, looking around in wonder",
+          "owl_librarian": "Elderly tawny owl, round spectacles, robes, ink-stained wing-tips. Points to a specific scroll."
+        },
+        "action": [
+          "Finn emerges from staircase into the Archives - camera spirals up with him",
+          "Owl librarian descends silently, lands on perch near map table",
+          "Without speaking, owl retrieves an ancient scroll, unrolls it",
+          "The map: clear paths marked in red showing Galeborn movements converging on Willowmere",
+          "Finn studies it, traces the route with his claw, understanding the danger",
+          "He meets the owl's eyes, nods thanks. The owl blinks slowly - trust."
+        ],
+        "mood": "Mystery, discovery, the weight of ancient knowledge",
+        "audio": {
+          "music": "Curious pizzicato, building tension as map is revealed",
+          "ambience": "Turning pages, scratching quill, soft owl hoot"
+        }
+      }
+    },
+    {
+      "id": "chapter_5_descent",
+      "name": "Chapter 5 - Into the Depths",
+      "filename": "chapter_5_descent_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 15,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn descends into the Deep Cellars to cut off the Galeborn infiltration route",
+        "setting": "Narrow stone stairs descending into darkness. Torch sconces on walls. Tree roots breaking through ceiling. Damp, ancient atmosphere.",
+        "action": [
+          "Finn takes a torch from a sconce, the flame reflecting in his eyes",
+          "He begins the descent - each step echoes",
+          "Camera below, looking up as Finn descends toward it",
+          "Shadows seem to move at the edges",
+          "Finn pauses, sniffs the air - something is down there",
+          "He draws the Otterblade, torch in other paw, continues downward",
+          "Final shot: from above, watching him disappear into darkness"
+        ],
+        "mood": "Tense, claustrophobic, facing fear, determination overcoming dread",
+        "audio": {
+          "music": "Minimal, unsettling low drones",
+          "ambience": "Dripping water, distant rumbles, Finn's breathing"
+        },
+        "lighting": "Single torch source, deep shadows, brief glimpses of movement"
+      }
+    },
+    {
+      "id": "chapter_6_rally",
+      "name": "Chapter 6 - Rally the Defenders",
+      "filename": "chapter_6_rally_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 25,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn rallies the woodland defenders in the Kitchen Gardens",
+        "setting": "Sunlit courtyard with vegetable plots, herb spirals, training dummies. Surrounding stone walls, Hearthhold buildings visible. Afternoon sun.",
+        "characters": {
+          "finn": "Standing on a low wall, addressing the gathered creatures",
+          "defenders": "Mix of mice (with pikes), squirrels (with bows), a young badger (with shield), rabbits (runners/messengers). All looking uncertain but hopeful."
+        },
+        "action": [
+          "Wide shot: the courtyard, defenders gathered in worried clusters",
+          "Finn steps up onto a low wall to address them",
+          "Close-ups of faces: fear, doubt, looking to each other",
+          "Finn speaks (no dialogue, but gestures to the Hearthhold, to the Everember's chimney smoke)",
+          "He draws the Otterblade, holds it up - not threateningly, but as a promise",
+          "One by one, the defenders straighten, raise their own weapons",
+          "Final shot: the group united, weapons raised, sun behind them",
+          "Finn's small, grateful nod"
+        ],
+        "mood": "Hope rising from fear, community strength, the power of standing together",
+        "audio": {
+          "music": "Quiet beginning, swelling to triumphant but humble orchestral moment",
+          "ambience": "Birdsong, armor clinking, voices of affirmation"
+        }
+      }
+    },
+    {
+      "id": "chapter_7_ascent",
+      "name": "Chapter 7 - The Bell Tower Climb",
+      "filename": "chapter_7_ascent_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 20,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Finn climbs the Bell Tower as the storm arrives",
+        "setting": "Steep internal staircase. Wind howling through arrow slits. Storm clouds visible outside, lightning illuminating the scenes. Ancient bronze bells above.",
+        "action": [
+          "Finn pushes open a wind-battered door, fights to enter the tower",
+          "Camera follows as he climbs against the gale, cloak whipping",
+          "Lightning flash through an arrow slit - brief glimpse of Galeborn crows circling outside",
+          "Finn reaches the bell chamber, wind roaring",
+          "He sees it: the massive bronze bell, the rope",
+          "Another lightning flash: Zephyros's silhouette visible in the storm clouds, distant but approaching",
+          "Finn grips the bell rope, ready"
+        ],
+        "mood": "Urgency, elemental struggle, the climax approaching",
+        "audio": {
+          "music": "Driving strings, brass stabs with lightning",
+          "ambience": "Howling wind, thunder, metal groaning"
+        }
+      }
+    },
+    {
+      "id": "boss_champion_intro",
+      "name": "Boss Intro - Galeborn Champion",
+      "filename": "boss_champion_intro_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 15,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "First encounter with the Galeborn Champion - elite fox warrior",
+        "setting": "The gatehouse interior. Dim except for storm light through arrow slits. Wind howling.",
+        "characters": {
+          "finn": "Sword drawn, on guard",
+          "champion": "White arctic fox in frost-touched armor, greatsword resting on shoulder. Calm, confident, noble bearing."
+        },
+        "action": [
+          "Finn enters the gatehouse, senses something wrong",
+          "Slow reveal: the Champion steps from shadow, armor gleaming faintly",
+          "They circle each other - the Champion is impressed, not dismissive",
+          "The Champion speaks (no dialogue audio, but gestures to Finn's blade - respect)",
+          "Both settle into fighting stances",
+          "Final frame: frozen moment before combat begins"
+        ],
+        "mood": "Worthy adversaries meeting, mutual respect despite conflict",
+        "audio": {
+          "music": "Cold minor key strings, noble but ominous",
+          "ambience": "Wind, distant thunder"
+        }
+      }
+    },
+    {
+      "id": "boss_champion_defeat",
+      "name": "Boss Defeat - Galeborn Champion",
+      "filename": "boss_champion_defeat_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 12,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "The Champion falls, warns Finn about Zephyros",
+        "characters": {
+          "champion": "Kneeling, wounded but dignified. Frost melting from his armor.",
+          "finn": "Standing, blade lowered, showing mercy"
+        },
+        "action": [
+          "Champion sinks to one knee, sword clattering",
+          "Finn holds blade ready but doesn't strike the finishing blow",
+          "Champion looks up, frost clearing from his eyes - a moment of clarity",
+          "He gestures upward, toward the tower - Zephyros is coming",
+          "Champion's head drops, spent",
+          "Finn hesitates, then runs toward the tower, leaving the Champion alive"
+        ],
+        "mood": "Bittersweet victory, honor between warriors, urgency to continue",
+        "audio": {
+          "music": "Fading combat music, shift to tense urgency",
+          "sfx": "Sword drop, labored breathing, distant bells"
+        }
+      }
+    },
+    {
+      "id": "chapter_8_confrontation",
+      "name": "Chapter 8 - Facing Zephyros",
+      "filename": "chapter_8_confrontation_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 35,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "The final confrontation - Finn faces Zephyros on the outer ramparts",
+        "setting": "Storm-battered battlements at night. Lightning illuminating the massive storm hawk's silhouette. Ice forming on stones. The Hearthhold visible below, Everember's glow through the storm.",
+        "characters": {
+          "finn": "Small against the storm but unwavering, Otterblade drawn",
+          "zephyros": "Enormous anthropomorphic hawk, twice Finn's height, frost-touched armor, war-glaive, regal and terrible"
+        },
+        "action": [
+          "Finn emerges onto the ramparts, wind nearly knocking him down",
+          "He braces, looks up into the storm",
+          "Lightning flash: Zephyros descends from the clouds, wings spread wide",
+          "Landing that shakes the stones, ice crackling where talons touch",
+          "Zephyros rises to full height, looks down at Finn",
+          "Their eyes meet - otter and hawk, warmth and cold, small and vast",
+          "Zephyros speaks (gesture only) - offering surrender, gesturing to the futility",
+          "Finn's response: raises the Otterblade, the Everember's distant glow reflected in steel",
+          "Zephyros's expression: surprise, then respect, then cold determination",
+          "Both ready their weapons - final shot: the moment before battle"
+        ],
+        "mood": "Epic confrontation, destiny manifest, the small standing against the vast",
+        "audio": {
+          "music": "Full orchestra, the Storm motif vs. the Hearth motif intertwining",
+          "ambience": "Howling wind, thunder, crackling ice"
+        }
+      }
+    },
+    {
+      "id": "boss_zephyros_phase1",
+      "name": "Boss Phase 1 - Zephyros Ground Combat",
+      "filename": "boss_zephyros_phase1_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 8,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Brief transition cinematic as Zephyros engages in ground combat",
+        "action": [
+          "Zephyros sweeps his glaive in a massive arc",
+          "Finn ducks, rolls, comes up with a counter",
+          "Blades clash - Finn pushed back by the force",
+          "Quick cuts of intense combat - Finn finding openings",
+          "Zephyros shows damage, snarls"
+        ],
+        "mood": "Intense combat, Finn holding his own despite the odds",
+        "audio": {
+          "music": "Driving percussion, heroic brass"
+        }
+      }
+    },
+    {
+      "id": "boss_zephyros_phase2",
+      "name": "Boss Phase 2 - Zephyros Takes Flight",
+      "filename": "boss_zephyros_phase2_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 10,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Zephyros takes to the air, unleashing his full storm power",
+        "action": [
+          "Zephyros spreads wings wide, launches into the air with a screech",
+          "The storm intensifies - wind knocks Finn off balance",
+          "Zephyros circles above, frost breath visible as cold mist (NOT laser)",
+          "Finn braces, looks for opportunities as Zephyros dives",
+          "Lightning strikes the ramparts - Finn uses the moments of illumination"
+        ],
+        "mood": "Escalation, desperate situation, having to fight smarter",
+        "audio": {
+          "music": "Choir joins orchestra, overwhelming power",
+          "ambience": "Hurricane winds, hawk screech"
+        }
+      }
+    },
+    {
+      "id": "boss_zephyros_defeat",
+      "name": "Boss Defeat - Zephyros Falls",
+      "filename": "boss_zephyros_defeat_cinematic.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 25,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Zephyros is defeated - the storm breaks",
+        "action": [
+          "Final strike: Finn's blade finds its mark as Zephyros dives",
+          "Zephyros crashes to the rampart, glaive sliding away",
+          "Slow motion: frost melting from the hawk's armor",
+          "Zephyros, wounded, looks up at Finn - the cold leaving his eyes",
+          "A moment of strange peace on his face - the storm releases him",
+          "The clouds begin to part, first dawn light breaking through",
+          "Zephyros closes his eyes, at rest - NOT dead, but defeated, the cold's hold broken",
+          "Finn stands over him, breathing hard, lowers his sword",
+          "Wide shot: the storm clearing, Hearthhold visible below, Everember burning bright"
+        ],
+        "mood": "Bittersweet victory, the tragedy of the enemy, dawn after the storm",
+        "audio": {
+          "music": "Storm motif fading, Hearth leitmotif emerging triumphant",
+          "ambience": "Wind dying, birdsong beginning"
+        }
+      }
+    },
+    {
+      "id": "outro_cinematic",
+      "name": "Ending Cinematic - The New Dawn",
+      "filename": "outro_victory_sunrise_scene.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 60,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Victory celebration and new dawn at Willowmere",
+        "setting": "Great Hall, restored and filled with life. Dawn light streaming through tall windows. The Everember burning brighter than ever.",
+        "characters": {
+          "finn": "Cleaned up, humble, surrounded by friends",
+          "elder_badger": "Proud, holding ceremonial medallion",
+          "allies": "All the characters met along the way - hedgehog gatekeeper, owl librarian, mouse villagers, squirrel defenders, the young badger"
+        },
+        "action": [
+          "Exterior: sunrise over Willowmere, damage visible but being repaired",
+          "Woodland creatures working together - boarding windows, tending gardens",
+          "Interior: Great Hall prepared for celebration",
+          "Finn enters, still not used to being celebrated, a bit awkward",
+          "Creatures part for him, smiling, patting his shoulder",
+          "Elder Badger stands by the Everember, waiting",
+          "Finn approaches, kneels",
+          "Elder Badger places a medallion (not crown, not ostentatious) around Finn's neck",
+          "Finn rises, the Everember flames seem to dance in response",
+          "He turns to face the hall - sees all the faces, all the lives he helped save",
+          "Small, genuine smile - not triumphant, just... home",
+          "Wide shot: the celebration beginning, music, laughter",
+          "Final shot: Finn by a window, looking out at the sunrise, paw on the Otterblade's hilt",
+          "He turns back to join his friends - the camera holds on the sunrise",
+          "Fade to warm light"
+        ],
+        "mood": "Triumph, warmth restored, belonging, the promise of peace, bittersweet joy",
+        "audio": {
+          "music": "Full Hearth Leitmotif with joyful orchestration, then gentle resolution",
+          "ambience": "Cheering voices, crackling fire, birdsong of new dawn"
+        }
+      }
+    },
+    {
+      "id": "credits_sequence",
+      "name": "Credits - Storybook Montage",
+      "filename": "credits_storybook_montage.mp4",
+      "status": "pending",
+      "config": {
+        "duration": 90,
+        "aspectRatio": "16:9",
+        "includeAudio": true
+      },
+      "prompt": {
+        "scene": "Credits roll over storybook-style illustrations of Finn's journey",
+        "style": "Each scene rendered as if in an illuminated manuscript - painted borders, aged parchment texture",
+        "montage_scenes": [
+          "Finn's cottage at dawn (full color, warmth)",
+          "The road to Willowmere (sepia sketch)",
+          "Crossing the gatehouse bridge (illuminated border)",
+          "The Everember's first light (gold leaf accents)",
+          "Exploring the archives (candlelit warmth)",
+          "The deep cellars (darker, torch-lit)",
+          "Rallying the defenders (banner colors)",
+          "The storm ascending (dramatic grays and blues)",
+          "Facing Zephyros (epic composition)",
+          "The new dawn (full color, radiant)"
+        ],
+        "credits_style": "Elegant serif font in warm gold, credits roll slowly over the art",
+        "ending": "Final page: 'The End' in illuminated manuscript style, book closes",
+        "audio": {
+          "music": "Full suite of game themes woven together - Hearth, Adventure, Storm (subdued), Victory"
+        }
+      }
+    }
+  ]
+}

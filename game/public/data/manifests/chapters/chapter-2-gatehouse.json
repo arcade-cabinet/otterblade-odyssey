@@ -1,0 +1,781 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 2,
+  "name": "The Gatehouse",
+  "location": "Northern Gate of Willowmere",
+
+  "narrative": {
+    "theme": "Proving worth - the first threshold",
+    "quest": "Cross the Threshold",
+    
+    "emotionalArc": {
+      "opening": "The massive gatehouse looms, ancient and weathered. Guards at the walls, refugees at the gate. Finn is just one more seeking shelter.",
+      "midpoint": "The gate is barred. Siege conditions. Only those who can prove their worth may enter. The captain needs the walls defended while the mechanism is cleared.",
+      "climax": "Galeborn assault! Finn fights alongside the defenders on the wall. The Otterblade catches firelight and an old badger's eyes widen in recognition.",
+      "resolution": "The gate opens. 'Bearer of the Blade,' the badger says, bowing. 'The Hearthhold welcomes you home.'"
+    },
+
+    "storyBeats": [
+      {
+        "id": "arrival",
+        "moment": "The gatehouse rises from the mist like a mountain. Centuries of stone and faith, now under siege by cold itself.",
+        "triggeredBy": "chapter_start",
+        "expression": "awe"
+      },
+      {
+        "id": "the_crowd",
+        "moment": "Refugees huddle by the gate. Mice, voles, a family of squirrels. All seeking the warmth within. The gate stays shut.",
+        "triggeredBy": "approach_refugees",
+        "expression": "sorrow"
+      },
+      {
+        "id": "denied_entry",
+        "moment": "The gate captain—a gruff badger—shakes his head. No room for more mouths. Unless you can fight for your place.",
+        "triggeredBy": "approach_captain",
+        "expression": "determination"
+      },
+      {
+        "id": "wall_duty",
+        "moment": "The stairs to the battlements. Cold wind howls. Somewhere below, ice forms on the moat. They're coming.",
+        "triggeredBy": "reach_battlements",
+        "expression": "fear"
+      },
+      {
+        "id": "the_assault",
+        "moment": "Shapes in the mist. Galeborn. Frost-wolves. A horde breaking against the walls like winter breaking against stone.",
+        "triggeredBy": "assault_begins",
+        "expression": "determination"
+      },
+      {
+        "id": "recognition",
+        "moment": "The badger captain sees the Otterblade flash. His grizzled face changes. He knows that blade. He remembers who bore it last.",
+        "triggeredBy": "assault_ends",
+        "expression": "wonder"
+      },
+      {
+        "id": "threshold_crossed",
+        "moment": "The great gate groans open. Beyond lies the Great Hall, heart of the Hearthhold. Finn steps through. There is no going back.",
+        "triggeredBy": "gate_opens",
+        "expression": "resolve"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 1,
+    "nextChapter": 3,
+    
+    "transitionIn": {
+      "type": "cinematic",
+      "cinematicId": "chapter_1_gatehouse_approach",
+      "playerSpawnPoint": { "x": 80, "y": 450 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_2_gate_opens",
+      "exitPoint": { "x": 2700, "y": 400 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 1 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "captain_grimclaw",
+      "characterId": "npc_badger_captain",
+      "name": "Captain Grimclaw",
+      "role": "quest_giver",
+      "position": { "x": 400, "y": 430 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "skeptical",
+        "states": {
+          "skeptical": {
+            "animation": "arms_crossed",
+            "expression": "stern",
+            "canInteract": true
+          },
+          "testing": {
+            "animation": "pointing_wall",
+            "expression": "commanding",
+            "canInteract": false
+          },
+          "impressed": {
+            "animation": "salute",
+            "expression": "respect",
+            "canInteract": true
+          },
+          "recognizing": {
+            "animation": "bow",
+            "expression": "awe",
+            "canInteract": false
+          }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "stop_hand",
+          "finnResponse": "show_blade",
+          "actions": [
+            { "type": "show_toast", "value": "The captain gestures to the walls—prove yourself up there" },
+            { "type": "npc_action", "target": "captain_grimclaw", "value": "testing" }
+          ]
+        },
+        {
+          "trigger": "assault_ends",
+          "gesture": "bow",
+          "finnResponse": "bow",
+          "actions": [
+            { "type": "npc_action", "target": "captain_grimclaw", "value": "recognizing" },
+            { "type": "show_toast", "value": "'Bearer of the Blade...'" }
+          ]
+        }
+      ],
+      
+      "givesQuest": "quest_defend_walls"
+    },
+    {
+      "id": "mouse_child",
+      "characterId": "npc_mouse_child",
+      "name": "Refugee Child",
+      "role": "ambient",
+      "position": { "x": 250, "y": 460 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "sit",
+        "interactRadius": 50
+      },
+      
+      "storyState": {
+        "initialState": "scared",
+        "states": {
+          "scared": {
+            "animation": "huddled",
+            "expression": "fear",
+            "canInteract": true
+          },
+          "hopeful": {
+            "animation": "looking_up",
+            "expression": "hope",
+            "canInteract": false
+          }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "wave_small",
+          "finnResponse": "gentle_nod",
+          "actions": [
+            { "type": "restore_warmth", "value": 5 },
+            { "type": "npc_action", "target": "mouse_child", "value": "hopeful" },
+            { "type": "show_toast", "value": "A small moment of connection in the cold" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_cross_threshold",
+      "name": "Cross the Threshold",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_speak_captain",
+          "description": "Speak to the Gate Captain",
+          "type": "interact",
+          "target": "captain_grimclaw"
+        },
+        {
+          "id": "obj_reach_walls",
+          "description": "Climb to the battlements",
+          "type": "reach_location",
+          "target": "battlements"
+        },
+        {
+          "id": "obj_defend_walls",
+          "description": "Defend the walls",
+          "type": "defeat_enemies",
+          "count": 8
+        },
+        {
+          "id": "obj_clear_mechanism",
+          "description": "Clear the gate mechanism",
+          "type": "defeat_enemies",
+          "target": "frost_gremlin"
+        },
+        {
+          "id": "obj_enter_hearthhold",
+          "description": "Enter the Hearthhold",
+          "type": "reach_location",
+          "target": "chapter_exit"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 50,
+        "achievement": "The First Threshold"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    },
+    {
+      "id": "quest_defend_walls",
+      "name": "Defend the Walls",
+      "type": "main",
+      "giver": "captain_grimclaw",
+      
+      "objectives": [
+        {
+          "id": "obj_defeat_waves",
+          "description": "Repel the Galeborn assault",
+          "type": "survive_waves",
+          "count": 3
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 25,
+        "achievement": "Wall Defender"
+      },
+      
+      "completionTrigger": "assault_ends"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 2800,
+      "minY": 0,
+      "maxY": 700
+    },
+    
+    "biome": "fortress",
+    "spawnPoint": { "x": 80, "y": 450 },
+    
+    "segments": [
+      {
+        "id": "gate_approach",
+        "startX": 0,
+        "endX": 600,
+        
+        "platforms": [
+          { "x": 0, "y": 480, "width": 600, "type": "cobblestone", "asset": "platform_cobble_road" }
+        ],
+        
+        "walls": [
+          { "x": 550, "y": 200, "width": 50, "height": 280, "asset": "wall_gatehouse_main" }
+        ]
+      },
+      {
+        "id": "refugee_area",
+        "startX": 100,
+        "endX": 500,
+        
+        "platforms": [],
+        "walls": []
+      },
+      {
+        "id": "wall_stairs",
+        "startX": 600,
+        "endX": 1000,
+        
+        "platforms": [
+          { "x": 600, "y": 480, "width": 100, "type": "stone", "asset": "platform_stair_base" },
+          { "x": 650, "y": 420, "width": 80, "type": "stone", "asset": "platform_stair_1" },
+          { "x": 700, "y": 360, "width": 80, "type": "stone", "asset": "platform_stair_2" },
+          { "x": 750, "y": 300, "width": 80, "type": "stone", "asset": "platform_stair_3" },
+          { "x": 800, "y": 240, "width": 200, "type": "stone", "asset": "platform_wall_top" }
+        ],
+        
+        "walls": [
+          { "x": 630, "y": 240, "width": 20, "height": 240, "asset": "wall_stairwell" }
+        ]
+      },
+      {
+        "id": "battlements",
+        "startX": 800,
+        "endX": 2000,
+        
+        "platforms": [
+          { "x": 800, "y": 240, "width": 1200, "type": "stone", "asset": "platform_battlements" }
+        ],
+        
+        "walls": [
+          { "x": 800, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 960, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 1120, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 1280, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 1440, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 1600, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 1760, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" },
+          { "x": 1920, "y": 160, "width": 80, "height": 80, "asset": "wall_merlon" }
+        ],
+        
+        "scamperZones": [
+          { "x": 880, "y": 180, "width": 60, "height": 60 },
+          { "x": 1040, "y": 180, "width": 60, "height": 60 },
+          { "x": 1200, "y": 180, "width": 60, "height": 60 },
+          { "x": 1360, "y": 180, "width": 60, "height": 60 },
+          { "x": 1520, "y": 180, "width": 60, "height": 60 },
+          { "x": 1680, "y": 180, "width": 60, "height": 60 },
+          { "x": 1840, "y": 180, "width": 60, "height": 60 }
+        ]
+      },
+      {
+        "id": "gate_mechanism",
+        "startX": 2000,
+        "endX": 2400,
+        
+        "platforms": [
+          { "x": 2000, "y": 240, "width": 150, "type": "stone", "asset": "platform_wall_connection" },
+          { "x": 2150, "y": 300, "width": 100, "type": "stone", "asset": "platform_mechanism_upper" },
+          { "x": 2100, "y": 380, "width": 200, "type": "iron", "asset": "platform_mechanism_main" },
+          { "x": 2050, "y": 480, "width": 300, "type": "stone", "asset": "platform_mechanism_base" }
+        ],
+        
+        "walls": [
+          { "x": 2350, "y": 300, "width": 50, "height": 200, "asset": "wall_mechanism_housing" }
+        ]
+      },
+      {
+        "id": "inner_gate",
+        "startX": 2400,
+        "endX": 2800,
+        
+        "platforms": [
+          { "x": 2400, "y": 450, "width": 400, "type": "abbey_stone", "asset": "platform_inner_courtyard" }
+        ],
+        
+        "walls": []
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_gate", "position": { "x": 150, "y": 450 }, "type": "shrine" },
+      { "id": "checkpoint_battlements", "position": { "x": 900, "y": 210 }, "type": "brazier", "requiresTrigger": "reach_battlements" },
+      { "id": "checkpoint_mechanism", "position": { "x": 2200, "y": 450 }, "type": "brazier", "requiresTrigger": "assault_ends" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "wave_1_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 1000, "y": 210 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "spawnedByTrigger": "wave_1_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "wave_1_scout_2",
+      "enemyType": "scout",
+      "position": { "x": 1200, "y": 210 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "spawnedByTrigger": "wave_1_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "wave_2_frostwolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 1400, "y": 210 },
+      "behavior": { "type": "chase", "aggroRadius": 200 },
+      "spawnedByTrigger": "wave_2_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "wave_2_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 1100, "y": 210 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "spawnedByTrigger": "wave_2_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "wave_2_scout_2",
+      "enemyType": "scout",
+      "position": { "x": 1600, "y": 210 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "spawnedByTrigger": "wave_2_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "wave_3_frostwolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 1200, "y": 210 },
+      "behavior": { "type": "chase", "aggroRadius": 200 },
+      "spawnedByTrigger": "wave_3_start",
+      "difficulty": "hard"
+    },
+    {
+      "id": "wave_3_frostwolf_2",
+      "enemyType": "frostwolf",
+      "position": { "x": 1600, "y": 210 },
+      "behavior": { "type": "chase", "aggroRadius": 200 },
+      "spawnedByTrigger": "wave_3_start",
+      "difficulty": "hard"
+    },
+    {
+      "id": "wave_3_icebat_1",
+      "enemyType": "icebat",
+      "position": { "x": 1400, "y": 150 },
+      "behavior": { "type": "patrol", "aggroRadius": 180 },
+      "spawnedByTrigger": "wave_3_start",
+      "difficulty": "medium"
+    },
+    {
+      "id": "frost_gremlin",
+      "enemyType": "frost_gremlin",
+      "position": { "x": 2200, "y": 350 },
+      "behavior": { "type": "guard", "guardRadius": 80, "aggroRadius": 120 },
+      "spawnedByTrigger": "approach_mechanism",
+      "difficulty": "hard",
+      "isMiniMiniboss": true
+    }
+  ],
+
+  "boss": null,
+
+  "interactions": [
+    {
+      "id": "brazier_1",
+      "type": "shrine",
+      "position": { "x": 900, "y": 180 },
+      "asset": "brazier_wall",
+      "activateRadius": 60,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "brazier_wall_off" },
+        "lit": { "asset": "brazier_wall_on", "actions": [
+          { "type": "restore_warmth", "value": 15 },
+          { "type": "play_sound", "target": "brazier_ignite" }
+        ]}
+      }
+    },
+    {
+      "id": "brazier_2",
+      "type": "shrine",
+      "position": { "x": 1400, "y": 180 },
+      "asset": "brazier_wall",
+      "activateRadius": 60,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "brazier_wall_off" },
+        "lit": { "asset": "brazier_wall_on", "actions": [
+          { "type": "restore_warmth", "value": 15 },
+          { "type": "play_sound", "target": "brazier_ignite" }
+        ]}
+      }
+    },
+    {
+      "id": "brazier_3",
+      "type": "shrine",
+      "position": { "x": 1900, "y": 180 },
+      "asset": "brazier_wall",
+      "activateRadius": 60,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "brazier_wall_off" },
+        "lit": { "asset": "brazier_wall_on", "actions": [
+          { "type": "restore_warmth", "value": 15 },
+          { "type": "play_sound", "target": "brazier_ignite" }
+        ]}
+      }
+    },
+    {
+      "id": "gate_mechanism_lever",
+      "type": "lever",
+      "position": { "x": 2280, "y": 450 },
+      "asset": "lever_large",
+      "activateRadius": 50,
+      "initialState": "locked",
+      "states": {
+        "locked": { "asset": "lever_large_locked", "solid": false },
+        "ready": { "asset": "lever_large_off", "solid": false },
+        "activated": { "asset": "lever_large_on", "solid": false, "actions": [
+          { "type": "play_sound", "target": "gate_mechanism_grind" },
+          { "type": "shake_screen", "value": 0.5 },
+          { "type": "change_music", "target": "music_triumph" }
+        ]}
+      },
+      "requires": {
+        "trigger": "frost_gremlin_defeated"
+      }
+    },
+    {
+      "id": "great_gate",
+      "type": "door",
+      "position": { "x": 2550, "y": 350 },
+      "asset": "gate_great",
+      "activateRadius": 100,
+      "initialState": "closed",
+      "states": {
+        "closed": { "asset": "gate_great_closed", "solid": true },
+        "opening": { "asset": "gate_great_opening", "solid": false },
+        "open": { "asset": "gate_great_open", "solid": false }
+      },
+      "requires": {
+        "trigger": "lever_activated"
+      }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 0, "width": 200, "height": 700 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_gatehouse_tension" },
+        { "type": "show_toast", "value": "The Northern Gate" }
+      ]
+    },
+    {
+      "id": "approach_refugees",
+      "type": "enter_region",
+      "region": { "x": 200, "y": 400, "width": 150, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "play_sound", "target": "crowd_murmur_worried" }
+      ]
+    },
+    {
+      "id": "approach_captain",
+      "type": "enter_region",
+      "region": { "x": 350, "y": 380, "width": 100, "height": 120 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "Captain Grimclaw bars the way" }
+      ]
+    },
+    {
+      "id": "reach_battlements",
+      "type": "enter_region",
+      "region": { "x": 800, "y": 180, "width": 100, "height": 80 },
+      "once": true,
+      "requires": [],
+      "actions": [
+        { "type": "show_toast", "value": "The battlements. Wind cuts like ice." },
+        { "type": "drain_warmth", "value": 10 }
+      ]
+    },
+    {
+      "id": "assault_begins",
+      "type": "enter_region",
+      "region": { "x": 950, "y": 180, "width": 100, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "They're coming!" },
+        { "type": "change_music", "target": "music_combat_intense" },
+        { "type": "shake_screen", "value": 0.3 }
+      ]
+    },
+    {
+      "id": "wave_1_start",
+      "type": "enter_region",
+      "region": { "x": 950, "y": 150, "width": 50, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "spawn_enemies", "value": ["wave_1_scout_1", "wave_1_scout_2"] }
+      ]
+    },
+    {
+      "id": "wave_1_complete",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["wave_1_start"],
+      "actions": [
+        { "type": "show_toast", "value": "More coming!" }
+      ]
+    },
+    {
+      "id": "wave_2_start",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["wave_1_start"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["wave_2_frostwolf_1", "wave_2_scout_1", "wave_2_scout_2"] },
+        { "type": "shake_screen", "value": 0.4 }
+      ]
+    },
+    {
+      "id": "wave_2_complete",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["wave_2_start"],
+      "actions": [
+        { "type": "show_toast", "value": "The final wave approaches!" }
+      ]
+    },
+    {
+      "id": "wave_3_start",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["wave_2_start"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["wave_3_frostwolf_1", "wave_3_frostwolf_2", "wave_3_icebat_1"] },
+        { "type": "shake_screen", "value": 0.5 }
+      ]
+    },
+    {
+      "id": "assault_ends",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["wave_3_start"],
+      "actions": [
+        { "type": "show_toast", "value": "The walls hold!" },
+        { "type": "change_music", "target": "music_gatehouse_tension" },
+        { "type": "restore_warmth", "value": 20 },
+        { "type": "unlock_checkpoint" },
+        { "type": "complete_quest", "target": "quest_defend_walls" }
+      ]
+    },
+    {
+      "id": "approach_mechanism",
+      "type": "enter_region",
+      "region": { "x": 2050, "y": 300, "width": 100, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "spawn_enemies", "value": ["frost_gremlin"] },
+        { "type": "show_toast", "value": "Something has frozen the mechanism!" },
+        { "type": "change_music", "target": "music_miniboss" }
+      ]
+    },
+    {
+      "id": "frost_gremlin_defeated",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["approach_mechanism"],
+      "actions": [
+        { "type": "show_toast", "value": "The ice shatters. The mechanism is free." },
+        { "type": "change_music", "target": "music_gatehouse_tension" }
+      ]
+    },
+    {
+      "id": "lever_activated",
+      "type": "interact",
+      "targetId": "gate_mechanism_lever",
+      "once": true,
+      "requires": ["frost_gremlin_defeated"],
+      "actions": []
+    },
+    {
+      "id": "gate_opens",
+      "type": "timer",
+      "delay": 2000,
+      "once": true,
+      "requires": ["lever_activated"],
+      "actions": [
+        { "type": "show_toast", "value": "The gate opens..." },
+        { "type": "change_music", "target": "music_triumph" }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "enter_region",
+      "region": { "x": 2700, "y": 350, "width": 100, "height": 150 },
+      "once": true,
+      "requires": ["gate_opens"],
+      "actions": [
+        { "type": "complete_quest", "target": "quest_cross_threshold" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_2_gate_opens" }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_refugee_1", "type": "ember_shard", "position": { "x": 180, "y": 450 } },
+    { "id": "shard_stairs_1", "type": "ember_shard", "position": { "x": 720, "y": 330 } },
+    { "id": "shard_wall_1", "type": "ember_shard", "position": { "x": 1100, "y": 210 } },
+    { "id": "shard_wall_2", "type": "ember_shard", "position": { "x": 1500, "y": 210 } },
+    { "id": "shard_mechanism_1", "type": "ember_shard", "position": { "x": 2180, "y": 270 } },
+    { "id": "hearthstone_gate", "type": "hearthstone", "position": { "x": 2600, "y": 420 } },
+    { "id": "lore_gate_history", "type": "lore_fragment", "position": { "x": 500, "y": 450 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_wall_cache",
+      "name": "The Watchman's Cache",
+      "type": "hidden_room",
+      "entrance": { "x": 1760, "y": 200, "width": 40, "height": 40 },
+      "hint": "A loose stone in the battlements, marked with a badger's claw",
+      "rewards": {
+        "emberShards": 15,
+        "hearthstones": 1,
+        "achievement": "Sharp Eyes"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "gatehouse_bridge_chapter_plate",
+    "parallaxBackground": "abbey_exterior_parallax_background",
+    "introCinematic": "chapter_1_gatehouse_approach",
+    "outroCinematic": "chapter_2_gate_opens",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_gatehouse_tension",
+      "tension": "music_gatehouse_siege",
+      "combat": "music_combat_intense",
+      "boss": "music_miniboss",
+      "victory": "music_triumph"
+    },
+    
+    "ambientSounds": [
+      "ambient_wind_howling",
+      "ambient_crowd_murmur",
+      "ambient_distant_combat"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#708090",
+      "ambientIntensity": 0.5,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "snow",
+      "intensity": 0.6,
+      "affectsGameplay": true
+    },
+    
+    "warmthDrain": 0.5,
+    
+    "particles": [
+      {
+        "type": "snow",
+        "density": 0.6,
+        "region": { "x": 0, "y": 0, "width": 2800, "height": 300 }
+      },
+      {
+        "type": "embers",
+        "density": 0.3,
+        "region": { "x": 800, "y": 150, "width": 1200, "height": 100 }
+      }
+    ]
+  }
+}
