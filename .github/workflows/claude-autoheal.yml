@@ -23,12 +23,16 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   detect-ai-feedback:
     name: Detect AI Feedback
-    # Only run for PR-related events
+    # Only run for PR-related events, skip if triggered by bot to prevent loops
     if: |
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
-      github.event_name == 'pull_request_review' ||
-      (github.event_name == 'check_run' && github.event.check_run.conclusion == 'failure' && github.event.check_run.pull_requests[0]) ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.pull_requests[0])
+      github.actor != 'github-actions[bot]' &&
+      github.actor != 'claude[bot]' &&
+      (
+        (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
+        github.event_name == 'pull_request_review' ||
+        (github.event_name == 'check_run' && github.event.check_run.conclusion == 'failure' && github.event.check_run.pull_requests[0]) ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.pull_requests[0])
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -63,20 +67,17 @@ jobs:
           if [ "$EVENT_NAME" = "issue_comment" ]; then
             PR_NUM="${{ github.event.issue.number }}"
             
-            # Detect AI agents by username
+            # Detect AI agents by username (more precise than content matching)
             if [[ "$COMMENT_USER" == *"coderabbit"* ]] || [[ "$COMMENT_USER" == "coderabbitai"* ]]; then
               AGENTS="${AGENTS}coderabbit,"
               FEEDBACK_TYPE="code_review"
-            fi
-            if [[ "$COMMENT_USER" == *"gemini"* ]]; then
+            elif [[ "$COMMENT_USER" == *"gemini"* ]]; then
               AGENTS="${AGENTS}gemini,"
               FEEDBACK_TYPE="code_review"
-            fi
-            if [[ "$COMMENT_USER" == *"copilot"* ]]; then
+            elif [[ "$COMMENT_USER" == *"copilot"* ]]; then
               AGENTS="${AGENTS}copilot,"
               FEEDBACK_TYPE="code_review"
-            fi
-            if [[ "$COMMENT_BODY" == *"CodeQL"* ]] || [[ "$COMMENT_BODY" == *"code-scanning"* ]]; then
+            elif [[ "$COMMENT_USER" == "github-code-scanning"* ]] || [[ "$COMMENT_USER" == "github-advanced-security"* ]]; then
               AGENTS="${AGENTS}codeql,"
               FEEDBACK_TYPE="security_alert"
             fi
@@ -165,10 +166,17 @@ jobs:
         env:
           PR_BRANCH: ${{ needs.detect-ai-feedback.outputs.pr_branch }}
         run: |
-          if [[ "$PR_BRANCH" == copilot/* ]]; then
+          # Validate branch name format
+          if [[ ! "$PR_BRANCH" =~ ^[a-zA-Z0-9/_-]+$ ]]; then
+            echo "::error::Invalid branch name format: $PR_BRANCH"
+            exit 1
+          fi
+          
+          # Use regex matching for security
+          if [[ "$PR_BRANCH" =~ ^copilot/ ]]; then
             echo "mode=collaborative" >> $GITHUB_OUTPUT
             echo "agent=@copilot" >> $GITHUB_OUTPUT
-          elif [[ "$PR_BRANCH" == jules/* ]]; then
+          elif [[ "$PR_BRANCH" =~ ^jules/ ]]; then
             echo "mode=collaborative" >> $GITHUB_OUTPUT
             echo "agent=@jules" >> $GITHUB_OUTPUT
           else
