@@ -367,7 +367,28 @@ export class GameState {
   deserialize(data) {
     if (!data) return;
 
-    Object.assign(this, data);
+  deserialize(data) {
+    if (!data) return;
+
+    // Safe property assignment - avoid prototype pollution
+    const safeKeys = [
+      'currentChapter', 'health', 'maxHealth', 'warmth', 'maxWarmth',
+      'shards', 'inventory', 'completedQuests', 'activeQuests',
+      'discoveredSecrets', 'activatedCheckpoints', 'defeatedEnemies',
+      'defeatedEnemiesByType', 'enemyGroups', 'unlockedDoors',
+      'playTime', 'deaths', 'lastCheckpoint', 'settings'
+    ];
+    
+    for (const key of safeKeys) {
+      if (data.hasOwnProperty(key)) {
+        this[key] = data[key];
+      }
+    }
+
+    this.gameTime = 0;
+    this.listeners = [];
+    this.notify();
+  }
     this.gameTime = 0; // Reset game time
     this.listeners = []; // Don't restore listeners
     this.notify();
