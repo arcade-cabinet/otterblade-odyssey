@@ -40,6 +40,11 @@ import { inputManager } from './systems/InputManager';
 /**
  * Preload all game manifests using the DDL loader with progress tracking.
  * This runs once at game startup to fetch all JSON data.
+ *
+ * @param {(percent: number) => void} [onProgress] Optional callback invoked with
+ *   the current preload progress percentage (0–100) after each manifest step.
+ * @returns {Promise<{ success: true }>} Promise that resolves when all manifests
+ *   have finished preloading successfully.
  */
 async function preloadGameManifests(onProgress) {
   try {
