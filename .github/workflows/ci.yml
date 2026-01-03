@@ -89,7 +89,14 @@ jobs:
   claude_auto_fix:
     name: Claude auto-fix on CI failure
     needs: quality
-    if: needs.quality.result == 'failure' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    # Run only when:
+    # - the quality job failed
+    # - the workflow was triggered by a pull request
+    # - the pull request comes from this repository (not a fork)
+    if: >
+      needs.quality.result == 'failure'
+      && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
