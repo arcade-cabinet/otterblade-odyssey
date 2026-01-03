@@ -2,6 +2,10 @@ name: Ecosystem Fixer
 
 # CI Failure Resolution Pipeline
 # 
+# ⚠️  IMPORTANT: This workflow is SUPERSEDED by Claude Auto-Heal (.github/workflows/claude-autoheal.yml)
+#    for PR-related CI failures. Claude Auto-Heal provides superior orchestration and healing.
+#    This workflow remains for non-PR CI failure analysis only.
+#
 # Uses Ollama GLM 4.6 Cloud for cost-efficient, fast auto-fix suggestions.
 # Combined with CodeQL and Copilot suggestions for comprehensive fixes.
 #

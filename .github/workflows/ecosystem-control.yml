@@ -1,9 +1,13 @@
 # Ecosystem Control - AI Agent Orchestration
 # Routes @cascade commands to appropriate AI agents via pure curl
 #
+# ⚠️  IMPORTANT: For PR management, use Claude PR Manager (.github/workflows/claude-pr-manager.yml)
+#    Claude is the central authority for PR reviews, approvals, and orchestration.
+#    This workflow handles @cascade commands for other ecosystem tasks.
+#
 # Responsibilities:
 # - Parse @cascade commands from issue/PR comments
-# - Route to Claude, Cursor, Jules, or Ollama
+# - Route to Claude, Cursor, Jules, or Ollama for non-PR tasks
 # - Execute targeted AI actions against tracking issues
 #
 # All API calls via curl - zero dependencies

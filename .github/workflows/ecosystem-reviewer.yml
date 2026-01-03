@@ -4,6 +4,11 @@ name: Ecosystem Reviewer
 # 1. Ollama (fast, cheap) → quick review
 # 2. Claude (escalation) → complex PRs or many issues
 # 3. Jules (refactor) → when code changes needed
+#
+# ⚠️  IMPORTANT: This workflow is SUPERSEDED by Claude PR Manager (.github/workflows/claude-pr-manager.yml)
+#    and Claude Initial Review (.github/workflows/claude-review.yml) for PR reviews.
+#    Claude provides superior review orchestration using Haiku 4.5.
+#    This workflow remains for legacy support only.
 
 on:
   pull_request:
