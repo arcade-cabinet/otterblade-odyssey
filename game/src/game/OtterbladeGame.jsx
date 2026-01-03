@@ -1,7 +1,7 @@
 /**
  * Otterblade Odyssey - Main Game Component
- * Orchestrates game systems using modular architecture
- * AGENTS.md compliant: ~200 lines (max 300 target)
+ * Uses monolithic game architecture (game-monolith.js)
+ * Clean: 3 JS files total (monolith + DDL + this), plus external libs
  */
 
 import {
@@ -13,29 +13,23 @@ import {
   onCleanup,
   Show,
 } from 'solid-js';
-import { Vector3 } from 'yuka';
-import { initializeMatter, isMatterInitialized } from './physics/matter-wrapper';
+
+// ONE import - the entire game engine
+import {
+  initializeGame,
+  createPhysicsEngine,
+  createFinnBody,
+  createGameLoop,
+  initializeChapter,
+  PlayerController,
+  audioManager,
+  inputManager,
+  CHAPTER_FILES,
+} from './game-monolith';
+
+// DDL loader (second file)
 import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
-import { loadChapterManifest } from './data/chapter-loaders';
-import { createGameLoop } from './engine/gameLoop';
-import {
-  buildEnemies,
-  buildInteractionsAndCollectibles,
-  buildLevelGeometry,
-  buildNPCs,
-  initializeAudio,
-  initializeChapterData,
-  initializeQuests,
-} from './engine/initialization';
-import { createSceneRenderer } from './engine/rendering';
-import { BellSystem, HearthSystem, LanternSystem } from './environment/EnvironmentalSystems';
-import { createFinnBody, createPhysicsEngine, HazardSystem } from './physics/PhysicsManager';
-import { PlayerController } from './physics/PlayerController';
-import { aiManager } from './systems/AIManager';
-import { audioManager } from './systems/AudioManager';
-import { setupCollisionHandlers } from './systems/collision';
-import { inputManager } from './systems/InputManager';
 
 /**
  * Preload all game manifests using the DDL loader with progress tracking.
@@ -168,15 +162,8 @@ function OtterbladeGameContent() {
     // Wait for manifests to load before starting game
     if (!manifestsLoaded() || !gameStarted()) return;
 
-    // Initialize Matter.js first (dynamic import)
-    if (!isMatterInitialized()) {
-      try {
-        await initializeMatter();
-      } catch (error) {
-        console.error('Failed to initialize Matter.js:', error);
-        return;
-      }
-    }
+    // Initialize game engine (loads Matter.js dynamically)
+    await initializeGame();
 
     const canvas = canvasRef;
     if (!canvas) {
@@ -194,14 +181,68 @@ function OtterbladeGameContent() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Initialize chapter data
-    const chapterId = currentChapter();
-    const { manifest, spawnPoint } = initializeChapterData(chapterId);
-    // Initialize quest system
-    initializeQuests(manifest, setActiveQuest, setQuestObjectives);
+    // Load chapter manifest using DDL
+    const { loadChapterManifest } = await import('../ddl/loader');
+    const manifest = loadChapterManifest(currentChapter());
+    
+    if (!manifest) {
+      console.error('Failed to load chapter manifest');
+      return;
+    }
 
-    // Initialize audio
-    initializeAudio(audioManager, manifest);
+    console.log(`Loading Chapter ${currentChapter()}: ${manifest.name}`);
+
+    // Create physics engine
+    const engine = createPhysicsEngine();
+
+    // Create player
+    const spawnPoint = manifest.level?.spawnPoint || { x: 200, y: 300 };
+    const player = createFinnBody(spawnPoint.x, spawnPoint.y);
+    const { World } = window.Matter;
+    World.add(engine.world, player);
+
+    // Create player controller
+    const playerController = new PlayerController(player, engine, gameStateObj, audioManager);
+
+    // Initialize chapter (platforms, enemies, etc.)
+    const { platforms, enemies } = initializeChapter(
+      currentChapter(),
+      manifest,
+      engine,
+      gameStateObj
+    );
+
+    console.log(`Chapter loaded: ${platforms.length} platforms, ${enemies.length} enemies`);
+
+    // Load audio
+    if (manifest.media?.audio?.music?.[0]) {
+      setTimeout(() => {
+        audioManager.playMusic(manifest.media.audio.music[0].id);
+      }, 500);
+    }
+
+    // Create game loop
+    const loop = createGameLoop({
+      canvas,
+      ctx,
+      engine,
+      player,
+      playerController,
+      gameState: gameStateObj,
+    });
+
+    // Start game
+    loop.start();
+
+    // Cleanup on unmount
+    onCleanup(() => {
+      loop.stop();
+      const { World, Engine } = window.Matter;
+      World.clear(engine.world, false);
+      Engine.clear(engine);
+      console.log('[Game] Cleaned up');
+    });
+  });
 
     // Create physics engine
     const engine = createPhysicsEngine();
