@@ -1,4 +1,4 @@
-name: Auto Fix CI Failures
+name: Auto Fix CI Failures With Claude
 
 on:
   workflow_run:
