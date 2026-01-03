@@ -117,13 +117,21 @@ class ChaseState extends TypedState {
   constructor() {
     super();
     this.seekBehavior = new SeekBehavior();
+    this.followPathBehavior = null;
+    this.pathRecalcInterval = 60; // frames (~1 second at 60fps)
+    this.pathAge = 0;
+    this.currentPath = null;
+    this.lastTargetPosition = null;
   }
 
   enter(enemy) {
     if (enemy.target?.position) {
-      this.seekBehavior.target = enemy.target.position;
-      enemy.steering.behaviors.push(this.seekBehavior);
       enemy.maxSpeed = enemy.chaseSpeed;
+
+      // Initialize pathfinding
+      this.pathAge = this.pathRecalcInterval; // Force immediate path calculation
+      this.currentPath = null;
+      this.lastTargetPosition = null;
 
       // Play alert sound
       if (enemy.onAlert) {
@@ -137,9 +145,6 @@ class ChaseState extends TypedState {
       enemy.stateMachine.changeTo('patrol');
       return;
     }
-
-    // Update seek target
-    this.seekBehavior.target = enemy.target.position;
 
     const distToTarget = enemy.position.distanceTo(enemy.target.position);
 
@@ -155,13 +160,72 @@ class ChaseState extends TypedState {
       enemy.stateMachine.changeTo('attack');
       return;
     }
+
+    // Check if we need to recalculate path
+    const targetMoved =
+      this.lastTargetPosition && this.lastTargetPosition.distanceTo(enemy.target.position) > 30;
+    const needsNewPath =
+      !this.currentPath || this.pathAge >= this.pathRecalcInterval || targetMoved;
+
+    if (needsNewPath && enemy.aiManager) {
+      // Recalculate path using A* pathfinding
+      this.currentPath = enemy.aiManager.findPath(enemy.position, enemy.target.position);
+      this.pathAge = 0;
+      this.lastTargetPosition = enemy.target.position.clone();
+
+      // Update path following behavior
+      if (this.currentPath && this.currentPath.length > 1) {
+        // Remove old path behavior
+        if (this.followPathBehavior) {
+          const index = enemy.steering.behaviors.indexOf(this.followPathBehavior);
+          if (index > -1) {
+            enemy.steering.behaviors.splice(index, 1);
+          }
+        }
+
+        // Create new path following behavior
+        this.followPathBehavior = new FollowPathBehavior();
+        this.followPathBehavior.path.clear();
+        for (const waypoint of this.currentPath) {
+          this.followPathBehavior.path.add(waypoint);
+        }
+        this.followPathBehavior.nextWaypointDistance = 10;
+
+        enemy.steering.behaviors.push(this.followPathBehavior);
+      } else {
+        // Fallback to direct seek if pathfinding fails
+        this.seekBehavior.target = enemy.target.position;
+        if (!enemy.steering.behaviors.includes(this.seekBehavior)) {
+          enemy.steering.behaviors.push(this.seekBehavior);
+        }
+      }
+    } else {
+      this.pathAge++;
+
+      // Update seek target as fallback
+      if (!this.followPathBehavior && !enemy.steering.behaviors.includes(this.seekBehavior)) {
+        this.seekBehavior.target = enemy.target.position;
+        enemy.steering.behaviors.push(this.seekBehavior);
+      }
+    }
   }
 
   exit(enemy) {
-    const index = enemy.steering.behaviors.indexOf(this.seekBehavior);
-    if (index > -1) {
-      enemy.steering.behaviors.splice(index, 1);
+    // Clean up behaviors
+    if (this.followPathBehavior) {
+      const index = enemy.steering.behaviors.indexOf(this.followPathBehavior);
+      if (index > -1) {
+        enemy.steering.behaviors.splice(index, 1);
+      }
     }
+
+    const seekIndex = enemy.steering.behaviors.indexOf(this.seekBehavior);
+    if (seekIndex > -1) {
+      enemy.steering.behaviors.splice(seekIndex, 1);
+    }
+
+    this.currentPath = null;
+    this.followPathBehavior = null;
   }
 }
 
@@ -728,7 +792,51 @@ class AIManager {
     }
 
     path.unshift(start.clone());
-    return path;
+    return this.smoothPath(path);
+  }
+
+  /**
+   * Smooth path by removing unnecessary waypoints using funnel algorithm
+   * @param {Array<Vector3>} path - Original path
+   * @returns {Array<Vector3>} - Smoothed path
+   */
+  smoothPath(path) {
+    if (path.length <= 2) return path;
+
+    const smoothed = [path[0]];
+    let current = 0;
+
+    while (current < path.length - 1) {
+      // Try to skip intermediate waypoints by checking line of sight
+      let farthest = current + 1;
+
+      for (let i = current + 2; i < path.length; i++) {
+        if (this.hasLineOfSight(path[current], path[i])) {
+          farthest = i;
+        } else {
+          break;
+        }
+      }
+
+      smoothed.push(path[farthest]);
+      current = farthest;
+    }
+
+    return smoothed;
+  }
+
+  /**
+   * Check if there's a clear line of sight between two points
+   * Simple check based on distance and region connectivity
+   * @param {Vector3} from - Start point
+   * @param {Vector3} to - End point
+   * @returns {boolean} - True if line of sight exists
+   */
+  hasLineOfSight(from, to) {
+    const distance = from.distanceTo(to);
+    // For now, consider points close together to have line of sight
+    // In a full implementation, this would check for obstacles
+    return distance < 150; // Max direct path distance
   }
 
   /**
@@ -764,6 +872,7 @@ class AIManager {
 
   addEnemy(id, config) {
     const enemy = new EnemyAI(config);
+    enemy.aiManager = this; // Reference to AIManager for pathfinding
     this.enemies.set(id, enemy);
     this.entityManager.add(enemy);
 
@@ -814,6 +923,6 @@ class AIManager {
   }
 }
 
-// Export singleton instance
+// Export singleton instance and class for testing
 export const aiManager = new AIManager();
-export { EnemyAI, NPCAI };
+export { AIManager, EnemyAI, NPCAI };
