@@ -201,7 +201,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
  *
  * @param chapterId - Chapter ID (0-9)
  * @returns Cached chapter manifest
- * @throws Error if chapter not in cache
+ * @throws Error if chapter not in cache or validation fails
  */
 export function getChapterManifestSync(chapterId: number): ChapterManifest {
   const path = CHAPTER_FILENAMES[chapterId];
@@ -215,7 +215,16 @@ export function getChapterManifestSync(chapterId: number): ChapterManifest {
     );
   }
 
-  return manifestCache.get(path) as ChapterManifest;
+  const cachedData = manifestCache.get(path);
+
+  // Runtime type guard: Validate cached data structure
+  const result = ChapterManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted chapter-${chapterId} manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 // ============================================================================
@@ -241,12 +250,21 @@ export async function loadEnemiesManifest(): Promise<EnemiesManifest> {
 
 /**
  * Gets enemies manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getEnemiesManifestSync(): EnemiesManifest {
   if (!manifestCache.has('enemies.json')) {
     throw new Error('Enemies manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('enemies.json') as EnemiesManifest;
+
+  const cachedData = manifestCache.get('enemies.json');
+  const result = EnemiesManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted enemies manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -268,12 +286,21 @@ export async function loadNPCsManifest(): Promise<NPCsManifest> {
 
 /**
  * Gets NPCs manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getNPCsManifestSync(): NPCsManifest {
   if (!manifestCache.has('npcs.json')) {
     throw new Error('NPCs manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('npcs.json') as NPCsManifest;
+
+  const cachedData = manifestCache.get('npcs.json');
+  const result = NPCsManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted NPCs manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 // ============================================================================
@@ -299,12 +326,21 @@ export async function loadSpritesManifest(): Promise<SpritesManifest> {
 
 /**
  * Gets sprites manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getSpritesManifestSync(): SpritesManifest {
   if (!manifestCache.has('sprites.json')) {
     throw new Error('Sprites manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('sprites.json') as SpritesManifest;
+
+  const cachedData = manifestCache.get('sprites.json');
+  const result = SpritesManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted sprites manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -326,12 +362,21 @@ export async function loadCinematicsManifest(): Promise<CinematicsManifest> {
 
 /**
  * Gets cinematics manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getCinematicsManifestSync(): CinematicsManifest {
   if (!manifestCache.has('cinematics.json')) {
     throw new Error('Cinematics manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('cinematics.json') as CinematicsManifest;
+
+  const cachedData = manifestCache.get('cinematics.json');
+  const result = CinematicsManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted cinematics manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -353,12 +398,21 @@ export async function loadSoundsManifest(): Promise<SoundsManifest> {
 
 /**
  * Gets sounds manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getSoundsManifestSync(): SoundsManifest {
   if (!manifestCache.has('sounds.json')) {
     throw new Error('Sounds manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('sounds.json') as SoundsManifest;
+
+  const cachedData = manifestCache.get('sounds.json');
+  const result = SoundsManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted sounds manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -380,12 +434,21 @@ export async function loadEffectsManifest(): Promise<EffectsManifest> {
 
 /**
  * Gets effects manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getEffectsManifestSync(): EffectsManifest {
   if (!manifestCache.has('effects.json')) {
     throw new Error('Effects manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('effects.json') as EffectsManifest;
+
+  const cachedData = manifestCache.get('effects.json');
+  const result = EffectsManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted effects manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -407,12 +470,21 @@ export async function loadItemsManifest(): Promise<ItemsManifest> {
 
 /**
  * Gets items manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getItemsManifestSync(): ItemsManifest {
   if (!manifestCache.has('items.json')) {
     throw new Error('Items manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('items.json') as ItemsManifest;
+
+  const cachedData = manifestCache.get('items.json');
+  const result = ItemsManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted items manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -434,12 +506,21 @@ export async function loadScenesManifest(): Promise<ScenesManifest> {
 
 /**
  * Gets scenes manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getScenesManifestSync(): ScenesManifest {
   if (!manifestCache.has('scenes.json')) {
     throw new Error('Scenes manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('scenes.json') as ScenesManifest;
+
+  const cachedData = manifestCache.get('scenes.json');
+  const result = ScenesManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted scenes manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -461,12 +542,21 @@ export async function loadChapterPlatesManifest(): Promise<ChapterPlatesManifest
 
 /**
  * Gets chapter plates manifest from cache synchronously.
+ * @throws Error if not loaded or validation fails
  */
 export function getChapterPlatesManifestSync(): ChapterPlatesManifest {
   if (!manifestCache.has('chapter-plates.json')) {
     throw new Error('Chapter plates manifest not loaded. Call preloadManifests() first.');
   }
-  return manifestCache.get('chapter-plates.json') as ChapterPlatesManifest;
+
+  const cachedData = manifestCache.get('chapter-plates.json');
+  const result = ChapterPlatesManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted chapter plates manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 // ============================================================================
