@@ -132,6 +132,7 @@ function OtterbladeGameContent() {
 
   // Game state signals
   const [currentChapter] = createSignal(0);
+  const [currentChapterManifest, setCurrentChapterManifest] = createSignal(null);
   const [health, setHealth] = createSignal(5);
   const [maxHealth] = createSignal(5);
   const [warmth, setWarmth] = createSignal(100);
@@ -181,14 +182,17 @@ function OtterbladeGameContent() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Load chapter manifest using DDL
-    const { loadChapterManifest } = await import('../ddl/loader');
-    const manifest = loadChapterManifest(currentChapter());
+    // Load chapter manifest using DDL sync accessor (already preloaded)
+    const { getChapterManifestSync } = await import('../ddl/loader');
+    const manifest = getChapterManifestSync(currentChapter());
     
     if (!manifest) {
       console.error('Failed to load chapter manifest');
       return;
     }
+
+    // Store for UI access
+    setCurrentChapterManifest(manifest);
 
     console.log(`Loading Chapter ${currentChapter()}: ${manifest.name}`);
 
@@ -335,7 +339,9 @@ function OtterbladeGameContent() {
           }}
         >
           <div style={{ 'font-size': '18px', 'margin-bottom': '10px', color: '#E67E22' }}>
-            Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}
+            <Show when={currentChapterManifest()} fallback={<span>Chapter {currentChapter()}</span>}>
+              Chapter {currentChapter()}: {currentChapterManifest().name}
+            </Show>
           </div>
           <div style={{ 'margin-bottom': '10px' }}>
             <span style={{ color: '#F4D03F' }}>Health: </span>
