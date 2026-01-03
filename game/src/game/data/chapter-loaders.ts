@@ -1,10 +1,17 @@
 /**
  * @fileoverview Loaders for chapter manifest files.
  * These functions load and validate chapter data with full type safety.
+ *
+ * MIGRATION NOTE: This module provides compatibility bridge between:
+ * 1. Legacy static imports (bundled JSON) - used during build/SSR
+ * 2. New DDL loader (fetch-based) - used at runtime after preload
+ *
+ * The loader will automatically use DDL cache if available, falling back
+ * to static imports. This enables gradual migration to fetch-based loading.
  */
 
 import { fromError } from 'zod-validation-error';
-// Static imports for all chapter manifests
+// Static imports for all chapter manifests (fallback for build/SSR)
 import chapter0Data from '../../data/manifests/chapters/chapter-0-the-calling.json';
 import chapter1Data from '../../data/manifests/chapters/chapter-1-river-path.json';
 import chapter2Data from '../../data/manifests/chapters/chapter-2-gatehouse.json';
@@ -16,6 +23,17 @@ import chapter7Data from '../../data/manifests/chapters/chapter-7-bell-tower.jso
 import chapter8Data from '../../data/manifests/chapters/chapter-8-storms-edge.json';
 import chapter9Data from '../../data/manifests/chapters/chapter-9-new-dawn.json';
 import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './manifest-schemas';
+
+// Import DDL loader for runtime fetch-based loading
+// This is optional - if DDL loader hasn't preloaded, we fall back to static imports
+let ddlLoader: typeof import('../../ddl/loader') | null = null;
+try {
+  // Dynamic import so this module works during SSR/build
+  ddlLoader = await import('../../ddl/loader');
+} catch {
+  // DDL loader not available (SSR/build context) - will use static imports
+  console.log('[chapter-loaders] Using static imports (SSR/build mode)');
+}
 
 /** All chapter data indexed by ID */
 const CHAPTER_DATA_MAP: Record<number, unknown> = {
@@ -38,14 +56,27 @@ const chapterCache = new Map<number, ChapterManifest>();
  * Loads and validates a chapter manifest by ID.
  * Results are cached after first load.
  *
+ * COMPATIBILITY BRIDGE: This function will use the DDL loader cache if available,
+ * otherwise falls back to static imports. This enables seamless migration to
+ * fetch-based loading without breaking existing code.
+ *
  * @throws Error if chapter doesn't exist or fails validation
  */
 export function loadChapterManifest(chapterId: number): ChapterManifest {
-  // Check cache first
+  // Try to use DDL loader cache first (if manifests were preloaded)
+  if (ddlLoader) {
+    try {
+      return ddlLoader.getChapterManifestSync(chapterId);
+    } catch {
+      // DDL cache miss - fall through to static imports
+    }
+  }
+
+  // Check local cache
   const cached = chapterCache.get(chapterId);
   if (cached) return cached;
 
-  // Get raw data
+  // Get raw data from static imports (fallback)
   const rawData = CHAPTER_DATA_MAP[chapterId];
   if (!rawData) {
     throw new Error(`Chapter ${chapterId} not found. Valid chapters: 0-9`);

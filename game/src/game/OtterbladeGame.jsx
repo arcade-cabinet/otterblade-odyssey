@@ -5,8 +5,17 @@
  */
 
 import Matter from 'matter-js';
-import { createEffect, createSignal, ErrorBoundary, For, onCleanup, Show } from 'solid-js';
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  ErrorBoundary,
+  For,
+  onCleanup,
+  Show,
+} from 'solid-js';
 import { Vector3 } from 'yuka';
+import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
 import { loadChapterManifest } from './data/chapter-loaders';
 import { createGameLoop } from './engine/gameLoop';
@@ -30,8 +39,45 @@ import { inputManager } from './systems/InputManager';
 
 const { World, Runner, Engine } = Matter;
 
+/**
+ * Preload all game manifests using the DDL loader.
+ * This runs once at game startup to fetch all JSON data.
+ */
+async function preloadGameManifests() {
+  try {
+    // Dynamic import to avoid SSR issues
+    const { preloadManifests } = await import('../ddl/loader');
+
+    // Preload all manifests in parallel
+    await preloadManifests({
+      manifestTypes: [
+        'chapters',
+        'enemies',
+        'npcs',
+        'sprites',
+        'cinematics',
+        'sounds',
+        'effects',
+        'items',
+        'scenes',
+        'chapter-plates',
+      ],
+      logProgress: true,
+      throwOnError: false, // Don't fail on individual manifest errors
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('[Game] Manifest preload failed:', error);
+    throw new Error(`Failed to load game data: ${error.message}`);
+  }
+}
+
 function OtterbladeGameContent() {
   let canvasRef;
+
+  // Preload manifests using createResource
+  const [manifestsLoaded] = createResource(preloadGameManifests);
 
   // Game state signals
   const [currentChapter] = createSignal(0);
@@ -62,7 +108,8 @@ function OtterbladeGameContent() {
   };
 
   createEffect(() => {
-    if (!gameStarted()) return;
+    // Wait for manifests to load before starting game
+    if (!manifestsLoaded() || !gameStarted()) return;
 
     const canvas = canvasRef;
     if (!canvas) {
@@ -263,7 +310,22 @@ function OtterbladeGameContent() {
 
   return (
     <>
-      <Show when={!gameStarted()}>
+      {/* Loading Screen - Show while manifests are loading */}
+      <Show when={manifestsLoaded.loading}>
+        <LoadingScreen progress={50} status="Loading game manifests..." />
+      </Show>
+
+      {/* Error Screen - Show if manifest loading failed */}
+      <Show when={manifestsLoaded.error}>
+        <LoadingScreen
+          progress={0}
+          status="Failed to load game data"
+          error={manifestsLoaded.error?.message || 'Unknown error occurred'}
+        />
+      </Show>
+
+      {/* Start Menu - Show after manifests load but before game starts */}
+      <Show when={!manifestsLoaded.loading && !manifestsLoaded.error && !gameStarted()}>
         <div
           style={{
             position: 'fixed',
@@ -311,13 +373,15 @@ function OtterbladeGameContent() {
               cursor: 'pointer',
               'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
             }}
+            disabled={manifestsLoaded.loading}
           >
             Begin Journey
           </button>
         </div>
       </Show>
 
-      <Show when={gameStarted()}>
+      {/* Game Canvas - Show when game is started and manifests are loaded */}
+      <Show when={gameStarted() && manifestsLoaded()}>
         <canvas ref={canvasRef} style={{ display: 'block' }} />
 
         {/* HUD */}
