@@ -60,11 +60,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           if [ -z "$SONAR_PROJECT_KEY" ] || [ -z "$SONAR_ORGANIZATION" ]; then
-            echo "SONAR_PROJECT_KEY and SONAR_ORGANIZATION must be set as repository or organization variables."
+            echo "::error::SONAR_PROJECT_KEY and SONAR_ORGANIZATION must be set as repository or organization variables."
             exit 1
           fi
           if [ -z "$SONAR_TOKEN" ]; then
-            echo "SONAR_TOKEN secret is missing."
+            echo "::error::SONAR_TOKEN secret is missing."
             exit 1
           fi
 
