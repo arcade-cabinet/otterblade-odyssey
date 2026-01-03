@@ -64,13 +64,18 @@ jobs:
               prData = context.payload.pull_request;
             } else if (eventName === 'pull_request_review' || eventName === 'pull_request_review_comment') {
               prData = context.payload.pull_request;
-            } else if (eventName === 'issue_comment' && context.payload.issue?.pull_request) {
-              const { data } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.payload.issue.number,
-              });
-              prData = data;
+} else if (eventName === 'issue_comment' && context.payload.issue?.pull_request) {
+  try {
+    const { data } = await github.rest.pulls.get({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: context.payload.issue.number,
+    });
+    prData = data;
+  } catch (error) {
+    core.setFailed(`Failed to fetch PR details: ${error.message}`);
+    return;
+  }
             }
 
             if (!prData) {
