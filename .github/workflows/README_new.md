@@ -11,7 +11,7 @@ This repository is standardized around the Astro + Solid + Matter.js rebuild. CI
 
 ## Continuous Integration (ci.yml)
 
-**Triggers:** push to `main`, pull requests.  
+**Triggers:** push to `main`, pull requests.
 **Jobs:**
 - **Build & Lint:** `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, upload `dist/`.
 - **Unit Tests:** `pnpm test:unit`, upload coverage to Coveralls (`coverage/lcov.info`). SonarCloud can consume the same reports for quality gates.
