@@ -101,10 +101,12 @@ export function buildLevel(chapterId, engine) {
         platformDef.startY,
         platformDef.endX,
         platformDef.endY,
-        platformDef.width,
-        platformDef.height,
-        platformDef.speed || 2,
-        platformDef.pauseDuration || 1000
+        {
+          width: platformDef.width,
+          height: platformDef.height,
+          speed: platformDef.speed || 2,
+          pauseDuration: platformDef.pauseDuration || 1000,
+        }
       );
       level.movingPlatforms.push(movingPlatform);
       World.add(engine.world, movingPlatform.body);
