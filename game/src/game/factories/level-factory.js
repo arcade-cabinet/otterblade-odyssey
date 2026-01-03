@@ -7,7 +7,7 @@
  * @module factories/level-factory
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { getChapterSpawnPoint, loadChapterManifest } from '../data/chapter-loaders';
 import {
   createPlatform,
@@ -16,7 +16,6 @@ import {
   WaterZone,
 } from '../physics/PhysicsManager.js';
 
-const { World, Bodies } = Matter;
 
 /**
  * Build a complete level from a chapter manifest

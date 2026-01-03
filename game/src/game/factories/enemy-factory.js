@@ -6,11 +6,10 @@
  * @module factories/enemy-factory
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { getChapterEncounters } from '../data/chapter-loaders';
 
-const { Bodies, World } = Matter;
 
 /**
  * Build enemies for a chapter

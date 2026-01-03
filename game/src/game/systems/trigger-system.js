@@ -6,9 +6,8 @@
  * @module systems/trigger-system
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 
-const { Bodies, World } = Matter;
 
 /**
  * Trigger System class

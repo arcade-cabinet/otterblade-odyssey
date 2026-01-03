@@ -4,7 +4,6 @@
  * AGENTS.md compliant: ~200 lines (max 300 target)
  */
 
-import Matter from 'matter-js';
 import {
   createEffect,
   createResource,
@@ -15,6 +14,7 @@ import {
   Show,
 } from 'solid-js';
 import { Vector3 } from 'yuka';
+import { initializeMatter, isMatterInitialized } from './physics/matter-wrapper';
 import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
 import { loadChapterManifest } from './data/chapter-loaders';
@@ -164,14 +164,18 @@ function OtterbladeGameContent() {
     onBossDefeated: () => console.log('Boss defeated!'),
   };
 
-  createEffect(() => {
+  createEffect(async () => {
     // Wait for manifests to load before starting game
     if (!manifestsLoaded() || !gameStarted()) return;
 
-    // Guard against Matter.js not being loaded (bundler timing issue)
-    if (typeof Matter === 'undefined' || !Matter.Engine) {
-      console.error('Matter.js not loaded - check bundler configuration');
-      return;
+    // Initialize Matter.js first (dynamic import)
+    if (!isMatterInitialized()) {
+      try {
+        await initializeMatter();
+      } catch (error) {
+        console.error('Failed to initialize Matter.js:', error);
+        return;
+      }
     }
 
     const canvas = canvasRef;
