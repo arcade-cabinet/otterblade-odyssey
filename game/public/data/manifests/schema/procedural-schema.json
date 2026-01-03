@@ -296,7 +296,7 @@
             "pollen",
             "smoke",
             "splash",
-            "blood",
+            "damage_particles",
             "magic_trail",
             "custom"
           ]

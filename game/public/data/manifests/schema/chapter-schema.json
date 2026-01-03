@@ -276,7 +276,8 @@
         "y": { "type": "number" },
         "width": { "type": "number" },
         "height": { "type": "number" }
-      }
+      },
+      "required": ["x", "y", "width", "height"]
     },
 
     "npc": {

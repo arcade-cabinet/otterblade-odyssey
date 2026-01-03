@@ -111,11 +111,21 @@
         },
         "validation": {
           "type": "object",
-          "description": "Validation rules for brand compliance",
+          "description": "Validation rules for brand compliance and file requirements",
           "properties": {
             "noHumans": { "type": "boolean" },
             "protagonistIsOtter": { "type": "boolean" },
-            "warmPalette": { "type": "boolean" }
+            "warmPalette": { "type": "boolean" },
+            "minFileSize": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Minimum file size in bytes"
+            },
+            "maxFileSize": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Maximum file size in bytes"
+            }
           }
         },
         "variants": {

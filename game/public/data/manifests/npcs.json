@@ -29,7 +29,7 @@
       "description": "The heart of the Hearthhold. Small in stature, mighty in spirit. Many heroes have come from mousefolk.",
       "physique": "Small, nimble, round ears, long tail",
       "personality": ["brave", "kind", "resourceful", "humble"],
-      "roles": ["abbeydweller", "healer", "scribe", "warrior"],
+      "roles": ["hearthholddweller", "healer", "scribe", "warrior"],
       "colors": {
         "fur": ["#8B7355", "#9C8465", "#A69076"]
       }
