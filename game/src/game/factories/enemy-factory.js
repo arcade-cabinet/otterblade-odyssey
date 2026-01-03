@@ -8,7 +8,7 @@
 
 import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
-import { getChapterEncounters } from '../data/chapter-loaders';
+import { getChapterManifestSync, getEnemiesManifestSync } from '../../../ddl/loader';
 
 
 /**
@@ -27,7 +27,9 @@ export function buildEnemies(chapterId, engine) {
     throw new Error('Invalid Matter.js engine');
   }
 
-  const encounterDefs = getChapterEncounters(chapterId);
+  // Load chapter manifest and extract encounters
+  const manifest = getChapterManifestSync(chapterId);
+  const encounterDefs = manifest.encounters || [];
   const enemies = [];
 
   for (const encounterDef of encounterDefs) {
@@ -118,10 +120,33 @@ export function createEnemy(enemyDef, engine) {
 }
 
 /**
- * Get enemy stats by type
+ * Get enemy stats by type from DDL enemies manifest
  * @private
  */
 function getEnemyStats(enemyType) {
+  // Try to load from DDL first
+  try {
+    const enemiesManifest = getEnemiesManifestSync();
+    const enemyData = enemiesManifest.enemies?.find(e => e.type.toLowerCase() === enemyType.toLowerCase());
+    
+    if (enemyData) {
+      return {
+        width: enemyData.size?.width || 28,
+        height: enemyData.size?.height || 40,
+        health: enemyData.stats?.health || 15,
+        damage: enemyData.stats?.damage || 5,
+        speed: enemyData.stats?.speed || 1.5,
+        alertRadius: enemyData.behavior?.detectionRadius || 200,
+        attackRange: enemyData.behavior?.attackRange || 30,
+        defaultBehavior: enemyData.behavior?.defaultState || 'patrol',
+        defaultLoot: enemyData.loot || [{ item: 'shard', chance: 0.5, amount: 1 }],
+      };
+    }
+  } catch (err) {
+    console.warn(`[EnemyFactory] Could not load enemy stats from DDL: ${err.message}`);
+  }
+
+  // Fallback to hardcoded stats
   const stats = {
     galeborn: {
       width: 28,

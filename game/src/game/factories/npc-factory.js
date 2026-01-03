@@ -7,7 +7,7 @@
  */
 
 import { Vector3 } from 'yuka';
-import { getChapterNPCs } from '../data/chapter-loaders';
+import { getChapterManifestSync, getNPCsManifestSync } from '../../../ddl/loader';
 
 /**
  * Build NPCs for a chapter
@@ -21,7 +21,9 @@ export function buildNPCs(chapterId, gameState = {}) {
     throw new Error(`Invalid chapter ID: ${chapterId}`);
   }
 
-  const npcDefs = getChapterNPCs(chapterId);
+  // Load chapter manifest and extract NPCs
+  const manifest = getChapterManifestSync(chapterId);
+  const npcDefs = manifest.npcs || [];
   const npcs = [];
 
   for (const npcDef of npcDefs) {
