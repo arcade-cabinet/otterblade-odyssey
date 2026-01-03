@@ -27,5 +27,14 @@ export default defineConfig({
 				'@data': dataPath,
 			},
 		},
+		// Pre-bundle CommonJS libraries for browser
+		optimizeDeps: {
+			include: ['matter-js', 'howler', 'yuka', 'nipplejs'],
+		},
+		// Exclude CommonJS libraries from SSR analysis
+		ssr: {
+			noExternal: [],
+			external: ['matter-js', 'howler'],
+		},
 	},
 });
