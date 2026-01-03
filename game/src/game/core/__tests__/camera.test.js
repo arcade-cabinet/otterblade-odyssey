@@ -122,14 +122,14 @@ describe('Camera', () => {
       // Early shake (50ms into 100ms duration, decay = 0.5)
       camera.shakeTime = 0;
       camera.follow(target, 50);
-      const earlyDecay = 1 - (50 / 100); // 0.5
+      const earlyDecay = 1 - 50 / 100; // 0.5
 
       // Late shake (90ms into 100ms duration, decay = 0.1)
       camera.x = 0;
       camera.y = 0;
       camera.shakeTime = 0;
       camera.follow(target, 90);
-      const lateDecay = 1 - (90 / 100); // 0.1
+      const lateDecay = 1 - 90 / 100; // 0.1
 
       // Restore Math.random
       Math.random = originalRandom;

@@ -41,7 +41,10 @@ export default defineConfig({
       reportsDirectory: './coverage',
     },
     // Test both legacy TypeScript and new JavaScript code
-    include: ['tests/**/*.{test,spec}.{ts,tsx,js,jsx}', 'game/src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    include: [
+      'tests/**/*.{test,spec}.{ts,tsx,js,jsx}',
+      'game/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+    ],
     exclude: [
       'node_modules',
       'dist',

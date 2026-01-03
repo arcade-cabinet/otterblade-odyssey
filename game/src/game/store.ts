@@ -577,7 +577,7 @@ export const useStore = create<GameState>()(
       }),
 
       // Hydration callback
-      onRehydrateStorage: () => (state, error) => {
+      onRehydrateStorage: () => (_state, error) => {
         if (error) {
           console.error('[Store] Failed to rehydrate state:', error);
         }
