@@ -59,6 +59,11 @@ jobs:
         with:
           github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
             const prNumber = Number(process.env.PR_NUMBER);
             const owner = context.repo.owner;
             const repo = context.repo.repo;
