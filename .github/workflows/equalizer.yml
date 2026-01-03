@@ -133,7 +133,7 @@ jobs:
             const defaultStrategy = config.pr_management?.default_strategy?.strategy || 'autonomous';
             const headRef = process.env.HEAD_REF;
             const wildcardToRegex = (input) => {
-              const escaped = input.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+              const escaped = input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
               return new RegExp(`^${escaped.replace(/\*/g, '.*')}$`);
             };
 
