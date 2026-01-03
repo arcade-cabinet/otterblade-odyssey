@@ -320,8 +320,9 @@ jobs:
         with:
           github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
-            const count = ${{ needs.list-prs.outputs.count }};
-            const prs = ${{ needs.list-prs.outputs.prs || '[]' }};
+            const count = parseInt('${{ needs.list-prs.outputs.count }}') || 0;
+            const prsJson = '${{ needs.list-prs.outputs.prs }}' || '[]';
+            const prs = JSON.parse(prsJson);
             
             let summary = `## 🔄 Auto-Update Summary\n\n`;
             
