@@ -120,7 +120,7 @@ jobs:
         id: failures
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
-          github-token: ${{ secrets.CI_GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           script: |
             const { data } = await github.rest.actions.listJobsForWorkflowRun({
               owner: context.repo.owner,
