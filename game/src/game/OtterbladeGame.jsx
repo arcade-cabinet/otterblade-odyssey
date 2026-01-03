@@ -37,35 +37,84 @@ import { audioManager } from './systems/AudioManager';
 import { setupCollisionHandlers } from './systems/collision';
 import { inputManager } from './systems/InputManager';
 
-const { World, Runner, Engine } = Matter;
-
 /**
- * Preload all game manifests using the DDL loader.
+ * Preload all game manifests using the DDL loader with progress tracking.
  * This runs once at game startup to fetch all JSON data.
  */
-async function preloadGameManifests() {
+async function preloadGameManifests(onProgress) {
   try {
     // Dynamic import to avoid SSR issues
-    const { preloadManifests } = await import('../ddl/loader');
+    const {
+      loadChapterManifest,
+      loadEnemiesManifest,
+      loadNPCsManifest,
+      loadSpritesManifest,
+      loadCinematicsManifest,
+      loadSoundsManifest,
+      loadEffectsManifest,
+      loadItemsManifest,
+      loadScenesManifest,
+      loadChapterPlatesManifest,
+    } = await import('../ddl/loader');
 
-    // Preload all manifests in parallel
-    await preloadManifests({
-      manifestTypes: [
-        'chapters',
-        'enemies',
-        'npcs',
-        'sprites',
-        'cinematics',
-        'sounds',
-        'effects',
-        'items',
-        'scenes',
-        'chapter-plates',
-      ],
-      logProgress: true,
-      throwOnError: false, // Don't fail on individual manifest errors
-    });
+    const totalSteps = 19; // 10 chapters + 9 manifests
+    let completed = 0;
 
+    const updateProgress = () => {
+      completed++;
+      const percent = Math.floor((completed / totalSteps) * 100);
+      onProgress?.(percent);
+      console.log(`[DDL] Progress: ${percent}% (${completed}/${totalSteps})`);
+    };
+
+    // Load all manifests in parallel with progress tracking
+    const loaders = [];
+
+    // Load 10 chapters
+    for (let i = 0; i <= 9; i++) {
+      loaders.push(
+        loadChapterManifest(i)
+          .then(() => {
+            updateProgress();
+            console.log(`[DDL] ✓ Chapter ${i} loaded`);
+          })
+          .catch((error) => {
+            console.warn(`[DDL] ✗ Failed to load chapter ${i}:`, error.message);
+            updateProgress(); // Still count as progress even if failed
+          })
+      );
+    }
+
+    // Load entity and asset manifests
+    const manifestLoaders = [
+      { loader: loadEnemiesManifest, name: 'Enemies' },
+      { loader: loadNPCsManifest, name: 'NPCs' },
+      { loader: loadSpritesManifest, name: 'Sprites' },
+      { loader: loadCinematicsManifest, name: 'Cinematics' },
+      { loader: loadSoundsManifest, name: 'Sounds' },
+      { loader: loadEffectsManifest, name: 'Effects' },
+      { loader: loadItemsManifest, name: 'Items' },
+      { loader: loadScenesManifest, name: 'Scenes' },
+      { loader: loadChapterPlatesManifest, name: 'Chapter Plates' },
+    ];
+
+    for (const { loader, name } of manifestLoaders) {
+      loaders.push(
+        loader()
+          .then(() => {
+            updateProgress();
+            console.log(`[DDL] ✓ ${name} loaded`);
+          })
+          .catch((error) => {
+            console.warn(`[DDL] ✗ Failed to load ${name}:`, error.message);
+            updateProgress();
+          })
+      );
+    }
+
+    await Promise.all(loaders);
+
+    console.log('[DDL] Preload complete');
     return { success: true };
   } catch (error) {
     console.error('[Game] Manifest preload failed:', error);
@@ -76,8 +125,11 @@ async function preloadGameManifests() {
 function OtterbladeGameContent() {
   let canvasRef;
 
-  // Preload manifests using createResource
-  const [manifestsLoaded] = createResource(preloadGameManifests);
+  // Track loading progress
+  const [loadingProgress, setLoadingProgress] = createSignal(0);
+
+  // Preload manifests using createResource with progress tracking
+  const [manifestsLoaded] = createResource(() => preloadGameManifests(setLoadingProgress));
 
   // Game state signals
   const [currentChapter] = createSignal(0);
@@ -138,11 +190,11 @@ function OtterbladeGameContent() {
 
     // Create physics engine
     const engine = createPhysicsEngine();
-    const runner = Runner.create();
+    const runner = Matter.Runner.create();
 
     // Create player
     const player = createFinnBody(spawnPoint.x, spawnPoint.y);
-    World.add(engine.world, player);
+    Matter.World.add(engine.world, player);
 
     // Create player controller
     const playerController = new PlayerController(player, engine, gameStateObj, audioManager);
@@ -302,8 +354,8 @@ function OtterbladeGameContent() {
       for (const sequence of timingSequences) {
         sequence?.destroy?.();
       }
-      Engine.clear(engine);
-      World.clear(engine.world, false);
+      Matter.Engine.clear(engine);
+      Matter.World.clear(engine.world, false);
       enemyBodyMap.clear();
     });
   });
@@ -312,7 +364,7 @@ function OtterbladeGameContent() {
     <>
       {/* Loading Screen - Show while manifests are loading */}
       <Show when={manifestsLoaded.loading}>
-        <LoadingScreen progress={50} status="Loading game manifests..." />
+        <LoadingScreen progress={loadingProgress()} status="Loading game manifests..." />
       </Show>
 
       {/* Error Screen - Show if manifest loading failed */}

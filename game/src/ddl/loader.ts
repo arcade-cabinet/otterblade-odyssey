@@ -15,83 +15,34 @@
  */
 
 import { fromError } from 'zod-validation-error';
-import type { ChapterManifest } from '../game/data/manifest-schemas';
-import { ChapterManifestSchema } from '../game/data/manifest-schemas';
+import type {
+  ChapterManifest,
+  EnemiesManifest,
+  NPCsManifest,
+  SpritesManifest,
+  CinematicsManifest,
+  SoundsManifest,
+  EffectsManifest,
+  ItemsManifest,
+  ScenesManifest,
+  ChapterPlatesManifest,
+} from '../game/data/manifest-schemas';
+import {
+  ChapterManifestSchema,
+  EnemiesManifestSchema,
+  NPCsManifestSchema,
+  SpritesManifestSchema,
+  CinematicsManifestSchema,
+  SoundsManifestSchema,
+  EffectsManifestSchema,
+  ItemsManifestSchema,
+  ScenesManifestSchema,
+  ChapterPlatesManifestSchema,
+} from '../game/data/manifest-schemas';
 
 // ============================================================================
 // TYPES
 // ============================================================================
-
-/** Generic manifest for non-chapter types */
-export interface GenericManifest {
-  $schema?: string;
-  [key: string]: unknown;
-}
-
-/** Enemies manifest structure */
-export interface EnemiesManifest extends GenericManifest {
-  category: 'enemies';
-  assets: Array<{
-    id: string;
-    name: string;
-    filename: string;
-    status: string;
-    type: string;
-    config: unknown;
-    prompt: unknown;
-  }>;
-}
-
-/** NPCs manifest structure */
-export interface NPCsManifest extends GenericManifest {
-  category: 'npcs';
-  version: string;
-  description: string;
-  species: Record<string, unknown>;
-  npcs: Array<unknown>;
-}
-
-/** Sprites manifest structure */
-export interface SpritesManifest extends GenericManifest {
-  category: 'sprites';
-  assets: Array<unknown>;
-}
-
-/** Cinematics manifest structure */
-export interface CinematicsManifest extends GenericManifest {
-  category: 'cinematics';
-  assets: Array<unknown>;
-}
-
-/** Sounds manifest structure */
-export interface SoundsManifest extends GenericManifest {
-  category: 'sounds';
-  assets: Array<unknown>;
-}
-
-/** Effects manifest structure */
-export interface EffectsManifest extends GenericManifest {
-  category: 'effects';
-  assets: Array<unknown>;
-}
-
-/** Items manifest structure */
-export interface ItemsManifest extends GenericManifest {
-  category: 'items';
-  assets: Array<unknown>;
-}
-
-/** Scenes manifest structure */
-export interface ScenesManifest extends GenericManifest {
-  category: 'scenes';
-  assets: Array<unknown>;
-}
-
-/** Chapter plates manifest structure */
-export interface ChapterPlatesManifest extends GenericManifest {
-  category: 'chapter-plates';
-  assets: Array<unknown>;
-}
 
 /** Preload configuration */
 export interface PreloadOptions {
@@ -191,6 +142,23 @@ async function loadManifest(path: string): Promise<unknown> {
 // ============================================================================
 
 /**
+ * Mapping of chapter IDs to manifest filenames.
+ * Centralized to avoid duplication and ensure consistency.
+ */
+const CHAPTER_FILENAMES: Record<number, string> = {
+  0: 'chapters/chapter-0-the-calling.json',
+  1: 'chapters/chapter-1-river-path.json',
+  2: 'chapters/chapter-2-gatehouse.json',
+  3: 'chapters/chapter-3-great-hall.json',
+  4: 'chapters/chapter-4-archives.json',
+  5: 'chapters/chapter-5-deep-cellars.json',
+  6: 'chapters/chapter-6-kitchen-gardens.json',
+  7: 'chapters/chapter-7-bell-tower.json',
+  8: 'chapters/chapter-8-storms-edge.json',
+  9: 'chapters/chapter-9-new-dawn.json',
+};
+
+/**
  * Loads and validates a chapter manifest by ID.
  * Results are cached after first load.
  *
@@ -209,21 +177,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
     throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
   }
 
-  // Map chapter ID to filename
-  const chapterFiles: Record<number, string> = {
-    0: 'chapters/chapter-0-the-calling.json',
-    1: 'chapters/chapter-1-river-path.json',
-    2: 'chapters/chapter-2-gatehouse.json',
-    3: 'chapters/chapter-3-great-hall.json',
-    4: 'chapters/chapter-4-archives.json',
-    5: 'chapters/chapter-5-deep-cellars.json',
-    6: 'chapters/chapter-6-kitchen-gardens.json',
-    7: 'chapters/chapter-7-bell-tower.json',
-    8: 'chapters/chapter-8-storms-edge.json',
-    9: 'chapters/chapter-9-new-dawn.json',
-  };
-
-  const path = chapterFiles[chapterId];
+  const path = CHAPTER_FILENAMES[chapterId];
   if (!path) {
     throw new Error(`No manifest file found for chapter ${chapterId}`);
   }
@@ -250,22 +204,9 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
  * @throws Error if chapter not in cache
  */
 export function getChapterManifestSync(chapterId: number): ChapterManifest {
-  const chapterFiles: Record<number, string> = {
-    0: 'chapters/chapter-0-the-calling.json',
-    1: 'chapters/chapter-1-river-path.json',
-    2: 'chapters/chapter-2-gatehouse.json',
-    3: 'chapters/chapter-3-great-hall.json',
-    4: 'chapters/chapter-4-archives.json',
-    5: 'chapters/chapter-5-deep-cellars.json',
-    6: 'chapters/chapter-6-kitchen-gardens.json',
-    7: 'chapters/chapter-7-bell-tower.json',
-    8: 'chapters/chapter-8-storms-edge.json',
-    9: 'chapters/chapter-9-new-dawn.json',
-  };
-
-  const path = chapterFiles[chapterId];
+  const path = CHAPTER_FILENAMES[chapterId];
   if (!path) {
-    throw new Error(`Invalid chapter ID: ${chapterId}`);
+    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
   }
 
   if (!manifestCache.has(path)) {
@@ -274,7 +215,7 @@ export function getChapterManifestSync(chapterId: number): ChapterManifest {
     );
   }
 
-  return manifestCache.get(path);
+  return manifestCache.get(path) as ChapterManifest;
 }
 
 // ============================================================================
@@ -288,8 +229,14 @@ export function getChapterManifestSync(chapterId: number): ChapterManifest {
  */
 export async function loadEnemiesManifest(): Promise<EnemiesManifest> {
   const data = await loadManifest('enemies.json');
-  // TODO: Add Zod schema validation when schema is defined
-  return data as EnemiesManifest;
+
+  const result = EnemiesManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid enemies manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -309,8 +256,14 @@ export function getEnemiesManifestSync(): EnemiesManifest {
  */
 export async function loadNPCsManifest(): Promise<NPCsManifest> {
   const data = await loadManifest('npcs.json');
-  // TODO: Add Zod schema validation when schema is defined
-  return data as NPCsManifest;
+
+  const result = NPCsManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid NPCs manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -334,7 +287,14 @@ export function getNPCsManifestSync(): NPCsManifest {
  */
 export async function loadSpritesManifest(): Promise<SpritesManifest> {
   const data = await loadManifest('sprites.json');
-  return data as SpritesManifest;
+
+  const result = SpritesManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid sprites manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -354,7 +314,14 @@ export function getSpritesManifestSync(): SpritesManifest {
  */
 export async function loadCinematicsManifest(): Promise<CinematicsManifest> {
   const data = await loadManifest('cinematics.json');
-  return data as CinematicsManifest;
+
+  const result = CinematicsManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid cinematics manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -374,7 +341,14 @@ export function getCinematicsManifestSync(): CinematicsManifest {
  */
 export async function loadSoundsManifest(): Promise<SoundsManifest> {
   const data = await loadManifest('sounds.json');
-  return data as SoundsManifest;
+
+  const result = SoundsManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid sounds manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -394,7 +368,14 @@ export function getSoundsManifestSync(): SoundsManifest {
  */
 export async function loadEffectsManifest(): Promise<EffectsManifest> {
   const data = await loadManifest('effects.json');
-  return data as EffectsManifest;
+
+  const result = EffectsManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid effects manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -414,7 +395,14 @@ export function getEffectsManifestSync(): EffectsManifest {
  */
 export async function loadItemsManifest(): Promise<ItemsManifest> {
   const data = await loadManifest('items.json');
-  return data as ItemsManifest;
+
+  const result = ItemsManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid items manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -434,7 +422,14 @@ export function getItemsManifestSync(): ItemsManifest {
  */
 export async function loadScenesManifest(): Promise<ScenesManifest> {
   const data = await loadManifest('scenes.json');
-  return data as ScenesManifest;
+
+  const result = ScenesManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid scenes manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
@@ -454,7 +449,14 @@ export function getScenesManifestSync(): ScenesManifest {
  */
 export async function loadChapterPlatesManifest(): Promise<ChapterPlatesManifest> {
   const data = await loadManifest('chapter-plates.json');
-  return data as ChapterPlatesManifest;
+
+  const result = ChapterPlatesManifestSchema.safeParse(data);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Invalid chapter plates manifest: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 /**
