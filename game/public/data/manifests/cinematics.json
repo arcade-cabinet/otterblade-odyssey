@@ -13,6 +13,7 @@
   },
   "assets": [
     {
+      "type": "cinematic",
       "id": "intro_cinematic",
       "name": "Opening Cinematic - The Calling",
       "filename": "intro_cinematic_otters_journey.mp4",
@@ -55,6 +56,8 @@
       }
     },
     {
+      "type": "cinematic",
+      "type": "cinematic",
       "id": "chapter_1_arrival",
       "name": "Chapter 1 - First Sight of Willowmere",
       "filename": "chapter_1_arrival_cinematic.mp4",
@@ -82,6 +85,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_2_threshold",
       "name": "Chapter 2 - Crossing the Threshold",
       "filename": "chapter_2_threshold_cinematic.mp4",
@@ -116,6 +120,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_3_everember",
       "name": "Chapter 3 - The Everember",
       "filename": "chapter_3_everember_cinematic.mp4",
@@ -151,6 +156,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "meet_elder_badger",
       "name": "Meeting the Elder Badger",
       "filename": "meet_elder_badger_cinematic.mp4",
@@ -183,6 +189,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_4_archives",
       "name": "Chapter 4 - The Ancient Map",
       "filename": "chapter_4_archives_cinematic.mp4",
@@ -215,6 +222,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_5_descent",
       "name": "Chapter 5 - Into the Depths",
       "filename": "chapter_5_descent_cinematic.mp4",
@@ -245,6 +253,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_6_rally",
       "name": "Chapter 6 - Rally the Defenders",
       "filename": "chapter_6_rally_cinematic.mp4",
@@ -279,6 +288,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_7_ascent",
       "name": "Chapter 7 - The Bell Tower Climb",
       "filename": "chapter_7_ascent_cinematic.mp4",
@@ -308,6 +318,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "boss_champion_intro",
       "name": "Boss Intro - Galeborn Champion",
       "filename": "boss_champion_intro_cinematic.mp4",
@@ -340,6 +351,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "boss_champion_defeat",
       "name": "Boss Defeat - Galeborn Champion",
       "filename": "boss_champion_defeat_cinematic.mp4",
@@ -371,6 +383,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "chapter_8_confrontation",
       "name": "Chapter 8 - Facing Zephyros",
       "filename": "chapter_8_confrontation_cinematic.mp4",
@@ -407,6 +420,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "boss_zephyros_phase1",
       "name": "Boss Phase 1 - Zephyros Ground Combat",
       "filename": "boss_zephyros_phase1_cinematic.mp4",
@@ -432,6 +446,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "boss_zephyros_phase2",
       "name": "Boss Phase 2 - Zephyros Takes Flight",
       "filename": "boss_zephyros_phase2_cinematic.mp4",
@@ -458,6 +473,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "boss_zephyros_defeat",
       "name": "Boss Defeat - Zephyros Falls",
       "filename": "boss_zephyros_defeat_cinematic.mp4",
@@ -488,6 +504,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "outro_cinematic",
       "name": "Ending Cinematic - The New Dawn",
       "filename": "outro_victory_sunrise_scene.mp4",
@@ -530,6 +547,7 @@
       }
     },
     {
+      "type": "cinematic",
       "id": "credits_sequence",
       "name": "Credits - Storybook Montage",
       "filename": "credits_storybook_montage.mp4",
