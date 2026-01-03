@@ -59,11 +59,6 @@ jobs:
         with:
           github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
-        env:
-          PR_NUMBER: ${{ inputs.pr_number }}
-        with:
-          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          script: |
             const prNumber = Number(process.env.PR_NUMBER);
             const owner = context.repo.owner;
             const repo = context.repo.repo;
@@ -124,13 +119,6 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-        env:
-          PR_NUMBER: ${{ inputs.pr_number }}
-        with:
-          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const path = require('path');
             const prNumber = Number(process.env.PR_NUMBER);
             const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github/claude-config.json');
             const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -156,21 +144,16 @@ jobs:
             const normalize = (entry) => ({
               author: entry.user?.login,
               body: entry.body || '',
+              created_at: entry.created_at,
+              url: entry.html_url,
+            });
+
             const isFromTrusted = (login) =>
               !!login && trusted.some((id) => login.toLowerCase().includes(id));
 
-            const filterTrustedEntries = (entries) =>
-              entries
-                .filter((entry) => isFromTrusted(entry.user?.login))
-                .map(normalize);
-
             const aiFeedback = [
-              ...filterTrustedEntries(issueComments),
-              ...filterTrustedEntries(prReviews),
-
-            const aiFeedback = [
-              ...issueComments.filter((comment) => trusted.some((id) => comment.user?.login?.toLowerCase().includes(id))).map(normalize),
-              ...prReviews.filter((review) => trusted.some((id) => review.user?.login?.toLowerCase().includes(id))).map(normalize),
+              ...issueComments.filter((comment) => isFromTrusted(comment.user?.login)).map(normalize),
+              ...prReviews.filter((review) => isFromTrusted(review.user?.login)).map(normalize),
             ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             core.setOutput('feedback', JSON.stringify(aiFeedback.slice(0, 15)));
@@ -267,7 +250,7 @@ jobs:
           PR_NUMBER: ${{ inputs.pr_number }}
           PLAN_BODY: ${{ steps.plan.outputs.plan }}
         run: |
-          gh pr comment "$PR_NUMBER" --body "$PLAN_BODY"
+          echo "$PLAN_BODY" | gh pr comment "$PR_NUMBER" --body-file -
 
       - name: Ensure tracking issue exists
         env:
@@ -275,18 +258,21 @@ jobs:
           PLAN_BODY: ${{ steps.plan.outputs.plan }}
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ github.repository }}
-          if ! gh api repos/"$REPO"/labels/equalizer-plan >/dev/null 2>&1; then
-            gh api -X POST repos/"$REPO"/labels \
+        run: |
+          TITLE="Equalizer: PR #${PR_NUMBER//[^0-9]/}"
 
           # Ensure tracking label exists (idempotent)
           if ! gh api repos/$REPO/labels/equalizer-plan >/dev/null 2>&1; then
             gh api -X POST repos/$REPO/labels \
               -f name='equalizer-plan' \
               -f color='6A5ACD' \
-              -f description='Auto-managed Equalizer planning tracker' >/dev/null
+              -f description='Auto-managed Equalizer planning tracker' 2>&1 | tee -a equalizer_label_errors.log >/dev/null || true
           fi
 
-          EXISTING=$(gh issue list --repo "$REPO" --search "\"$TITLE\" in:title" --json number --jq '.[0].number' || true)
+          EXISTING=$(gh issue list --repo "$REPO" \
+            --label equalizer-plan \
+            --search "\"$TITLE\" in:title" \
+            --json number --jq '.[0].number' || true)
 
           BODY_CONTENT="${PLAN_BODY}
 
