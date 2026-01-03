@@ -1,8 +1,169 @@
 # Workflow Orchestration Guide
 
-## AI Review Pipeline Architecture
+## 🤖 Claude PR Manager System (NEW)
 
-The Otterblade Odyssey repository uses a tiered AI review system that ensures efficient and effective code review:
+**The Otterblade Odyssey repository now uses Claude as the central PR manager** that orchestrates all AI agent feedback and manages the PR lifecycle.
+
+### Architecture Overview
+
+```
+PR Opened
+    ↓
+Claude Initial Review (claude-review.yml)
+    ↓
+AI Agents Post Feedback (CodeQL, CodeRabbit, CI failures, etc.)
+    ↓
+Claude Auto-Heal (claude-autoheal.yml)
+    ↓
+Claude PR Manager (claude-pr-manager.yml)
+    ↓
+Approval & Auto-Merge
+```
+
+### Core Workflows
+
+#### 1. Claude PR Manager (`.github/workflows/claude-pr-manager.yml`)
+**The central orchestrator** for all PRs.
+
+**Triggers:**
+- PR opened, synchronized, reopened, ready for review
+- Issue comments on PRs
+- PR reviews submitted
+- PR review comments
+
+**Modes:**
+- **Collaborative Mode** (for `copilot/*` and `jules/*` branches):
+  - Claude coordinates via comments
+  - Tags the creating agent (@copilot or @jules)
+  - Does NOT make direct code changes
+  - Synthesizes all AI feedback into actionable items
+  - Approves only when agent confirms fixes
+  
+- **Autonomous Mode** (for all other PRs):
+  - Claude has full authority to make changes
+  - Directly fixes issues found by AI agents
+  - Continuously iterates until all checks pass
+  - Approves and enables auto-merge when ready
+
+**Model:** Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+- 73% SWE-bench score (matches Sonnet 4)
+- $1/$5 per million tokens (5x cheaper than Opus 4.5)
+- 2x faster than Sonnet
+
+#### 2. Claude Auto-Heal (`.github/workflows/claude-autoheal.yml`)
+**Continuous healing** when AI agents post feedback.
+
+**Triggers:**
+- Issue comments on PRs (from CodeRabbit, Gemini, etc.)
+- PR reviews submitted
+- Check runs fail
+- Workflow runs fail
+
+**Actions:**
+- Detects AI agent feedback automatically
+- Determines PR strategy (collaborative vs autonomous)
+- Responds appropriately:
+  - **Collaborative**: Posts synthesized feedback for agent
+  - **Autonomous**: Implements fixes directly
+
+**Model:** Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+
+#### 3. Claude Initial Review (`.github/workflows/claude-review.yml`)
+**Fast initial review** when PR is opened.
+
+**Triggers:**
+- PR opened (not draft)
+
+**Focus Areas:**
+- Code quality & best practices
+- Security vulnerabilities
+- Performance implications
+- Test coverage
+- Documentation completeness
+
+**Output:**
+- Inline comments for specific issues
+- Summary comment with overall assessment
+
+**Model:** Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+
+### Configuration
+
+**File:** `.github/claude-config.json`
+
+Key settings:
+- **Models:** All workflows use Claude Haiku 4.5 for optimal cost/performance
+- **Branch strategies:** Collaborative for `copilot/*` and `jules/*`, autonomous for others
+- **Auto-merge:** Enabled after all success criteria met
+- **Healing:** Continuous, max 50 iterations, 45min timeout
+- **Trusted AI agents:** CodeQL, CodeRabbit, Gemini, Copilot, Jules, Dependabot, Renovate
+
+### Required Secrets
+
+To enable Claude PR Manager, configure these repository secrets:
+
+1. **`ANTHROPIC_API_KEY`** (Required)
+   - Your Anthropic API key for Claude access
+   - Get from: https://console.anthropic.com/
+   - Permissions: All workflows need this
+
+2. **`CI_GITHUB_TOKEN`** (Required)
+   - Synced Personal Access Token with enhanced permissions
+   - Needed for: Cross-repo operations, enhanced API access, workflow execution
+   - This is a required synced PAT and must be configured
+
+### Success Criteria
+
+Before Claude approves and merges a PR:
+- ✅ All workflows passing (CI, Build, Test)
+- ✅ All AI agent feedback addressed
+- ✅ No security vulnerabilities (Critical or High)
+- ✅ Code quality standards met
+- ✅ No merge conflicts
+
+### Working with Claude PR Manager
+
+#### For GitHub Copilot
+
+When you create PRs on `copilot/*` branches:
+1. Claude reviews and posts initial feedback
+2. Other AI agents may also comment
+3. Claude synthesizes all feedback and tags you: `@copilot`
+4. You address the feedback with new commits
+5. Comment when done: `@claude ready for re-review`
+6. Claude re-reviews and approves when ready
+
+See `.github/copilot-instructions.md` for detailed guidance.
+
+#### For Standard PRs
+
+On non-agent branches, Claude operates autonomously:
+1. Claude reviews the PR
+2. Gathers feedback from all AI agents
+3. Implements fixes directly
+4. Iterates until all criteria met
+5. Approves and enables auto-merge
+
+### Legacy Workflows (Deprecated)
+
+The following workflows have been **removed** and replaced by Claude PR Manager:
+- ~~`ai-curator.yml`~~ → Use Claude PR Manager
+- ~~`ai-delegator.yml`~~ → Use Claude PR Manager
+- ~~`ai-fixer.yml`~~ → Use Claude Auto-Heal
+- ~~`ai-reviewer.yml`~~ → Use Claude Initial Review
+- ~~`autoheal.yml`~~ → Use Claude Auto-Heal
+- ~~`delegator.yml`~~ → Use Claude PR Manager
+
+The following ecosystem workflows remain but **defer to Claude** for PR management:
+- `ecosystem-merge.yml` - Follows Claude's merge decisions
+- `ecosystem-control.yml` - Handles non-PR @cascade commands
+- `ecosystem-fixer.yml` - Legacy, superseded by Claude Auto-Heal
+- `ecosystem-reviewer.yml` - Legacy, superseded by Claude reviews
+- `ecosystem-agents.yml` - Scheduled maintenance (not PR-specific)
+
+---
+
+## AI Review Pipeline Architecture (Legacy - Pre-Claude Manager)
 
 ### Tier 0: Automated Agents (Front-line Triage)
 **Triggers:** PR open, PR sync

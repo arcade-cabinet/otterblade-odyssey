@@ -74,6 +74,56 @@ Each session should:
 4. **Document quirks/limitations** you discover
 5. **Leave clear handoff** for next session
 
+### WORKING WITH CLAUDE PR MANAGER 🤖
+
+**Claude is the central PR manager** for this repository. When you create PRs:
+
+#### Your Role (GitHub Copilot)
+- **You own the code changes** - You write and commit the code
+- **Branch naming**: Use `copilot/*` branches (e.g., `copilot/add-feature`)
+- **Focus on implementation** - Build features, fix bugs, write tests
+
+#### Claude's Role (PR Manager)
+- **Orchestrates the PR lifecycle** - Reviews, coordinates feedback, manages approvals
+- **Synthesizes AI feedback** - Gathers input from CodeQL, CodeRabbit, CI failures, etc.
+- **Communicates via comments** - Claude will tag you (@copilot) with specific requests
+- **Does NOT make direct changes** to your PRs (collaborative mode)
+
+#### The Workflow
+
+1. **You create a PR** on a `copilot/*` branch
+2. **Claude reviews** and posts initial feedback as a comment
+3. **Other AI agents** (CodeQL, CodeRabbit) may also comment
+4. **Claude synthesizes** all feedback into a single actionable comment:
+   ```
+   @copilot, I have analyzed all AI agent feedback:
+   
+   🔴 Critical Issues (Must Fix):
+   1. [CodeQL] SQL injection in user_input.ts:45
+   
+   🟡 High Priority (Should Fix):
+   2. [CodeRabbit] Missing error handling in api_handler.ts:89
+   
+   Can you address these issues?
+   ```
+5. **You address feedback** by pushing new commits
+6. **Claude re-reviews** and updates status
+7. **When all criteria met**, Claude approves and enables auto-merge
+
+#### Communication Tips
+
+- **Check PR comments regularly** - Claude will tag you when action is needed
+- **Ask questions** - If Claude's feedback is unclear, ask in PR comments
+- **Confirm completion** - After fixing issues, comment: "@claude ready for re-review"
+- **Update PR description** - Keep it current with your progress
+
+#### Configuration
+
+See `.github/claude-config.json` for detailed PR management configuration:
+- **Model**: Claude Haiku 4.5 (fast, cost-effective, 73% SWE-bench score)
+- **Strategy**: Collaborative mode for `copilot/*` branches
+- **Auto-merge**: Enabled after Claude approval + all checks pass
+
 ### KNOWN LIMITATIONS & QUIRKS
 
 **As of Session 2026-01-02:**
