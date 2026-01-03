@@ -29,13 +29,18 @@ import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './
 let ddlLoader: typeof import('../../ddl/loader') | null = null;
 
 // Kick off dynamic import without using top-level await to maintain SSR/build compatibility.
-// When the import resolves, we cache the loader module; until then we fall back to static data.
+// NOTE: This import runs asynchronously at module initialization. Calls to
+// `loadChapterManifest(chapterId)` that occur before this import resolves will
+// intentionally fall back to static imports for that invocation. Once the import
+// completes, subsequent `loadChapterManifest` calls may use the DDL loader cache
+// via `ddlLoader.getChapterManifestSync`. This timing-dependent behavior is
+// expected and is part of the compatibility bridge between static and DDL loading.
 import('../../ddl/loader')
   .then((module) => {
     ddlLoader = module;
   })
   .catch(() => {
-    // DDL loader not available (SSR/build context) - will use static imports
+    // DDL loader not available (e.g. SSR/build context) - will always use static imports
     console.log('[chapter-loaders] Using static imports (SSR/build mode)');
   });
 /** All chapter data indexed by ID */
