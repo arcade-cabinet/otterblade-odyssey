@@ -102,9 +102,7 @@ export function buildLevel(chapterId, engine) {
         platformDef.endX,
         platformDef.endY,
         platformDef.width,
-        platformDef.height,
-        platformDef.speed || 2,
-        platformDef.pauseDuration || 1000
+        platformDef.height
       );
       level.movingPlatforms.push(movingPlatform);
       World.add(engine.world, movingPlatform.body);
