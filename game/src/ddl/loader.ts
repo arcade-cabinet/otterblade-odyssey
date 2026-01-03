@@ -25,7 +25,7 @@ import { ChapterManifestSchema } from '../game/data/manifest-schemas';
 /** Generic manifest for non-chapter types */
 export interface GenericManifest {
   $schema?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /** Enemies manifest structure */
@@ -37,8 +37,8 @@ export interface EnemiesManifest extends GenericManifest {
     filename: string;
     status: string;
     type: string;
-    config: any;
-    prompt: any;
+    config: unknown;
+    prompt: unknown;
   }>;
 }
 
@@ -47,50 +47,50 @@ export interface NPCsManifest extends GenericManifest {
   category: 'npcs';
   version: string;
   description: string;
-  species: Record<string, any>;
-  npcs: Array<any>;
+  species: Record<string, unknown>;
+  npcs: Array<unknown>;
 }
 
 /** Sprites manifest structure */
 export interface SpritesManifest extends GenericManifest {
   category: 'sprites';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Cinematics manifest structure */
 export interface CinematicsManifest extends GenericManifest {
   category: 'cinematics';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Sounds manifest structure */
 export interface SoundsManifest extends GenericManifest {
   category: 'sounds';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Effects manifest structure */
 export interface EffectsManifest extends GenericManifest {
   category: 'effects';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Items manifest structure */
 export interface ItemsManifest extends GenericManifest {
   category: 'items';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Scenes manifest structure */
 export interface ScenesManifest extends GenericManifest {
   category: 'scenes';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Chapter plates manifest structure */
 export interface ChapterPlatesManifest extends GenericManifest {
   category: 'chapter-plates';
-  assets: Array<any>;
+  assets: Array<unknown>;
 }
 
 /** Preload configuration */
@@ -119,7 +119,7 @@ export interface PreloadOptions {
 // ============================================================================
 
 /** Cache for loaded and validated manifests */
-const manifestCache = new Map<string, any>();
+const manifestCache = new Map<string, unknown>();
 
 /**
  * Clears the manifest cache.
@@ -154,7 +154,7 @@ export function getCacheStats(): {
  * @returns Parsed JSON data
  * @throws Error if fetch fails or JSON is invalid
  */
-async function loadManifest(path: string): Promise<any> {
+async function loadManifest(path: string): Promise<unknown> {
   // Check cache first
   if (manifestCache.has(path)) {
     return manifestCache.get(path);
@@ -561,7 +561,7 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
   }
 
   // Preload asset manifests
-  const assetLoaders: Record<string, () => Promise<any>> = {
+  const assetLoaders: Record<string, () => Promise<unknown>> = {
     sprites: loadSpritesManifest,
     cinematics: loadCinematicsManifest,
     sounds: loadSoundsManifest,
@@ -572,7 +572,7 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
   };
 
   for (const [type, loader] of Object.entries(assetLoaders)) {
-    if (manifestTypes.includes(type as any)) {
+    if (manifestTypes.includes(type as PreloadOptions['manifestTypes'][number])) {
       loaders.push(
         loader()
           .then(() => logProgress && console.log(`[DDL] ✓ ${type} loaded`))
