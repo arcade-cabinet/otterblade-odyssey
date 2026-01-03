@@ -4,7 +4,11 @@
   "provider": "openai",
   "model": "gpt-image-1",
   "outputDir": "game/src/assets/images/sprites",
-  "notes": "All enemy assets have status 'pending' and will be generated via the asset generation pipeline. The workflow validates manifests, generates assets using the specified AI provider (OpenAI DALL-E), and updates status to 'approved' upon successful generation. See tests/asset-generation.test.ts for validation.",
+  "notes": [
+    "All enemy assets have status 'pending' and will be generated via the asset generation pipeline.",
+    "The workflow validates manifests, generates assets using the specified AI provider (OpenAI DALL-E), and updates status to 'approved' upon successful generation.",
+    "See tests/asset-generation.test.ts for validation."
+  ],
   "brandGuidance": {
     "faction": "The Galeborn - followers of Zephyros the storm hawk, creatures of cold wind and frost",
     "aesthetic": "Weathered, cold-adapted, practical gear - bone, iron, leather, fur. Cold blue-gray palette.",
