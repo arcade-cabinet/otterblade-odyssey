@@ -13,7 +13,7 @@
  */
 
 import type { Page } from '@playwright/test';
-import type { ChapterManifest } from '../../client/src/game/data/manifest-schemas';
+import type { ChapterManifest } from '../../game/src/game/data/manifest-schemas';
 import { AIPlayer, actionToKeyboard, type PlayerState } from './ai-player';
 import { parseLevel } from './level-parser';
 
@@ -209,7 +209,7 @@ export function generateTestCode(config: PlaythroughConfig): string {
   return `
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../factories/playthrough-factory';
-import chapter${chapter.chapterId}Manifest from '../../client/src/data/manifests/chapters/chapter-${chapter.chapterId}-${chapter.name.toLowerCase().replace(/\s+/g, '-')}.json';
+import chapter${chapter.chapterId}Manifest from '../../game/src/data/manifests/chapters/chapter-${chapter.chapterId}-${chapter.name.toLowerCase().replace(/\s+/g, '-')}.json';
 
 test.describe('Chapter ${chapter.chapterId}: ${chapter.name}', () => {
   test('should complete automated playthrough', async ({ page }) => {

@@ -1,9 +1,8 @@
 import path from 'node:path';
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [],
   test: {
     globals: true,
     environment: 'happy-dom',
@@ -44,39 +43,33 @@ export default defineConfig({
     // Test both legacy TypeScript and new JavaScript code
     include: [
       'tests/**/*.{test,spec}.{ts,tsx,js,jsx}',
-      'client/src/**/*.{test,spec}.{ts,tsx}',
-      'game/src/**/*.{test,spec}.{js,jsx}',
+      'game/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
     ],
-    exclude: ['node_modules', 'dist', 'e2e'],
+    exclude: [
+      'node_modules',
+      'dist',
+      'e2e',
+      'tests/unit/react-components.test.tsx',
+      'tests/unit/ecs.test.ts',
+    ],
     // Handle ESM packages that have directory imports or other Node ESM issues
     server: {
       deps: {
-        inline: [
-          '@react-three/fiber',
-          '@react-three/drei',
-          '@react-three/postprocessing',
-          'three',
-          '@dimforge/rapier2d-compat',
-          'miniplex',
-          'miniplex-react',
-          '@hmans/use-rerender',
-          'matter-js',
-          'yuka',
-        ],
+        inline: ['matter-js', 'yuka'],
       },
     },
     // Mock modules that have ESM issues in test environment
     deps: {
       optimizer: {
         web: {
-          include: ['miniplex-react', 'matter-js'],
+          include: ['matter-js'],
         },
       },
     },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './client/src'),
+      '@': path.resolve(__dirname, './game/src'),
       '@shared': path.resolve(__dirname, './shared'),
       '@game': path.resolve(__dirname, './game/src'),
     },

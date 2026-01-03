@@ -2,7 +2,7 @@ services:
   - type: web
     name: otterblade-odyssey
     runtime: static
-    buildCommand: pnpm install --frozen-lockfile && pnpm build:client
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter game build
     staticPublishPath: ./dist
     pullRequestPreviewsEnabled: true
     headers:

@@ -12,7 +12,7 @@
 
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter0Manifest from '../../client/src/data/manifests/chapters/chapter-0-the-calling.json';
+import chapter0Manifest from '../../game/src/data/manifests/chapters/chapter-0-the-calling.json';
 
 test.describe('Chapter 0: The Calling - Automated Playthrough', () => {
   test.use({

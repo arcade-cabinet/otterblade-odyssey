@@ -40,9 +40,7 @@ export default defineConfig({
 
     // Canvas 2D support for Astro + Solid.js game
     launchOptions: {
-      args: [
-        '--disable-gpu-sandbox',
-      ],
+      args: ['--disable-gpu-sandbox'],
     },
   },
 

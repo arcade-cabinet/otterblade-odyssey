@@ -29,7 +29,7 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 | **Language** | JavaScript (ES2022) | No TypeScript compilation overhead |
 | **Physics** | Matter.js 0.20 | POC-proven, 2D rigid body physics |
 | **Rendering** | Canvas 2D API | Procedural character rendering, parallax |
-| **AI/Pathfinding** | YUKA 0.9 | Enemy AI, steering behaviors, FSM |
+| **AI/Pathfinding** | YUKA 0.7.8 | Enemy AI, steering behaviors, FSM |
 | **State Management** | Zustand 5.x | Game state with localStorage persistence |
 | **Audio** | Howler.js / Tone.js | Spatial audio, music |
 | **Touch Controls** | nipplejs / Custom | Mobile-first touch joystick |
@@ -88,7 +88,7 @@ game/src/                  # Astro + Solid.js game
 └── ui/
     └── styles.css         # Warm Redwall-inspired CSS
 
-client/src/data/
+game/src/data/
 ├── manifests/             # JSON DDL definitions
 │   ├── chapters/          # 10 chapter definitions
 │   ├── schema/            # JSON schemas
@@ -101,7 +101,7 @@ client/src/data/
 
 ## Data Architecture
 
-### Static Content (JSON files in `client/src/data/`)
+### Static Content (JSON files in `game/src/data/`)
 - Legacy chapter definitions → `chapters.json`
 - Biome configurations → `biomes.json`
 - **Chapter manifests** → `manifests/chapters/chapter-*.json` (comprehensive)
@@ -113,7 +113,7 @@ client/src/data/
 ```javascript
 // Load chapter manifests
 export async function loadChapterManifest(chapterId) {
-  const response = await fetch(`../../client/src/data/manifests/chapters/chapter-${chapterId}.json`);
+  const response = await fetch(`../../game/src/data/manifests/chapters/chapter-${chapterId}.json`);
   return await response.json();
 }
 
@@ -139,6 +139,10 @@ const boss = await getChapterBoss(8); // Returns Zephyros data
 - **NEVER** import JSON directly - always use async loaders
 - **ALWAYS** validate JSON structure (optional: use JSON Schema)
 - **Keep it simple** - Vanilla JS patterns, no over-engineering
+
+### Documentation Alignment
+- Keep `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` synchronized so agent guidance consistently reflects the Astro + Solid + Matter.js stack and manifest-driven data flow.
+- Update everything under `docs/` whenever architecture, workflows, or stack choices change; contributors should never see conflicting instructions across docs.
 
 ---
 
@@ -357,10 +361,10 @@ function cleanupEnemies() {
 
 ### Manifest-Driven Architecture
 
-All visual assets are managed through JSON manifests in `client/src/data/manifests/`:
+All visual assets are managed through JSON manifests in `game/src/data/manifests/`:
 
 ```
-client/src/data/manifests/
+game/src/data/manifests/
 ├── sprites.json        # Finn + NPCs (OpenAI GPT-Image-1)
 ├── enemies.json        # 6 enemies + Zephyros boss (OpenAI)
 ├── cinematics.json     # 18 story/boss cinematics (Google Veo 3.1)
@@ -371,26 +375,15 @@ client/src/data/manifests/
 └── sounds.json         # 18 ambient, SFX, music (Freesound)
 ```
 
-### dev-tools Package
+### Asset Generation (Enterprise)
 
-The `@otterblade/dev-tools` package provides idempotent asset generation:
+Asset generation uses the `jbcom/control-center` enterprise binary:
+- **Veo 3.1** - Video/cinematic generation
+- **Imagen 3** - Image/sprite generation
+- Parallel generation at scale
+- Built-in brand enforcement
 
-```bash
-# Located at: packages/dev-tools/
-
-# Generate all missing assets
-pnpm --filter @otterblade/dev-tools cli
-
-# Generate by category
-pnpm --filter @otterblade/dev-tools cli -- --category sprites
-pnpm --filter @otterblade/dev-tools cli -- --category cinematics
-
-# Preview without generating
-pnpm --filter @otterblade/dev-tools cli -- --dry-run
-
-# Force regeneration
-pnpm --filter @otterblade/dev-tools cli -- --force
-```
+See issue #45 for archived documentation of the previous dev-tools implementation.
 
 ### Asset Status Workflow
 
@@ -413,7 +406,7 @@ pending → [generate] → complete → [review] → approved
 **Idempotency Rule**: Approved assets are NEVER regenerated.
 
 ```
-1. GENERATE  → pnpm --filter @otterblade/dev-tools cli
+1. GENERATE  → via jbcom/control-center
 2. DEPLOY    → Push to main → CD deploys to GitHub Pages
 3. REVIEW    → Visit /assets on GitHub Pages
 4. APPROVE   → Select assets → Click "Approve Selected"
@@ -426,13 +419,13 @@ pending → [generate] → complete → [review] → approved
 `https://jbdevprimary.github.io/otterblade-odyssey/assets`
 
 **Approval Storage:**
-- `client/src/data/approvals.json` - Production approvals (committed)
+- `game/src/data/approvals.json` - Production approvals (committed)
 - `localStorage` - Working selections (browser-local)
 
 **Before generating, check:**
 ```bash
 # Check if asset is approved
-jq '.approvals[] | select(.id == "intro_cinematic")' client/src/data/approvals.json
+jq '.approvals[] | select(.id == "intro_cinematic")' game/src/data/approvals.json
 ```
 
 ### Brand Compliance (CRITICAL)
@@ -451,16 +444,6 @@ All generation prompts enforce these rules from `BRAND.md`:
 - Glowing energy weapons or magic beams
 - Anime/JRPG styling
 
-### GitHub Actions Integration
-
-The `assets.yml` workflow automates generation:
-
-1. Triggered via `workflow_dispatch` (manual)
-2. Validates API keys (OPENAI_API_KEY, GEMINI_API_KEY)
-3. Runs dev-tools CLI with selected options
-4. Creates PR with generated assets
-5. PR includes brand compliance checklist
-
 ### Provider Selection Matrix
 
 | Asset Type | Provider | Model | Why |
@@ -469,32 +452,6 @@ The `assets.yml` workflow automates generation:
 | Enemies | OpenAI | gpt-image-1 | Consistent style |
 | Cinematics | Google | veo-3.1 | Native audio, long duration |
 | Scenes | Google | imagen-3.0 | Painterly, wide format |
-
-### Validation Commands
-
-```bash
-# Validate all assets exist
-pnpm validate:assets
-
-# Audit cinematics for brand violations
-pnpm audit:cinematics
-
-# Analyze sprite quality
-pnpm analyze:sprite path/to/sprite.png
-
-# Analyze video compliance
-pnpm analyze:video path/to/video.mp4
-```
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `packages/dev-tools/src/cli.ts` | Main CLI entry point |
-| `packages/dev-tools/src/manifest-generator.ts` | Asset generation logic |
-| `packages/dev-tools/src/shared/prompts.ts` | Brand-aligned prompts |
-| `packages/dev-tools/src/shared/config.ts` | API clients, models |
-| `.github/workflows/assets.yml` | GitHub Actions workflow |
 
 ---
 
@@ -505,10 +462,9 @@ pnpm analyze:video path/to/video.mp4
 | `WORLD.md` | World-building and lore |
 | `BRAND.md` | Visual style guide |
 | `replit.md` | Project architecture |
-| `client/src/data/*.json` | Game content data |
-| `client/src/game/data/` | Typed data loaders |
-| `client/src/data/manifests/` | Asset generation manifests |
-| `packages/dev-tools/` | Asset generation tools |
+| `game/src/data/*.json` | Game content data |
+| `game/src/game/data/` | Typed data loaders |
+| `game/src/data/manifests/` | Asset generation manifests |
 
 ---
 

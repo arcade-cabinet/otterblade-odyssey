@@ -7,7 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter9Manifest from '../../client/src/data/manifests/chapters/chapter-9-new-dawn.json';
+import chapter9Manifest from '../../game/src/data/manifests/chapters/chapter-9-new-dawn.json';
 
 test.describe('Chapter 9: New Dawn - Automated Playthrough', () => {
   test.use({

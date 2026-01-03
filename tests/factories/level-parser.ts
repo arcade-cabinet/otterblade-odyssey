@@ -7,7 +7,7 @@
  * - Automated playthrough validation
  */
 
-import type { ChapterManifest } from '../../client/src/game/data/manifest-schemas';
+import type { ChapterManifest } from '../../game/src/game/data/manifest-schemas';
 
 export interface Platform {
   id: string;

@@ -58,7 +58,7 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 | Language | JavaScript (ES2022) |
 | Physics | Matter.js 0.20 (POC-proven) |
 | Rendering | Canvas 2D API |
-| AI/Pathfinding | YUKA 0.9 |
+| AI/Pathfinding | YUKA 0.7.8 |
 | State Management | Zustand 5.x (with localStorage) |
 | Audio | Howler.js / Tone.js |
 | Touch Controls | nipplejs / Custom |
@@ -107,20 +107,27 @@ client/src/data/
 └── approvals.json         # Asset approval tracking
 ```
 
+## Data Flow Rules
+
+- Authored content (chapters, sprites, cinematics, approvals) lives in `client/src/data/` and stays immutable at runtime.
+- Load JSON through async helpers under `game/src/ddl/` using `fetch`; never import JSON directly or copy content into JavaScript constants.
+- Systems and renderers derive runtime state from the loaded manifests to avoid magic numbers and keep tests deterministic.
+- The legacy `client/` runtime is frozen—new runtime code belongs in `game/` alongside the Astro + Solid shell.
+
 ## 10-Chapter Story Structure
 
-| # | Chapter | Biome | Quest |
-|---|---------|-------|-------|
-| 0 | Prologue | Village | "Answer the Call" |
-| 1 | Abbey Approach | Forest/Bridge | "Reach the Gatehouse" |
-| 2 | Gatehouse | Entry | "Cross the Threshold" |
-| 3 | Great Hall | Interior | "Defend the Great Hall" |
-| 4 | Library | Interior | "Find the Ancient Map" |
-| 5 | Dungeon | Catacombs | "Descend into the Depths" |
-| 6 | Courtyard | Gardens | "Rally the Defenders" |
-| 7 | Rooftops | Rafters | "Ascend to the Bells" |
-| 8 | Final Ascent | High Keep | "Reach Zephyros" |
-| 9 | Epilogue | Victory | "A New Dawn" |
+| # | Chapter | Location | Quest |
+|---|---------|----------|-------|
+| 0 | The Calling | Finn's Cottage | Answer the Call |
+| 1 | River Path | Willow Banks | Reach the Gatehouse |
+| 2 | The Gatehouse | Northern Gate | Cross the Threshold |
+| 3 | Great Hall | Central Hearthhold | Take the Oath |
+| 4 | The Archives | Library Spire | Find the Ancient Map |
+| 5 | Deep Cellars | Underground Passages | Descend into the Depths |
+| 6 | Kitchen Gardens | Southern Grounds | Rally the Defenders |
+| 7 | Bell Tower | Highest Spire | Sound the Alarm |
+| 8 | Storm's Edge | Outer Ramparts | Face Zephyros |
+| 9 | New Dawn | The Great Hearth | The Everember Rekindled |
 
 ## Code Patterns
 
@@ -240,34 +247,19 @@ All game assets are managed through JSON manifests in `client/src/data/manifests
 | `effects.json` | Particles, combat effects, weather | OpenAI GPT-Image-1 |
 | `sounds.json` | 18 ambient, SFX, and music tracks | Freesound/Custom |
 
-### dev-tools Package
+### Asset Generation (Enterprise)
 
-The `@otterblade/dev-tools` package handles all asset generation:
+Asset generation has moved to the `jbcom/control-center` enterprise binary which includes:
+- **Veo 3.1** - Video/cinematic generation
+- **Imagen 3** - Image/sprite generation
+- Parallel generation at scale
+- Built-in brand enforcement prompts
 
-```bash
-# Generate all missing assets
-pnpm --filter @otterblade/dev-tools cli
-
-# Generate specific category
-pnpm --filter @otterblade/dev-tools cli -- --category sprites
-
-# Dry run to preview
-pnpm --filter @otterblade/dev-tools cli -- --dry-run
-
-# Force regeneration
-pnpm --filter @otterblade/dev-tools cli -- --force --id intro_cinematic
-```
-
-### GitHub Actions Workflow
-
-Use `assets.yml` workflow for automated generation:
-- Validates API keys (OPENAI_API_KEY, GEMINI_API_KEY)
-- Creates PR with generated assets
-- Includes brand compliance checklist
+See issue #45 for archived documentation of the previous `dev-tools` implementation.
 
 ### Brand Enforcement
 
-All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
+All asset generation must enforce:
 - **Anthropomorphic woodland animals ONLY** - NO humans ever
 - **Warm storybook aesthetic** - NO neon, sci-fi, horror
 - **Consistent protagonist** - Finn the otter warrior
@@ -291,7 +283,7 @@ All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
 
 **Workflow:**
 ```
-1. Generate assets → pnpm --filter @otterblade/dev-tools cli
+1. Generate assets → via jbcom/control-center
 2. Push to main → CD deploys to GitHub Pages
 3. Visit /assets → Review in gallery
 4. Select + Approve assets
@@ -303,12 +295,7 @@ All prompts in `packages/dev-tools/src/shared/prompts.ts` enforce:
 **Approval Storage:** `client/src/data/approvals.json`
 
 **Before generating, respect approvals:**
-```typescript
-// Skip approved assets
-if (approvalsJson.approvals.find(a => a.id === asset.id)) {
-  continue; // Don't regenerate
-}
-```
+Assets marked as `approved` in `approvals.json` should never be regenerated.
 
 ## Testing Commands
 

@@ -15,7 +15,7 @@
       "!playwright-report",
       "!test-results",
       "!proofs",
-      "!client/src/components/ui"
+      "!**/.astro"
     ]
   },
   "assist": {

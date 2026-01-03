@@ -4,6 +4,7 @@
 packages:
   # Main application packages
   - "."
+  - "game"
   - "packages/*"
 
 # Ignore certain built dependencies to avoid compilation issues

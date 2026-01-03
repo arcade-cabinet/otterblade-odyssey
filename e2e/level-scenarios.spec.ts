@@ -41,7 +41,7 @@ async function loadChapterManifest(chapterId: number) {
   }
 
   // In test environment, we need to load from the build output or repo
-  const manifestPath = `../../client/src/data/manifests/chapters/${filename}`;
+  const manifestPath = `../../game/src/data/manifests/chapters/${filename}`;
   const manifest = await import(manifestPath);
   return manifest.default || manifest;
 }
