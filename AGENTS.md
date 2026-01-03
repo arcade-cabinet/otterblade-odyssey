@@ -140,6 +140,10 @@ const boss = await getChapterBoss(8); // Returns Zephyros data
 - **ALWAYS** validate JSON structure (optional: use JSON Schema)
 - **Keep it simple** - Vanilla JS patterns, no over-engineering
 
+### Documentation Alignment
+- Keep `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` synchronized so agent guidance consistently reflects the Astro + Solid + Matter.js stack and manifest-driven data flow.
+- Update everything under `docs/` whenever architecture, workflows, or stack choices change; contributors should never see conflicting instructions across docs.
+
 ---
 
 ## Code Quality Checklist

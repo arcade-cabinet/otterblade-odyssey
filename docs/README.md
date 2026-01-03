@@ -7,8 +7,13 @@ Welcome to the comprehensive documentation for Otterblade Odyssey! This director
 **New to the project?** Start here:
 1. Read the [root README](../README.md) for project overview
 2. Check [BRAND.md](../BRAND.md) for visual style guidelines
-3. Review [IMPLEMENTATION.md](../IMPLEMENTATION.md) for architecture
+3. Review [IMPLEMENTATION.md](./IMPLEMENTATION.md) for architecture
 4. See [AGENTS.md](../AGENTS.md) for AI agent instructions
+
+### Directory Responsibilities
+
+- `game/` — Astro + Solid.js application, Matter.js/Canvas runtime. **All new runtime work goes here.**
+- `client/` — Legacy React/Vite runtime is frozen; only JSON data in `client/src/data/` remains authoritative while migration completes.
 
 ## Documentation Structure
 
@@ -22,7 +27,7 @@ These files are in the repository root for easy access:
 | `BRAND.md` | Visual identity, color palette, art direction | Designers, AI agents |
 | `CLAUDE.md` | Claude Code agent instructions | AI assistants |
 | `AGENTS.md` | Universal AI agent guidelines | All AI agents |
-| `IMPLEMENTATION.md` | Complete implementation guide | Developers |
+| `docs/IMPLEMENTATION.md` | Astro/Solid/Matter implementation guide | Developers |
 
 ### Technical Documentation (docs/)
 
@@ -183,6 +188,7 @@ Include as appropriate:
 
 **Testing & Quality**
 - [TESTING.md](./TESTING.md) - Comprehensive testing guide
+- [COMPLETE_JOURNEY_VALIDATION.md](./COMPLETE_JOURNEY_VALIDATION.md) - Deterministic chapter and journey validation
 
 **AI & Automation**
 - [AI.md](./AI.md) - YUKA AI systems
@@ -190,7 +196,7 @@ Include as appropriate:
 
 **Game Systems**
 - [PHYSICS.md](./PHYSICS.md) - Physics engine
-- [IMPLEMENTATION.md](../IMPLEMENTATION.md) - Full implementation guide
+- [IMPLEMENTATION.md](./IMPLEMENTATION.md) - Full implementation guide
 
 **Visual Design**
 - [BRAND.md](../BRAND.md) - Brand guidelines

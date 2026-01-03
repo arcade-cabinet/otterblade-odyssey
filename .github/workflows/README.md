@@ -1,238 +1,54 @@
-# Workflow Orchestration Guide
+# Workflow Orchestration Guide (Astro Stack)
 
-## AI Review Pipeline Architecture
+This repository is standardized around the Astro + Solid + Matter.js rebuild. CI/CD is optimized for fast feedback, automated fixes, and GitHub Pages deployment of the Astro site.
 
-The Otterblade Odyssey repository uses a tiered AI review system that ensures efficient and effective code review:
+## Pipeline Overview
 
-### Tier 0: Automated Agents (Front-line Triage)
-**Triggers:** PR open, PR sync
-**Agents:** CodeRabbit, Gemini, Dependabot, Renovate
+- **CI:** pnpm-based lint, type checks, unit tests, and build. Coverage is uploaded to **Coveralls**; quality signals flow to **SonarCloud**.
+- **Auto-fix:** **Claude** (via `autoheal.yml`) diagnoses failed runs and can push patches back to the branch.
+- **PR review:** `review.yml` runs an Ollama triage review with optional escalation to Claude; there are no CodeRabbit/Gemini/Jules tiers.
+- **CD:** `cd.yml` builds the Astro site and deploys to **GitHub Pages** with artifacts attached for asset review.
 
-These agents run **first** and provide immediate feedback:
-- CodeRabbit: Comprehensive code review with context awareness
-- Gemini Code Assist: Google's AI code review
-- Dependabot: Dependency security and updates
-- Renovate: Automated dependency management
+## Continuous Integration (ci.yml)
 
-**Configuration:** `.coderabbit.yaml`
-
-### Tier 1: Ollama Review (Fast, Cost-Effective)
-**Triggers:** PR comments from automated agents, security events
-**Tool:** control-center binary with Ollama backend
-
-Ollama reviews run **after** automated agents complete and:
-- Provide quick, AI-powered review
-- Count suggestions for escalation decision
-- Use local/cheap LLM models
-- Escalate to Claude if >5 suggestions OR >500 lines changed
-
-**Workflow:** `.github/workflows/ai-reviewer.yml`
-
-### Tier 2: Claude Deep Review (Complex PRs)
-**Triggers:** Escalation from Ollama (complex PRs)
-**Tool:** Anthropic Claude via GitHub Action
-
-Claude reviews provide:
-- Deep semantic analysis
-- Security vulnerability detection
-- Performance optimization suggestions
-- Architecture improvement recommendations
-
-**Workflow:** `.github/workflows/ai-reviewer.yml` (claude-review job)
-
-### Tier 3: Jules Refactor (Major Changes)
-**Triggers:** >10 suggestions from Ollama
-**Tool:** Google Jules API
-
-Jules handles:
-- Automated refactoring
-- Creating follow-up PRs with fixes
-- Addressing bulk review feedback
-
-**Workflow:** `.github/workflows/ai-reviewer.yml` (jules-refactor job)
-
-## Security Scanning
-
-### CodeQL Analysis
-**Triggers:** Push to main, PR open, scheduled daily, manual
-**Tool:** GitHub CodeQL
-
-CodeQL performs:
-- SAST (Static Application Security Testing)
-- Security vulnerability detection
-- Code quality analysis
-- Triggers AI review on security findings
-
-**Workflow:** `.github/workflows/codeql.yml`
-
-## CI/CD Pipeline
-
-### CI (Fast Checks)
-**Triggers:** Push, PR
+**Triggers:** push to `main`, pull requests.  
 **Jobs:**
-1. Build & Lint
-2. Unit Tests
-3. Coverage Upload
+- **Build & Lint:** `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, upload `dist/`.
+- **Unit Tests:** `pnpm test:unit`, upload coverage to Coveralls (`coverage/lcov.info`). SonarCloud can consume the same reports for quality gates.
 
-**Workflow:** `.github/workflows/ci.yml`
+Artifacts from CI feed into downstream deploys and debugging.
 
-### Release Gate (E2E Tests)
-**Triggers:** Merge queue only
-**Jobs:**
-1. E2E Tests (with video capture)
-2. AI Triage (on failure)
+## Quality Gates
 
-**Workflow:** `.github/workflows/release-gate.yml`
+- **Coveralls:** Receives LCOV from unit tests for coverage tracking.
+- **SonarCloud:** Uses build + coverage output for code quality metrics; keep reports available in CI artifacts for ingestion.
 
-**Key Feature:** Video capture enabled for gameplay verification
-- Videos saved to `test-results/` and `playwright-report/`
-- Retained for 30 days
-- Helps debug E2E test failures
+## Auto-Fix (autoheal.yml)
 
-### CD (Deployment)
-**Triggers:** Push to main, release published, manual
-**Jobs:**
-1. Detect Stack (Node/Python/Rust/Go)
-2. Build (Node.js/TypeScript)
-   - Build client for GitHub Pages
-   - Generate TypeDoc documentation
-   - Upload artifacts
-3. Deploy to GitHub Pages
-4. Build Android APKs (arm64, arm32, x86_64)
-5. Release Android APKs (on release events)
-6. Sync Documentation to Org Portal
+- Listens for failed CI/build/test/lint workflows or can be called manually.
+- Runs Claude against the failing logs; when authorized, it commits fixes to the PR branch.
+- Skips untrusted forked contributions; respects branch protections.
 
-**Workflow:** `.github/workflows/cd.yml`
+## PR Review (review.yml)
 
-## Workflow Trigger Flow
+- **Triage:** Ollama-powered review for quick feedback.
+- **Escalation:** Claude deep review when suggestion/LOC thresholds are exceeded or when Ollama is unavailable.
+- Results are posted as PR comments; no external tiers (CodeRabbit, Gemini, Jules) are involved.
 
-```
-PR Opened
-    ↓
-CodeRabbit/Gemini Review (Tier 0)
-    ↓
-[Automated Agent Comments]
-    ↓
-Ollama Review (Tier 1) ← Triggered by comments
-    ↓
-[Decision Point: Needs Escalation?]
-    ├─ Yes → Claude Review (Tier 2)
-    │           ↓
-    │       [>10 suggestions?]
-    │           ├─ Yes → Jules Refactor (Tier 3)
-    │           └─ No → Done
-    └─ No → Done
+## Release Gate (release-gate.yml)
 
-Parallel:
-├─ CI: Build + Lint + Unit Tests
-├─ CodeQL: Security Scanning
-│     ↓
-│  [Security Findings?]
-│     └─ Yes → Trigger AI Review
-└─ Done
+- Executes E2E/acceptance checks before merge queue completion.
+- Attaches videos and reports for debugging; failures can be handed to auto-fix.
 
-Merge Queue Entered
-    ↓
-Release Gate: E2E Tests (with video)
-    ↓
-[Pass/Fail]
-    ├─ Pass → Merge to main
-    │           ↓
-    │        CD: Deploy to GitHub Pages
-    │           ↓
-    │        [Game Live at: arcade-cabinet.github.io/otterblade-odyssey/]
-    └─ Fail → Remove from queue
-                ↓
-             AI Fixer Triggered
-```
+## Continuous Deployment (cd.yml)
 
-## Environment Setup
+- Detects the Node/Astro stack and runs `pnpm build:client` (Astro build) with repo-aware base paths.
+- Publishes the built site to **GitHub Pages** and mirrors generated assets for the review gallery.
+- Documentation artifacts are uploaded alongside the build for optional portal syncs.
 
-### Secrets Required
-- `GITHUB_TOKEN`: Automatic (provided by GitHub)
-- `CI_GITHUB_TOKEN`: Personal access token for cross-repo operations
-- `ANTHROPIC_API_KEY`: Claude API key (optional, for Tier 2)
-- `OLLAMA_API_KEY`: Ollama API key (optional, for Tier 1)
-- `GOOGLE_JULES_API_KEY`: Jules API key (optional, for Tier 3)
+## Monitoring & Maintenance
 
-### Repository Settings
-- **Branch Protection:** Main branch requires:
-  - E2E Tests passing
-  - Build & Lint passing
-  - Merge queue enabled
-  - Required deployment: release environment
-- **Environments:**
-  - `release`: Release gate E2E tests
-  - `github-pages`: Production deployment
-
-## Testing the Pipeline
-
-### Local Testing
-```bash
-# Install dependencies
-pnpm install
-
-# Run linter
-pnpm lint
-
-# Run unit tests
-pnpm test:unit
-
-# Build for production
-pnpm build:client
-
-# Run E2E tests (headless)
-pnpm test:e2e
-
-# Run E2E tests with video capture
-PLAYWRIGHT_MCP=true pnpm test:e2e
-```
-
-### CI Testing
-1. Create a PR
-2. Wait for CodeRabbit/Gemini to review
-3. Add a comment (triggers Ollama if from automated agent)
-4. Watch CI/CD pipeline execute
-5. Add to merge queue
-6. Watch release gate E2E tests
-7. Merge completes → Deployment to GitHub Pages
-
-## Maintenance
-
-### Updating Workflows
-1. Run `actionlint .github/workflows/*.yml` to validate syntax
-2. Test changes in a PR before merging
-3. Monitor workflow runs in Actions tab
-
-### Monitoring
-- Check Actions tab for workflow status
-- Review CodeQL alerts in Security tab
-- Check E2E test videos in artifacts
-- Monitor deployment at arcade-cabinet.github.io/otterblade-odyssey/
-
-## Troubleshooting
-
-### AI Review Not Triggering
-- Check that comment is from automated agent (coderabbitai, gemini-code-assist, etc.)
-- Verify API keys are configured
-- Check workflow run logs
-
-### E2E Tests Failing
-- Download video artifacts from workflow run
-- Check `playwright-report/` for details
-- Review console errors in test output
-- Verify WebGL/GPU settings
-
-### Deployment Failing
-- Check build artifacts were uploaded
-- Verify GitHub Pages is enabled in repo settings
-- Check Pages deployment environment configuration
-- Review CD workflow logs
-
-## Best Practices
-
-1. **Let automated agents run first** - CodeRabbit and Gemini provide fast, free feedback
-2. **Use merge queue** - Ensures E2E tests pass before merge
-3. **Review video artifacts** - Gameplay videos help debug issues
-4. **Monitor security alerts** - CodeQL findings trigger AI review automatically
-5. **Keep workflows updated** - Run actionlint regularly
+- Use the Actions tab to watch CI/CD runs and artifact uploads.
+- Keep `ANTHROPIC_API_KEY`, `CI_GITHUB_TOKEN`, and Coveralls/SonarCloud secrets configured.
+- Validate workflow syntax with `actionlint .github/workflows/*.yml` before merging changes.
+- When runs fail, check auto-fix comments and Claude patches before re-running CI.
