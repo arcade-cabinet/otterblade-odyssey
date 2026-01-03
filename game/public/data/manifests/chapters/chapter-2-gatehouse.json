@@ -448,7 +448,7 @@
       "behavior": { "type": "guard", "guardRadius": 80, "aggroRadius": 120 },
       "spawnedByTrigger": "approach_mechanism",
       "difficulty": "hard",
-      "isMiniMiniboss": true
+      "isMiniboss": true
     }
   ],
 

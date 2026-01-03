@@ -253,6 +253,168 @@
         "style": "Pixel art, ethereal not aggressive",
         "negative": "NO laser, NO fire, NO energy beam"
       }
+    },
+    {
+      "id": "enemy_scout",
+      "name": "Galeborn Scout",
+      "filename": "enemy_scout_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 2,
+        "frameWidth": 96,
+        "frameHeight": 96,
+        "size": "768x192",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Galeborn scout - agile ferret or marten",
+        "physique": "Lean, quick predator. Sleek body, alert posture, built for speed and stealth",
+        "fur": "Dark brown or sable with frost-touched highlights, keen eyes",
+        "outfit": "Light scout's gear - leather vest, hood, short blade at belt",
+        "expression": "Alert, watchful, ready to call for backup",
+        "animation": "Row 1: Idle watch (2), patrol (4), alert stance (2). Row 2: Quick strike (3), dodge (2), retreat (2), fall (1)",
+        "behavior": "Scout enemy, low HP, fast movement, calls allies when spotting player",
+        "style": "Pixel art, 96x96, facing LEFT, cold blue-gray undertones",
+        "negative": "NO demonic features, NO glowing eyes, NO sci-fi elements"
+      }
+    },
+    {
+      "id": "enemy_frostwolf",
+      "name": "Frostwolf",
+      "filename": "enemy_frostwolf_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 2,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "1024x256",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Frostwolf - wolf or large fox companion of the Galeborn",
+        "physique": "Powerful canine, wolf-like build, thick winter coat",
+        "fur": "Gray-white with frost patterns, ice-blue eyes, frost on muzzle",
+        "outfit": "Simple leather collar with Galeborn insignia, natural appearance",
+        "expression": "Fierce but loyal, pack predator instincts",
+        "animation": "Row 1: Idle breathing (2), prowl (4), growl (2). Row 2: Leap attack (3), bite (2), howl (2), collapse (1)",
+        "behavior": "Medium HP, lunging attacks, works in packs",
+        "style": "Pixel art, 128x128, facing LEFT, cold blue-gray tones",
+        "negative": "NO demonic features, NO fire, NO sci-fi elements"
+      }
+    },
+    {
+      "id": "enemy_icebat",
+      "name": "Icebat",
+      "filename": "enemy_icebat_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 2,
+        "frameWidth": 96,
+        "frameHeight": 96,
+        "size": "768x192",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Icebat - frost-touched bat creature",
+        "physique": "Small flying mammal, large wings, compact body",
+        "fur": "Pale blue-white fur, frost crystals on wing membranes",
+        "features": "Large ears, small fangs, ice-touched appearance",
+        "expression": "Agitated flyer, territorial",
+        "animation": "Row 1: Hover (2), fly forward (4), dive prep (2). Row 2: Dive attack (3), bite (2), evasive (2), fall (1)",
+        "behavior": "Flying enemy, swoops from above, low HP",
+        "style": "Pixel art, 96x96, facing LEFT, aerial combat",
+        "negative": "NO demonic features, NO fire, NO sci-fi elements"
+      }
+    },
+    {
+      "id": "enemy_frost_gremlin",
+      "name": "Frost Gremlin",
+      "filename": "enemy_frost_gremlin_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 2,
+        "frameWidth": 96,
+        "frameHeight": 96,
+        "size": "768x192",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Frost Gremlin - small arctic rodent warrior",
+        "physique": "Tiny but fierce, lemming or vole size, hunched posture",
+        "fur": "White or pale gray, frost patterns, beady eyes",
+        "outfit": "Scraps of Galeborn gear, oversized helmet, crude frost weapon",
+        "expression": "Manic aggression, desperate ferocity",
+        "animation": "Row 1: Idle twitch (2), scurry (4), prepare attack (2). Row 2: Wild swing (3), leap (2), stumble (2), defeat (1)",
+        "behavior": "Weak but numerous, swarm tactics, unpredictable movement",
+        "style": "Pixel art, 96x96, facing LEFT, chaotic energy",
+        "negative": "NO demonic features, NO glowing eyes, NO sci-fi elements"
+      }
+    },
+    {
+      "id": "enemy_frost_captain",
+      "name": "Frost Captain",
+      "filename": "enemy_frost_captain_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 2,
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "size": "1024x256",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Frost Captain - elite badger or wolverine commander",
+        "physique": "Heavily built, muscular, commanding presence",
+        "fur": "Dark fur with frost-white stripes, battle-scarred",
+        "outfit": "Heavy Galeborn armor, fur-lined cloak, frost-forged weapon, officer insignia",
+        "expression": "Stern commander, tactical mind, battle-hardened",
+        "animation": "Row 1: Idle command (2), march (4), battle stance (2). Row 2: Heavy strike (3), block (2), rally (2), fall (1)",
+        "behavior": "High HP, powerful attacks, buffs nearby allies",
+        "style": "Pixel art, 128x128, facing LEFT, imposing presence",
+        "negative": "NO demonic features, NO glowing effects, NO sci-fi elements"
+      }
+    },
+    {
+      "id": "enemy_frost_specter",
+      "name": "Frost Specter",
+      "filename": "enemy_frost_specter_sprite_sheet.png",
+      "status": "pending",
+      "type": "sprite_sheet",
+      "config": {
+        "columns": 8,
+        "rows": 2,
+        "frameWidth": 96,
+        "frameHeight": 128,
+        "size": "768x256",
+        "quality": "high",
+        "transparent": true
+      },
+      "prompt": {
+        "subject": "Frost Specter - ghostly winter spirit ally of Galeborn",
+        "physique": "Ethereal form, wispy and translucent, floating movement",
+        "appearance": "Vague animal silhouette (owl or hare) made of frost and mist",
+        "features": "Semi-transparent, frost particles, cold blue-white glow (subtle)",
+        "expression": "Otherworldly, haunting but not evil, bound to winter",
+        "animation": "Row 1: Float idle (2), drift forward (4), phase (2). Row 2: Frost touch (3), swirl (2), dissipate (2), fade (1)",
+        "behavior": "Magical enemy, phases through obstacles, frost attacks",
+        "style": "Pixel art, 96x128, facing LEFT, ethereal transparency",
+        "negative": "NO demonic features, NO skulls, NO fire, NO sci-fi"
+      }
     }
   ]
 }

@@ -1,4 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+import { tmpdir } from 'os';
+import { join } from 'path';
+
+/**
+ * Helper function to wait for start button to appear
+ * Uses Playwright's locator API which supports :has-text()
+ */
+async function waitForStartButton(page: Page, timeout = 30000) {
+  await page.locator('button:has-text("Begin Journey")').waitFor({ timeout });
+}
 
 /**
  * E2E Tests for DDL Manifest Loader
@@ -52,13 +62,7 @@ test.describe('DDL Manifest Loader', () => {
     await expect(loadingScreen).toBeVisible({ timeout: 5000 });
 
     // Wait for manifests to load (should see start menu after)
-    await page.waitForFunction(
-      () => {
-        const startButton = document.querySelector('button:has-text("Begin Journey")');
-        return startButton !== null;
-      },
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Verify that manifest requests were made
     const networkRequests = await page.evaluate(() => {
@@ -81,10 +85,7 @@ test.describe('DDL Manifest Loader', () => {
 
   test('should preload all 10 chapters', async ({ page }) => {
     // Wait for game to be ready
-    await page.waitForFunction(
-      () => document.querySelector('button:has-text("Begin Journey")') !== null,
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Check that DDL loader is available and cache is populated
     const cacheStats = await page.evaluate(async () => {
@@ -124,10 +125,7 @@ test.describe('DDL Manifest Loader', () => {
 
   test('should load chapter manifests with correct structure', async ({ page }) => {
     // Wait for preload
-    await page.waitForFunction(
-      () => document.querySelector('button:has-text("Begin Journey")') !== null,
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Test chapter 0 structure
     const chapter0 = await page.evaluate(async () => {
@@ -155,10 +153,7 @@ test.describe('DDL Manifest Loader', () => {
 
   test('should load entity manifests (enemies, NPCs)', async ({ page }) => {
     // Wait for preload
-    await page.waitForFunction(
-      () => document.querySelector('button:has-text("Begin Journey")') !== null,
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Check enemies manifest
     const enemiesData = await page.evaluate(async () => {
@@ -197,10 +192,7 @@ test.describe('DDL Manifest Loader', () => {
 
   test('should load asset manifests (sprites, sounds, cinematics)', async ({ page }) => {
     // Wait for preload
-    await page.waitForFunction(
-      () => document.querySelector('button:has-text("Begin Journey")') !== null,
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Check all asset manifests
     const assetManifests = await page.evaluate(async () => {
@@ -275,10 +267,7 @@ test.describe('DDL Manifest Loader', () => {
 
   test('should handle game initialization with fetched manifests', async ({ page }) => {
     // Wait for preload to complete
-    await page.waitForFunction(
-      () => document.querySelector('button:has-text("Begin Journey")') !== null,
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Click start button
     await page.click('button:has-text("Begin Journey")');
@@ -468,16 +457,14 @@ test.describe('DDL Manifest Loader', () => {
     console.log('✓ Matter.js physics engine initialized');
 
     // Take screenshot of running game for manual inspection
-    await page.screenshot({ path: '/tmp/ddl-loader-game-running.png', fullPage: false });
-    console.log('Screenshot saved: /tmp/ddl-loader-game-running.png');
+    const screenshotPath = join(tmpdir(), 'ddl-loader-game-running.png');
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    console.log(`Screenshot saved: ${screenshotPath}`);
   });
 
   test('should validate chapter manifest data integrity', async ({ page }) => {
     // Wait for preload
-    await page.waitForFunction(
-      () => document.querySelector('button:has-text("Begin Journey")') !== null,
-      { timeout: 30000 }
-    );
+    await waitForStartButton(page);
 
     // Validate multiple chapters have proper structure
     const validationResults = await page.evaluate(async () => {
