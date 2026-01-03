@@ -25,7 +25,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_bots: "*"
-          github_token: ${{ secrets.Ci_GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
           
           # Enable progress tracking
           track_progress: true
