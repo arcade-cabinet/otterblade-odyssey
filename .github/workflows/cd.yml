@@ -2,6 +2,8 @@ name: CD
 
 on:
   workflow_run:
+    # NOTE: This CD workflow depends on the CI workflow being named exactly "CI".
+    # If the CI workflow's `name:` is changed, update this list to match.
     workflows: ["CI"]
     branches: [main]
     types: [completed]
