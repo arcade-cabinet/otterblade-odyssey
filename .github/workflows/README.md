@@ -397,3 +397,164 @@ PLAYWRIGHT_MCP=true pnpm test:e2e
 3. **Review video artifacts** - Gameplay videos help debug issues
 4. **Monitor security alerts** - CodeQL findings trigger AI review automatically
 5. **Keep workflows updated** - Run actionlint regularly
+
+---
+
+## AI-Powered Auto-Update PRs
+
+**File:** `ai-auto-update.yml`
+
+### Purpose
+
+Automatically keeps all pull requests up-to-date with the `main` branch using a three-stage update strategy with AI-powered conflict resolution.
+
+### Triggers
+
+- **Automatic:** Runs on every push to `main` branch
+- **Manual:** Can be triggered via `workflow_dispatch` with options:
+  - `pr_number` (optional): Target a specific PR by number
+  - `force_ai_resolution` (optional): Force AI conflict resolution even if standard update works
+
+### Update Strategy
+
+The workflow uses a three-stage approach to update PRs:
+
+1. **Rebase First** (Preferred)
+   - Cleanest history
+   - Uses `git rebase` with `--force-with-lease`
+   - Aborts and moves to next stage if conflicts occur
+
+2. **Merge Fallback**
+   - Standard merge commit if rebase fails
+   - Uses `git merge main --no-edit`
+   - Moves to AI resolution if conflicts occur
+
+3. **AI Conflict Resolution** (Last Resort)
+   - Uses Claude AI via `anthropics/claude-code-action@v1`
+   - Intelligently resolves conflicts preserving intent from both branches
+   - Automatically labels PR with `ai-merge-resolved`
+   - Comments on PR explaining resolution or failure
+
+### Jobs
+
+#### 1. `list-prs`
+- Lists all open, non-draft PRs
+- Compares each PR's head SHA with main to determine if behind
+- Outputs list of PRs needing updates
+
+#### 2. `update-pr` (Matrix Strategy)
+- Processes each PR in parallel (max 3 concurrent)
+- Uses `fail-fast: false` so one failure doesn't stop others
+- Steps through the three-stage update strategy
+- Reports success/failure and adds labels/comments
+
+#### 3. `summary`
+- Generates workflow summary showing all PRs processed
+- Reports which PRs were updated and by which method
+- Always runs (even on failures) to provide complete overview
+
+### AI Conflict Resolution
+
+When Claude resolves conflicts, it:
+
+1. **Understands Context**
+   - Reads PR description to understand its purpose
+   - Reviews conflicted files to understand both sides
+   - Identifies root cause of conflicts
+
+2. **Resolves Intelligently**
+   - Preserves PR's intended changes and functionality
+   - Incorporates critical fixes from main branch
+   - Never loses functionality from either branch
+   - Merges test cases from both sides
+   - Maintains code quality and consistency
+
+3. **Resolution Strategy**
+   - Prefers PR's approach for feature-specific changes
+   - Prefers main's approach for infrastructure/tooling changes
+   - Merges both sides when changes are complementary
+   - Favors keeping more functionality over less
+
+4. **After Resolution**
+   - Runs linters and tests to ensure nothing broke
+   - Commits resolution with clear message
+   - Pushes changes to PR branch
+   - Adds comment explaining resolution
+
+5. **Requests Human Review If**
+   - Conflicts are too complex or deeply intertwined
+   - Changes fundamentally contradict each other
+   - Risk of breaking critical functionality is high
+   - More than 10 files have conflicts
+
+### Permissions Required
+
+```yaml
+permissions:
+  contents: write       # Push updates to PR branches
+  pull-requests: write  # Add labels and comments
+  issues: write         # Add labels (PRs are issues)
+  id-token: write       # OIDC token for Claude API
+```
+
+### Secrets Used
+
+- `ANTHROPIC_API_KEY` - Required for Claude AI conflict resolution
+- `CI_GITHUB_TOKEN` - Enhanced GitHub token (falls back to `GITHUB_TOKEN`)
+
+### Usage Examples
+
+#### Automatic Update on Push to Main
+```bash
+git push origin main
+# Workflow automatically runs and updates all open PRs
+```
+
+#### Manual Trigger for All PRs
+```bash
+gh workflow run ai-auto-update.yml
+```
+
+#### Manual Trigger for Specific PR
+```bash
+gh workflow run ai-auto-update.yml -f pr_number=123
+```
+
+#### Force AI Resolution
+```bash
+gh workflow run ai-auto-update.yml -f pr_number=123 -f force_ai_resolution=true
+```
+
+### Monitoring
+
+- Check workflow runs: https://github.com/arcade-cabinet/otterblade-odyssey/actions/workflows/ai-auto-update.yml
+- View summary for each run to see which PRs were processed
+- Check PR labels for `ai-merge-resolved` to see AI interventions
+- Review PR comments for AI resolution explanations
+
+### Troubleshooting
+
+**PR not updating automatically:**
+- Check if PR is a draft (drafts are skipped)
+- Verify PR is actually behind main
+- Check workflow run logs for errors
+
+**AI resolution failed:**
+- Review PR comments for explanation
+- Conflicts may be too complex for automated resolution
+- Manual intervention required
+
+**Workflow not triggering:**
+- Verify `ANTHROPIC_API_KEY` secret is set
+- Check workflow file syntax with `actionlint`
+- Ensure permissions are correctly configured
+
+### Integration with Other Workflows
+
+This workflow complements:
+- `claude.yml` - Manual Claude invocation via `@claude` mentions
+- `ci-failure-auto-fix-with-claude.yml` - Auto-fixes CI failures
+- `pr-review.yml` - Automated PR reviews
+- Claude PR Manager system - Orchestrates overall PR lifecycle
+
+Together, these workflows provide comprehensive automation for PR lifecycle management including keeping PRs up-to-date with main.
