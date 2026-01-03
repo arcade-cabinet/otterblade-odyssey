@@ -29,7 +29,7 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 | **Language** | JavaScript (ES2022) | No TypeScript compilation overhead |
 | **Physics** | Matter.js 0.20 | POC-proven, 2D rigid body physics |
 | **Rendering** | Canvas 2D API | Procedural character rendering, parallax |
-| **AI/Pathfinding** | YUKA 0.9 | Enemy AI, steering behaviors, FSM |
+| **AI/Pathfinding** | YUKA 0.7.8 | Enemy AI, steering behaviors, FSM |
 | **State Management** | Zustand 5.x | Game state with localStorage persistence |
 | **Audio** | Howler.js / Tone.js | Spatial audio, music |
 | **Touch Controls** | nipplejs / Custom | Mobile-first touch joystick |
