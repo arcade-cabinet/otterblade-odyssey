@@ -382,8 +382,8 @@ export class GameState {
       }
     }
 
-    this.gameTime = 0;
-    this.listeners = [];
+    this.gameTime = 0; // Reset game time
+    this.listeners = []; // Don't restore listeners
     this.notify();
   }
 
