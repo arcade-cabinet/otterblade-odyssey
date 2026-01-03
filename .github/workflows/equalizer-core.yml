@@ -1,0 +1,315 @@
+name: Equalizer Core
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+      head_ref:
+        required: true
+        type: string
+      strategy:
+        required: true
+        type: string
+      comment_body:
+        required: false
+        type: string
+      comment_author:
+        required: false
+        type: string
+      run_reason:
+        required: true
+        type: string
+      trigger_url:
+        required: false
+        type: string
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: false
+      CI_GITHUB_TOKEN:
+        required: false
+
+jobs:
+  orchestrate:
+    name: Synthesize plan and healing steps
+    runs-on: ubuntu-latest
+    outputs:
+      plan: ${{ steps.plan.outputs.plan }}
+      head_sha: ${{ steps.status.outputs.head_sha }}
+      status: ${{ steps.status.outputs.status }}
+      feedback: ${{ steps.feedback.outputs.feedback }}
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Collect status signals
+        id: status
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const pr = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            const checks = await github.paginate(github.rest.checks.listForRef, {
+              owner,
+              repo,
+              ref: pr.data.head.sha,
+              per_page: 100,
+            });
+
+            const normalize = (check) => ({
+              name: check.name,
+              conclusion: check.conclusion || check.status,
+              url: check.html_url,
+            });
+
+            const failing = checks.filter(
+              (check) =>
+                check.status === 'completed' &&
+                check.conclusion &&
+                !['success', 'neutral', 'skipped'].includes(check.conclusion),
+            );
+
+            const pending = checks.filter(
+              (check) => check.status !== 'completed' || !check.conclusion,
+            );
+
+            const passing = checks.filter(
+              (check) =>
+                check.status === 'completed' &&
+                ['success', 'neutral', 'skipped'].includes(check.conclusion || ''),
+            );
+
+            core.setOutput('status', JSON.stringify({
+              headSha: pr.data.head.sha,
+              failing: failing.map(normalize),
+              pending: pending.map(normalize),
+              passing: passing.map(normalize),
+              totalChecks: checks.length,
+            }));
+
+            core.setOutput('head_sha', pr.data.head.sha);
+
+      - name: Gather trusted AI feedback
+        id: feedback
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+        with:
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const prNumber = Number(process.env.PR_NUMBER);
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github/claude-config.json');
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const trusted = (config.ai_agents?.trusted || []).map((id) => id.toLowerCase());
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const issueComments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const prReviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100,
+            });
+
+            const normalize = (entry) => ({
+              author: entry.user?.login,
+              body: entry.body || '',
+            const isFromTrusted = (login) =>
+              !!login && trusted.some((id) => login.toLowerCase().includes(id));
+
+            const filterTrustedEntries = (entries) =>
+              entries
+                .filter((entry) => isFromTrusted(entry.user?.login))
+                .map(normalize);
+
+            const aiFeedback = [
+              ...filterTrustedEntries(issueComments),
+              ...filterTrustedEntries(prReviews),
+
+            const aiFeedback = [
+              ...issueComments.filter((comment) => trusted.some((id) => comment.user?.login?.toLowerCase().includes(id))).map(normalize),
+              ...prReviews.filter((review) => trusted.some((id) => review.user?.login?.toLowerCase().includes(id))).map(normalize),
+            ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            core.setOutput('feedback', JSON.stringify(aiFeedback.slice(0, 15)));
+
+      - name: Synthesize plan
+        id: plan
+        uses: actions/github-script@v7
+        env:
+          STATUS_SUMMARY: ${{ steps.status.outputs.status }}
+          FEEDBACK_NOTES: ${{ steps.feedback.outputs.feedback }}
+          STRATEGY: ${{ inputs.strategy }}
+          COMMENT_BODY: ${{ inputs.comment_body || '' }}
+          COMMENT_AUTHOR: ${{ inputs.comment_author || '' }}
+          RUN_REASON: ${{ inputs.run_reason }}
+          TRIGGER_URL: ${{ inputs.trigger_url || '' }}
+          HEAD_REF: ${{ inputs.head_ref }}
+        with:
+          script: |
+            const statusSummary = JSON.parse(process.env.STATUS_SUMMARY || '{}');
+            const feedback = JSON.parse(process.env.FEEDBACK_NOTES || '[]');
+            const failing = statusSummary.failing || [];
+            const pending = statusSummary.pending || [];
+            const strategy = process.env.STRATEGY || 'autonomous';
+
+            const tasks = [];
+
+            if (failing.length > 0) {
+              tasks.push(`- Address failing checks: ${failing.map((item) => item.name).join(', ')}`);
+            }
+
+            if (pending.length > 0) {
+              tasks.push(`- Monitor pending checks: ${pending.map((item) => item.name).join(', ')}`);
+            }
+
+            if (feedback.length > 0) {
+              tasks.push('- Incorporate the latest trusted AI feedback below.');
+            } else {
+              tasks.push('- No recent trusted AI feedback detected. Proceed based on CI signals.');
+            }
+
+            if (strategy === 'collaborative') {
+              tasks.push('- Collaboration mode: request updates from the contributing agent; do not push changes from this workflow.');
+            } else {
+              tasks.push('- Autonomous mode: safe to proceed with direct fixes once plan is approved.');
+            }
+
+            if (process.env.COMMENT_BODY) {
+              tasks.push(`- Original request from @${process.env.COMMENT_AUTHOR || 'unknown'}: ${process.env.COMMENT_BODY.substring(0, 400)}`);
+            }
+
+            if (tasks.length === 0) {
+              tasks.push('- No immediate actions detected.');
+            }
+
+            const lines = [
+              `## Equalizer Plan (${strategy})`,
+              '',
+              `**Trigger:** ${process.env.RUN_REASON}`,
+              `**Branch:** ${process.env.HEAD_REF}`,
+              `**Head SHA:** ${statusSummary.headSha || 'unknown'}`,
+            ];
+
+            if (process.env.TRIGGER_URL) {
+              lines.push(`**Context:** ${process.env.TRIGGER_URL}`);
+            }
+
+            lines.push('', '### Tasks', ...tasks, '');
+
+            if (feedback.length > 0) {
+              lines.push('### Latest Trusted AI Feedback');
+              feedback.slice(0, 5).forEach((item) => {
+                lines.push(`- @${item.author}: ${item.body.substring(0, 240)}${item.body.length > 240 ? '…' : ''}`);
+              });
+            }
+
+            if (failing.length > 0 || pending.length > 0) {
+              lines.push('', '### Status Checks');
+              const formatChecks = (title, checks) => {
+                if (checks.length === 0) return;
+                lines.push(`- ${title}:`);
+                checks.forEach((check) => {
+                  lines.push(`  - ${check.name}: ${check.conclusion}${check.url ? ` (${check.url})` : ''}`);
+                });
+              };
+              formatChecks('Failing', failing);
+              formatChecks('Pending', pending);
+            }
+
+            core.setOutput('plan', lines.join('\n'));
+
+      - name: Comment plan on PR
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          PLAN_BODY: ${{ steps.plan.outputs.plan }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "$PLAN_BODY"
+
+      - name: Ensure tracking issue exists
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PLAN_BODY: ${{ steps.plan.outputs.plan }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          REPO: ${{ github.repository }}
+          if ! gh api repos/"$REPO"/labels/equalizer-plan >/dev/null 2>&1; then
+            gh api -X POST repos/"$REPO"/labels \
+
+          # Ensure tracking label exists (idempotent)
+          if ! gh api repos/$REPO/labels/equalizer-plan >/dev/null 2>&1; then
+            gh api -X POST repos/$REPO/labels \
+              -f name='equalizer-plan' \
+              -f color='6A5ACD' \
+              -f description='Auto-managed Equalizer planning tracker' >/dev/null
+          fi
+
+          EXISTING=$(gh issue list --repo "$REPO" --search "\"$TITLE\" in:title" --json number --jq '.[0].number' || true)
+
+          BODY_CONTENT="${PLAN_BODY}
+
+Linked PR: #${PR_NUMBER}"
+
+          if [ -z "$EXISTING" ]; then
+            gh issue create --repo "$REPO" --title "$TITLE" --body "$BODY_CONTENT" --label equalizer-plan
+          else
+            gh issue edit "$EXISTING" --repo "$REPO" --title "$TITLE" --body "$BODY_CONTENT"
+          fi
+
+      - name: Collaborative mode notice
+        if: inputs.strategy == 'collaborative'
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "🤝 Equalizer is in collaborative mode for this branch. Direct pushes are blocked; the contributing agent must apply fixes."
+
+      - name: Autonomous healing checkpoint
+        if: inputs.strategy != 'collaborative'
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "🛠️ Equalizer is clear to proceed autonomously after the above plan. Status checks will be re-evaluated after actions are taken."
