@@ -27,14 +27,17 @@ import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './
 // Import DDL loader for runtime fetch-based loading
 // This is optional - if DDL loader hasn't preloaded, we fall back to static imports
 let ddlLoader: typeof import('../../ddl/loader') | null = null;
-try {
-  // Dynamic import so this module works during SSR/build
-  ddlLoader = await import('../../ddl/loader');
-} catch {
-  // DDL loader not available (SSR/build context) - will use static imports
-  console.log('[chapter-loaders] Using static imports (SSR/build mode)');
-}
 
+// Kick off dynamic import without using top-level await to maintain SSR/build compatibility.
+// When the import resolves, we cache the loader module; until then we fall back to static data.
+import('../../ddl/loader')
+  .then((module) => {
+    ddlLoader = module;
+  })
+  .catch(() => {
+    // DDL loader not available (SSR/build context) - will use static imports
+    console.log('[chapter-loaders] Using static imports (SSR/build mode)');
+  });
 /** All chapter data indexed by ID */
 const CHAPTER_DATA_MAP: Record<number, unknown> = {
   0: chapter0Data,
