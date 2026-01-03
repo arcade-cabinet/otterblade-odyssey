@@ -3,7 +3,7 @@
   "category": "sounds",
   "provider": "freesound",
   "outputDir": "game/src/assets/audio",
-  "notes": "Environmental and ambient sounds for Willowmere Hearthhold. Focus on warmth, nature, and the contrast between safety and danger.",
+  "notes": "Environmental and ambient sounds for Willowmere Hearthhold. Focus on warmth, nature, and the contrast between safety and danger. Provider is 'freesound': assets are manually searched, curated, and downloaded from Freesound using these prompts as search/selection guidance, rather than being AI-generated.",
   "assets": [
     {
       "id": "ambient_hearth",
