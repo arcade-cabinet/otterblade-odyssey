@@ -354,8 +354,8 @@ function OtterbladeGameContent() {
       for (const sequence of timingSequences) {
         sequence?.destroy?.();
       }
-      Matter.World.clear(engine.world, false);
       Matter.Engine.clear(engine);
+      Matter.World.clear(engine.world, false);
       enemyBodyMap.clear();
     });
   });
