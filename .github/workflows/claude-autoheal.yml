@@ -58,6 +58,11 @@ jobs:
           CHECK_APP: ${{ github.event.check_run.app.slug }}
           WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
         run: |
+          # Sanitize user inputs to prevent command injection
+          # Only allow alphanumeric, underscore, dash, and brackets (for bot names)
+          SAFE_COMMENT_USER=$(echo "$COMMENT_USER" | tr -cd 'a-zA-Z0-9_-[]')
+          SAFE_REVIEW_USER=$(echo "$REVIEW_USER" | tr -cd 'a-zA-Z0-9_-[]')
+          
           AGENTS=""
           FEEDBACK_TYPE=""
           PR_NUM=""
@@ -68,16 +73,16 @@ jobs:
             PR_NUM="${{ github.event.issue.number }}"
             
             # Detect AI agents by username (more precise than content matching)
-            if [[ "$COMMENT_USER" == *"coderabbit"* ]] || [[ "$COMMENT_USER" == "coderabbitai"* ]]; then
+            if [[ "$SAFE_COMMENT_USER" == *"coderabbit"* ]] || [[ "$SAFE_COMMENT_USER" == "coderabbitai"* ]]; then
               AGENTS="${AGENTS}coderabbit,"
               FEEDBACK_TYPE="code_review"
-            elif [[ "$COMMENT_USER" == *"gemini"* ]]; then
+            elif [[ "$SAFE_COMMENT_USER" == *"gemini"* ]]; then
               AGENTS="${AGENTS}gemini,"
               FEEDBACK_TYPE="code_review"
-            elif [[ "$COMMENT_USER" == *"copilot"* ]]; then
+            elif [[ "$SAFE_COMMENT_USER" == *"copilot"* ]]; then
               AGENTS="${AGENTS}copilot,"
               FEEDBACK_TYPE="code_review"
-            elif [[ "$COMMENT_USER" == "github-code-scanning"* ]] || [[ "$COMMENT_USER" == "github-advanced-security"* ]]; then
+            elif [[ "$SAFE_COMMENT_USER" == "github-code-scanning"* ]] || [[ "$SAFE_COMMENT_USER" == "github-advanced-security"* ]]; then
               AGENTS="${AGENTS}codeql,"
               FEEDBACK_TYPE="security_alert"
             fi
@@ -86,11 +91,11 @@ jobs:
             PR_NUM="${{ github.event.pull_request.number }}"
             
             # Detect AI reviewer
-            if [[ "$REVIEW_USER" == *"coderabbit"* ]] || [[ "$REVIEW_USER" == "coderabbitai"* ]]; then
+            if [[ "$SAFE_REVIEW_USER" == *"coderabbit"* ]] || [[ "$SAFE_REVIEW_USER" == "coderabbitai"* ]]; then
               AGENTS="${AGENTS}coderabbit,"
               FEEDBACK_TYPE="code_review"
             fi
-            if [[ "$REVIEW_USER" == *"copilot"* ]]; then
+            if [[ "$SAFE_REVIEW_USER" == *"copilot"* ]]; then
               AGENTS="${AGENTS}copilot,"
               FEEDBACK_TYPE="code_review"
             fi
@@ -191,6 +196,7 @@ jobs:
           ref: ${{ needs.detect-ai-feedback.outputs.pr_branch }}
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Run Auto-Heal
         if: steps.check-key.outputs.available == 'true'

@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Post Completion Comment
         env:
@@ -37,9 +38,15 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -eo pipefail
+          
+          # Sanitize inputs to prevent command injection
+          SAFE_SESSION_ID=$(echo "$SESSION_ID" | tr -cd 'a-zA-Z0-9_-')
+          SAFE_PR_NUMBER=$(echo "$PR_NUMBER" | tr -cd '0-9')
+          SAFE_ISSUE_NUMBER=$(echo "$ISSUE_NUMBER" | tr -cd '0-9')
+          SAFE_AGENT_TYPE=$(echo "$AGENT_TYPE" | tr -cd 'a-zA-Z0-9_-')
 
           # Determine emoji based on agent type
-          case "${AGENT_TYPE}" in
+          case "${SAFE_AGENT_TYPE}" in
             "bolt") EMOJI="⚡"; AGENT_NAME="Bolt (Performance)" ;;
             "palette") EMOJI="🎨"; AGENT_NAME="Palette (UX)" ;;
             "scribe") EMOJI="📚"; AGENT_NAME="Scribe (Docs)" ;;
@@ -78,7 +85,7 @@ jobs:
 
           | Field | Value |
           |-------|-------|
-          | **Session ID** | \`${SESSION_ID}\` |
+          | **Session ID** | \`${SAFE_SESSION_ID}\` |
           | **Agent** | ${AGENT_NAME} |
           | **Outcome** | ${STATUS_ICON} ${STATUS_TEXT} |
           "
@@ -97,16 +104,16 @@ jobs:
           > This PR will be automatically reviewed and merged if approved.
           "
 
-          if [[ -n "${PR_NUMBER}" ]]; then
+          if [[ -n "${SAFE_PR_NUMBER}" ]]; then
             # Comment on PR and add labels for triage
-            gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "$COMMENT_BODY"
-            gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-label "jules-pr,auto-triage" || true
-            echo "Posted completion comment to PR #${PR_NUMBER}"
-          elif [[ -n "${ISSUE_NUMBER}" ]]; then
+            gh pr comment "${SAFE_PR_NUMBER}" --repo "${REPO}" --body "$COMMENT_BODY"
+            gh pr edit "${SAFE_PR_NUMBER}" --repo "${REPO}" --add-label "jules-pr,auto-triage" || true
+            echo "Posted completion comment to PR #${SAFE_PR_NUMBER}"
+          elif [[ -n "${SAFE_ISSUE_NUMBER}" ]]; then
             # Comment on Issue
-            gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body "$COMMENT_BODY"
-            echo "Posted completion comment to Issue #${ISSUE_NUMBER}"
+            gh issue comment "${SAFE_ISSUE_NUMBER}" --repo "${REPO}" --body "$COMMENT_BODY"
+            echo "Posted completion comment to Issue #${SAFE_ISSUE_NUMBER}"
           else
             echo "::notice::No PR or issue number provided - completion logged only"
-            echo "Session completed: ${SESSION_ID} - ${OUTCOME}"
+            echo "Session completed: ${SAFE_SESSION_ID} - ${OUTCOME}"
           fi
