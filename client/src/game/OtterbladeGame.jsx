@@ -250,6 +250,7 @@ function OtterbladeGameContent() {
     // Cleanup on unmount
     onCleanup(() => {
       gameLoop.stop();
+      playerController.destroy();
       audioManager.stopAll();
       aiManager.destroy();
       inputManager.reset();

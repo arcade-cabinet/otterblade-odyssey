@@ -53,6 +53,9 @@ export class PlayerController {
       kb: { x: 15, y: -8 },
       chargeTime: 1000, // 1 second charge
     };
+
+    // Track active timeouts for cleanup
+    this.activeTimeouts = [];
   }
 
   update(controls, delta) {
@@ -283,10 +286,11 @@ export class PlayerController {
     this.audioManager.playSFX('roll');
 
     // End roll after duration
-    setTimeout(() => {
+    const rollTimeout = setTimeout(() => {
       this.player.isRolling = false;
       this.player.isInvulnerable = false;
     }, 500);
+    this.activeTimeouts.push(rollTimeout);
 
     this.attackCooldown = 0.6; // 600ms cooldown
   }
@@ -296,9 +300,10 @@ export class PlayerController {
     const originalMask = this.player.collisionFilter.mask;
     this.player.collisionFilter.mask &= ~0x0004; // Disable PLATFORM
 
-    setTimeout(() => {
+    const dropTimeout = setTimeout(() => {
       this.player.collisionFilter.mask = originalMask;
     }, 200);
+    this.activeTimeouts.push(dropTimeout);
 
     Body.applyForce(this.player, this.player.position, { x: 0, y: 0.01 });
   }
@@ -308,9 +313,10 @@ export class PlayerController {
     this.player.isParrying = true;
     this.audioManager.playSFX('parry_ready');
 
-    setTimeout(() => {
+    const parryTimeout = setTimeout(() => {
       this.player.isParrying = false;
     }, 300);
+    this.activeTimeouts.push(parryTimeout);
   }
 
   /**
@@ -350,9 +356,10 @@ export class PlayerController {
     // Add to world temporarily
     Matter.World.add(this.engine.world, hitbox);
 
-    setTimeout(() => {
+    const hitboxTimeout = setTimeout(() => {
       Matter.World.remove(this.engine.world, hitbox);
     }, 100);
+    this.activeTimeouts.push(hitboxTimeout);
 
     // Audio
     this.audioManager.playSFX('blade_swing', { pitch: 0.9 + Math.random() * 0.2 });
@@ -393,9 +400,10 @@ export class PlayerController {
 
     Matter.World.add(this.engine.world, hitbox);
 
-    setTimeout(() => {
+    const hearthTimeout = setTimeout(() => {
       Matter.World.remove(this.engine.world, hitbox);
     }, 150);
+    this.activeTimeouts.push(hearthTimeout);
 
     // Visual and audio
     this.audioManager.playSFX('hearth_strike');
@@ -431,12 +439,24 @@ export class PlayerController {
     this.player.isInvulnerable = true;
     this.player.damageFlashTimer = 10;
 
-    setTimeout(() => {
+    const damageTimeout = setTimeout(() => {
       this.player.isInvulnerable = false;
     }, 600);
+    this.activeTimeouts.push(damageTimeout);
 
     this.audioManager.playSFX('player_hurt');
 
     return { hit: true };
+  }
+
+  /**
+   * Clean up controller resources
+   */
+  destroy() {
+    // Clear all active timeouts
+    for (const timeout of this.activeTimeouts) {
+      clearTimeout(timeout);
+    }
+    this.activeTimeouts = [];
   }
 }
