@@ -19,6 +19,7 @@ import {
 } from 'yuka';
 
 /**
+<<<<<<< HEAD
  * Pathfinding constants
  */
 const PATH_RECALC_INTERVAL = 60; // frames (~1 second at 60fps)
@@ -26,6 +27,8 @@ const TARGET_MOVEMENT_THRESHOLD = 30; // units - recalculate if target moves thi
 const LINE_OF_SIGHT_DISTANCE = 150; // units - max distance for direct path
 
 /**
+=======
+>>>>>>> main
  * Base class for typed states with better TypeScript-like behavior
  */
 class TypedState extends State {
@@ -124,15 +127,19 @@ class ChaseState extends TypedState {
   constructor() {
     super();
     this.seekBehavior = new SeekBehavior();
+<<<<<<< HEAD
     this.followPathBehavior = null;
     this.pathRecalcInterval = PATH_RECALC_INTERVAL;
     this.pathAge = 0;
     this.currentPath = null;
     this.lastTargetPosition = null;
+=======
+>>>>>>> main
   }
 
   enter(enemy) {
     if (enemy.target?.position) {
+<<<<<<< HEAD
       enemy.maxSpeed = enemy.chaseSpeed;
 
       // Initialize pathfinding
@@ -140,6 +147,12 @@ class ChaseState extends TypedState {
       this.currentPath = null;
       this.lastTargetPosition = null;
 
+=======
+      this.seekBehavior.target = enemy.target.position;
+      enemy.steering.behaviors.push(this.seekBehavior);
+      enemy.maxSpeed = enemy.chaseSpeed;
+
+>>>>>>> main
       // Play alert sound
       if (enemy.onAlert) {
         enemy.onAlert();
@@ -153,6 +166,12 @@ class ChaseState extends TypedState {
       return;
     }
 
+<<<<<<< HEAD
+=======
+    // Update seek target
+    this.seekBehavior.target = enemy.target.position;
+
+>>>>>>> main
     const distToTarget = enemy.position.distanceTo(enemy.target.position);
 
     // Lost target
@@ -167,6 +186,7 @@ class ChaseState extends TypedState {
       enemy.stateMachine.changeTo('attack');
       return;
     }
+<<<<<<< HEAD
 
     // Check if we need to recalculate path
     const targetMoved =
@@ -234,6 +254,15 @@ class ChaseState extends TypedState {
 
     this.currentPath = null;
     this.followPathBehavior = null;
+=======
+  }
+
+  exit(enemy) {
+    const index = enemy.steering.behaviors.indexOf(this.seekBehavior);
+    if (index > -1) {
+      enemy.steering.behaviors.splice(index, 1);
+    }
+>>>>>>> main
   }
 }
 
@@ -800,6 +829,7 @@ class AIManager {
     }
 
     path.unshift(start.clone());
+<<<<<<< HEAD
     return this.smoothPath(path);
   }
 
@@ -845,6 +875,9 @@ class AIManager {
     // For now, consider points close together to have line of sight
     // In a full implementation, this would check for obstacles
     return distance < LINE_OF_SIGHT_DISTANCE;
+=======
+    return path;
+>>>>>>> main
   }
 
   /**
@@ -880,10 +913,13 @@ class AIManager {
 
   addEnemy(id, config) {
     const enemy = new EnemyAI(config);
+<<<<<<< HEAD
     // Inject AIManager reference for pathfinding access
     // Note: This creates coupling but is necessary for state machine access to pathfinding
     // Alternative would be callback-based approach, but this is simpler and more direct
     enemy.aiManager = this;
+=======
+>>>>>>> main
     this.enemies.set(id, enemy);
     this.entityManager.add(enemy);
 
@@ -934,6 +970,12 @@ class AIManager {
   }
 }
 
+<<<<<<< HEAD
 // Export singleton instance and class for testing
 export const aiManager = new AIManager();
 export { AIManager, EnemyAI, NPCAI };
+=======
+// Export singleton instance
+export const aiManager = new AIManager();
+export { EnemyAI, NPCAI };
+>>>>>>> main
