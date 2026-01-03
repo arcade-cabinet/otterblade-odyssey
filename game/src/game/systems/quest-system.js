@@ -222,6 +222,11 @@ export class QuestSystem {
    * @returns {number} Percentage (0-100)
    */
   getQuestProgress(questId) {
+    // Check if quest is completed first
+    if (this.isQuestCompleted(questId)) {
+      return 100;
+    }
+
     const quest = this.activeQuests.find((q) => q.id === questId);
     if (!quest) return 0;
 

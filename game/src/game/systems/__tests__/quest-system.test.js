@@ -201,7 +201,7 @@ describe('QuestSystem', () => {
       const result = questSystem.abandonQuest('quest-2');
 
       expect(result).toBe(true);
-      expect(questSystem.activeQuests).not.toContain('quest-2');
+      expect(questSystem.isQuestActive('quest-2')).toBe(false);
     });
 
     it('should not abandon required quest', () => {
@@ -209,7 +209,7 @@ describe('QuestSystem', () => {
       const result = questSystem.abandonQuest('quest-1');
 
       expect(result).toBe(false);
-      expect(questSystem.activeQuests).toContain('quest-1');
+      expect(questSystem.isQuestActive('quest-1')).toBe(true);
     });
 
     it('should return false for non-existent quest', () => {

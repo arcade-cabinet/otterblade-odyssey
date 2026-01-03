@@ -105,16 +105,17 @@ describe('Finn Renderer', () => {
 
   it('should apply bounce animation when moving', () => {
     const staticCalls = [];
-    drawFinn(mockCtx, { x: 0, y: 0 }, 1, 0, { moving: false });
+    drawFinn(mockCtx, { x: 0, y: 0 }, 1, 10, { moving: false });
     staticCalls.push([...mockCtx.ellipse.mock.calls]);
     mockCtx.ellipse.mockClear();
 
     const movingCalls = [];
-    drawFinn(mockCtx, { x: 0, y: 0 }, 1, 0, { moving: true });
+    drawFinn(mockCtx, { x: 0, y: 0 }, 1, 10, { moving: true });
     movingCalls.push([...mockCtx.ellipse.mock.calls]);
 
     // Y coordinates should differ when moving (bounce effect)
-    expect(staticCalls[0][0][1]).not.toEqual(movingCalls[0][0][1]);
+    // Check body ellipse (index 1) not shadow (index 0)
+    expect(staticCalls[0][1][1]).not.toEqual(movingCalls[0][1][1]);
   });
 
   it('should animate breathing over time', () => {
@@ -128,6 +129,7 @@ describe('Finn Renderer', () => {
     frame100Calls.push([...mockCtx.ellipse.mock.calls]);
 
     // Y coordinates should differ between frames (breathing animation)
-    expect(frame0Calls[0][0][1]).not.toEqual(frame100Calls[0][0][1]);
+    // Check body ellipse (index 1) not shadow (index 0)
+    expect(frame0Calls[0][1][1]).not.toEqual(frame100Calls[0][1][1]);
   });
 });
