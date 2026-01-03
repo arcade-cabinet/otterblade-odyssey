@@ -263,8 +263,8 @@ jobs:
           PLAN_BODY: ${{ steps.plan.outputs.plan }}
           PR_NUMBER: ${{ inputs.pr_number }}
           REPO: ${{ github.repository }}
-        run: |
-          TITLE="Equalizer Plan for PR #${PR_NUMBER}"
+          if ! gh api repos/"$REPO"/labels/equalizer-plan >/dev/null 2>&1; then
+            gh api -X POST repos/"$REPO"/labels \
 
           # Ensure tracking label exists (idempotent)
           if ! gh api repos/$REPO/labels/equalizer-plan >/dev/null 2>&1; then
