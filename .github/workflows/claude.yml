@@ -1,0 +1,69 @@
+name: Claude On-Demand Review/Fix
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-ref:
+        description: Git ref (branch or SHA) to review or fix
+        required: true
+        type: string
+        default: main
+      mode:
+        description: Choose Claude mode
+        required: true
+        type: choice
+        options:
+          - review
+          - fix
+        default: review
+      instructions:
+        description: Extra context or goals for Claude
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  id-token: write
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target ref
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ inputs.target-ref }}
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          version: 10.12.1
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@7145c3e0510bcdbdd29f67cc4a8c1958f1acfa2f # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          prompt: |
+            /${{ inputs.mode }}
+            Target ref: ${{ inputs.target-ref }}
+            Repository: ${{ github.repository }}
+
+            ${{ inputs.instructions }}
+          claude_args: >-
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(node:*),Bash(git:*),Bash(gh:*)"
