@@ -110,6 +110,15 @@ jobs:
           echo "$PROMPT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Load PR Manager Prompt
+        if: steps.check-key.outputs.available == 'true'
+        id: load-prompt
+        run: |
+          PROMPT=$(cat .github/prompts/pr-manager-prompt.md)
+          echo "prompt<<EOF" >> $GITHUB_OUTPUT
+          echo "$PROMPT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Run Claude PR Manager
         if: steps.check-key.outputs.available == 'true'
         uses: anthropics/claude-code-action@b17b541bbc4d94ffa42edf2e2384ffe702e59370
