@@ -86,14 +86,7 @@ function OtterbladeGameContent() {
 
     // Initialize chapter data
     const chapterId = currentChapter();
-    try {
-      const { manifest, spawnPoint } = initializeChapterData(chapterId);
-      // ... rest of initialization
-    } catch (error) {
-      console.error('Failed to initialize chapter:', error);
-      // Fallback to chapter 0 or show error screen
-      return;
-    }
+    const { manifest, spawnPoint } = initializeChapterData(chapterId);
 
     // Initialize quest system
     initializeQuests(manifest, setActiveQuest, setQuestObjectives);

@@ -401,7 +401,6 @@ export function buildEnemies(
               },
               onAlert: () => audioManager.playSFX('enemy_alert'),
               onAttack: () => {
-              onAttack: () => {
                 audioManager.playSFX('blade_swing', { rate: 0.9 });
                 const distance = Math.abs(player.position.x - enemyBody.position.x);
                 if (distance < 50) {
@@ -412,17 +411,6 @@ export function buildEnemies(
                   });
 
                   if (result?.parried) {
-                    playerController.onSuccessfulParry(enemyBody);
-                  }
-                }
-              },
-                if (Math.abs(player.position.x - enemyBody.position.x) < 50) {
-                  const result = playerController.takeDamage(enemyDef.damage || 1, {
-                    x: player.velocity.x + (player.position.x > enemyBody.position.x ? 5 : -5),
-                    y: -3,
-                  });
-
-                  if (result.parried) {
                     playerController.onSuccessfulParry(enemyBody);
                   }
                 }

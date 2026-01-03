@@ -367,9 +367,6 @@ export class GameState {
   deserialize(data) {
     if (!data) return;
 
-  deserialize(data) {
-    if (!data) return;
-
     // Safe property assignment - avoid prototype pollution
     const safeKeys = [
       'currentChapter', 'health', 'maxHealth', 'warmth', 'maxWarmth',
@@ -378,19 +375,15 @@ export class GameState {
       'defeatedEnemiesByType', 'enemyGroups', 'unlockedDoors',
       'playTime', 'deaths', 'lastCheckpoint', 'settings'
     ];
-    
+
     for (const key of safeKeys) {
-      if (data.hasOwnProperty(key)) {
+      if (Object.hasOwn(data, key)) {
         this[key] = data[key];
       }
     }
 
     this.gameTime = 0;
     this.listeners = [];
-    this.notify();
-  }
-    this.gameTime = 0; // Reset game time
-    this.listeners = []; // Don't restore listeners
     this.notify();
   }
 
@@ -421,13 +414,8 @@ export class GameState {
       const data = localStorage.getItem(`otterblade_save_${slot}`);
       if (!data) return false;
 
-  load(slot = 'default') {
-    try {
-      const data = localStorage.getItem(`otterblade_save_${slot}`);
-      if (!data) return false;
-
       const parsed = JSON.parse(data);
-      
+
       // Basic validation
       if (typeof parsed !== 'object' || parsed === null) {
         console.error('Invalid save data format');
@@ -435,12 +423,6 @@ export class GameState {
       }
 
       this.deserialize(parsed);
-      return true;
-    } catch (error) {
-      console.error('Failed to load game:', error);
-      return false;
-    }
-  }
       return true;
     } catch (error) {
       console.error('Failed to load game:', error);
