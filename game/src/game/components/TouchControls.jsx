@@ -45,7 +45,9 @@ export default function TouchControls(_props) {
           inputManager.setTouchJoystick(0, 0);
         });
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error('Failed to load nipplejs for touch controls:', error);
+      });
   });
 
   onCleanup(() => {

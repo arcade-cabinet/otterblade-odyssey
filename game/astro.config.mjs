@@ -9,8 +9,8 @@ const dataPath = fileURLToPath(new URL('./src/data', import.meta.url));
 
 export default defineConfig({
 	integrations: [solid()],
-	site: 'https://jbdevprimary.github.io/otterblade-odyssey',
-	base: '/otterblade-odyssey',
+	site: process.env.SITE_URL || 'http://localhost:4321',
+	base: process.env.BASE_PATH || '/',
 	server: {
 		host: true,
 		port: 4321,
