@@ -42,8 +42,8 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 // import chapterPlate from "@assets/...png";  // DO NOT USE
 ```
 
-### 4. JavaScript Target is ES2022
-Modern JavaScript features, ES modules. **Use JavaScript (not TypeScript)** for simplicity.
+### 4. Language is TypeScript (compiles to ES2022)
+Modern TypeScript features with ES2022 compilation target. **TypeScript provides type safety and better tooling** while compiling to vanilla JavaScript with zero runtime overhead. Types are stripped at build time, maintaining performance while providing compile-time safety.
 
 ### 5. Node.js Version is 25.x
 All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` at repo root. CI/CD workflows, Replit, and local dev must all align to this version.
