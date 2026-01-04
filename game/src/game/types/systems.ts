@@ -72,6 +72,9 @@ export interface InputSystem extends GameSystem {
     active: boolean;
     joystick: { x: number; y: number } | null;
   };
+  
+  // Methods
+  isPressed(key: string): boolean;
 }
 
 /**
@@ -82,6 +85,8 @@ export interface AISystem extends GameSystem {
   register(entity: any): void;
   unregister(entity: any): void;
   setTarget(entityId: string, target: Matter.Body): void;
+  enemies: Map<string, any>;
+  npcs: Map<string, any>;
 }
 
 /**

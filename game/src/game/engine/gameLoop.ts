@@ -4,51 +4,17 @@
  */
 
 import type * as Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
+import type { GameLoopParams, GameLoopController } from '../types/systems';
 
-const { Runner, Body } = Matter;
-
-interface GameLoopParams {
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  engine: Matter.Engine;
-  runner: Matter.Runner;
-  player: Matter.Body;
-  playerController: any; // TODO: Type this
-  playerRef: { position: { x: number; y: number } };
-  inputManager: any; // TODO: Type this
-  _audioManager: any;
-  aiManager: any; // TODO: Type this
-  bossAI: any; // TODO: Type this
-  enemyBodyMap: Map<string, Matter.Body>;
-  lanternSystem: any;
-  bellSystem: any;
-  hearthSystem: any;
-  hazardSystem: any;
-  movingPlatforms: Array<{ update: (delta: number) => void }>;
-  waterZones: Array<{ applyToBody: (body: Matter.Body, delta: number, state: any) => void }>;
-  flowPuzzles: Array<{ applyFlowToBody: (body: Matter.Body) => { x: number; y: number } | null }>;
-  timingSequences: Array<{ update: (delta: number) => void }>;
-  gameStateObj: any; // TODO: Type this
-  renderScene: (
-    ctx: CanvasRenderingContext2D,
-    camera: { x: number; y: number },
-    frame: number,
-    facing: number,
-    bossAI: any
-  ) => void;
-}
-
-interface GameLoop {
-  start: () => void;
-  stop: () => void;
-}
+const { Runner, Body } = getMatterModules();
 
 /**
  * Create game loop with proper delta time tracking
  */
-export function createGameLoop(params: GameLoopParams): GameLoop {
+export function createGameLoop(params: GameLoopParams): GameLoopController {
   const {
     canvas,
     ctx,
