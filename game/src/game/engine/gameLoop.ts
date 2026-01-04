@@ -3,17 +3,82 @@
  * Main update and render loop with proper delta time calculation
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
+import type Matter from 'matter-js';
 import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
 
+// Import Matter.js modules
+const { Runner, Body } = await import('matter-js').then(m => m.default);
+
+/**
+ * Camera configuration for following player
+ */
+interface Camera {
+  x: number;
+  y: number;
+}
+
+/**
+ * Game controls state
+ */
+interface Controls {
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  jump: boolean;
+  attack: boolean;
+  parry: boolean;
+  roll: boolean;
+  slink: boolean;
+  interact: boolean;
+}
+
+/**
+ * Game loop parameters interface
+ */
+interface GameLoopParams {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  engine: Matter.Engine;
+  runner: Matter.Runner;
+  player: Matter.Body;
+  playerController: any; // TODO: Type this properly
+  playerRef: { position: { x: number; y: number } };
+  inputManager: any; // TODO: Type this properly
+  _audioManager: any; // TODO: Type this properly
+  aiManager: any; // TODO: Type this properly
+  bossAI?: any; // TODO: Type this properly
+  enemyBodyMap: Map<string, Matter.Body>;
+  lanternSystem: any; // TODO: Type this properly
+  bellSystem: any; // TODO: Type this properly
+  hearthSystem: any; // TODO: Type this properly
+  hazardSystem: any; // TODO: Type this properly
+  movingPlatforms: Array<{ update: (deltaTime: number) => void }>;
+  waterZones: Array<any>; // TODO: Type this properly
+  flowPuzzles: Array<any>; // TODO: Type this properly
+  timingSequences: Array<{ update: (deltaTime: number) => void }>;
+  gameStateObj: any; // TODO: Type this properly
+  renderScene: (
+    ctx: CanvasRenderingContext2D,
+    camera: Camera,
+    animFrame: number,
+    playerFacing: number,
+    bossAI?: any
+  ) => void;
+}
+
+/**
+ * Game loop control interface
+ */
+interface GameLoopControl {
+  start: () => void;
+  stop: () => void;
+}
 
 /**
  * Create game loop with proper delta time tracking
- * @param {Object} params - Game loop parameters
- * @returns {Object} - { start, stop }
  */
-export function createGameLoop(params) {
+export function createGameLoop(params: GameLoopParams): GameLoopControl {
   const {
     canvas,
     ctx,
@@ -42,10 +107,10 @@ export function createGameLoop(params) {
   let animFrame = 0;
   let playerFacing = 1;
   let lastTime = performance.now();
-  let animationFrameId = null;
-  const camera = { x: 0, y: 0 };
+  let animationFrameId: number | null = null;
+  const camera: Camera = { x: 0, y: 0 };
 
-  function gameLoop(currentTime) {
+  function gameLoop(currentTime: number): void {
     if (!canvas || !ctx) return;
 
     // Proper delta time calculation (not fixed 16.67ms)
@@ -59,7 +124,7 @@ export function createGameLoop(params) {
     inputManager.update();
 
     // Get unified controls
-    const controls = {
+    const controls: Controls = {
       left: inputManager.isPressed('left'),
       right: inputManager.isPressed('right'),
       up: inputManager.isPressed('up'),
@@ -224,12 +289,12 @@ export function createGameLoop(params) {
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  function start() {
+  function start(): void {
     lastTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  function stop() {
+  function stop(): void {
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
       animationFrameId = null;

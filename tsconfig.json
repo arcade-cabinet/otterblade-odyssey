@@ -7,7 +7,7 @@
     "target": "ES2022",
     "noEmit": true,
     "module": "ESNext",
-    "strict": false,
+    "strict": true,
     "lib": ["ES2022", "dom", "dom.iterable"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
@@ -19,7 +19,8 @@
     "paths": {
       "@/*": ["./game/src/*"],
       "@shared/*": ["./shared/*"],
-      "@game/*": ["./game/src/*"]
+      "@game/*": ["./game/src/game/*"],
+      "@types/*": ["./game/src/game/types/*"]
     }
   }
 }
