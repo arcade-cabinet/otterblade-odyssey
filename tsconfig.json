@@ -7,19 +7,22 @@
     "target": "ES2022",
     "noEmit": true,
     "module": "ESNext",
-    "strict": false,
+    "strict": true,
     "lib": ["ES2022", "dom", "dom.iterable"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "types": ["node", "vite/client"],
+    "types": ["@types/node", "vite/client"],
     "paths": {
       "@/*": ["./game/src/*"],
       "@shared/*": ["./shared/*"],
-      "@game/*": ["./game/src/*"]
+      "@game/*": ["./game/src/*"],
+      "@types/*": ["./game/src/game/types/*"]
     }
   }
 }
