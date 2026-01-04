@@ -348,6 +348,8 @@ pnpm audit:cinematics
 | [AGENTS.md](./AGENTS.md) | Technical patterns for AI agents |
 | [IMPLEMENTATION.md](./IMPLEMENTATION.md) | Technical implementation guide |
 | [WORLD.md](./docs/WORLD.md) | Story, lore, and characters |
+| [AI.md](./docs/AI.md) | AI system overview and integration patterns |
+| [AI_REFERENCE.md](./docs/AI_REFERENCE.md) | Complete YUKA implementation examples and code patterns |
 | [COMPLETE_JOURNEY_VALIDATION.md](./docs/COMPLETE_JOURNEY_VALIDATION.md) | Testing architecture |
 
 ### Code Patterns
