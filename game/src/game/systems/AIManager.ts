@@ -46,7 +46,6 @@ class TypedState extends State {
   execute(_owner: EnemyVehicle): void {}
   exit(_owner: EnemyVehicle): void {}
 }
-}
 
 /**
  * Enemy AI States

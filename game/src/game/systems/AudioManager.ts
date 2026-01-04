@@ -112,7 +112,7 @@ class AudioManager implements AudioSystem {
    * Load chapter-specific audio from DDL manifest
    * Supports DDL format with media.musicTracks and media.ambientSounds
    */
-  loadChapterAudio(manifest: any): void {
+  loadChapterAudio(manifest: { media?: { musicTracks?: { exploration?: string; tension?: string; combat?: string; boss?: string; victory?: string }; ambientSounds?: string[] } }): void {
     if (!manifest.media) {
       console.warn('No media section in chapter manifest');
       return;
