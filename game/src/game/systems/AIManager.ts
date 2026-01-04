@@ -17,7 +17,7 @@ import {
   Vehicle,
   WanderBehavior,
 } from 'yuka';
-import type { AISystem } from '../types/systems';
+import type { AISystem, PatrolZone } from '../types/systems';
 import type * as Matter from 'matter-js';
 
 /**
@@ -33,7 +33,7 @@ interface EnemyVehicle extends Vehicle {
   hp: number;
   maxHp: number;
   stateMachine: StateMachine;
-  patrolZone?: any;
+  patrolZone?: PatrolZone;
   isWithinPatrolZone(): boolean;
   matterBody?: Matter.Body;
 }

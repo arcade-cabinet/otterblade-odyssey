@@ -6,7 +6,7 @@
 import type * as Matter from 'matter-js';
 import { drawBoss, drawEnemy, drawNPC } from '../rendering/enemies';
 import { drawFinn } from '../rendering/finn';
-import type { Camera, RenderContext, ChapterManifest, AISystem } from '../types';
+import type { Camera, RenderContext, ChapterManifest, AISystem, BossAI } from '../types';
 
 /**
  * Scene renderer parameters
@@ -36,7 +36,7 @@ type SceneRenderFunction = (
   camera: Camera,
   animFrame: number,
   playerFacing: number,
-  bossAI: any
+  bossAI: BossAI | null
 ) => void;
 
 /**

@@ -81,12 +81,34 @@ export interface InputSystem extends GameSystem {
  * AI System interface
  * Manages YUKA AI entities and behaviors
  */
+/**
+ * Input controls state
+ */
+export interface InputControls {
+  moveLeft: boolean;
+  moveRight: boolean;
+  jump: boolean;
+  attack: boolean;
+  interact: boolean;
+  pause: boolean;
+}
+
+/**
+ * Patrol zone definition for AI entities
+ */
+export interface PatrolZone {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface AISystem extends GameSystem {
-  register(entity: any): void;
-  unregister(entity: any): void;
+  register(entity: import('./ai').EnemyVehicle): void;
+  unregister(entity: import('./ai').EnemyVehicle): void;
   setTarget(entityId: string, target: Matter.Body): void;
-  enemies: Map<string, any>;
-  npcs: Map<string, any>;
+  enemies: Map<string, import('./ai').EnemyVehicle>;
+  npcs: Map<string, import('./ai').EnemyVehicle>;
 }
 
 /**
@@ -109,8 +131,12 @@ export interface AudioSystem extends GameSystem {
  * Player controller interface
  */
 export interface PlayerController {
-  update(controls: any, deltaTime: number): void;
+  update(controls: InputControls, deltaTime: number): void;
   takeDamage(amount: number, knockback?: { x: number; y: number }): void;
+  moveLeft(): void;
+  moveRight(): void;
+  jump(): void;
+  attack(): void;
 }
 
 /**

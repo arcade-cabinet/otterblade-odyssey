@@ -239,6 +239,17 @@ export interface NPC extends Entity {
 }
 
 /**
+ * Action parameters interface for triggers
+ */
+export interface ActionParams {
+  target?: string;
+  amount?: number;
+  duration?: number;
+  value?: string | number | boolean;
+  [key: string]: string | number | boolean | undefined;
+}
+
+/**
  * Trigger zone entity
  */
 export interface Trigger extends Entity {
@@ -254,7 +265,7 @@ export interface Trigger extends Entity {
   
   // Action
   action: string;
-  actionParams?: any;
+  actionParams?: ActionParams;
 }
 
 /**

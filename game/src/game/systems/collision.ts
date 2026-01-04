@@ -6,6 +6,18 @@
 import type * as Matter from 'matter-js';
 import { World } from 'matter-js';
 import { Vector3 } from 'yuka';
+import type { InputSystem, AudioSystem, PlayerController } from '../types/systems';
+
+/**
+ * Quest objective definition
+ */
+interface QuestObjective {
+  id: string;
+  description: string;
+  completed: boolean;
+  progress: number;
+  target: number;
+}
 
 /**
  * Collections interface
@@ -21,8 +33,8 @@ interface Collections {
  * Managers interface
  */
 interface Managers {
-  inputManager: any;
-  audioManager: any;
+  inputManager: InputSystem;
+  audioManager: AudioSystem;
 }
 
 /**
@@ -31,7 +43,7 @@ interface Managers {
 interface Setters {
   setHealth: (fn: (h: number) => number) => void;
   setShards: (fn: (s: number) => number) => void;
-  setQuestObjectives: (objectives: any) => void;
+  setQuestObjectives: (objectives: QuestObjective[]) => void;
 }
 
 /**
@@ -40,14 +52,14 @@ interface Setters {
 interface Getters {
   health: () => number;
   maxHealth: () => number;
-  questObjectives: () => any;
+  questObjectives: () => QuestObjective[];
 }
 
 /**
  * Controllers interface
  */
 interface Controllers {
-  _playerController: any;
+  _playerController: PlayerController;
 }
 
 /**
