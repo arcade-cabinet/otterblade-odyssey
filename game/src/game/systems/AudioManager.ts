@@ -110,89 +110,41 @@ class AudioManager implements AudioSystem {
 
   /**
    * Load chapter-specific audio from DDL manifest
-   * Supports DDL format with media.musicTracks and media.ambientSounds
+   * Fully DDL-compliant: loads complete paths from manifest, no hardcoded paths
    */
-  loadChapterAudio(manifest: { media?: { musicTracks?: { exploration?: string; tension?: string; combat?: string; boss?: string; victory?: string }; ambientSounds?: string[] } }): void {
+  loadChapterAudio(manifest: { media?: { musicTracks?: Record<string, { file: string; alternates?: string[]; volume?: number; loop?: boolean }>; ambientSounds?: Array<{ file: string; alternates?: string[]; volume?: number; loop?: boolean }> } }): void {
     if (!manifest.media) {
       console.warn('No media section in chapter manifest');
       return;
     }
 
-    // Load music tracks from DDL format
+    // Load music tracks from DDL format - uses complete file paths from manifest
     if (manifest.media.musicTracks) {
-      const { exploration, tension, combat, boss, victory } = manifest.media.musicTracks;
-
-      // Load exploration music
-      if (exploration && !this.music.has(exploration)) {
-        this.music.set(
-          exploration,
-          new Howl({
-            src: [`/audio/music/${exploration}.mp3`, `/audio/music/${exploration}.ogg`],
-            volume: this.volumes.music,
-            loop: true,
-          })
-        );
-      }
-
-      // Load tension music
-      if (tension && !this.music.has(tension)) {
-        this.music.set(
-          tension,
-          new Howl({
-            src: [`/audio/music/${tension}.mp3`, `/audio/music/${tension}.ogg`],
-            volume: this.volumes.music,
-            loop: true,
-          })
-        );
-      }
-
-      // Load combat music
-      if (combat && !this.music.has(combat)) {
-        this.music.set(
-          combat,
-          new Howl({
-            src: [`/audio/music/${combat}.mp3`, `/audio/music/${combat}.ogg`],
-            volume: this.volumes.music,
-            loop: true,
-          })
-        );
-      }
-
-      // Load boss music
-      if (boss && !this.music.has(boss)) {
-        this.music.set(
-          boss,
-          new Howl({
-            src: [`/audio/music/${boss}.mp3`, `/audio/music/${boss}.ogg`],
-            volume: this.volumes.music,
-            loop: true,
-          })
-        );
-      }
-
-      // Load victory music
-      if (victory && !this.music.has(victory)) {
-        this.music.set(
-          victory,
-          new Howl({
-            src: [`/audio/music/${victory}.mp3`, `/audio/music/${victory}.ogg`],
-            volume: this.volumes.music,
-            loop: false,
-          })
-        );
+      for (const [id, track] of Object.entries(manifest.media.musicTracks)) {
+        if (!this.music.has(id)) {
+          this.music.set(
+            id,
+            new Howl({
+              src: [track.file, ...(track.alternates || [])],
+              volume: this.volumes.music * (track.volume ?? 1.0),
+              loop: track.loop ?? true,
+            })
+          );
+        }
       }
     }
 
-    // Load ambient sounds from DDL format
+    // Load ambient sounds from DDL format - uses complete file paths from manifest
     if (manifest.media.ambientSounds) {
-      for (const ambientId of manifest.media.ambientSounds) {
-        if (!this.ambience.has(ambientId)) {
+      for (const ambient of manifest.media.ambientSounds) {
+        const id = ambient.file.split('/').pop()?.replace(/\.[^/.]+$/, '') || 'unknown';
+        if (!this.ambience.has(id)) {
           this.ambience.set(
-            ambientId,
+            id,
             new Howl({
-              src: [`/audio/ambient/${ambientId}.mp3`, `/audio/ambient/${ambientId}.ogg`],
-              volume: this.volumes.ambient,
-              loop: true,
+              src: [ambient.file, ...(ambient.alternates || [])],
+              volume: this.volumes.ambient * (ambient.volume ?? 1.0),
+              loop: ambient.loop ?? true,
             })
           );
         }
