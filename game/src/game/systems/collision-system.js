@@ -6,9 +6,8 @@
  * @module systems/collision-system
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 
-const { Events } = Matter;
 
 /**
  * Collision System class

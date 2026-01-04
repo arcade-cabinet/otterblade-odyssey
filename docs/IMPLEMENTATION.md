@@ -72,7 +72,7 @@ The legacy `client/` React/Vite/ECS code is frozen; only the JSON data remains c
 
 - [x] Loader functions fetch data from `client/src/data/**/*.json`.
 - [ ] Systems accept manifest-derived configs (no magic numbers).
-- [ ] Canvas renderers are pure and side-effect free beyond drawing.
+- [ ] Canvas renderers are pure and side-effect-free beyond drawing.
 - [ ] Solid components stay <200 lines and focus on composition.
 - [ ] Biome passes locally (`pnpm biome check .`).
 - [ ] No React/Rapier/Miniplex imports in new code.

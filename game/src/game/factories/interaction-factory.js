@@ -6,9 +6,8 @@
  * @module factories/interaction-factory
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 
-const { Bodies, World } = Matter;
 
 /**
  * Build interactions for a chapter

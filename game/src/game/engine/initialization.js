@@ -3,7 +3,7 @@
  * Handles level loading, entity spawning, and system setup from DDL manifests
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { ZephyrosAI } from '../ai/BossAI';
 import { hearingSystem } from '../ai/PerceptionSystem';
@@ -16,8 +16,6 @@ import {
 } from '../data/chapter-loaders';
 import { FlowPuzzle, TimingSequence } from '../environment/EnvironmentalSystems';
 import { createPlatform, MovingPlatform, WaterZone } from '../physics/PhysicsManager';
-
-const { World, Bodies } = Matter;
 
 /**
  * Initialize chapter data and manifest
@@ -122,6 +120,7 @@ export function buildLevelGeometry(
   flowPuzzles,
   timingSequences
 ) {
+  const { World } = getMatterModules();
   if (!manifest.level?.segments) return;
 
   for (const segment of manifest.level.segments) {
@@ -293,6 +292,7 @@ export function buildLevelGeometry(
  * @returns {Map} - NPC bodies map
  */
 export function buildNPCs(chapterId, engine, aiManager) {
+  const { World, Bodies } = getMatterModules();
   const npcBodies = new Map();
 
   try {
@@ -342,6 +342,7 @@ export function buildEnemies(
   playerController,
   player
 ) {
+  const { World, Bodies } = getMatterModules();
   const enemyBodyMap = new Map();
   let bossAI = null;
 
@@ -447,6 +448,7 @@ export function buildEnemies(
  * @returns {Object} - { interactions, collectibles }
  */
 export function buildInteractionsAndCollectibles(chapterId, engine, manifest) {
+  const { World, Bodies } = getMatterModules();
   const interactions = [];
   const collectibles = [];
 

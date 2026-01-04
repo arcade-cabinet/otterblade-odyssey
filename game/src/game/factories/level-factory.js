@@ -7,8 +7,8 @@
  * @module factories/level-factory
  */
 
-import Matter from 'matter-js';
-import { getChapterSpawnPoint, loadChapterManifest } from '../data/chapter-loaders';
+import { getMatterModules } from '../physics/matter-wrapper';
+import { getChapterManifestSync } from '../../../ddl/loader';
 import {
   createPlatform,
   HazardSystem,
@@ -16,7 +16,6 @@ import {
   WaterZone,
 } from '../physics/PhysicsManager.js';
 
-const { World, Bodies } = Matter;
 
 /**
  * Build a complete level from a chapter manifest
@@ -34,9 +33,9 @@ export function buildLevel(chapterId, engine) {
     throw new Error('Invalid Matter.js engine provided to buildLevel');
   }
 
-  // Load chapter manifest from DDL
-  const manifest = loadChapterManifest(chapterId);
-  const spawnPoint = getChapterSpawnPoint(chapterId);
+  // Load chapter manifest from DDL using sync accessor
+  const manifest = getChapterManifestSync(chapterId);
+  const spawnPoint = manifest.level?.spawnPoint || { x: 100, y: 300 };
 
   const level = {
     id: chapterId,

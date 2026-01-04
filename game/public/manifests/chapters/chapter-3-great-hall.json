@@ -128,8 +128,8 @@
           ]
         }
       ],
-
-      "givesQuest": "quest_great_hall"
+      
+      "givesQuest": "quest_defend_hall"
     },
     {
       "id": "young_mouse_1",

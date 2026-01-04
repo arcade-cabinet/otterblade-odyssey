@@ -4,10 +4,9 @@
  * parry/riposte, combat system per WORLD.md and PHYSICS.md
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { checkGrounded, createAttackHitbox, PLAYER_PHYSICS } from './PhysicsManager';
 
-const { Body } = Matter;
 
 /**
  * Player movement and combat controller

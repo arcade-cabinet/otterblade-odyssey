@@ -13,6 +13,8 @@
   },
   "assets": [
     {
+      "type": "chapter-plate",
+      "type": "chapter-plate",
       "id": "chapter_plate_prologue",
       "name": "Prologue - The Calling",
       "filename": "prologue_village_chapter_plate.png",
@@ -33,6 +35,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_1",
       "name": "Chapter 1 - River Path",
       "filename": "abbey_approach_chapter_plate.png",
@@ -52,6 +55,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_2",
       "name": "Chapter 2 - Gatehouse Bridge",
       "filename": "gatehouse_bridge_chapter_plate.png",
@@ -71,6 +75,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_3",
       "name": "Chapter 3 - Great Hall Oath",
       "filename": "great_hall_oath_chapter_plate.png",
@@ -90,6 +95,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_4",
       "name": "Chapter 4 - Library Map Table",
       "filename": "library_map_table_chapter_plate.png",
@@ -109,6 +115,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_5",
       "name": "Chapter 5 - Dungeon Descent",
       "filename": "dungeon_descent_chapter_plate.png",
@@ -128,6 +135,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_6",
       "name": "Chapter 6 - Courtyard Rally",
       "filename": "courtyard_rally_chapter_plate.png",
@@ -147,6 +155,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_7",
       "name": "Chapter 7 - Rooftop Wind",
       "filename": "rooftop_wind_chapter_plate.png",
@@ -166,6 +175,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_8",
       "name": "Chapter 8 - Final Ascent",
       "filename": "final_ascent_chapter_plate.png",
@@ -186,6 +196,7 @@
       }
     },
     {
+      "type": "chapter-plate",
       "id": "chapter_plate_epilogue",
       "name": "Epilogue - Victory",
       "filename": "epilogue_victory_chapter_plate.png",

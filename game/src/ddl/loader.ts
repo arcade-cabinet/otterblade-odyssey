@@ -5,7 +5,7 @@
  * All game content is defined in JSON manifests and loaded at runtime via fetch.
  *
  * Architecture:
- * - Manifests live in /data/manifests/ (served from game/public/)
+ * - Manifests live in /manifests/ (served from game/public/)
  * - Async loading with caching for performance
  * - Zod validation for type safety
  * - Preload support for game initialization
@@ -98,10 +98,10 @@ export function getCacheStats(): {
 // ============================================================================
 
 /**
- * Base manifest loader that fetches JSON from /data/manifests/ paths.
+ * Base manifest loader that fetches JSON from /manifests/ paths.
  * Handles caching and provides descriptive errors.
  *
- * @param path - Relative path from /data/manifests/ (e.g., "enemies.json")
+ * @param path - Relative path from /manifests/ (e.g., "enemies.json")
  * @returns Parsed JSON data
  * @throws Error if fetch fails or JSON is invalid
  */
@@ -112,7 +112,7 @@ async function loadManifest(path: string): Promise<unknown> {
   }
 
   // Construct full fetch path
-  const fetchPath = `/data/manifests/${path}`;
+  const fetchPath = `/manifests/${path}`;
 
   try {
     const response = await fetch(fetchPath);
@@ -173,13 +173,8 @@ const CHAPTER_FILENAMES: Record<number, string> = {
  * ```
  */
 export async function loadChapterManifest(chapterId: number): Promise<ChapterManifest> {
-  if (
-    typeof chapterId !== 'number' ||
-    !Number.isInteger(chapterId) ||
-    chapterId < 0 ||
-    chapterId >= TOTAL_CHAPTERS
-  ) {
-    throw new Error(`Invalid chapter ID: ${chapterId}.`);
+  if (typeof chapterId !== 'number' || Number.isNaN(chapterId) || chapterId < 0 || chapterId > 9 || !Number.isInteger(chapterId)) {
+    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
   }
 
   const path = CHAPTER_FILENAMES[chapterId];
@@ -193,7 +188,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
   }
 
   // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
-  const fetchPath = `/data/manifests/${path}`;
+  const fetchPath = `/manifests/${path}`;
   const response = await fetch(fetchPath);
 
   if (!response.ok) {
@@ -237,8 +232,16 @@ export function getChapterManifestSync(chapterId: number): ChapterManifest {
     );
   }
 
-  // Data was already validated during load - trust the cache
-  return manifestCache.get(path) as ChapterManifest;
+  const cachedData = manifestCache.get(path);
+
+  // Runtime type guard: Validate cached data structure
+  const result = ChapterManifestSchema.safeParse(cachedData);
+  if (!result.success) {
+    const error = fromError(result.error);
+    throw new Error(`Corrupted chapter-${chapterId} manifest in cache: ${error.message}`);
+  }
+
+  return result.data;
 }
 
 // ============================================================================
@@ -622,7 +625,7 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
 
   // Preload chapters
   if (manifestTypes.includes('chapters')) {
-    for (let i = 0; i < TOTAL_CHAPTERS; i++) {
+    for (let i = 0; i <= 9; i++) {
       loaders.push(
         loadChapterManifest(i)
           .then(() => {
@@ -717,7 +720,7 @@ export const TOTAL_CHAPTERS = 10;
  * Checks if a chapter ID is valid.
  */
 export function isValidChapterId(chapterId: number): boolean {
-  return Number.isInteger(chapterId) && chapterId >= 0 && chapterId < TOTAL_CHAPTERS;
+  return Number.isInteger(chapterId) && chapterId >= 0 && chapterId <= 9;
 }
 
 /**

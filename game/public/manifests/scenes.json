@@ -6,6 +6,8 @@
   "outputDir": "game/src/assets/images",
   "assets": [
     {
+      "type": "scene",
+      "type": "scene",
       "id": "parallax_village",
       "name": "Village Morning Parallax",
       "filename": "parallax/village_morning_parallax_background.png",
@@ -23,6 +25,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_abbey_exterior",
       "name": "Abbey Exterior Parallax",
       "filename": "parallax/abbey_exterior_parallax_background.png",
@@ -40,6 +43,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_abbey_interior",
       "name": "Abbey Interior Parallax",
       "filename": "parallax/abbey_interior_parallax_background.png",
@@ -57,6 +61,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_dungeon",
       "name": "Dungeon Parallax",
       "filename": "parallax/dungeon_parallax_background.png",
@@ -74,6 +79,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_courtyard",
       "name": "Courtyard Parallax",
       "filename": "parallax/courtyard_parallax_background.png",
@@ -91,6 +97,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_rooftops",
       "name": "Rooftops Parallax",
       "filename": "parallax/rooftops_parallax_background.png",
@@ -108,6 +115,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_outer_ruins",
       "name": "Outer Ruins Parallax",
       "filename": "parallax/outer_ruins_parallax_background.png",
@@ -125,6 +133,7 @@
       }
     },
     {
+      "type": "scene",
       "id": "parallax_new_dawn",
       "name": "New Dawn Hall Parallax",
       "filename": "parallax/new_dawn_hall_parallax_background.png",

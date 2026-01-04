@@ -231,5 +231,8 @@ class InputManager {
   }
 }
 
-// Export singleton instance
-export const inputManager = new InputManager();
+// Export singleton instance (lazy initialization for SSR compatibility)
+let _instance = null;
+export const inputManager = typeof window !== 'undefined' 
+  ? new InputManager() 
+  : null;

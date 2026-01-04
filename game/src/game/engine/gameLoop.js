@@ -3,11 +3,10 @@
  * Main update and render loop with proper delta time calculation
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
 
-const { Body, Runner } = Matter;
 
 /**
  * Create game loop with proper delta time tracking

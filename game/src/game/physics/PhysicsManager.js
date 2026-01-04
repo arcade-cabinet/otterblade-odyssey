@@ -4,9 +4,8 @@
  * water physics, hazards, and platform varieties per PHYSICS.md
  */
 
-import Matter from 'matter-js';
+import { getMatterModules } from '../physics/matter-wrapper';
 
-const { Engine, Bodies, Body, Query, Composite, Sleeping } = Matter;
 
 // Collision category bitmasks (PHYSICS.md:100-154)
 export const COLLISION_GROUPS = {
@@ -48,6 +47,7 @@ export const COLLISION_MASKS = {
  * Creates physics engine with otter-appropriate gravity
  */
 export function createPhysicsEngine() {
+  const { Engine } = getMatterModules();
   const engine = Engine.create({
     gravity: { x: 0, y: 1.5 }, // POC-proven value
     enableSleeping: false,
@@ -63,6 +63,7 @@ export function createPhysicsEngine() {
  * Creates Finn's compound body with head/torso/feet sensors (PHYSICS.md:173-214)
  */
 export function createFinnBody(x, y) {
+  const { Bodies, Body } = getMatterModules();
   // Main torso
   const torso = Bodies.rectangle(0, 0, 28, 40, {
     label: 'finn_torso',

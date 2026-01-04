@@ -49,16 +49,11 @@ export default function LoadingScreen(props) {
           overflow: 'hidden',
           'margin-bottom': '1rem',
         }}
-        role="progressbar"
-        aria-valuenow={props.progress || 0}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label="Loading progress"
       >
         <div
           class="loading-bar"
           style={{
-            width: `${props.progress || 0}%`,
+            width: `${Math.max(0, Math.min(100, props.progress || 0))}%`,
             height: '100%',
             background: 'linear-gradient(90deg, #D4A574 0%, #E5C9A8 100%)',
             'border-radius': '2px',
