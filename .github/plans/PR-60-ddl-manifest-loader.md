@@ -8,20 +8,25 @@
 
 ## Executive Summary
 
-Implement fetch-based DDL manifest loader with JavaScript monolith architecture. Core loader complete (✅), but critical game initialization failure blocks completion (❌).
+Implement fetch-based DDL manifest loader with TypeScript → JavaScript compilation. Core loader complete (✅). **NEW:** Migrating to TypeScript for type safety while preserving vanilla JavaScript performance.
+
+**Related Plan:** [TypeScript Migration Plan](.github/plans/TYPESCRIPT_MIGRATION.md)
 
 ## Critical Path
 
 ```mermaid
 graph LR
     A[Phase 1: Fix Matter.js] --> B[Phase 2: Complete Monolith]
-    B --> C[Phase 3: Integration]
-    C --> D[Phase 4: Documentation]
-    D --> E[Phase 5: Testing]
-    E --> F[✅ Ready for Merge]
+    B --> C[Phase 3: TypeScript Migration]
+    C --> D[Phase 4: Integration]
+    D --> E[Phase 5: Documentation]
+    E --> F[Phase 6: Testing]
+    F --> G[✅ Ready for Merge]
     
-    style A fill:#f96,stroke:#333,stroke-width:4px
-    style F fill:#9f6,stroke:#333,stroke-width:2px
+    style A fill:#9f6,stroke:#333,stroke-width:2px
+    style B fill:#9f6,stroke:#333,stroke-width:2px
+    style C fill:#ff6,stroke:#333,stroke-width:4px
+    style G fill:#9f6,stroke:#333,stroke-width:2px
 ```
 
 ## Phase 1: Matter.js Resolution (BLOCKER) 🔴
@@ -312,7 +317,108 @@ dist/_astro/OtterbladeGame.DsLtAIaV.js  105.21 kB │ gzip: 30.40 kB
 ✓ Complete!
 ```
 
-## Phase 3-5: Integration, Documentation, Testing
+## Phase 3: TypeScript Migration ✨ NEW
+
+**Status:** 🟡 IN PROGRESS  
+**Priority:** HIGH  
+**Owner:** @copilot  
+**Dependencies:** Phase 2 complete  
+**Estimated:** 6 weeks  
+**Detailed Plan:** [TypeScript Migration Plan](./TYPESCRIPT_MIGRATION.md)
+
+### Overview
+
+Migrate game engine from JavaScript monoliths to TypeScript with ES2022 compilation. Provides type safety for DDL manifests, Matter.js bodies, and YUKA entities while **preserving vanilla JavaScript performance**.
+
+**Key Benefits:**
+- Type-safe manifest loading
+- Catch bugs at compile time (typos in body labels, invalid AI states)
+- Full IDE autocomplete for Canvas API, Physics, AI
+- Self-documenting code through interfaces
+- Zero runtime overhead (types stripped at build)
+
+### Tasks
+
+#### Task 3.1: Type Definitions
+
+**Acceptance Criteria:**
+- [ ] Create `game/src/game/types/` directory structure
+- [ ] Define System interfaces (GameSystem, PhysicsSystem, etc.)
+- [ ] Define Entity types (Player, Enemy, Platform, Item)
+- [ ] Extract manifest types from Zod schemas
+- [ ] Add Matter.js body type guards
+- [ ] Document YUKA entity interfaces
+
+**Files to Create:**
+```
+game/src/game/types/
+├── systems.ts          # System interfaces
+├── entities.ts         # Entity types
+├── manifests.ts        # DDL manifest types
+├── physics.ts          # Matter.js body types
+├── ai.ts               # YUKA entity types
+└── canvas.ts           # Canvas rendering types
+```
+
+#### Task 3.2: Engine Core Migration
+
+**Acceptance Criteria:**
+- [ ] Migrate `gameLoop.js` → `gameLoop.ts`
+- [ ] Migrate `rendering.js` → `rendering.ts`
+- [ ] Migrate `physics.js` → `physics.ts`
+- [ ] Migrate `initialization.js` → `initialization.ts`
+- [ ] Update imports in consuming files
+- [ ] Verify `pnpm dev` still works
+
+#### Task 3.3: Systems Migration
+
+**Acceptance Criteria:**
+- [ ] Migrate `systems/collision.js` → `collision.ts`
+- [ ] Migrate `systems/AIManager.js` → `AIManager.ts`
+- [ ] Migrate `systems/input.js` → `input.ts`
+- [ ] Migrate `systems/audio.js` → `audio.ts`
+- [ ] Add type-safe event handlers
+- [ ] Test all systems with `tsc --noEmit`
+
+#### Task 3.4: Entities & Factories
+
+**Acceptance Criteria:**
+- [ ] Create typed entity factories
+- [ ] Migrate `entities/Player.js` → `Player.ts`
+- [ ] Migrate `entities/Enemy.js` → `Enemy.ts`
+- [ ] Add runtime type guards (isPlayer, isEnemy)
+- [ ] Update entity creation in level builder
+
+#### Task 3.5: Monolith Decomposition
+
+**Acceptance Criteria:**
+- [ ] Extract CameraSystem from `game-monolith.js`
+- [ ] Extract ParticleSystem from `game-monolith.js`
+- [ ] Extract NPCSystem from `game-monolith.js`
+- [ ] Extract all 32 systems to TypeScript modules
+- [ ] Delete `game-monolith.js` when complete
+- [ ] Verify production build size unchanged
+
+### Evidence Requirements
+
+Each task requires:
+- [ ] Screenshot of TypeScript compilation success
+- [ ] `tsc --noEmit` output showing no errors
+- [ ] Production bundle size comparison
+- [ ] Video of game running with TypeScript-compiled code
+- [ ] Console log showing no runtime errors
+
+### Phase Success Criteria
+
+- ✅ All game code migrated to TypeScript
+- ✅ Zero TypeScript compilation errors
+- ✅ Zero performance regression
+- ✅ Same bundle size (±5KB acceptable)
+- ✅ Full IDE autocomplete working
+- ✅ Type-safe DDL manifest loading
+- ✅ Documentation updated with TypeScript examples
+
+## Phase 4: Integration ✅ COMPLETE
 
 See full phase breakdown in plan. Each has tasks with acceptance criteria and evidence requirements.
 
