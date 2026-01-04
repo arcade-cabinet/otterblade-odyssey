@@ -264,7 +264,15 @@ export function createPlatform(config: PlatformConfig): Matter.Body {
 /**
  * Creates temporary attack hitbox (PHYSICS.md:664-714)
  */
-export function createAttackHitbox(source, offsetX, offsetY, width, height, damage, knockback) {
+export function createAttackHitbox(
+  source: Matter.Body & { facingDirection?: number; label?: string },
+  offsetX: number,
+  offsetY: number,
+  width: number,
+  height: number,
+  damage: number,
+  knockback: { x: number; y: number }
+): Matter.Body & { damage: number; knockback: { x: number; y: number }; source: Matter.Body } {
   const facing = source.facingDirection || 1;
 
   const hitbox = Bodies.rectangle(
@@ -294,14 +302,28 @@ export function createAttackHitbox(source, offsetX, offsetY, width, height, dama
  * Water zone physics (PHYSICS.md:844-902)
  */
 export class WaterZone {
-  constructor(region, buoyancy = 0.01, drag = 0.15, warmthDrain = 0.5) {
+  region: { x: number; y: number; width: number; height: number };
+  buoyancy: number;
+  drag: number;
+  warmthDrain: number;
+
+  constructor(
+    region: { x: number; y: number; width: number; height: number },
+    buoyancy: number = 0.01,
+    drag: number = 0.15,
+    warmthDrain: number = 0.5
+  ) {
     this.region = region; // { x, y, width, height }
     this.buoyancy = buoyancy;
     this.drag = drag;
     this.warmthDrain = warmthDrain;
   }
 
-  applyToBody(body, delta, gameState) {
+  applyToBody(
+    body: Matter.Body & { label?: string; isInWater?: boolean; swimTimer?: number },
+    delta: number,
+    gameState?: { drainWarmth(amount: number): void }
+  ): void {
     const submergedRatio = this.calculateSubmergedRatio(body.bounds);
 
     if (submergedRatio <= 0) return;
@@ -329,7 +351,7 @@ export class WaterZone {
     }
   }
 
-  calculateSubmergedRatio(bounds) {
+  calculateSubmergedRatio(bounds: Matter.Bounds): number {
     const bodyTop = bounds.min.y;
     const bodyBottom = bounds.max.y;
     const bodyHeight = bodyBottom - bodyTop;
@@ -345,7 +367,7 @@ export class WaterZone {
     return (submergedBottom - submergedTop) / bodyHeight;
   }
 
-  contains(x, y) {
+  contains(x: number, y: number): boolean {
     return (
       x >= this.region.x &&
       x <= this.region.x + this.region.width &&
@@ -358,12 +380,29 @@ export class WaterZone {
 /**
  * Hazard system (PHYSICS.md:792-838)
  */
+interface Hazard {
+  type: 'spikes' | 'frost_trap' | 'fire';
+  region: { x: number; y: number; width: number; height: number };
+  damage: number;
+  cooldown: number;
+  warmthDrain: number;
+  lastDamageTime: number;
+}
+
 export class HazardSystem {
+  hazards: Hazard[];
+
   constructor() {
     this.hazards = [];
   }
 
-  addHazard(type, region, damage, cooldown = 1000, warmthDrain = 0) {
+  addHazard(
+    type: 'spikes' | 'frost_trap' | 'fire',
+    region: { x: number; y: number; width: number; height: number },
+    damage: number,
+    cooldown: number = 1000,
+    warmthDrain: number = 0
+  ): void {
     this.hazards.push({
       type, // 'spikes' | 'frost_trap' | 'fire'
       region, // { x, y, width, height }
@@ -374,7 +413,10 @@ export class HazardSystem {
     });
   }
 
-  checkCollisions(player, gameState) {
+  checkCollisions(
+    player: Matter.Body & { isInvulnerable?: boolean; slowedUntil?: number },
+    gameState: { takeDamage(amount: number): void; drainWarmth(amount: number): void; restoreWarmth(amount: number): void }
+  ): void {
     if (player.isInvulnerable) return;
 
     const now = performance.now();
@@ -391,7 +433,7 @@ export class HazardSystem {
     }
   }
 
-  isBodyInRegion(body, region) {
+  isBodyInRegion(body: Matter.Body, region: { x: number; y: number; width: number; height: number }): boolean {
     const { x, y } = body.position;
     return (
       x >= region.x &&
@@ -401,7 +443,11 @@ export class HazardSystem {
     );
   }
 
-  applyHazardEffect(player, hazard, gameState) {
+  applyHazardEffect(
+    player: Matter.Body & { slowedUntil?: number },
+    hazard: Hazard,
+    gameState: { takeDamage(amount: number): void; drainWarmth(amount: number): void; restoreWarmth(amount: number): void }
+  ): void {
     switch (hazard.type) {
       case 'spikes':
         gameState.takeDamage(hazard.damage);
@@ -425,8 +471,26 @@ export class HazardSystem {
 /**
  * Moving platform system (PHYSICS.md:432-511)
  */
+interface MovingPlatformConfig {
+  waypoints: Matter.Vector[];
+  speed: number;
+  waitTime?: number;
+  loop?: boolean;
+  type?: string;
+  [key: string]: any;
+}
+
 export class MovingPlatform {
-  constructor(config) {
+  body: Matter.Body;
+  waypoints: Matter.Vector[];
+  currentWaypoint: number;
+  speed: number;
+  waitTime: number;
+  waitTimer: number;
+  loop: boolean;
+  riders: Set<Matter.Body>;
+
+  constructor(config: MovingPlatformConfig) {
     this.body = createPlatform({ ...config, type: 'wood' });
     this.body.isStatic = false;
     this.body.isSleeping = false;
@@ -442,7 +506,7 @@ export class MovingPlatform {
     Body.setPosition(this.body, this.waypoints[0]);
   }
 
-  update(delta) {
+  update(delta: number): void {
     if (this.waitTimer > 0) {
       this.waitTimer -= delta;
       Body.setVelocity(this.body, { x: 0, y: 0 });
@@ -479,11 +543,11 @@ export class MovingPlatform {
     }
   }
 
-  addRider(body) {
+  addRider(body: Matter.Body): void {
     this.riders.add(body);
   }
 
-  removeRider(body) {
+  removeRider(body: Matter.Body): void {
     this.riders.delete(body);
   }
 }
@@ -506,7 +570,10 @@ export const PLAYER_PHYSICS = {
 /**
  * Check if player is grounded using feet sensor
  */
-export function checkGrounded(player, engine) {
+export function checkGrounded(
+  player: Matter.Body & { parts: Matter.Body[] },
+  engine: Matter.Engine
+): boolean {
   const feet = player.parts.find((p) => p.label === 'finn_feet');
   if (!feet) return false;
 
@@ -523,7 +590,10 @@ export function checkGrounded(player, engine) {
 /**
  * Update active region for performance (PHYSICS.md:916-940)
  */
-export function updateActiveRegion(engine, playerPos) {
+export function updateActiveRegion(
+  engine: Matter.Engine,
+  playerPos: { x: number; y: number }
+): void {
   const ACTIVE_RADIUS = 1000;
   const allBodies = Composite.allBodies(engine.world);
 
