@@ -32,13 +32,15 @@ interface TouchState {
 class InputManager implements InputSystem {
   name = 'InputManager';
   
-  keys: Record<string, boolean> = {};
-  gamepad: Gamepad | null = null;
-  touch: TouchState = {
+  // Private internal state
+  private keys: Record<string, boolean> = {};
+  private gamepadInstance: Gamepad | null = null;
+  private touchState: TouchState = {
     joystick: { x: 0, y: 0 },
     buttons: {},
   };
 
+  // Public interface (matches InputSystem)
   keyboard = {
     left: false,
     right: false,
@@ -72,12 +74,6 @@ class InputManager implements InputSystem {
 
   // Previous frame state for edge detection
   prevState: InputState = { ...this.state };
-
-  private gamepadInstance: Gamepad | null = null;
-  private touchState: TouchState = {
-    joystick: { x: 0, y: 0 },
-    buttons: {},
-  };
 
   constructor() {
     this.init();
