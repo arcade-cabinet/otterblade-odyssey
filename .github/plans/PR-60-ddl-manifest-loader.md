@@ -349,6 +349,38 @@ Migrate game engine from JavaScript monoliths to TypeScript with ES2022 compilat
 - [ ] Add Matter.js body type guards
 - [ ] Document YUKA entity interfaces
 
+## Phase 3: TypeScript Migration ✨ NEW
+
+**Status:** 🟡 IN PROGRESS
+**Priority:** HIGH
+**Owner:** @copilot
+**Dependencies:** Phase 2 complete
+**Estimated:** 6 weeks
+**Detailed Plan:** [TypeScript Migration Plan](./TYPESCRIPT_MIGRATION.md)
+
+### Overview
+
+Migrate game engine from JavaScript monoliths to TypeScript with ES2022 compilation. Provides type safety for DDL manifests, Matter.js bodies, and YUKA entities while **preserving vanilla JavaScript performance**.
+
+**Key Benefits:**
+- Type-safe manifest loading
+- Catch bugs at compile time (typos in body labels, invalid AI states)
+- Full IDE autocomplete for Canvas API, Physics, AI
+- Self-documenting code through interfaces
+- Zero runtime overhead (types stripped at build)
+
+### Tasks
+
+#### Task 3.1: Type Definitions
+
+**Acceptance Criteria:**
+- [ ] Create `game/src/game/types/` directory structure
+- [ ] Define System interfaces (GameSystem, PhysicsSystem, etc.)
+- [ ] Define Entity types (Player, Enemy, Platform, Item)
+- [ ] Extract manifest types from Zod schemas
+- [ ] Add Matter.js body type guards
+- [ ] Document YUKA entity interfaces
+
 **Files to Create:**
 ```
 game/src/game/types/
