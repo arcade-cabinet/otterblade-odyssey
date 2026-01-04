@@ -45,12 +45,15 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
   let lastTime = performance.now();
   let animationFrameId: number | null = null;
   const camera = { x: 0, y: 0 };
+  
+  // Max delta to prevent spiral of death when frame rate drops
+  const MAX_DELTA_MS = 100;
 
   function gameLoop(currentTime: number): void {
     if (!canvas || !ctx) return;
 
     // Proper delta time calculation (not fixed 16.67ms)
-    const delta = Math.min(currentTime - lastTime, 100); // Cap at 100ms to prevent spiral of death
+    const delta = Math.min(currentTime - lastTime, MAX_DELTA_MS); // Cap at 100ms to prevent spiral of death
     lastTime = currentTime;
     const deltaSec = delta / 1000;
 

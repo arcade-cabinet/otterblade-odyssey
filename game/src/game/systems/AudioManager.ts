@@ -2,10 +2,12 @@
  * AudioManager.ts
  * Howler.js-based audio system with DDL integration
  * Implements proper audio management per CLAUDE.md line 63
+ * Loads all audio from DDL manifests per CLAUDE.md lines 112-114
  */
 
 import { Howl, Howler } from 'howler';
 import type { AudioSystem } from '../types/systems';
+import type { SoundManifest } from '../types/manifests';
 
 /**
  * Volume configuration
@@ -23,7 +25,7 @@ interface VolumeConfig {
 class AudioManager implements AudioSystem {
   name = 'AudioManager';
   
-  music: Howl | null = null;
+  music: Map<string, Howl> = new Map();
   sfx: Map<string, Howl> = new Map();
   ambience: Map<string, Howl> = new Map();
 
@@ -49,121 +51,71 @@ class AudioManager implements AudioSystem {
   init(): void {
     // Set master volume
     Howler.volume(this.volumes.master);
-
-    // Preload common sounds
-    this.preloadCommonSounds();
   }
 
-  preloadCommonSounds(): void {
-    // Footstep sounds
-    this.sfx.set(
-      'footstep',
-      new Howl({
-        src: ['/audio/sfx/footstep.mp3', '/audio/sfx/footstep.webm'],
-        volume: this.volumes.sfx * 0.3,
-        sprite: {
-          step1: [0, 200],
-          step2: [200, 200],
-          step3: [400, 200],
-        },
-      })
-    );
-
-    // Blade sounds
-    this.sfx.set(
-      'blade_swing',
-      new Howl({
-        src: ['/audio/sfx/blade_swing.mp3'],
-        volume: this.volumes.sfx * 0.6,
-        rate: 1.2,
-      })
-    );
-
-    this.sfx.set(
-      'blade_hit',
-      new Howl({
-        src: ['/audio/sfx/blade_hit.mp3'],
-        volume: this.volumes.sfx * 0.7,
-      })
-    );
-
-    // UI sounds
-    this.sfx.set(
-      'menu_select',
-      new Howl({
-        src: ['/audio/sfx/menu_select.mp3'],
-        volume: this.volumes.sfx * 0.5,
-      })
-    );
-
-    this.sfx.set(
-      'door_open',
-      new Howl({
-        src: ['/audio/sfx/door_open.mp3'],
-        volume: this.volumes.sfx * 0.6,
-      })
-    );
-
-    // Enemy sounds
-    this.sfx.set(
-      'enemy_alert',
-      new Howl({
-        src: ['/audio/sfx/enemy_alert.mp3'],
-        volume: this.volumes.sfx * 0.7,
-      })
-    );
-
-    this.sfx.set(
-      'enemy_hit',
-      new Howl({
-        src: ['/audio/sfx/enemy_hit.mp3'],
-        volume: this.volumes.sfx * 0.6,
-      })
-    );
-
-    // Collectible sounds
-    this.sfx.set(
-      'shard_pickup',
-      new Howl({
-        src: ['/audio/sfx/shard_pickup.mp3'],
-        volume: this.volumes.sfx * 0.8,
-        rate: 1.1,
-      })
-    );
-
-    // Bell sounds
-    this.sfx.set(
-      'bell_ring',
-      new Howl({
-        src: ['/audio/sfx/bell_ring.mp3'],
-        volume: this.volumes.sfx * 0.9,
-      })
-    );
-
-    // Hearth sounds
-    this.ambience.set(
-      'hearth_crackle',
-      new Howl({
-        src: ['/audio/ambient/hearth_crackle.mp3'],
-        volume: this.volumes.ambient * 0.5,
-        loop: true,
-      })
-    );
+  /**
+   * Load sound manifest from DDL
+   * Per CLAUDE.md lines 112-114: Load JSON through async helpers, never hardcode
+   */
+  async loadSoundManifest(manifestPath: string = '/data/manifests/sounds.json'): Promise<void> {
+    try {
+      const response = await fetch(manifestPath);
+      if (!response.ok) {
+        console.warn(`Failed to load sound manifest from ${manifestPath}, using defaults`);
+        return;
+      }
+      
+      const manifest: SoundManifest = await response.json();
+      
+      // Load SFX from manifest
+      if (manifest.sfx) {
+        for (const [id, sound] of Object.entries(manifest.sfx)) {
+          const howl = new Howl({
+            src: [sound.file],
+            volume: this.volumes.sfx * sound.volume,
+          });
+          this.sfx.set(id, howl);
+        }
+      }
+      
+      // Load music from manifest
+      if (manifest.music) {
+        for (const [id, musicTrack] of Object.entries(manifest.music)) {
+          const howl = new Howl({
+            src: [musicTrack.file],
+            volume: this.volumes.music * musicTrack.volume,
+            loop: musicTrack.loop,
+          });
+          this.music.set(id, howl);
+        }
+      }
+      
+      // Load ambient sounds from manifest
+      if (manifest.ambient) {
+        for (const [id, ambientSound] of Object.entries(manifest.ambient)) {
+          const howl = new Howl({
+            src: [ambientSound.file],
+            volume: this.volumes.ambient * ambientSound.volume,
+            loop: ambientSound.loop,
+          });
+          this.ambience.set(id, howl);
+        }
+      }
+      
+      console.log(`Loaded ${this.sfx.size} SFX, ${this.music.size} music tracks, ${this.ambience.size} ambient sounds from manifest`);
+    } catch (error) {
+      console.error('Error loading sound manifest:', error);
+    }
   }
 
   /**
    * Load chapter-specific audio from DDL manifest
-   * Supports new DDL format with media.musicTracks and media.ambientSounds
+   * Supports DDL format with media.musicTracks and media.ambientSounds
    */
-  loadChapterAudio(manifest) {
+  loadChapterAudio(manifest: any): void {
     if (!manifest.media) {
       console.warn('No media section in chapter manifest');
       return;
-    }
-
-    // Initialize music map if needed
-    if (!this.music) {
-      this.music = new Map();
     }
 
     // Load music tracks from DDL format
@@ -246,74 +198,40 @@ class AudioManager implements AudioSystem {
         }
       }
     }
-
-    // Support legacy format (old audio.music, audio.ambience structure)
-    if (manifest.media.audio) {
-      const { music, ambience } = manifest.media.audio;
-
-      // Load music tracks (legacy)
-      if (music) {
-        for (const track of music) {
-          if (!this.music.has(track.id)) {
-            this.music.set(
-              track.id,
-              new Howl({
-                src: [track.url],
-                volume: this.volumes.music,
-                loop: track.loop !== false,
-                onend: () => {
-                  if (track.nextTrack) {
-                    this.playMusic(track.nextTrack);
-                  }
-                },
-              })
-            );
-          }
-        }
-      }
-
-      // Load ambient sounds (legacy)
-      if (ambience) {
-        for (const ambient of ambience) {
-          if (!this.ambience.has(ambient.id)) {
-            this.ambience.set(
-              ambient.id,
-              new Howl({
-                src: [ambient.url],
-                volume: this.volumes.ambient * (ambient.volume || 1),
-                loop: ambient.loop !== false,
-              })
-            );
-          }
-        }
-      }
-    }
   }
 
   /**
    * Play music with optional crossfade
    */
-  playMusic(trackId, crossfade = true) {
-    const newTrack = this.music?.get(trackId);
+  playMusic(trackId: string, crossfade: boolean = true): void {
+    const newTrack = this.music.get(trackId);
     if (!newTrack) {
       console.warn(`Music track not found: ${trackId}`);
       return;
     }
 
     if (this.currentMusic && crossfade) {
-      // Crossfade from current to new
-      this.crossfadeMusic(this.currentMusic, newTrack);
+      // Get the currently playing track
+      const currentTrackId = this.currentMusic;
+      const oldTrack = this.music.get(currentTrackId);
+      if (oldTrack) {
+        this.crossfadeMusic(oldTrack, newTrack);
+        this.currentMusic = trackId; // Update to new track ID
+      }
     } else {
       // Stop current and play new
       if (this.currentMusic) {
-        this.currentMusic.stop();
+        const oldTrack = this.music.get(this.currentMusic);
+        if (oldTrack) {
+          oldTrack.stop();
+        }
       }
       newTrack.play();
-      this.currentMusic = newTrack;
+      this.currentMusic = trackId;
     }
   }
 
-  crossfadeMusic(oldTrack, newTrack) {
+  crossfadeMusic(oldTrack: Howl, newTrack: Howl): void {
     const duration = this.crossfadeDuration;
     const steps = 50;
     const stepTime = duration / steps;
@@ -340,7 +258,7 @@ class AudioManager implements AudioSystem {
         if (oldTrack) {
           oldTrack.stop();
         }
-        this.currentMusic = newTrack;
+        // currentMusic is updated in playMusic
       }
     }, stepTime);
   }
@@ -348,7 +266,7 @@ class AudioManager implements AudioSystem {
   /**
    * Play sound effect
    */
-  playSFX(soundId, options = {}) {
+  playSFX(soundId: string, options: { rate?: number; volume?: number; sprite?: string } = {}): number | null {
     const sound = this.sfx.get(soundId);
     if (!sound) {
       console.warn(`SFX not found: ${soundId}`);
@@ -375,7 +293,7 @@ class AudioManager implements AudioSystem {
   /**
    * Play ambient sound
    */
-  playAmbient(ambientId) {
+  playAmbient(ambientId: string): void {
     const ambient = this.ambience.get(ambientId);
     if (!ambient) {
       console.warn(`Ambient sound not found: ${ambientId}`);
@@ -392,7 +310,7 @@ class AudioManager implements AudioSystem {
   /**
    * Stop ambient sound
    */
-  stopAmbient(ambientId) {
+  stopAmbient(ambientId: string): void {
     const ambient = this.ambience.get(ambientId);
     if (ambient) {
       ambient.stop();
@@ -403,9 +321,12 @@ class AudioManager implements AudioSystem {
   /**
    * Stop all audio
    */
-  stopAll() {
+  stopAll(): void {
     if (this.currentMusic) {
-      this.currentMusic.stop();
+      const track = this.music.get(this.currentMusic);
+      if (track) {
+        track.stop();
+      }
     }
 
     for (const ambient of this.ambience.values()) {
@@ -418,7 +339,7 @@ class AudioManager implements AudioSystem {
   /**
    * Set volume for category
    */
-  setVolume(category, value) {
+  setVolume(category: keyof VolumeConfig, value: number): void {
     if (category in this.volumes) {
       this.volumes[category] = Math.max(0, Math.min(1, value));
 
@@ -429,7 +350,10 @@ class AudioManager implements AudioSystem {
 
       // Update music volume
       if (category === 'music' && this.currentMusic) {
-        this.currentMusic.volume(this.volumes.music);
+        const track = this.music.get(this.currentMusic);
+        if (track) {
+          track.volume(this.volumes.music);
+        }
       }
     }
   }
@@ -437,21 +361,29 @@ class AudioManager implements AudioSystem {
   /**
    * Get current volume for category
    */
-  getVolume(category) {
+  getVolume(category: keyof VolumeConfig): number {
     return this.volumes[category] || 0;
   }
 
   /**
    * Mute/unmute all audio
    */
-  setMuted(muted) {
+  setMuted(muted: boolean): void {
     Howler.mute(muted);
+  }
+
+  /**
+   * Update method required by AudioSystem interface
+   */
+  update(deltaTime: number): void {
+    // Audio system doesn't need frame updates
+    // All audio is event-driven through Howler.js
   }
 
   /**
    * Cleanup
    */
-  destroy() {
+  destroy(): void {
     this.stopAll();
 
     // Unload all sounds
@@ -463,10 +395,8 @@ class AudioManager implements AudioSystem {
       ambient.unload();
     }
 
-    if (this.music) {
-      for (const track of this.music.values()) {
-        track.unload();
-      }
+    for (const track of this.music.values()) {
+      track.unload();
     }
   }
 }

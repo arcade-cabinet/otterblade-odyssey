@@ -105,29 +105,58 @@ export interface AudioSystem extends GameSystem {
  * Game Loop Parameters
  * Defines all dependencies needed for the main game loop
  */
+/**
+ * Player controller interface
+ */
+export interface PlayerController {
+  update(controls: any, deltaTime: number): void;
+  takeDamage(amount: number, knockback?: { x: number; y: number }): void;
+}
+
+/**
+ * Player reference for AI targeting
+ */
+export interface PlayerReference {
+  position: { x: number; y: number };
+}
+
+/**
+ * Boss AI interface
+ */
+export interface BossAI {
+  isDead: boolean;
+  projectiles: Array<{ x: number; y: number; vx: number; vy: number; damage: number; warmthDrain?: number }>;
+  hazardZones: Array<{ x: number; y: number; width: number; height: number; damage: number; warmthDrain: number }>;
+  update(deltaTime: number): void;
+  selectAndExecuteAttack(): void;
+}
+
+/**
+ * Game loop parameters with proper typing
+ */
 export interface GameLoopParams {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   engine: Matter.Engine;
   runner: Matter.Runner;
-  player: any; // Will be typed in entities.ts
-  playerController: any;
-  playerRef: any;
+  player: Matter.Body & { facingDirection: number };
+  playerController: PlayerController;
+  playerRef: PlayerReference;
   inputManager: InputSystem;
   _audioManager: AudioSystem;
   aiManager: AISystem;
-  bossAI: any;
-  enemyBodyMap: Map<number, any>;
-  lanternSystem: any;
-  bellSystem: any;
-  hearthSystem: any;
-  hazardSystem: any;
-  movingPlatforms: any[];
-  waterZones: any[];
-  flowPuzzles: any[];
-  timingSequences: any[];
+  bossAI: BossAI | null;
+  enemyBodyMap: Map<number, Matter.Body>;
+  lanternSystem: { update(deltaTime: number): void; lanterns: any[]; lightLantern(lantern: any, context: any): boolean };
+  bellSystem: { update(deltaTime: number): void };
+  hearthSystem: { update(deltaTime: number): void };
+  hazardSystem: { update(deltaTime: number): void };
+  movingPlatforms: Array<{ body: Matter.Body; def: any }>;
+  waterZones: Array<{ x: number; y: number; width: number; height: number }>;
+  flowPuzzles: Array<any>;
+  timingSequences: Array<any>;
   gameStateObj: any;
-  renderScene: (ctx: CanvasRenderingContext2D, camera: Camera) => void;
+  renderScene: (ctx: CanvasRenderingContext2D, camera: Camera, animFrame: number, playerFacing: number, bossAI: BossAI | null) => void;
 }
 
 /**
