@@ -1,9 +1,11 @@
 // .devcontainer/devcontainer.json
 {
   "name": "Astro + SolidJS (Node 24 LTS, pnpm, Biome, Playwright, matter-js)",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-24-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-25-bookworm",
 
   "forwardPorts": [4321, 3000, 9229],
+
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
   "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
   "postStartCommand": "pnpm playwright install --with-deps",
@@ -30,7 +32,6 @@
   },
 
   "mounts": [
-    "source=${localWorkspaceFolderBasename}-pnpm-store,target=/home/node/.local/share/pnpm/store,type=volume",
-    "source=${localWorkspaceFolderBasename}-node_modules,target=/workspace/node_modules,type=volume"
+    "source=${localWorkspaceFolderBasename}-pnpm-store,target=/home/node/.local/share/pnpm/store,type=volume"
   ]
 }
