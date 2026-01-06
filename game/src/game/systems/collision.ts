@@ -3,29 +3,78 @@
  * Handles all game collision events with O(1) lookups using Maps
  */
 
+import type * as Matter from 'matter-js';
 import { World } from 'matter-js';
 import { Vector3 } from 'yuka';
+import type { InputSystem, AudioSystem, PlayerController } from '../types/systems';
+
+/**
+ * Quest objective definition
+ */
+interface QuestObjective {
+  id: string;
+  description: string;
+  completed: boolean;
+  progress: number;
+  target: number;
+}
+
+/**
+ * Collections interface
+ */
+interface Collections {
+  collectibles: Array<{ body: Matter.Body; collected: boolean }>;
+  npcBodies: Map<string, any>;
+  interactions: Array<{ body: Matter.Body }>;
+  _enemyBodyMap: Map<number, any>;
+}
+
+/**
+ * Managers interface
+ */
+interface Managers {
+  inputManager: InputSystem;
+  audioManager: AudioSystem;
+}
+
+/**
+ * Setters interface
+ */
+interface Setters {
+  setHealth: (fn: (h: number) => number) => void;
+  setShards: (fn: (s: number) => number) => void;
+  setQuestObjectives: (objectives: QuestObjective[]) => void;
+}
+
+/**
+ * Getters interface
+ */
+interface Getters {
+  health: () => number;
+  maxHealth: () => number;
+  questObjectives: () => QuestObjective[];
+}
+
+/**
+ * Controllers interface
+ */
+interface Controllers {
+  _playerController: PlayerController;
+}
 
 /**
  * Setup collision handlers for game entities
  * Uses efficient Map-based lookups instead of O(n) array searches
- * @param {Matter.Engine} engine - Physics engine
- * @param {Matter.Body} player - Player physics body
- * @param {Object} collections - Entity collections
- * @param {Object} managers - Game managers (input, audio)
- * @param {Object} setters - State setter functions
- * @param {Object} getters - State getter functions
- * @param {Object} controllers - Player controller
  */
 export function setupCollisionHandlers(
-  engine,
-  player,
-  collections,
-  managers,
-  setters,
-  getters,
-  controllers
-) {
+  engine: Matter.Engine,
+  player: Matter.Body,
+  collections: Collections,
+  managers: Managers,
+  setters: Setters,
+  getters: Getters,
+  controllers: Controllers
+): void {
   const { Events } = Matter;
   const { inputManager, audioManager } = managers;
   const { collectibles, npcBodies, interactions, _enemyBodyMap } = collections;

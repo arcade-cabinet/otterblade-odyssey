@@ -3,15 +3,61 @@
  * Handles all game scene rendering
  */
 
+import type * as Matter from 'matter-js';
 import { drawBoss, drawEnemy, drawNPC } from '../rendering/enemies';
 import { drawFinn } from '../rendering/finn';
+import type { Camera, RenderContext, ChapterManifest, AISystem, BossAI } from '../types';
+
+/**
+ * Scene renderer parameters
+ */
+interface SceneRendererParams {
+  manifest: ChapterManifest;
+  player: Matter.Body;
+  platforms: Array<{ body: Matter.Body; def: { type: string } }>;
+  walls: Array<{ body: Matter.Body }>;
+  ceilings: Array<{ body: Matter.Body }>;
+  interactions: Array<{ body: Matter.Body; def: { type: string } }>;
+  waterZones: Array<{ region: { x: number; y: number; width: number; height: number } }>;
+  lanternSystem: { render: (ctx: RenderContext, camera: Camera) => void };
+  bellSystem: { render: (ctx: RenderContext, camera: Camera) => void };
+  hearthSystem: { render: (ctx: RenderContext, camera: Camera) => void };
+  flowPuzzles: Array<{ render: (ctx: RenderContext, camera: Camera) => void }>;
+  timingSequences: Array<{ render: (ctx: RenderContext, camera: Camera) => void }>;
+  collectibles: Array<{ body: Matter.Body; collected: boolean }>;
+  aiManager: AISystem;
+}
+
+/**
+ * Scene render function signature
+ */
+type SceneRenderFunction = (
+  ctx: RenderContext,
+  camera: Camera,
+  animFrame: number,
+  playerFacing: number,
+  bossAI: BossAI | null
+) => void;
+
+/**
+ * Biome type
+ */
+type BiomeType = 'village' | 'forest' | 'abbey' | 'catacombs';
+
+/**
+ * Background colors for each biome
+ */
+const BIOME_COLORS: Record<BiomeType, string> = {
+  village: '#2C3E50',
+  forest: '#1a3a1a',
+  abbey: '#1a1a24',
+  catacombs: '#0d0d15',
+};
 
 /**
  * Create scene renderer
- * @param {Object} params - Renderer parameters
- * @returns {Function} - Render function
  */
-export function createSceneRenderer(params) {
+export function createSceneRenderer(params: SceneRendererParams): SceneRenderFunction {
   const {
     manifest,
     player,
@@ -29,19 +75,19 @@ export function createSceneRenderer(params) {
     aiManager,
   } = params;
 
-  return function renderScene(ctx, camera, animFrame, playerFacing, bossAI) {
+  return function renderScene(
+    ctx: RenderContext,
+    camera: Camera,
+    animFrame: number,
+    playerFacing: number,
+    bossAI: any
+  ): void {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Background
-    const biome = manifest.level?.biome || 'abbey';
-    const bgColors = {
-      village: '#2C3E50',
-      forest: '#1a3a1a',
-      abbey: '#1a1a24',
-      catacombs: '#0d0d15',
-    };
-    ctx.fillStyle = bgColors[biome] || '#1a1a24';
+    const biome = (manifest.level?.biome as BiomeType) || 'abbey';
+    ctx.fillStyle = BIOME_COLORS[biome] || '#1a1a24';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();

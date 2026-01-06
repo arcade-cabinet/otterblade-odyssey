@@ -1,5 +1,5 @@
 /**
- * AIManager.js
+ * AIManager.ts
  * YUKA-based AI system for enemies and NPCs
  * Implements proper AI system per CLAUDE.md line 61 and docs/AI.md
  */
@@ -17,14 +17,34 @@ import {
   Vehicle,
   WanderBehavior,
 } from 'yuka';
+import type { AISystem, PatrolZone } from '../types/systems';
+import type * as Matter from 'matter-js';
+
+/**
+ * Enemy vehicle interface extending YUKA Vehicle
+ */
+interface EnemyVehicle extends Vehicle {
+  playerTarget?: { position: Vector3 };
+  target?: { position: Vector3 };
+  aggroRadius: number;
+  patrolSpeed: number;
+  chaseSpeed: number;
+  attackRange: number;
+  hp: number;
+  maxHp: number;
+  stateMachine: StateMachine;
+  patrolZone?: PatrolZone;
+  isWithinPatrolZone(): boolean;
+  matterBody?: Matter.Body;
+}
 
 /**
  * Base class for typed states with better TypeScript-like behavior
  */
 class TypedState extends State {
-  enter(_owner) {}
-  execute(_owner) {}
-  exit(_owner) {}
+  enter(_owner: EnemyVehicle): void {}
+  execute(_owner: EnemyVehicle): void {}
+  exit(_owner: EnemyVehicle): void {}
 }
 
 /**
@@ -32,13 +52,16 @@ class TypedState extends State {
  */
 
 class IdleState extends TypedState {
+  idleTime: number;
+  maxIdleTime: number;
+
   constructor() {
     super();
     this.idleTime = 0;
     this.maxIdleTime = 120;
   }
 
-  enter(enemy) {
+  enter(enemy: EnemyVehicle): void {
     this.idleTime = 0;
     this.maxIdleTime = 60 + Math.random() * 120;
     enemy.steering.behaviors.length = 0;

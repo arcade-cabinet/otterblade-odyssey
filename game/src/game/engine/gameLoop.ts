@@ -3,17 +3,18 @@
  * Main update and render loop with proper delta time calculation
  */
 
+import type * as Matter from 'matter-js';
 import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
+import type { GameLoopParams, GameLoopController } from '../types/systems';
 
+const { Runner, Body } = getMatterModules();
 
 /**
  * Create game loop with proper delta time tracking
- * @param {Object} params - Game loop parameters
- * @returns {Object} - { start, stop }
  */
-export function createGameLoop(params) {
+export function createGameLoop(params: GameLoopParams): GameLoopController {
   const {
     canvas,
     ctx,
@@ -42,14 +43,17 @@ export function createGameLoop(params) {
   let animFrame = 0;
   let playerFacing = 1;
   let lastTime = performance.now();
-  let animationFrameId = null;
+  let animationFrameId: number | null = null;
   const camera = { x: 0, y: 0 };
+  
+  // Max delta to prevent spiral of death when frame rate drops
+  const MAX_DELTA_MS = 100;
 
-  function gameLoop(currentTime) {
+  function gameLoop(currentTime: number): void {
     if (!canvas || !ctx) return;
 
     // Proper delta time calculation (not fixed 16.67ms)
-    const delta = Math.min(currentTime - lastTime, 100); // Cap at 100ms to prevent spiral of death
+    const delta = Math.min(currentTime - lastTime, MAX_DELTA_MS); // Cap at 100ms to prevent spiral of death
     lastTime = currentTime;
     const deltaSec = delta / 1000;
 
@@ -224,13 +228,13 @@ export function createGameLoop(params) {
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  function start() {
+  function start(): void {
     lastTime = performance.now();
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
-  function stop() {
-    if (animationFrameId) {
+  function stop(): void {
+    if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);
       animationFrameId = null;
     }

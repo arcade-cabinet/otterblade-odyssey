@@ -17,27 +17,27 @@
 import { fromError } from 'zod-validation-error';
 import type {
   ChapterManifest,
-  EnemiesManifest,
-  NPCsManifest,
-  SpritesManifest,
-  CinematicsManifest,
-  SoundsManifest,
-  EffectsManifest,
-  ItemsManifest,
-  ScenesManifest,
   ChapterPlatesManifest,
+  CinematicsManifest,
+  EffectsManifest,
+  EnemiesManifest,
+  ItemsManifest,
+  NPCsManifest,
+  ScenesManifest,
+  SoundsManifest,
+  SpritesManifest,
 } from '../game/data/manifest-schemas';
 import {
   ChapterManifestSchema,
-  EnemiesManifestSchema,
-  NPCsManifestSchema,
-  SpritesManifestSchema,
-  CinematicsManifestSchema,
-  SoundsManifestSchema,
-  EffectsManifestSchema,
-  ItemsManifestSchema,
-  ScenesManifestSchema,
   ChapterPlatesManifestSchema,
+  CinematicsManifestSchema,
+  EffectsManifestSchema,
+  EnemiesManifestSchema,
+  ItemsManifestSchema,
+  NPCsManifestSchema,
+  ScenesManifestSchema,
+  SoundsManifestSchema,
+  SpritesManifestSchema,
 } from '../game/data/manifest-schemas';
 
 // ============================================================================
@@ -188,16 +188,25 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
   }
 
   // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
-  const fetchPath = `/manifests/${path}`;
-  const response = await fetch(fetchPath);
+  const fetchPath = `/data/manifests/${path}`;
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch manifest at ${fetchPath}: ${response.status} ${response.statusText}`
-    );
+  let rawData;
+  try {
+    const response = await fetch(fetchPath);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch manifest at ${fetchPath}: ${response.status} ${response.statusText}`
+      );
+    }
+
+    rawData = await response.json();
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON in manifest ${fetchPath}: ${error.message}`);
+    }
+    throw new Error(`Failed to load manifest ${fetchPath}: ${(error as Error).message}`);
   }
-
-  const rawData = await response.json();
 
   // Validate with Zod schema
   const result = ChapterManifestSchema.safeParse(rawData);

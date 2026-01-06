@@ -6,19 +6,39 @@
  * @module factories/enemy-factory
  */
 
+import type * as Matter from 'matter-js';
+import type { Enemy, EnemyType } from '../types/entities';
+import type { EnemyVehicle } from '../types/ai';
 import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { getChapterManifestSync, getEnemiesManifestSync } from '../../../ddl/loader';
 
+/**
+ * Enemy definition from chapter manifest
+ */
+interface EnemyDefinition {
+  id?: string;
+  enemyType: EnemyType;
+  position?: { x: number; y: number };
+  patrolPath?: Array<{ x: number; y: number }>;
+  aggroRadius?: number;
+}
+
+/**
+ * Enemy stats from manifest
+ */
+interface EnemyStats {
+  width: number;
+  height: number;
+  health: number;
+  damage: number;
+  speed: number;
+}
 
 /**
  * Build enemies for a chapter
- *
- * @param {number} chapterId - Chapter ID
- * @param {Object} engine - Matter.js engine
- * @returns {Array} Array of enemy objects
  */
-export function buildEnemies(chapterId, engine) {
+export function buildEnemies(chapterId: number, engine: Matter.Engine): EnemyVehicle[] {
   if (typeof chapterId !== 'number' || chapterId < 0 || chapterId > 9) {
     throw new Error(`Invalid chapter ID: ${chapterId}`);
   }
@@ -30,7 +50,7 @@ export function buildEnemies(chapterId, engine) {
   // Load chapter manifest and extract encounters
   const manifest = getChapterManifestSync(chapterId);
   const encounterDefs = manifest.encounters || [];
-  const enemies = [];
+  const enemies: EnemyVehicle[] = [];
 
   for (const encounterDef of encounterDefs) {
     const enemy = createEnemy(encounterDef, engine);
@@ -42,12 +62,8 @@ export function buildEnemies(chapterId, engine) {
 
 /**
  * Create a single enemy from definition
- *
- * @param {Object} enemyDef - Enemy definition from DDL
- * @param {Object} engine - Matter.js engine
- * @returns {Object} Enemy object
  */
-export function createEnemy(enemyDef, engine) {
+export function createEnemy(enemyDef: EnemyDefinition, engine: Matter.Engine): EnemyVehicle {
   if (!enemyDef || !enemyDef.enemyType) {
     throw new Error('Invalid enemy definition');
   }
@@ -121,9 +137,8 @@ export function createEnemy(enemyDef, engine) {
 
 /**
  * Get enemy stats by type from DDL enemies manifest
- * @private
  */
-function getEnemyStats(enemyType) {
+function getEnemyStats(enemyType: string): EnemyStats {
   // Try to load from DDL first
   try {
     const enemiesManifest = getEnemiesManifestSync();
