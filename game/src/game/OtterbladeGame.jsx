@@ -14,7 +14,7 @@ import {
   Show,
 } from 'solid-js';
 
-// ONE import - the entire game engine
+// ONE import - the entire game engine (TypeScript modules)
 import {
   initializeGame,
   createPhysicsEngine,
@@ -25,7 +25,7 @@ import {
   audioManager,
   inputManager,
   CHAPTER_FILES,
-} from './game-monolith';
+} from './index';
 
 // DDL loader (second file)
 import LoadingScreen from './components/LoadingScreen';
@@ -70,7 +70,7 @@ async function preloadGameManifests(onProgress) {
     const loaders = [];
 
     // Load all chapters
-    for (let i = 0; i < TOTAL_CHAPTERS; i++) {
+    for (let i = 0; i < CHAPTER_FILES.length; i++) {
       loaders.push(
         loadChapterManifest(i)
           .then(() => {
@@ -183,9 +183,13 @@ function OtterbladeGameContent() {
     canvas.height = window.innerHeight;
 
     // Load chapter manifest using DDL sync accessor (already preloaded)
-    const { getChapterManifestSync } = await import('../ddl/loader');
+    const { getChapterManifestSync, loadChapterManifest } = await import('../ddl/loader');
+
+    // Ensure current chapter is loaded (in case cache was cleared)
+    await loadChapterManifest(currentChapter());
+
     const manifest = getChapterManifestSync(currentChapter());
-    
+
     if (!manifest) {
       console.error('Failed to load chapter manifest');
       return;

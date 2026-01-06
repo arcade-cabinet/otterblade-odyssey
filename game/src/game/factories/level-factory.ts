@@ -8,7 +8,7 @@
  */
 
 import { getMatterModules } from '../physics/matter-wrapper';
-import { getChapterManifestSync } from '../../../ddl/loader';
+import { getChapterManifestSync } from '@ddl/loader';
 import {
   createPlatform,
   HazardSystem,

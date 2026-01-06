@@ -98,10 +98,10 @@ export function getCacheStats(): {
 // ============================================================================
 
 /**
- * Base manifest loader that fetches JSON from /manifests/ paths.
+ * Base manifest loader that fetches JSON from /data/manifests/ paths.
  * Handles caching and provides descriptive errors.
  *
- * @param path - Relative path from /manifests/ (e.g., "enemies.json")
+ * @param path - Relative path from /data/manifests/ (e.g., "enemies.json")
  * @returns Parsed JSON data
  * @throws Error if fetch fails or JSON is invalid
  */
@@ -112,7 +112,7 @@ async function loadManifest(path: string): Promise<unknown> {
   }
 
   // Construct full fetch path
-  const fetchPath = `/manifests/${path}`;
+  const fetchPath = `/data/manifests/${path}`;
 
   try {
     const response = await fetch(fetchPath);
@@ -188,7 +188,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
   }
 
   // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
-  const fetchPath = `/data/manifests/${path}`;
+  const fetchPath = `/manifests/${path}`;
 
   let rawData;
   try {

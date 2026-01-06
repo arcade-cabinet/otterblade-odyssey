@@ -9,12 +9,11 @@ import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
 import type { GameLoopParams, GameLoopController } from '../types/systems';
 
-const { Runner, Body } = getMatterModules();
-
 /**
  * Create game loop with proper delta time tracking
  */
 export function createGameLoop(params: GameLoopParams): GameLoopController {
+  const { Runner, Body } = getMatterModules();
   const {
     canvas,
     ctx,
