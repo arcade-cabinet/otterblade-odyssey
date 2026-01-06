@@ -1,0 +1,222 @@
+/**
+ * Collision System
+ * Handles all game collision events with O(1) lookups using Maps
+ */
+
+import type * as Matter from 'matter-js';
+import { World } from 'matter-js';
+import { Vector3 } from 'yuka';
+import type { InputSystem, AudioSystem, PlayerController } from '../types/systems';
+
+/**
+ * Quest objective definition
+ */
+interface QuestObjective {
+  id: string;
+  description: string;
+  completed: boolean;
+  progress: number;
+  target: number;
+}
+
+/**
+ * Collections interface
+ */
+interface Collections {
+  collectibles: Array<{ body: Matter.Body; collected: boolean }>;
+  npcBodies: Map<string, any>;
+  interactions: Array<{ body: Matter.Body }>;
+  _enemyBodyMap: Map<number, any>;
+}
+
+/**
+ * Managers interface
+ */
+interface Managers {
+  inputManager: InputSystem;
+  audioManager: AudioSystem;
+}
+
+/**
+ * Setters interface
+ */
+interface Setters {
+  setHealth: (fn: (h: number) => number) => void;
+  setShards: (fn: (s: number) => number) => void;
+  setQuestObjectives: (objectives: QuestObjective[]) => void;
+}
+
+/**
+ * Getters interface
+ */
+interface Getters {
+  health: () => number;
+  maxHealth: () => number;
+  questObjectives: () => QuestObjective[];
+}
+
+/**
+ * Controllers interface
+ */
+interface Controllers {
+  _playerController: PlayerController;
+}
+
+/**
+ * Setup collision handlers for game entities
+ * Uses efficient Map-based lookups instead of O(n) array searches
+ */
+export function setupCollisionHandlers(
+  engine: Matter.Engine,
+  player: Matter.Body,
+  collections: Collections,
+  managers: Managers,
+  setters: Setters,
+  getters: Getters,
+  controllers: Controllers
+): void {
+  const { Events } = Matter;
+  const { inputManager, audioManager } = managers;
+  const { collectibles, npcBodies, interactions, _enemyBodyMap } = collections;
+  const { setHealth, setShards, setQuestObjectives } = setters;
+  const { health, maxHealth, questObjectives } = getters;
+  const { _playerController } = controllers;
+
+  // Create O(1) lookup maps for efficient collision detection
+  const collectibleMap = new Map();
+  for (const c of collectibles) {
+    collectibleMap.set(c.body.id, c);
+  }
+
+  const interactionMap = new Map();
+  for (const i of interactions) {
+    interactionMap.set(i.body.id, i);
+  }
+
+  Events.on(engine, 'collisionStart', (event) => {
+    for (const pair of event.pairs) {
+      const { bodyA, bodyB } = pair;
+
+      // Player collects shard - O(1) Map lookup
+      if (
+        (bodyA === player && bodyB.label === 'collectible') ||
+        (bodyB === player && bodyA.label === 'collectible')
+      ) {
+        const collectibleBody = bodyA === player ? bodyB : bodyA;
+        const collectible = collectibleMap.get(collectibleBody.id);
+        if (collectible && !collectible.collected) {
+          collectible.collected = true;
+          World.remove(engine.world, collectibleBody);
+          collectibleMap.delete(collectibleBody.id);
+          setShards((s) => s + 1);
+          audioManager.playSFX('shard_pickup');
+        }
+      }
+
+      // Player takes damage from enemy
+      if (
+        (bodyA === player && bodyB.label === 'enemy') ||
+        (bodyB === player && bodyA.label === 'enemy')
+      ) {
+        if (health() > 0) {
+          setHealth((h) => Math.max(0, h - 1));
+          audioManager.playSFX('enemy_hit', { volume: 0.7 });
+        }
+      }
+
+      // Player interacts with NPCs
+      if (
+        (bodyA === player && bodyB.label === 'npc') ||
+        (bodyB === player && bodyA.label === 'npc')
+      ) {
+        const npcBody = bodyA === player ? bodyB : bodyA;
+
+        // Find NPC by body - using Map for O(1) lookup
+        for (const [npcId, npcData] of npcBodies) {
+          if (npcData.body === npcBody && inputManager.isPressed('interact')) {
+            const npc = npcData.npc;
+            const playerPos = new Vector3(player.position.x, player.position.y, 0);
+
+            // Trigger NPC interaction
+            const interactionData = npc.interact(playerPos);
+            if (interactionData) {
+              console.log(`Interacting with NPC: ${npcId}`);
+              audioManager.playSFX('menu_select');
+
+              // Handle dialogue or quest progression
+              if (interactionData.type === 'dialogue') {
+                console.log(`Dialogue: ${interactionData.dialogue}`);
+              }
+
+              // Execute interaction actions
+              if (interactionData.actions) {
+                for (const action of interactionData.actions) {
+                  if (action.type === 'restore_health') {
+                    setHealth(maxHealth());
+                    audioManager.playSFX('bell_ring', { volume: 0.5 });
+                  }
+                  if (action.type === 'give_item') {
+                    const objectives = questObjectives();
+                    const updated = objectives.map((o) =>
+                      o.id === action.target ? { ...o, completed: true } : o
+                    );
+                    setQuestObjectives(updated);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Player interacts with objects - O(1) Map lookup
+      if (
+        (bodyA === player && bodyB.label.startsWith('interaction_')) ||
+        (bodyB === player && bodyA.label.startsWith('interaction_'))
+      ) {
+        const interactionBody = bodyA === player ? bodyB : bodyA;
+        const interaction = interactionMap.get(interactionBody.id);
+        if (interaction && inputManager.isPressed('interact')) {
+          audioManager.playSFX('door_open');
+          console.log(`Interacting with ${interaction.def.id}`);
+
+          // Execute DDL actions
+          if (interaction.def.states?.[interaction.state]) {
+            const stateData = interaction.def.states[interaction.state];
+            if (stateData.actions) {
+              for (const action of stateData.actions) {
+                if (action.type === 'restore_health') {
+                  setHealth(maxHealth());
+                }
+                if (action.type === 'give_item') {
+                  const objectives = questObjectives();
+                  const updated = objectives.map((o) =>
+                    o.id === action.target ? { ...o, completed: true } : o
+                  );
+                  setQuestObjectives(updated);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return {
+    collectibleMap,
+    interactionMap,
+  };
+}
+
+/**
+ * Update lookup maps when entities are added/removed
+ * @param {Map} map - The lookup map to update
+ * @param {Array} entities - Entity array
+ */
+export function updateCollisionMaps(map, entities) {
+  map.clear();
+  for (const entity of entities) {
+    map.set(entity.body.id, entity);
+  }
+}

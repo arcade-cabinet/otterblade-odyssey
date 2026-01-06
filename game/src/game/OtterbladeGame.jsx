@@ -1,10 +1,9 @@
 /**
  * Otterblade Odyssey - Main Game Component
- * Orchestrates game systems using modular architecture
- * AGENTS.md compliant: ~200 lines (max 300 target)
+ * Uses monolithic game architecture (game-monolith.js)
+ * Clean: 3 JS files total (monolith + DDL + this), plus external libs
  */
 
-import Matter from 'matter-js';
 import {
   createEffect,
   createResource,
@@ -14,28 +13,23 @@ import {
   onCleanup,
   Show,
 } from 'solid-js';
-import { Vector3 } from 'yuka';
+
+// ONE import - the entire game engine
+import {
+  initializeGame,
+  createPhysicsEngine,
+  createFinnBody,
+  createGameLoop,
+  initializeChapter,
+  PlayerController,
+  audioManager,
+  inputManager,
+  CHAPTER_FILES,
+} from './game-monolith';
+
+// DDL loader (second file)
 import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
-import { loadChapterManifest } from './data/chapter-loaders';
-import { createGameLoop } from './engine/gameLoop';
-import {
-  buildEnemies,
-  buildInteractionsAndCollectibles,
-  buildLevelGeometry,
-  buildNPCs,
-  initializeAudio,
-  initializeChapterData,
-  initializeQuests,
-} from './engine/initialization';
-import { createSceneRenderer } from './engine/rendering';
-import { BellSystem, HearthSystem, LanternSystem } from './environment/EnvironmentalSystems';
-import { createFinnBody, createPhysicsEngine, HazardSystem } from './physics/PhysicsManager';
-import { PlayerController } from './physics/PlayerController';
-import { aiManager } from './systems/AIManager';
-import { audioManager } from './systems/AudioManager';
-import { setupCollisionHandlers } from './systems/collision';
-import { inputManager } from './systems/InputManager';
 
 /**
  * Preload all game manifests using the DDL loader with progress tracking.
@@ -75,8 +69,8 @@ async function preloadGameManifests(onProgress) {
     // Load all manifests in parallel with progress tracking
     const loaders = [];
 
-    // Load 10 chapters
-    for (let i = 0; i <= 9; i++) {
+    // Load all chapters
+    for (let i = 0; i < TOTAL_CHAPTERS; i++) {
       loaders.push(
         loadChapterManifest(i)
           .then(() => {
@@ -138,6 +132,7 @@ function OtterbladeGameContent() {
 
   // Game state signals
   const [currentChapter] = createSignal(0);
+  const [currentChapterManifest, setCurrentChapterManifest] = createSignal(null);
   const [health, setHealth] = createSignal(5);
   const [maxHealth] = createSignal(5);
   const [warmth, setWarmth] = createSignal(100);
@@ -164,9 +159,12 @@ function OtterbladeGameContent() {
     onBossDefeated: () => console.log('Boss defeated!'),
   };
 
-  createEffect(() => {
+  createEffect(async () => {
     // Wait for manifests to load before starting game
     if (!manifestsLoaded() || !gameStarted()) return;
+
+    // Initialize game engine (loads Matter.js dynamically)
+    await initializeGame();
 
     const canvas = canvasRef;
     if (!canvas) {
@@ -184,184 +182,69 @@ function OtterbladeGameContent() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Initialize chapter data
-    const chapterId = currentChapter();
-    const { manifest, spawnPoint } = initializeChapterData(chapterId);
-    // Initialize quest system
-    initializeQuests(manifest, setActiveQuest, setQuestObjectives);
+    // Load chapter manifest using DDL sync accessor (already preloaded)
+    const { getChapterManifestSync } = await import('../ddl/loader');
+    const manifest = getChapterManifestSync(currentChapter());
+    
+    if (!manifest) {
+      console.error('Failed to load chapter manifest');
+      return;
+    }
 
-    // Initialize audio
-    initializeAudio(audioManager, manifest);
+    // Store for UI access
+    setCurrentChapterManifest(manifest);
+
+    console.log(`Loading Chapter ${currentChapter()}: ${manifest.name}`);
 
     // Create physics engine
     const engine = createPhysicsEngine();
-    const runner = Matter.Runner.create();
 
     // Create player
+    const spawnPoint = manifest.level?.spawnPoint || { x: 200, y: 300 };
     const player = createFinnBody(spawnPoint.x, spawnPoint.y);
-    Matter.World.add(engine.world, player);
+    const { World } = window.Matter;
+    World.add(engine.world, player);
 
     // Create player controller
     const playerController = new PlayerController(player, engine, gameStateObj, audioManager);
 
-    // Create player reference for AI
-    const playerRef = {
-      position: new Vector3(player.position.x, player.position.y, 0),
-      body: player,
-    };
-
-    // Initialize environmental systems
-    const lanternSystem = new LanternSystem(audioManager);
-    const bellSystem = new BellSystem(audioManager);
-    const hearthSystem = new HearthSystem(audioManager);
-    const hazardSystem = new HazardSystem();
-
-    // Initialize collections
-    const platforms = [];
-    const walls = [];
-    const ceilings = [];
-    const waterZones = [];
-    const movingPlatforms = [];
-    const flowPuzzles = [];
-    const timingSequences = [];
-
-    // Build level geometry
-    buildLevelGeometry(
-      engine,
+    // Initialize chapter (platforms, enemies, etc.)
+    const { platforms, enemies } = initializeChapter(
+      currentChapter(),
       manifest,
-      platforms,
-      walls,
-      ceilings,
-      movingPlatforms,
-      hazardSystem,
-      waterZones,
-      lanternSystem,
-      bellSystem,
-      hearthSystem,
-      flowPuzzles,
-      timingSequences
+      engine,
+      gameStateObj
     );
 
-    // Build navigation mesh for AI
-    try {
-      aiManager.buildNavMesh(platforms);
-    } catch (error) {
-      console.warn('NavMesh generation failed, AI pathfinding will be limited:', error);
+    console.log(`Chapter loaded: ${platforms.length} platforms, ${enemies.length} enemies`);
+
+    // Load audio
+    if (manifest.media?.audio?.music?.[0]) {
+      setTimeout(() => {
+        audioManager.playMusic(manifest.media.audio.music[0].id);
+      }, 500);
     }
 
-    // Build NPCs
-    const npcBodies = buildNPCs(chapterId, engine, aiManager);
-
-    // Build enemies and boss
-    const { enemyBodyMap, bossAI } = buildEnemies(
-      chapterId,
-      engine,
-      aiManager,
-      audioManager,
-      playerRef,
-      gameStateObj,
-      playerController,
-      player
-    );
-
-    // Build interactions and collectibles
-    const { interactions, collectibles } = buildInteractionsAndCollectibles(
-      chapterId,
-      engine,
-      manifest
-    );
-
-    // Setup collision handlers with O(1) Map lookups
-    setupCollisionHandlers(
-      engine,
-      player,
-      {
-        collectibles,
-        npcBodies,
-        interactions,
-        enemyBodyMap,
-      },
-      {
-        inputManager,
-        audioManager,
-      },
-      {
-        setHealth,
-        setShards,
-        setQuestObjectives,
-      },
-      {
-        health,
-        maxHealth,
-        questObjectives,
-      },
-      {
-        playerController,
-      }
-    );
-
-    // Create scene renderer
-    const renderScene = createSceneRenderer({
-      manifest,
-      player,
-      platforms,
-      walls,
-      ceilings,
-      interactions,
-      waterZones,
-      lanternSystem,
-      bellSystem,
-      hearthSystem,
-      flowPuzzles,
-      timingSequences,
-      collectibles,
-      aiManager,
-    });
-
-    // Create and start game loop with proper delta time
-    const gameLoop = createGameLoop({
+    // Create game loop
+    const loop = createGameLoop({
       canvas,
       ctx,
       engine,
-      runner,
       player,
       playerController,
-      playerRef,
-      inputManager,
-      audioManager,
-      aiManager,
-      bossAI,
-      enemyBodyMap,
-      lanternSystem,
-      bellSystem,
-      hearthSystem,
-      hazardSystem,
-      movingPlatforms,
-      waterZones,
-      flowPuzzles,
-      timingSequences,
-      gameStateObj,
-      renderScene,
+      gameState: gameStateObj,
     });
 
-    gameLoop.start();
+    // Start game
+    loop.start();
 
     // Cleanup on unmount
     onCleanup(() => {
-      gameLoop.stop();
-      playerController.destroy();
-      audioManager.stopAll();
-      aiManager.destroy();
-      inputManager.reset();
-      lanternSystem?.destroy?.();
-      bellSystem?.destroy?.();
-      hearthSystem?.destroy?.();
-      for (const sequence of timingSequences) {
-        sequence?.destroy?.();
-      }
-      Matter.Engine.clear(engine);
-      Matter.World.clear(engine.world, false);
-      enemyBodyMap.clear();
+      loop.stop();
+      const { World, Engine } = window.Matter;
+      World.clear(engine.world, false);
+      Engine.clear(engine);
+      console.log('[Game] Cleaned up');
     });
   });
 
@@ -408,32 +291,32 @@ function OtterbladeGameContent() {
           >
             Otterblade Odyssey
           </h1>
-          <h2
-            style={{
-              'font-size': '24px',
-              'margin-bottom': '40px',
-              color: '#F4D03F',
-            }}
-          >
-            A Redwall-inspired woodland epic
-          </h2>
-          <button
-            type="button"
-            onClick={() => setGameStarted(true)}
-            style={{
-              padding: '15px 40px',
-              'font-size': '20px',
-              background: '#E67E22',
-              color: 'white',
-              border: 'none',
-              'border-radius': '8px',
-              cursor: 'pointer',
-              'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
-            }}
-            disabled={manifestsLoaded.loading}
-          >
-            Begin Journey
-          </button>
+        <h2
+          style={{
+            'font-size': '24px',
+            'margin-bottom': '40px',
+            color: '#F4D03F',
+          }}
+        >
+          A Redwall-inspired woodland epic
+        </h2>
+        <button
+          type="button"
+          onClick={() => setGameStarted(true)}
+          style={{
+            padding: '15px 40px',
+            'font-size': '20px',
+            background: '#E67E22',
+            color: 'white',
+            border: 'none',
+            'border-radius': '8px',
+            cursor: 'pointer',
+            'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
+          }}
+          disabled={manifestsLoaded.loading}
+        >
+          Begin Journey
+        </button>
         </div>
       </Show>
 
@@ -456,7 +339,9 @@ function OtterbladeGameContent() {
           }}
         >
           <div style={{ 'font-size': '18px', 'margin-bottom': '10px', color: '#E67E22' }}>
-            Chapter {currentChapter()}: {loadChapterManifest(currentChapter()).name}
+            <Show when={currentChapterManifest()} fallback={<span>Chapter {currentChapter()}</span>}>
+              Chapter {currentChapter()}: {currentChapterManifest().name}
+            </Show>
           </div>
           <div style={{ 'margin-bottom': '10px' }}>
             <span style={{ color: '#F4D03F' }}>Health: </span>

@@ -3,7 +3,7 @@ services:
     name: otterblade-odyssey
     runtime: static
     buildCommand: pnpm install --frozen-lockfile && pnpm --filter game build
-    staticPublishPath: ./dist
+    staticPublishPath: ./game/dist
     pullRequestPreviewsEnabled: true
     headers:
       - path: /*
