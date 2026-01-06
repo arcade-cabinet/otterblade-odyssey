@@ -121,40 +121,6 @@ async function preloadGameManifests(onProgress) {
   }
 }
 
-/**
- * Preload all game manifests using the DDL loader.
- * This runs once at game startup to fetch all JSON data.
- */
-async function preloadGameManifests() {
-  try {
-    // Dynamic import to avoid SSR issues
-    const { preloadManifests } = await import('../ddl/loader');
-
-    // Preload all manifests in parallel
-    await preloadManifests({
-      manifestTypes: [
-        'chapters',
-        'enemies',
-        'npcs',
-        'sprites',
-        'cinematics',
-        'sounds',
-        'effects',
-        'items',
-        'scenes',
-        'chapter-plates',
-      ],
-      logProgress: true,
-      throwOnError: false, // Don't fail on individual manifest errors
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error('[Game] Manifest preload failed:', error);
-    throw new Error(`Failed to load game data: ${error.message}`);
-  }
-}
-
 function OtterbladeGameContent() {
   let canvasRef;
 
@@ -197,20 +163,8 @@ function OtterbladeGameContent() {
     // Wait for manifests to load before starting game
     if (!manifestsLoaded() || !gameStarted()) return;
 
-<<<<<<< HEAD
     // Initialize game engine (loads Matter.js dynamically)
     await initializeGame();
-=======
-    // Initialize Matter.js first (dynamic import)
-    if (!isMatterInitialized()) {
-      try {
-        await initializeMatter();
-      } catch (error) {
-        console.error('Failed to initialize Matter.js:', error);
-        return;
-      }
-    }
->>>>>>> f1e3097 (Fix Matter.js loading with single-point initialization wrapper)
 
     const canvas = canvasRef;
     if (!canvas) {
