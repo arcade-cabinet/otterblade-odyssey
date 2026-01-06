@@ -159,6 +159,12 @@ const CHAPTER_FILENAMES: Record<number, string> = {
 };
 
 /**
+ * Total number of chapters.
+ * Exported as canonical source for chapter count - other modules import this.
+ */
+export const TOTAL_CHAPTERS = Object.keys(CHAPTER_FILENAMES).length;
+
+/**
  * Loads and validates a chapter manifest by ID.
  * Results are cached after first load.
  *
@@ -173,8 +179,8 @@ const CHAPTER_FILENAMES: Record<number, string> = {
  * ```
  */
 export async function loadChapterManifest(chapterId: number): Promise<ChapterManifest> {
-  if (typeof chapterId !== 'number' || Number.isNaN(chapterId) || chapterId < 0 || chapterId > 9 || !Number.isInteger(chapterId)) {
-    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
+  if (typeof chapterId !== 'number' || Number.isNaN(chapterId) || chapterId < 0 || chapterId >= TOTAL_CHAPTERS || !Number.isInteger(chapterId)) {
+    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-${TOTAL_CHAPTERS - 1}.`);
   }
 
   const path = CHAPTER_FILENAMES[chapterId];
@@ -188,7 +194,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
   }
 
   // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
-  const fetchPath = `/manifests/${path}`;
+  const fetchPath = `/data/manifests/${path}`;
 
   let rawData;
   try {
@@ -232,7 +238,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
 export function getChapterManifestSync(chapterId: number): ChapterManifest {
   const path = CHAPTER_FILENAMES[chapterId];
   if (!path) {
-    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
+    throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-${TOTAL_CHAPTERS - 1}.`);
   }
 
   if (!manifestCache.has(path)) {
@@ -241,16 +247,8 @@ export function getChapterManifestSync(chapterId: number): ChapterManifest {
     );
   }
 
-  const cachedData = manifestCache.get(path);
-
-  // Runtime type guard: Validate cached data structure
-  const result = ChapterManifestSchema.safeParse(cachedData);
-  if (!result.success) {
-    const error = fromError(result.error);
-    throw new Error(`Corrupted chapter-${chapterId} manifest in cache: ${error.message}`);
-  }
-
-  return result.data;
+  // Return cached data directly - it was already validated when cached by loadChapterManifest
+  return manifestCache.get(path) as ChapterManifest;
 }
 
 // ============================================================================
@@ -718,18 +716,13 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
 /**
  * Gets all chapter IDs (0-9).
  */
-export const ALL_CHAPTER_IDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
-
-/**
- * Total number of chapters in the game.
- */
-export const TOTAL_CHAPTERS = 10;
+export const ALL_CHAPTER_IDS = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i) as const;
 
 /**
  * Checks if a chapter ID is valid.
  */
 export function isValidChapterId(chapterId: number): boolean {
-  return Number.isInteger(chapterId) && chapterId >= 0 && chapterId <= 9;
+  return Number.isInteger(chapterId) && chapterId >= 0 && chapterId < TOTAL_CHAPTERS;
 }
 
 /**

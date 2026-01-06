@@ -23,6 +23,7 @@ import chapter7Data from '../../data/manifests/chapters/chapter-7-bell-tower.jso
 import chapter8Data from '../../data/manifests/chapters/chapter-8-storms-edge.json';
 import chapter9Data from '../../data/manifests/chapters/chapter-9-new-dawn.json';
 import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './manifest-schemas';
+import { TOTAL_CHAPTERS } from '../../ddl/loader';
 
 // Import DDL loader for runtime fetch-based loading
 // This is optional - if DDL loader hasn't preloaded, we fall back to static imports
@@ -90,7 +91,7 @@ export function loadChapterManifest(chapterId: number): ChapterManifest {
   // Get raw data from static imports (fallback)
   const rawData = CHAPTER_DATA_MAP[chapterId];
   if (!rawData) {
-    throw new Error(`Chapter ${chapterId} not found. Valid chapters: 0-9`);
+    throw new Error(`Chapter ${chapterId} not found. Valid chapters: 0-${TOTAL_CHAPTERS - 1}`);
   }
 
   // Validate
@@ -111,7 +112,7 @@ export function loadChapterManifest(chapterId: number): ChapterManifest {
  */
 export function loadAllChapterManifests(): ChapterManifest[] {
   const chapters: ChapterManifest[] = [];
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i < TOTAL_CHAPTERS; i++) {
     chapters.push(loadChapterManifest(i));
   }
   return chapters;
@@ -236,7 +237,7 @@ export function clearChapterCache(): void {
  * Call this during game initialization for faster subsequent loads.
  */
 export function preloadAllChapters(): void {
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i < TOTAL_CHAPTERS; i++) {
     try {
       loadChapterManifest(i);
     } catch {
@@ -246,17 +247,12 @@ export function preloadAllChapters(): void {
 }
 
 /**
- * Gets the total number of chapters.
- */
-export const TOTAL_CHAPTERS = 10;
-
-/**
  * Gets chapter IDs that are available (not locked by progression).
  */
 export function getUnlockedChapters(completedChapters: number[]): number[] {
   const unlocked: number[] = [0]; // Chapter 0 is always unlocked
 
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i < TOTAL_CHAPTERS; i++) {
     const chapter = loadChapterManifest(i);
     const prevChapter = chapter.connections.previousChapter;
 
