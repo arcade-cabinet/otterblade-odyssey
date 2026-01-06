@@ -1,8 +1,10 @@
 import path from 'node:path';
+import solidPlugin from 'vite-plugin-solid';
 import { defineConfig } from 'vitest/config';
 
+
 export default defineConfig({
-  plugins: [],
+  plugins: [solidPlugin()],
   test: {
     globals: true,
     environment: 'happy-dom',
@@ -68,11 +70,12 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './game/src'),
-      '@shared': path.resolve(__dirname, './shared'),
-      '@game': path.resolve(__dirname, './game/src'),
-    },
-    conditions: ['node', 'default', 'import'],
+    alias: [
+      { find: /\.mp4$/, replacement: path.resolve(__dirname, './__mocks__/mp4Mock.ts') },
+      { find: '@', replacement: path.resolve(__dirname, './game/src') },
+      { find: '@shared', replacement: path.resolve(__dirname, './shared') },
+      { find: '@game', replacement: path.resolve(__dirname, './game/src') },
+    ],
+    conditions: ['browser', 'development'],
   },
 });

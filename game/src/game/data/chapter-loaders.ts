@@ -27,7 +27,6 @@ import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './
 // Import DDL loader for runtime fetch-based loading
 // This is optional - if DDL loader hasn't preloaded, we fall back to static imports
 let ddlLoader: typeof import('../../ddl/loader') | null = null;
-<<<<<<< HEAD
 
 // Kick off dynamic import without using top-level await to maintain SSR/build compatibility.
 // Only attempt the import in browser context to avoid unnecessary failed imports during SSR/build.
@@ -47,16 +46,6 @@ if (typeof window !== 'undefined') {
       console.log('[chapter-loaders] Using static imports (DDL loader unavailable)');
     });
 }
-=======
-try {
-  // Dynamic import so this module works during SSR/build
-  ddlLoader = await import('../../ddl/loader');
-} catch {
-  // DDL loader not available (SSR/build context) - will use static imports
-  console.log('[chapter-loaders] Using static imports (SSR/build mode)');
-}
-
->>>>>>> 3e1f025 (Add DDL loader with game integration and loading screen)
 /** All chapter data indexed by ID */
 const CHAPTER_DATA_MAP: Record<number, unknown> = {
   0: chapter0Data,
