@@ -187,22 +187,8 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
     throw new Error(`No manifest file found for chapter ${chapterId}`);
   }
 
-  // Check if validated data is already cached
-  if (manifestCache.has(path)) {
-    return manifestCache.get(path) as ChapterManifest;
-  }
-
-  // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
-  const fetchPath = `/data/manifests/${path}`;
-  const response = await fetch(fetchPath);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch manifest at ${fetchPath}: ${response.status} ${response.statusText}`
-    );
-  }
-
-  const rawData = await response.json();
+  // loadManifest handles caching and standardized error messages
+  const rawData = await loadManifest(path);
 
   // Validate with Zod schema
   const result = ChapterManifestSchema.safeParse(rawData);
@@ -211,7 +197,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
     throw new Error(`Invalid chapter-${chapterId} manifest: ${error.message}`);
   }
 
-  // Cache the VALIDATED data
+  // Cache the VALIDATED data (loadManifest cached the raw data, but we want the typed data)
   manifestCache.set(path, result.data);
 
   return result.data;

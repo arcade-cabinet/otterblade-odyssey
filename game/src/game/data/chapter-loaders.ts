@@ -111,7 +111,7 @@ export function loadChapterManifest(chapterId: number): ChapterManifest {
  */
 export function loadAllChapterManifests(): ChapterManifest[] {
   const chapters: ChapterManifest[] = [];
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i < TOTAL_CHAPTERS; i++) {
     chapters.push(loadChapterManifest(i));
   }
   return chapters;
@@ -236,7 +236,7 @@ export function clearChapterCache(): void {
  * Call this during game initialization for faster subsequent loads.
  */
 export function preloadAllChapters(): void {
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i < TOTAL_CHAPTERS; i++) {
     try {
       loadChapterManifest(i);
     } catch {
@@ -256,7 +256,7 @@ export const TOTAL_CHAPTERS = 10;
 export function getUnlockedChapters(completedChapters: number[]): number[] {
   const unlocked: number[] = [0]; // Chapter 0 is always unlocked
 
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i < TOTAL_CHAPTERS; i++) {
     const chapter = loadChapterManifest(i);
     const prevChapter = chapter.connections.previousChapter;
 
