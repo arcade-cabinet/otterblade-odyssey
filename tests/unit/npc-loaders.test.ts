@@ -6,11 +6,19 @@
  * the manifest format is still evolving with the game design.
  */
 
-import { describe, expect, it } from 'vitest';
-// Import the raw JSON directly for testing
-import npcData from '@/data/manifests/npcs.json';
+import { readFile } from 'node:fs/promises';
+import { beforeAll, describe, expect, it } from 'vitest';
 // Import typed loaders for function tests
-import { getAllSpecies, getGesture, getGestureLibrary, getSpecies } from '@/game/data';
+import { getAllSpecies, getGesture, getGestureLibrary, getSpecies, loadNPCManifestAsync } from '@/game/data';
+
+let npcData: Record<string, any>;
+
+beforeAll(async () => {
+  const manifestUrl = new URL('../../game/src/data/manifests/npcs.json', import.meta.url);
+  const raw = await readFile(manifestUrl, 'utf8');
+  npcData = JSON.parse(raw);
+  await loadNPCManifestAsync();
+});
 
 describe('NPC Manifest Structure', () => {
   describe('manifest metadata', () => {

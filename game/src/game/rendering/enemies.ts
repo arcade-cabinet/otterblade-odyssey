@@ -3,13 +3,43 @@
  * Galeborn soldiers, NPCs, and Zephyros boss
  */
 
+interface RenderPosition {
+  x: number;
+  y: number;
+}
+
+interface EnemyRenderData {
+  position: RenderPosition;
+  facing?: number;
+  hp?: number;
+}
+
+interface NPCRenderData {
+  position: RenderPosition;
+  facing?: number;
+  facingDirection?: number;
+  name?: string;
+}
+
+interface BossRenderData {
+  position: RenderPosition;
+  facing?: number;
+  hp?: number;
+  maxHp?: number;
+  phase?: number;
+}
+
 /**
  * Draw Galeborn enemy soldier
- * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {Object} enemy - Enemy object with position, facing, hp
- * @param {number} _animFrame - Animation frame counter
+ * @param ctx - Canvas context
+ * @param enemy - Enemy object with position, facing, hp
+ * @param _animFrame - Animation frame counter
  */
-export function drawEnemy(ctx, enemy, _animFrame) {
+export function drawEnemy(
+  ctx: CanvasRenderingContext2D,
+  enemy: EnemyRenderData,
+  _animFrame: number
+): void {
   const x = enemy.position.x;
   const y = enemy.position.y;
   const facing = enemy.facing || 1;
@@ -95,10 +125,14 @@ export function drawEnemy(ctx, enemy, _animFrame) {
  * @param {Object} npc - NPC object with position, facing
  * @param {number} animFrame - Animation frame counter
  */
-export function drawNPC(ctx, npc, animFrame) {
+export function drawNPC(
+  ctx: CanvasRenderingContext2D,
+  npc: NPCRenderData,
+  animFrame: number
+): void {
   const x = npc.position.x;
   const y = npc.position.y;
-  const facing = npc.facing || 1;
+  const facing = npc.facing ?? (npc as { facingDirection?: number }).facingDirection ?? 1;
 
   ctx.save();
   ctx.translate(x, y);
@@ -183,7 +217,11 @@ export function drawNPC(ctx, npc, animFrame) {
  * @param {Object} boss - Boss object with position, facing, hp, maxHp, phase
  * @param {number} animFrame - Animation frame counter
  */
-export function drawBoss(ctx, boss, animFrame) {
+export function drawBoss(
+  ctx: CanvasRenderingContext2D,
+  boss: BossRenderData,
+  animFrame: number
+): void {
   const x = boss.position.x;
   const y = boss.position.y;
   const facing = boss.facing || 1;

@@ -78,7 +78,7 @@ export function createFinnBody(x: number, y: number): Matter.Body {
 
   // Feet sensor for ground detection
   const feet = Bodies.rectangle(0, 24, 20, 8, {
-    label: 'finn_feet',
+    label: 'feet_sensor',
     isSensor: true,
   });
 

@@ -6,18 +6,19 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter6Manifest from '../../game/src/data/manifests/chapters/chapter-6-kitchen-gardens.json';
+
+test.use({
+  video: 'on',
+  timeout: 300000,
+});
 
 test.describe('Chapter 6: Kitchen Gardens - Automated Playthrough', () => {
-  test.use({
-    video: 'on',
-    timeout: 300000,
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 6: Kitchen Gardens');
 
+    const chapter6Manifest = await loadChapterManifest(page, 'chapter-6-kitchen-gardens.json');
     const result = await executePlaythrough(page, {
       chapter: chapter6Manifest as any,
       maxDuration: 180000,

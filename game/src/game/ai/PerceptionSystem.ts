@@ -1,28 +1,71 @@
 /**
- * PerceptionSystem.js
+ * PerceptionSystem
  * Vision cones, memory system, hearing per AI.md:673-780
  */
 
 import { Vector3 } from 'yuka';
 
+type Position = { x: number; y: number; z?: number };
+
+interface PerceptionOwner {
+  position: Vector3;
+  facingDirection?: number;
+}
+
+interface HeardSoundListener {
+  position: Vector3;
+  onHearSound: (event: SoundEvent, distance: number) => void;
+}
+
+/**
+ * Perceptive entity base class for AI that needs vision + memory.
+ */
+export class PerceptiveEntity {
+  position: Vector3;
+  facingDirection: number;
+  vision: VisionSystem;
+  memory: MemorySystem;
+
+  constructor(config: { fieldOfView?: number; visionRange?: number; memorySpan?: number }) {
+    this.position = new Vector3();
+    this.facingDirection = 1;
+    this.vision = new VisionSystem(this, config.fieldOfView, config.visionRange);
+    this.memory = new MemorySystem(this, config.memorySpan);
+  }
+
+  /**
+   * Update perception of a target.
+   */
+  updatePerception(target: { position: Vector3 }, delta: number): void {
+    if (this.vision.canSee(target.position)) {
+      this.memory.remember(target, target.position);
+    }
+    this.memory.update(delta);
+  }
+}
+
 /**
  * Vision system with field of view (AI.md:673-724)
  */
 export class VisionSystem {
-  constructor(owner, fieldOfView = Math.PI * 0.6, range = 300) {
+  owner: PerceptionOwner;
+  fieldOfView: number;
+  range: number;
+
+  constructor(owner: PerceptionOwner, fieldOfView: number = Math.PI * 0.6, range: number = 300) {
     this.owner = owner;
     this.fieldOfView = fieldOfView; // 108 degrees
     this.range = range;
   }
 
-  canSee(targetPos) {
+  canSee(targetPos: Vector3) {
     const toTarget = new Vector3().subVectors(targetPos, this.owner.position);
     const distance = toTarget.length();
 
     if (distance > this.range) return false;
 
     // Check if in field of view
-    const forward = this.owner.getForwardVector();
+    const forward = this.getForwardVector();
     toTarget.normalize();
 
     const dotProduct = forward.dot(toTarget);
@@ -42,7 +85,7 @@ export class VisionSystem {
   /**
    * Draw debug visualization
    */
-  debugRender(ctx, camera) {
+  debugRender(ctx: CanvasRenderingContext2D, camera: { x: number; y: number }) {
     ctx.save();
     ctx.translate(-camera.x, -camera.y);
 
@@ -77,7 +120,17 @@ export class VisionSystem {
  * Memory system for tracking entities (AI.md:673-724)
  */
 export class MemorySystem {
-  constructor(owner, memorySpan = 3) {
+  owner: PerceptionOwner;
+  memorySpan: number;
+  records: Array<{
+    entity: unknown;
+    position: Vector3;
+    lastSensedTime: number;
+    timesSpotted: number;
+    threat: number;
+  }>;
+
+  constructor(owner: PerceptionOwner, memorySpan: number = 3) {
     this.owner = owner;
     this.memorySpan = memorySpan; // seconds
     this.records = [];
@@ -86,14 +139,14 @@ export class MemorySystem {
   /**
    * Get memory record for entity
    */
-  getRecord(entity) {
+  getRecord(entity: unknown) {
     return this.records.find((r) => r.entity === entity);
   }
 
   /**
    * Update or create memory record
    */
-  remember(entity, position) {
+  remember(entity: unknown, position: Vector3) {
     let record = this.getRecord(entity);
 
     if (record) {
@@ -117,7 +170,7 @@ export class MemorySystem {
   /**
    * Update memory records (age them)
    */
-  update(delta) {
+  update(delta: number) {
     for (const record of this.records) {
       record.lastSensedTime += delta;
     }
@@ -151,7 +204,13 @@ export class MemorySystem {
  * Sound event for hearing system (AI.md:729-780)
  */
 export class SoundEvent {
-  constructor(position, loudness, type, source) {
+  position: Vector3;
+  loudness: number;
+  type: string;
+  source: unknown;
+  timestamp: number;
+
+  constructor(position: Vector3, loudness: number, type: string, source: unknown) {
     this.position = position.clone();
     this.loudness = loudness;
     this.type = type; // 'footstep' | 'attack' | 'item' | 'damage' | 'door' | 'jump'
@@ -164,6 +223,10 @@ export class SoundEvent {
  * Hearing system for sound propagation
  */
 export class HearingSystem {
+  sounds: SoundEvent[];
+  maxSounds: number;
+  listeners: HeardSoundListener[];
+
   constructor() {
     this.sounds = [];
     this.maxSounds = 20;
@@ -173,7 +236,7 @@ export class HearingSystem {
   /**
    * Emit a sound event
    */
-  emit(position, loudness, type, source) {
+  emit(position: Vector3, loudness: number, type: string, source: unknown) {
     const event = new SoundEvent(position, loudness, type, source);
     this.sounds.push(event);
 
@@ -195,96 +258,25 @@ export class HearingSystem {
   /**
    * Register a listener (enemy/NPC)
    */
-  addListener(listener) {
+  addListener(listener: HeardSoundListener) {
     this.listeners.push(listener);
   }
 
   /**
    * Remove listener
    */
-  removeListener(listener) {
-    const index = this.listeners.indexOf(listener);
-    if (index > -1) {
-      this.listeners.splice(index, 1);
-    }
+  removeListener(listener: HeardSoundListener) {
+    this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
   /**
-   * Update and clean old sounds
+   * Update sound lifetimes
    */
   update() {
     const now = performance.now();
-    this.sounds = this.sounds.filter((s) => now - s.timestamp < 2000);
+    this.sounds = this.sounds.filter((sound) => now - sound.timestamp < 1000);
   }
 }
 
-/**
- * Perceptive enemy with vision and memory (AI.md:669-724)
- */
-export class PerceptiveEntity {
-  constructor(config) {
-    this.position = new Vector3();
-    this.facingDirection = 1;
-
-    this.vision = new VisionSystem(this, config.fieldOfView, config.visionRange);
-    this.memory = new MemorySystem(this, config.memorySpan || 3);
-
-    this.alertLevel = 0; // 0 = unaware, 1 = suspicious, 2 = alert
-    this.investigatePosition = null;
-  }
-
-  /**
-   * Update perception
-   */
-  updatePerception(player, delta) {
-    // Check vision
-    if (this.vision.canSee(player.position)) {
-      // Remember player
-      const record = this.memory.remember(player, player.position);
-      record.threat = 1.0;
-
-      this.alertLevel = 2; // Full alert
-      this.target = player;
-    } else {
-      // Use memory to track last known position
-      const playerMemory = this.memory.getRecord(player);
-
-      if (playerMemory && playerMemory.lastSensedTime < 2) {
-        this.investigatePosition = playerMemory.position.clone();
-        this.alertLevel = Math.max(1, this.alertLevel); // At least suspicious
-      } else if (this.alertLevel > 0) {
-        // Gradually lose alert
-        this.alertLevel = Math.max(0, this.alertLevel - delta * 0.2);
-      }
-    }
-
-    // Update memory
-    this.memory.update(delta);
-  }
-
-  /**
-   * Handle hearing sound event
-   */
-  onHearSound(event, distance) {
-    // Closer sounds are more alerting
-    const alertIncrease = (1 - distance / 300) * 0.5;
-    this.alertLevel = Math.min(2, this.alertLevel + alertIncrease);
-
-    // If idle or patrolling, investigate
-    if (this.alertLevel < 2 && event.type !== 'ambient') {
-      this.investigatePosition = event.position.clone();
-    }
-  }
-
-  /**
-   * Get forward vector for vision
-   */
-  getForwardVector() {
-    return new Vector3(this.facingDirection, 0, 0);
-  }
-}
-
-/**
- * Global hearing system instance
- */
+// Export singleton instance
 export const hearingSystem = new HearingSystem();

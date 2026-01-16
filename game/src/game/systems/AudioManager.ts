@@ -102,7 +102,6 @@ class AudioManager implements AudioSystem {
         }
       }
       
-      console.log(`Loaded ${this.sfx.size} SFX, ${this.music.size} music tracks, ${this.ambience.size} ambient sounds from manifest`);
     } catch (error) {
       console.error('Error loading sound manifest:', error);
     }
@@ -243,6 +242,13 @@ class AudioManager implements AudioSystem {
   }
 
   /**
+   * Alias for playSFX (used by legacy call sites)
+   */
+  playSound(soundId: string, options: { rate?: number; volume?: number; sprite?: string } = {}): number | null {
+    return this.playSFX(soundId, options);
+  }
+
+  /**
    * Play ambient sound
    */
   playAmbient(ambientId: string): void {
@@ -289,6 +295,19 @@ class AudioManager implements AudioSystem {
   }
 
   /**
+   * Stop the current music track
+   */
+  stopMusic(): void {
+    if (this.currentMusic) {
+      const track = this.music.get(this.currentMusic);
+      if (track) {
+        track.stop();
+      }
+      this.currentMusic = null;
+    }
+  }
+
+  /**
    * Set volume for category
    */
   setVolume(category: keyof VolumeConfig, value: number): void {
@@ -322,6 +341,10 @@ class AudioManager implements AudioSystem {
    */
   setMuted(muted: boolean): void {
     Howler.mute(muted);
+  }
+
+  mute(muted: boolean): void {
+    this.setMuted(muted);
   }
 
   /**

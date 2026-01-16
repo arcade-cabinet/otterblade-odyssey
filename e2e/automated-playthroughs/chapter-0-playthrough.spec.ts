@@ -11,19 +11,20 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter0Manifest from '../../game/src/data/manifests/chapters/chapter-0-the-calling.json';
+
+test.use({
+  // Enable video recording for this suite
+  video: 'on',
+  // Give the AI plenty of time to complete
+  timeout: 300000, // 5 minutes
+});
 
 test.describe('Chapter 0: The Calling - Automated Playthrough', () => {
-  test.use({
-    // Enable video recording for this suite
-    video: 'on',
-    // Give the AI plenty of time to complete
-    timeout: 300000, // 5 minutes
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 0: The Calling');
+    const chapter0Manifest = await loadChapterManifest(page, 'chapter-0-the-calling.json');
 
     const result = await executePlaythrough(page, {
       chapter: chapter0Manifest as any,
@@ -48,6 +49,7 @@ test.describe('Chapter 0: The Calling - Automated Playthrough', () => {
     // This test is more lenient - it validates that the level doesn't have
     // game-breaking bugs even if the AI struggles
 
+    const chapter0Manifest = await loadChapterManifest(page, 'chapter-0-the-calling.json');
     const result = await executePlaythrough(page, {
       chapter: chapter0Manifest as any,
       maxDuration: 180000,
@@ -79,6 +81,7 @@ test.describe('Chapter 0: The Calling - Automated Playthrough', () => {
     // This test validates that the level geometry is sound
     // by checking that the AI can build a valid path
 
+    const chapter0Manifest = await loadChapterManifest(page, 'chapter-0-the-calling.json');
     await page.goto('/');
 
     // Skip cinematic

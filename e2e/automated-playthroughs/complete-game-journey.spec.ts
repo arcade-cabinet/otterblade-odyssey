@@ -16,39 +16,28 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
 
-// Import all chapter manifests
-import chapter0 from '../../game/src/data/manifests/chapters/chapter-0-the-calling.json';
-import chapter1 from '../../game/src/data/manifests/chapters/chapter-1-river-path.json';
-import chapter2 from '../../game/src/data/manifests/chapters/chapter-2-gatehouse.json';
-import chapter3 from '../../game/src/data/manifests/chapters/chapter-3-great-hall.json';
-import chapter4 from '../../game/src/data/manifests/chapters/chapter-4-archives.json';
-import chapter5 from '../../game/src/data/manifests/chapters/chapter-5-deep-cellars.json';
-import chapter6 from '../../game/src/data/manifests/chapters/chapter-6-kitchen-gardens.json';
-import chapter7 from '../../game/src/data/manifests/chapters/chapter-7-bell-tower.json';
-import chapter8 from '../../game/src/data/manifests/chapters/chapter-8-storms-edge.json';
-import chapter9 from '../../game/src/data/manifests/chapters/chapter-9-new-dawn.json';
+test.use({
+  video: 'on', // CRITICAL: Capture complete journey
+  timeout: 3600000, // 60 minutes for complete playthrough
+});
 
 const ALL_CHAPTERS = [
-  { id: 0, name: 'The Calling', manifest: chapter0, quest: 'Answer the Call' },
-  { id: 1, name: 'River Path', manifest: chapter1, quest: 'Reach the Gatehouse' },
-  { id: 2, name: 'Gatehouse', manifest: chapter2, quest: 'Cross the Threshold' },
-  { id: 3, name: 'Great Hall', manifest: chapter3, quest: 'Defend the Great Hall' },
-  { id: 4, name: 'Archives', manifest: chapter4, quest: 'Find the Ancient Map' },
-  { id: 5, name: 'Deep Cellars', manifest: chapter5, quest: 'Descend into the Depths' },
-  { id: 6, name: 'Kitchen Gardens', manifest: chapter6, quest: 'Rally the Defenders' },
-  { id: 7, name: 'Bell Tower', manifest: chapter7, quest: 'Ascend to the Bells' },
-  { id: 8, name: 'Storms Edge', manifest: chapter8, quest: 'Reach Zephyros' },
-  { id: 9, name: 'New Dawn', manifest: chapter9, quest: 'A New Dawn' },
+  { id: 0, name: 'The Calling', file: 'chapter-0-the-calling.json', quest: 'Answer the Call' },
+  { id: 1, name: 'River Path', file: 'chapter-1-river-path.json', quest: 'Reach the Gatehouse' },
+  { id: 2, name: 'Gatehouse', file: 'chapter-2-gatehouse.json', quest: 'Cross the Threshold' },
+  { id: 3, name: 'Great Hall', file: 'chapter-3-great-hall.json', quest: 'Defend the Great Hall' },
+  { id: 4, name: 'Archives', file: 'chapter-4-archives.json', quest: 'Find the Ancient Map' },
+  { id: 5, name: 'Deep Cellars', file: 'chapter-5-deep-cellars.json', quest: 'Descend into the Depths' },
+  { id: 6, name: 'Kitchen Gardens', file: 'chapter-6-kitchen-gardens.json', quest: 'Rally the Defenders' },
+  { id: 7, name: 'Bell Tower', file: 'chapter-7-bell-tower.json', quest: 'Ascend to the Bells' },
+  { id: 8, name: 'Storms Edge', file: 'chapter-8-storms-edge.json', quest: 'Reach Zephyros' },
+  { id: 9, name: 'New Dawn', file: 'chapter-9-new-dawn.json', quest: 'A New Dawn' },
 ];
 
 test.describe('COMPLETE GAME JOURNEY - Otterblade Odyssey', () => {
-  test.use({
-    video: 'on', // CRITICAL: Capture complete journey
-    timeout: 3600000, // 60 minutes for complete playthrough
-  });
-
   test('should complete ENTIRE game from start to victory', async ({ page }) => {
     console.log('╔═══════════════════════════════════════════════════════════════╗');
     console.log('║  OTTERBLADE ODYSSEY - COMPLETE JOURNEY VALIDATION            ║');
@@ -77,8 +66,9 @@ test.describe('COMPLETE GAME JOURNEY - Otterblade Odyssey', () => {
       const chapterStart = Date.now();
 
       try {
+        const manifest = await loadChapterManifest(page, chapter.file);
         const result = await executePlaythrough(page, {
-          chapter: chapter.manifest as any,
+          chapter: manifest as any,
           maxDuration: 300000, // 5 minutes per chapter
           screenshotInterval: 10000, // Screenshot every 10 seconds
           videoEnabled: true,

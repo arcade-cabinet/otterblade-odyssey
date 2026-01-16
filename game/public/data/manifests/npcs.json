@@ -119,7 +119,7 @@
     }
   },
 
-  "npcs": [
+  "characters": [
     {
       "id": "finn_otterblade",
       "species": "otter",

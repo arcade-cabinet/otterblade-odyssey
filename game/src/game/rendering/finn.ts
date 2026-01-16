@@ -3,19 +3,24 @@
  * Warm, brave otter warrior with Otterblade
  */
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 /**
  * Draw Finn the otter protagonist
- * @param {CanvasRenderingContext2D} ctx - Canvas context
- * @param {Object} position - Player position {x, y}
- * @param {number} facing - Direction player is facing (1 or -1)
- * @param {number} animFrame - Animation frame counter
+ * @param ctx - Canvas context
+ * @param position - Player position {x, y}
+ * @param facing - Direction player is facing (1 or -1)
+ * @param animFrame - Animation frame counter
  */
-export function drawFinn(ctx, position, facing, animFrame) {
-  if (!ctx || !position || typeof animFrame !== 'number') {
-    console.error('Invalid parameters to drawFinn');
-    return;
-  }
-
+export function drawFinn(
+  ctx: CanvasRenderingContext2D,
+  position: Position,
+  facing: 1 | -1,
+  animFrame: number
+): void {
   ctx.save();
   ctx.translate(position.x, position.y);
   ctx.scale(facing, 1);

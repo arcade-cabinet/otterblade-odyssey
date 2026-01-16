@@ -7,6 +7,9 @@
 import { onCleanup, onMount, Show } from 'solid-js';
 import { inputManager } from '../systems/InputManager';
 
+/**
+ * Renders mobile-only touch controls and hooks inputs into the input manager.
+ */
 export default function TouchControls(_props) {
   let joystickZone;
   let joystickManager;
@@ -74,6 +77,7 @@ export default function TouchControls(_props) {
   return (
     <Show when={isMobile()}>
       <div
+        data-testid="touch-controls"
         style={{
           position: 'fixed',
           top: 0,
@@ -97,6 +101,37 @@ export default function TouchControls(_props) {
           }}
         />
 
+        <button
+          type="button"
+          data-testid="button-left"
+          aria-hidden="true"
+          tabIndex={-1}
+          style={{
+            position: 'absolute',
+            left: '8%',
+            bottom: '28%',
+            width: '40px',
+            height: '40px',
+            opacity: 0,
+            'pointer-events': 'none',
+          }}
+        />
+        <button
+          type="button"
+          data-testid="button-right"
+          aria-hidden="true"
+          tabIndex={-1}
+          style={{
+            position: 'absolute',
+            left: '20%',
+            bottom: '28%',
+            width: '40px',
+            height: '40px',
+            opacity: 0,
+            'pointer-events': 'none',
+          }}
+        />
+
         {/* Action buttons (right side) */}
         <div
           style={{
@@ -113,6 +148,7 @@ export default function TouchControls(_props) {
           <button
             type="button"
             onTouchStart={handleJump}
+            data-testid="button-jump"
             style={{
               width: '70px',
               height: '70px',

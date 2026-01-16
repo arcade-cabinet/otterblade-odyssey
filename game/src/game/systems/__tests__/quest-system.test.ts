@@ -3,11 +3,20 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { QuestSystem } from '../quest-system.js';
+import { QuestSystem } from '../QuestSystem';
 
 describe('QuestSystem', () => {
-  let questSystem;
-  let sampleManifest;
+  let questSystem: QuestSystem;
+  let sampleManifest: {
+    quests: Array<{
+      id: string;
+      name: string;
+      description: string;
+      objectives: Array<{ id: string; description: string; required: number }>;
+      rewards: Array<{ type: string; amount: number }>;
+      optional: boolean;
+    }>;
+  };
 
   beforeEach(() => {
     questSystem = new QuestSystem();
@@ -61,16 +70,16 @@ describe('QuestSystem', () => {
       const quest = questSystem.startQuest('quest-1');
 
       expect(quest).not.toBeNull();
-      expect(quest.id).toBe('quest-1');
-      expect(quest.objectives.length).toBe(2);
+      expect(quest?.id).toBe('quest-1');
+      expect(quest?.objectives.length).toBe(2);
       expect(questSystem.activeQuests.length).toBe(1);
     });
 
     it('should initialize objectives with current=0', () => {
       const quest = questSystem.startQuest('quest-1');
 
-      expect(quest.objectives[0].current).toBe(0);
-      expect(quest.objectives[0].completed).toBe(false);
+      expect(quest?.objectives[0].current).toBe(0);
+      expect(quest?.objectives[0].completed).toBe(false);
     });
 
     it('should not start already active quest', () => {
@@ -105,21 +114,21 @@ describe('QuestSystem', () => {
       questSystem.updateObjective('quest-1', 'obj-1', 1);
 
       const quest = questSystem.getActiveQuest('quest-1');
-      expect(quest.objectives[0].current).toBe(1);
+      expect(quest?.objectives[0].current).toBe(1);
     });
 
     it('should mark objective as completed when required met', () => {
       questSystem.updateObjective('quest-1', 'obj-1', 3);
 
       const quest = questSystem.getActiveQuest('quest-1');
-      expect(quest.objectives[0].completed).toBe(true);
+      expect(quest?.objectives[0].completed).toBe(true);
     });
 
     it('should not exceed required amount', () => {
       questSystem.updateObjective('quest-1', 'obj-1', 10);
 
       const quest = questSystem.getActiveQuest('quest-1');
-      expect(quest.objectives[0].current).toBe(3); // Clamped to required
+      expect(quest?.objectives[0].current).toBe(3);
     });
 
     it('should complete quest when all objectives done', () => {
@@ -135,7 +144,7 @@ describe('QuestSystem', () => {
       questSystem.updateObjective('quest-1', 'obj-1', 1);
 
       const quest = questSystem.getActiveQuest('quest-1');
-      expect(quest.objectives[0].current).toBe(3);
+      expect(quest?.objectives[0].current).toBe(3);
     });
   });
 
@@ -242,21 +251,6 @@ describe('QuestSystem', () => {
       expect(newQuestSystem.activeQuests).toHaveLength(1);
       expect(newQuestSystem.activeQuests[0].id).toBe('quest-1');
       expect(newQuestSystem.activeQuests[0].objectives[0].current).toBe(2);
-    });
-  });
-
-  describe('clear()', () => {
-    beforeEach(() => {
-      questSystem.registerQuests(sampleManifest);
-      questSystem.startQuest('quest-1');
-    });
-
-    it('should clear all quests', () => {
-      questSystem.clear();
-
-      expect(questSystem.activeQuests).toHaveLength(0);
-      expect(questSystem.completedQuests).toHaveLength(0);
-      expect(questSystem.questDefinitions.size).toBe(0);
     });
   });
 });

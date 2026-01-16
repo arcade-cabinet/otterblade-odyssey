@@ -5,7 +5,7 @@
  */
 
 import type { BiomeColors, Chapter as ChapterData } from './data';
-import { getBiomeColorsArray, loadBiomes, loadChapters } from './data';
+import { getBiomeColorsArray, getBiomesSync, getChaptersSync, preloadLegacyData } from './data';
 
 /** Chunk size for procedural generation */
 export const CHUNK_SIZE = 48;
@@ -48,27 +48,12 @@ const FALLBACK_COLORS: BiomeColors = {
  */
 function loadChaptersWithColors(): Chapter[] {
   try {
-    const chapters = loadChapters();
-    const biomes = loadBiomes();
+    const chapters = getChaptersSync();
+    const biomes = getBiomesSync();
     const biomeColors = getBiomeColorsArray();
-
-    const unmappedChapters = chapters.filter(
-      (ch) => !biomes.some((b) => b.chapterIds.includes(ch.id))
-    );
-    if (unmappedChapters.length > 0) {
-      console.warn(
-        `[constants] ${unmappedChapters.length} chapters have no biome mapping: ` +
-          unmappedChapters.map((ch) => ch.name).join(', ')
-      );
-    }
 
     return chapters.map((ch, idx) => {
       const colors = biomeColors[idx];
-      if (!colors) {
-        console.warn(
-          `[constants] Missing biome colors for chapter ${idx} (${ch.name}), using fallback.`
-        );
-      }
       return {
         ...ch,
         bg: colors?.bg ?? FALLBACK_COLORS.bg,
@@ -79,7 +64,6 @@ function loadChaptersWithColors(): Chapter[] {
       };
     });
   } catch (error) {
-    console.error('[constants] Failed to load chapter data:', error);
     return [
       {
         id: 0,
@@ -102,11 +86,33 @@ function loadChaptersWithColors(): Chapter[] {
   }
 }
 
-/** All chapters with visual properties */
-export const CHAPTERS: Chapter[] = loadChaptersWithColors();
+function buildFallbackChapters(): Chapter[] {
+  return [
+    {
+      id: 0,
+      name: 'Loading Willowmere...',
+      setting: 'Unknown',
+      quest: 'Please wait',
+      hasBoss: false,
+      bossName: null,
+      assets: {
+        chapterPlate: '',
+        parallaxBg: '',
+      },
+      bg: FALLBACK_COLORS.bg,
+      fog: FALLBACK_COLORS.fog,
+      accent: FALLBACK_COLORS.accent,
+      sky1: FALLBACK_COLORS.sky1,
+      sky2: FALLBACK_COLORS.sky2,
+    },
+  ];
+}
 
-/** Legacy BIOMES array for backward compatibility */
-export const BIOMES = CHAPTERS.map((ch) => ({
+/** All chapters with visual properties (initialized via initializeChapterConstants). */
+export let CHAPTERS: Chapter[] = buildFallbackChapters();
+
+/** Legacy BIOMES array for backward compatibility (initialized via initializeChapterConstants). */
+export let BIOMES = CHAPTERS.map((ch) => ({
   name: ch.name,
   bg: ch.bg,
   fog: ch.fog,
@@ -115,6 +121,24 @@ export const BIOMES = CHAPTERS.map((ch) => ({
   sky2: ch.sky2,
   quest: ch.quest,
 }));
+
+/**
+ * Initializes chapter constants from JSON data.
+ * Must run before systems that rely on CHAPTERS/BIOMES.
+ */
+export async function initializeChapterConstants(): Promise<void> {
+  await preloadLegacyData();
+  CHAPTERS = loadChaptersWithColors();
+  BIOMES = CHAPTERS.map((ch) => ({
+    name: ch.name,
+    bg: ch.bg,
+    fog: ch.fog,
+    accent: ch.accent,
+    sky1: ch.sky1,
+    sky2: ch.sky2,
+    quest: ch.quest,
+  }));
+}
 
 /** Collision groups for physics filtering */
 export const CG = {

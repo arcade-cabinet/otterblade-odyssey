@@ -74,6 +74,11 @@ class InputManager implements InputSystem {
 
   // Previous frame state for edge detection
   prevState: InputState = { ...this.state };
+  private readonly keyDownHandler = (e: KeyboardEvent) => this.handleKeyDown(e);
+  private readonly keyUpHandler = (e: KeyboardEvent) => this.handleKeyUp(e);
+  private readonly gamepadConnectedHandler = (e: GamepadEvent) => this.handleGamepadConnected(e);
+  private readonly gamepadDisconnectedHandler = (e: GamepadEvent) =>
+    this.handleGamepadDisconnected(e);
 
   constructor() {
     this.init();
@@ -81,12 +86,12 @@ class InputManager implements InputSystem {
 
   init(): void {
     // Keyboard listeners
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
-    window.addEventListener('keyup', this.handleKeyUp.bind(this));
+    window.addEventListener('keydown', this.keyDownHandler);
+    window.addEventListener('keyup', this.keyUpHandler);
 
     // Gamepad detection
-    window.addEventListener('gamepadconnected', this.handleGamepadConnected.bind(this));
-    window.addEventListener('gamepaddisconnected', this.handleGamepadDisconnected.bind(this));
+    window.addEventListener('gamepadconnected', this.gamepadConnectedHandler);
+    window.addEventListener('gamepaddisconnected', this.gamepadDisconnectedHandler);
 
     // Prevent space/arrow default scrolling
     window.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -105,13 +110,11 @@ class InputManager implements InputSystem {
   }
 
   handleGamepadConnected(e: GamepadEvent): void {
-    console.log('Gamepad connected:', e.gamepad);
     this.gamepadInstance = e.gamepad;
     this.gamepad.connected = true;
   }
 
   handleGamepadDisconnected(_e: GamepadEvent): void {
-    console.log('Gamepad disconnected');
     this.gamepadInstance = null;
     this.gamepad.connected = false;
   }
@@ -293,10 +296,10 @@ class InputManager implements InputSystem {
    * Cleanup
    */
   cleanup(): void {
-    window.removeEventListener('keydown', this.handleKeyDown.bind(this));
-    window.removeEventListener('keyup', this.handleKeyUp.bind(this));
-    window.removeEventListener('gamepadconnected', this.handleGamepadConnected.bind(this));
-    window.removeEventListener('gamepaddisconnected', this.handleGamepadDisconnected.bind(this));
+    window.removeEventListener('keydown', this.keyDownHandler);
+    window.removeEventListener('keyup', this.keyUpHandler);
+    window.removeEventListener('gamepadconnected', this.gamepadConnectedHandler);
+    window.removeEventListener('gamepaddisconnected', this.gamepadDisconnectedHandler);
   }
 
   destroy(): void {

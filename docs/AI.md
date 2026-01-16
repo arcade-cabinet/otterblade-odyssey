@@ -6,18 +6,18 @@
 
 **For detailed code examples and complete implementations, see [AI_REFERENCE.md](./AI_REFERENCE.md).**
 
-This document provides high-level concepts and integration patterns. AI_REFERENCE.md contains production-ready code extracted from `game/src/game/ai/` and `game/src/game/systems/AIManager.js`.
+This document provides high-level concepts and integration patterns. AI_REFERENCE.md contains production-ready code extracted from `game/src/game/ai/` and `game/src/game/systems/AIManager.ts`.
 
 ## Quick Context
 
 - **Runtime**: Astro + Solid islands with Matter.js physics and Canvas 2D rendering.
 - **Data**: All authored behavior parameters live in `client/src/data/manifests/` (e.g., `enemies.json`, chapter manifests). Load them via async helpers in `game/src/ddl/`—never import JSON directly.
-- **Language**: JavaScript (ES2022) with JSDoc for clarity; keep functions small and composable.
+- **Language**: TypeScript (ES2022 target); keep functions small and composable.
 - **Implementation Files**:
-  - `game/src/game/ai/BossAI.js` - Boss AI with fuzzy logic and phase system
-  - `game/src/game/ai/PerceptionSystem.js` - Vision, memory, and hearing systems
-  - `game/src/game/systems/AIManager.js` - FSM states, YUKA integration, pathfinding
-  - `game/src/game/systems/EnemyStates.js` - Detailed FSM state implementations
+  - `game/src/game/ai/BossAI.ts` - Boss AI with fuzzy logic and phase system
+  - `game/src/game/ai/PerceptionSystem.ts` - Vision, memory, and hearing systems
+  - `game/src/game/systems/AIManager.ts` - FSM states, YUKA integration, pathfinding
+  - `game/src/game/systems/EnemyStates.ts` - Detailed FSM state implementations
 
 ## Core Concepts
 
@@ -219,7 +219,7 @@ Test AI helpers with deterministic inputs:
 
 ```javascript
 import { describe, it, expect } from 'vitest';
-import { ThreatAssessment } from '../game/ai/BossAI.js';
+import { ThreatAssessment } from '../game/ai/BossAI.ts';
 
 describe('ThreatAssessment', () => {
   it('should return high aggression for close low-health player', () => {
@@ -261,7 +261,7 @@ AI player navigates levels using shared navmesh from chapter manifests.
 
 ```
 game/src/game/ai/
-├── BossAI.js              # Fuzzy logic, phase system, attack patterns
+├── BossAI.ts              # Fuzzy logic, phase system, attack patterns
 ├── PerceptionSystem.js    # Vision, memory, hearing systems
 
 game/src/game/systems/
@@ -286,7 +286,7 @@ docs/
 | System | File | Key Classes |
 |--------|------|-------------|
 | FSM States | `systems/EnemyStates.js` | IdleState, PatrolState, ChaseState, AttackState, FleeState, HurtState |
-| Boss AI | `ai/BossAI.js` | ZephyrosAI, BossPattern, ThreatAssessment, FrostWavePattern |
+| Boss AI | `ai/BossAI.ts` | ZephyrosAI, BossPattern, ThreatAssessment, FrostWavePattern |
 | Perception | `ai/PerceptionSystem.js` | VisionSystem, MemorySystem, HearingSystem, PerceptiveEntity |
 | AI Manager | `systems/AIManager.js` | AIManager, EnemyAI, NPCAI, pathfinding functions |
 

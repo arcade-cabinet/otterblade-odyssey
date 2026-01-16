@@ -1,6 +1,6 @@
 # Claude Agent Instructions for Otterblade Odyssey
 
-This is the primary instruction file for Claude-based AI agents working on Otterblade Odyssey. Claude agents should read this file first, then reference `BRAND.md` for visual guidelines and `AGENTS.md` for technical patterns.
+This is the primary instruction file for Claude-based AI agents working on Otterblade Odyssey. Claude agents must read `.clinerules` and the `memory-bank/` files before any work, then use this file for execution details along with `BRAND.md` and `AGENTS.md`.
 
 ## Quick Context
 
@@ -31,19 +31,18 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 - Moss, stone, lantern light, cloth, leather, iron
 - Subtle magic (firefly motes, not laser beams)
 
-### 3. Use Procedural Generation (NOT Static Assets)
-```javascript
+### 3. Use Procedural Generation for Characters (Manifest-driven assets for cinematics)
+```ts
 // CORRECT - Procedural rendering like POC
 // See pocs/otterblade_odyssey.html for reference
 // Use canvas-based procedural generation for player, enemies, effects
 
-// WRONG - Static PNG/MP4 imports (removed from codebase)
-// import otterSprite from "@assets/...png";  // DO NOT USE
-// import chapterPlate from "@assets/...png";  // DO NOT USE
+// Cinematics and chapter plates are resolved via manifests and asset mapping,
+// not hardcoded imports or inline asset paths.
 ```
 
-### 4. Language is TypeScript (compiles to ES2022)
-Modern TypeScript features with ES2022 compilation target. **TypeScript provides type safety and better tooling** while compiling to vanilla JavaScript with zero runtime overhead. Types are stripped at build time, maintaining performance while providing compile-time safety.
+### 4. Language is TypeScript (ES2022 target)
+Modern TypeScript features with ES2022 compilation target. **TypeScript provides type safety and better tooling** while compiling to ES2022 JavaScript with zero runtime overhead. Types are stripped at build time, maintaining performance while providing compile-time safety.
 
 ### 5. Node.js Version is 25.x
 All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` at repo root. CI/CD workflows, Replit, and local dev must all align to this version.
@@ -55,7 +54,7 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 |-------|------------|
 | Framework | Astro 5.x (static site generation) |
 | UI Components | Solid.js (reactive UI) |
-| Language | JavaScript (ES2022) |
+| Language | TypeScript (ES2022 target) |
 | Physics | Matter.js 0.20 (POC-proven) |
 | Rendering | Canvas 2D API |
 | AI/Pathfinding | YUKA 0.7.8 |
@@ -67,52 +66,40 @@ All environments use Node.js 25 (latest stable). Version is defined in `.nvmrc` 
 
 ### Key Directories
 ```
-game/src/                  # Astro + Solid.js game
+game/src/                     # Astro + Solid.js game
 ├── pages/
-│   └── index.astro        # Main game page
-├── components/            # Solid.js components
-│   ├── GameCanvas.jsx     # Game canvas wrapper
-│   ├── HUD.jsx            # Health, shards, quest display
-│   ├── TouchControls.jsx  # Mobile controls
-│   ├── StartMenu.jsx      # Start screen
-│   └── ChapterPlate.jsx   # Chapter transitions
-├── game/                  # Core game engine
-│   ├── engine/
-│   │   ├── physics.js     # Matter.js engine setup
-│   │   ├── renderer.js    # Canvas 2D rendering pipeline
-│   │   └── gameLoop.js    # RequestAnimationFrame loop
-│   ├── entities/
-│   │   ├── Player.js      # Finn (otter protagonist)
-│   │   ├── Enemy.js       # Galeborn enemies
-│   │   ├── Platform.js    # Platforms, walls, hazards
-│   │   └── Item.js        # Collectibles, powerups
-│   ├── systems/
-│   │   ├── collision.js   # Collision handlers
-│   │   ├── ai.js          # YUKA AI manager
-│   │   ├── input.js       # Unified input (keyboard, gamepad, touch)
-│   │   └── audio.js       # Howler.js audio manager
-│   ├── rendering/
-│   │   ├── finn.js        # Procedural Finn rendering
-│   │   ├── enemies.js     # Procedural enemy rendering
-│   │   ├── environment.js # Platforms, parallax backgrounds
-│   │   └── effects.js     # Particles, post-process
-│   ├── store.js           # Zustand state management
-│   └── constants.js       # Game constants, collision groups
-└── ui/
-    └── styles.css         # Warm Redwall-inspired CSS
+│   └── index.astro           # Main game page
+├── game/                     # Core game engine + UI shell
+│   ├── OtterbladeGame.tsx    # Root Solid game component
+│   ├── components/           # Solid UI building blocks
+│   │   ├── TouchControls.tsx
+│   │   └── LoadingScreen.tsx
+│   ├── ui/                   # HUD + menus
+│   │   ├── HUD.tsx
+│   │   └── Menu.tsx
+│   ├── engine/               # Game loop + renderer
+│   ├── systems/              # Collision, AI, input, audio, triggers
+│   ├── factories/            # Level/NPC/enemy construction
+│   ├── rendering/            # Procedural render helpers
+│   ├── store.ts              # Zustand state management
+│   └── constants.ts          # Game constants, collision groups
+└── styles.css                # Warm Willowmere styling
 
-client/src/data/
-├── manifests/             # JSON DDL definitions
-│   └── chapters/          # 10 chapter definitions
-└── approvals.json         # Asset approval tracking
+game/public/data/
+├── manifests/                # JSON DDL definitions
+│   └── chapters/             # 10 chapter definitions
+└── biomes.json               # Shared authored data
+
+game/src/data/approvals.json  # Asset approval tracking (committed)
 ```
 
 ## Data Flow Rules
 
-- Authored content (chapters, sprites, cinematics, approvals) lives in `client/src/data/` and stays immutable at runtime.
-- Load JSON through async helpers under `game/src/ddl/` using `fetch`; never import JSON directly or copy content into JavaScript constants.
+- Authored content (chapters, sprites, cinematics) lives in `game/public/data/` and stays immutable at runtime.
+- Asset approvals live in `game/src/data/approvals.json`.
+- Load JSON through async helpers under `game/src/ddl/` using `fetch`; never import JSON directly or copy content into constants.
 - Systems and renderers derive runtime state from the loaded manifests to avoid magic numbers and keep tests deterministic.
-- The legacy `client/` runtime is frozen—new runtime code belongs in `game/` alongside the Astro + Solid shell.
+- All runtime code belongs in `game/` alongside the Astro + Solid shell.
 
 ## 10-Chapter Story Structure
 
@@ -132,7 +119,7 @@ client/src/data/
 ## Code Patterns
 
 ### Matter.js Physics Setup (from POC)
-```javascript
+```ts
 import Matter from 'matter-js';
 
 const { Engine, World, Bodies, Body, Events } = Matter;
@@ -153,7 +140,7 @@ World.add(engine.world, player);
 ```
 
 ### Procedural Finn Rendering (from POC)
-```javascript
+```ts
 export function drawFinn(ctx, { x, y, facing, state, animFrame, warmth }) {
   ctx.save();
   ctx.translate(x, y);
@@ -189,8 +176,8 @@ export function drawFinn(ctx, { x, y, facing, state, animFrame, warmth }) {
 ```
 
 ### Zustand State Management (with localStorage)
-```javascript
-// game/src/game/store.js
+```ts
+// game/src/game/store.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -234,7 +221,7 @@ const takeDamage = useGameStore((state) => state.takeDamage);
 
 ### Manifest-Driven Pipeline
 
-All game assets are managed through JSON manifests in `client/src/data/manifests/`:
+All game assets are managed through JSON manifests in `game/public/data/manifests/`:
 
 | Manifest | Assets | Provider |
 |----------|--------|----------|
@@ -292,7 +279,7 @@ All asset generation must enforce:
 7. Merge → Assets locked as idempotent
 ```
 
-**Approval Storage:** `client/src/data/approvals.json`
+**Approval Storage:** `game/src/data/approvals.json`
 
 **Before generating, respect approvals:**
 Assets marked as `approved` in `approvals.json` should never be regenerated.
@@ -322,9 +309,8 @@ pnpm audit:cinematics
 ## Common Mistakes to Avoid
 
 1. **Using npm/yarn** - Always use pnpm
-2. **Static PNG/MP4 assets** - Use procedural generation from POC, not static files
-3. **Wrong framework** - Use Astro + Solid.js, NOT vanilla JS, NOT React
-4. **TypeScript** - Use JavaScript for simplicity
+2. **Hardcoded asset paths** - Use manifest-driven assets; procedural rendering for characters (no inline sprite paths)
+3. **Wrong framework** - Use Astro + Solid.js, NOT React
 5. **Neon/sci-fi aesthetics** - Always check BRAND.md
 6. **Over-engineering** - Keep it simple, proven patterns from POC
 
@@ -344,7 +330,7 @@ Negative: neon, sci-fi, glowing energy, anime, grimdark, horror, demons, modern,
 | `BRAND.md` | Complete visual style guide |
 | `AGENTS.md` | Technical patterns for all AI agents |
 | `BUILD_PLAN_TONIGHT.md` | 6-hour build plan |
-| `VANILLA_JS_PLAN.md` | Why vanilla JS is superior |
+| `docs/VANILLA_JS_PLAN.md` | Why vanilla JS is superior |
 | `.github/copilot-instructions.md` | GitHub Copilot config |
 | `pocs/otterblade_odyssey.html` | Working POC (2,847 lines, Matter.js) |
-| `client/src/data/manifests/chapters/` | JSON DDL chapter definitions |
+| `game/public/data/manifests/chapters/` | JSON DDL chapter definitions |

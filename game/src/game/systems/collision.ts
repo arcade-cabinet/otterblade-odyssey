@@ -16,8 +16,12 @@ interface QuestObjective {
   description: string;
   completed: boolean;
   progress: number;
-  target: number;
+  target: string;
+  type: string;
+  optional?: boolean;
 }
+
+const DEFAULT_RESTORE_WARMTH = 5;
 
 /**
  * Collections interface
@@ -44,6 +48,10 @@ interface Setters {
   setHealth: (fn: (h: number) => number) => void;
   setShards: (fn: (s: number) => number) => void;
   setQuestObjectives: (objectives: QuestObjective[]) => void;
+  setWarmth: (fn: (w: number) => number) => void;
+  showToast: (message: string, durationMs?: number) => void;
+  setSlowMotion: (durationMs: number) => void;
+  spawnParticleBurst: (position: { x: number; y: number }, style?: string) => void;
 }
 
 /**
@@ -52,6 +60,7 @@ interface Setters {
 interface Getters {
   health: () => number;
   maxHealth: () => number;
+  maxWarmth: () => number;
   questObjectives: () => QuestObjective[];
 }
 
@@ -78,8 +87,16 @@ export function setupCollisionHandlers(
   const { Events } = Matter;
   const { inputManager, audioManager } = managers;
   const { collectibles, npcBodies, interactions, _enemyBodyMap } = collections;
-  const { setHealth, setShards, setQuestObjectives } = setters;
-  const { health, maxHealth, questObjectives } = getters;
+  const {
+    setHealth,
+    setShards,
+    setQuestObjectives,
+    setWarmth,
+    showToast,
+    setSlowMotion,
+    spawnParticleBurst,
+  } = setters;
+  const { health, maxHealth, maxWarmth, questObjectives } = getters;
   const { _playerController } = controllers;
 
   // Create O(1) lookup maps for efficient collision detection
@@ -92,6 +109,15 @@ export function setupCollisionHandlers(
   for (const i of interactions) {
     interactionMap.set(i.body.id, i);
   }
+
+  const completeObjectiveByTarget = (targetId: string) => {
+    const objectives = questObjectives();
+    if (!objectives?.length) return;
+    const updated = objectives.map((objective) =>
+      objective.target === targetId ? { ...objective, completed: true } : objective
+    );
+    setQuestObjectives(updated);
+  };
 
   Events.on(engine, 'collisionStart', (event) => {
     for (const pair of event.pairs) {
@@ -140,12 +166,11 @@ export function setupCollisionHandlers(
             // Trigger NPC interaction
             const interactionData = npc.interact(playerPos);
             if (interactionData) {
-              console.log(`Interacting with NPC: ${npcId}`);
               audioManager.playSFX('menu_select');
 
               // Handle dialogue or quest progression
               if (interactionData.type === 'dialogue') {
-                console.log(`Dialogue: ${interactionData.dialogue}`);
+                void interactionData.dialogue;
               }
 
               // Execute interaction actions
@@ -154,6 +179,30 @@ export function setupCollisionHandlers(
                   if (action.type === 'restore_health') {
                     setHealth(maxHealth());
                     audioManager.playSFX('bell_ring', { volume: 0.5 });
+                  }
+                  if (action.type === 'restore_warmth') {
+                    const amount =
+                      typeof action.value === 'number' ? action.value : DEFAULT_RESTORE_WARMTH;
+                    setWarmth((w) => Math.min(maxWarmth(), w + amount));
+                  }
+                  if (action.type === 'play_sound') {
+                    if (typeof action.target === 'string') {
+                      audioManager.playSFX(action.target);
+                    }
+                  }
+                  if (action.type === 'show_toast') {
+                    if (typeof action.value === 'string') {
+                      showToast(action.value);
+                    }
+                  }
+                  if (action.type === 'particle_burst') {
+                    const style = typeof action.value === 'string' ? action.value : undefined;
+                    spawnParticleBurst({ x: npcBody.position.x, y: npcBody.position.y }, style);
+                  }
+                  if (action.type === 'slow_motion') {
+                    if (typeof action.value === 'number') {
+                      setSlowMotion(action.value);
+                    }
                   }
                   if (action.type === 'give_item') {
                     const objectives = questObjectives();
@@ -164,6 +213,7 @@ export function setupCollisionHandlers(
                   }
                 }
               }
+              completeObjectiveByTarget(npcId);
             }
           }
         }
@@ -178,7 +228,7 @@ export function setupCollisionHandlers(
         const interaction = interactionMap.get(interactionBody.id);
         if (interaction && inputManager.isPressed('interact')) {
           audioManager.playSFX('door_open');
-          console.log(`Interacting with ${interaction.def.id}`);
+          void interaction.def.id;
 
           // Execute DDL actions
           if (interaction.def.states?.[interaction.state]) {
@@ -187,6 +237,38 @@ export function setupCollisionHandlers(
               for (const action of stateData.actions) {
                 if (action.type === 'restore_health') {
                   setHealth(maxHealth());
+                }
+                if (action.type === 'restore_warmth') {
+                  const amount =
+                    typeof action.value === 'number' ? action.value : DEFAULT_RESTORE_WARMTH;
+                  setWarmth((w) => Math.min(maxWarmth(), w + amount));
+                }
+                if (action.type === 'play_sound') {
+                  if (typeof action.target === 'string') {
+                    audioManager.playSFX(action.target);
+                  }
+                }
+                if (action.type === 'show_toast') {
+                  if (typeof action.value === 'string') {
+                    showToast(action.value);
+                  }
+                }
+                if (action.type === 'slow_motion') {
+                  if (typeof action.value === 'number') {
+                    setSlowMotion(action.value);
+                  }
+                }
+                if (action.type === 'particle_burst') {
+                  const style = typeof action.value === 'string' ? action.value : undefined;
+                  spawnParticleBurst(
+                    { x: interaction.body.position.x, y: interaction.body.position.y },
+                    style
+                  );
+                }
+                if (action.type === 'change_music') {
+                  if (typeof action.target === 'string') {
+                    audioManager.playMusic(action.target);
+                  }
                 }
                 if (action.type === 'give_item') {
                   const objectives = questObjectives();
@@ -197,6 +279,13 @@ export function setupCollisionHandlers(
                 }
               }
             }
+            const states = Object.keys(interaction.def.states);
+            const currentIndex = interaction.state ? states.indexOf(interaction.state) : -1;
+            const nextState = states[currentIndex + 1];
+            if (nextState) {
+              interaction.state = nextState;
+            }
+            completeObjectiveByTarget(interaction.def.id);
           }
         }
       }

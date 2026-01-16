@@ -74,6 +74,7 @@ export function createEnemy(enemyDef: EnemyDefinition, engine: Matter.Engine): E
 
   // Get enemy stats from type
   const stats = getEnemyStats(enemyDef.enemyType);
+  const { Bodies, World } = getMatterModules();
 
   // Create physics body
   const body = Bodies.rectangle(

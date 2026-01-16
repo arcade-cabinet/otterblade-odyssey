@@ -2,27 +2,51 @@
  * Quest System
  *
  * Manages quests, objectives, and rewards from DDL manifests.
- *
- * @module systems/quest-system
  */
+
+export interface QuestObjectiveDefinition {
+  id: string;
+  description: string;
+  required: number;
+  optional?: boolean;
+}
+
+export interface QuestDefinition {
+  id: string;
+  name: string;
+  description?: string;
+  objectives: QuestObjectiveDefinition[];
+  rewards?: Array<Record<string, unknown>>;
+  optional?: boolean;
+}
+
+export interface QuestState {
+  id: string;
+  name: string;
+  description?: string;
+  objectives: Array<QuestObjectiveDefinition & { current: number; completed: boolean }>;
+  rewards: Array<Record<string, unknown>>;
+  optional: boolean;
+  startTime: number;
+}
+
+export interface QuestManifest {
+  quests?: QuestDefinition[];
+}
 
 /**
  * Quest System class
  */
 export class QuestSystem {
-  constructor() {
-    this.activeQuests = [];
-    this.completedQuests = [];
-    this.questDefinitions = new Map();
-  }
+  activeQuests: QuestState[] = [];
+  completedQuests: string[] = [];
+  questDefinitions: Map<string, QuestDefinition> = new Map();
 
   /**
    * Register quest definitions from chapter manifest
-   *
-   * @param {Object} manifest - Chapter manifest
    */
-  registerQuests(manifest) {
-    if (!manifest || !manifest.quests) return;
+  registerQuests(manifest: QuestManifest): void {
+    if (!manifest?.quests) return;
 
     for (const questDef of manifest.quests) {
       this.questDefinitions.set(questDef.id, questDef);
@@ -31,24 +55,18 @@ export class QuestSystem {
 
   /**
    * Start a quest
-   *
-   * @param {string} questId - Quest ID
-   * @returns {Object|null} Quest object or null if failed
    */
-  startQuest(questId) {
-    // Check if already active or completed
+  startQuest(questId: string): QuestState | null {
     if (this.isQuestActive(questId) || this.isQuestCompleted(questId)) {
-      console.warn(`Quest ${questId} already active or completed`);
       return null;
     }
 
     const questDef = this.questDefinitions.get(questId);
     if (!questDef) {
-      console.error(`Quest definition not found: ${questId}`);
       return null;
     }
 
-    const quest = {
+    const quest: QuestState = {
       id: questId,
       name: questDef.name,
       description: questDef.description,
@@ -63,31 +81,18 @@ export class QuestSystem {
     };
 
     this.activeQuests.push(quest);
-
     return quest;
   }
 
   /**
    * Update objective progress
-   *
-   * @param {string} questId - Quest ID
-   * @param {string} objectiveId - Objective ID
-   * @param {number} amount - Amount to increment (default 1)
    */
-  updateObjective(questId, objectiveId, amount = 1) {
+  updateObjective(questId: string, objectiveId: string, amount: number = 1): void {
     const quest = this.activeQuests.find((q) => q.id === questId);
-    if (!quest) {
-      console.warn(`Active quest not found: ${questId}`);
-      return;
-    }
+    if (!quest) return;
 
     const objective = quest.objectives.find((obj) => obj.id === objectiveId);
-    if (!objective) {
-      console.warn(`Objective not found: ${objectiveId} in quest ${questId}`);
-      return;
-    }
-
-    if (objective.completed) return;
+    if (!objective || objective.completed) return;
 
     objective.current = Math.min(objective.current + amount, objective.required);
 
@@ -98,88 +103,52 @@ export class QuestSystem {
   }
 
   /**
-   * Check if all objectives are completed
-   * @private
-   */
-  checkQuestCompletion(questId) {
-    const quest = this.activeQuests.find((q) => q.id === questId);
-    if (!quest) return;
-
-    const allCompleted = quest.objectives.every((obj) => obj.completed);
-
-    if (allCompleted) {
-      this.completeQuest(questId);
-    }
-  }
-
-  /**
    * Complete a quest
-   *
-   * @param {string} questId - Quest ID
-   * @returns {Object|null} Rewards or null
    */
-  completeQuest(questId) {
+  completeQuest(questId: string): Array<Record<string, unknown>> | null {
     const questIndex = this.activeQuests.findIndex((q) => q.id === questId);
     if (questIndex === -1) {
-      console.warn(`Active quest not found: ${questId}`);
       return null;
     }
 
     const quest = this.activeQuests[questIndex];
-
-    // Move to completed
     this.activeQuests.splice(questIndex, 1);
     this.completedQuests.push(questId);
-
     return quest.rewards;
   }
 
   /**
    * Check if quest is active
-   *
-   * @param {string} questId - Quest ID
-   * @returns {boolean}
    */
-  isQuestActive(questId) {
+  isQuestActive(questId: string): boolean {
     return this.activeQuests.some((q) => q.id === questId);
   }
 
   /**
    * Check if quest is completed
-   *
-   * @param {string} questId - Quest ID
-   * @returns {boolean}
    */
-  isQuestCompleted(questId) {
+  isQuestCompleted(questId: string): boolean {
     return this.completedQuests.includes(questId);
   }
 
   /**
    * Get active quest by ID
-   *
-   * @param {string} questId - Quest ID
-   * @returns {Object|null}
    */
-  getActiveQuest(questId) {
+  getActiveQuest(questId: string): QuestState | null {
     return this.activeQuests.find((q) => q.id === questId) || null;
   }
 
   /**
    * Get all active quests
-   *
-   * @returns {Array}
    */
-  getAllActiveQuests() {
+  getAllActiveQuests(): QuestState[] {
     return [...this.activeQuests];
   }
 
   /**
    * Get objective progress for a quest
-   *
-   * @param {string} questId - Quest ID
-   * @returns {Array|null}
    */
-  getObjectiveProgress(questId) {
+  getObjectiveProgress(questId: string): Array<QuestObjectiveDefinition & { current: number; completed: boolean }> | null {
     const quest = this.activeQuests.find((q) => q.id === questId);
     if (!quest) return null;
 
@@ -195,19 +164,13 @@ export class QuestSystem {
 
   /**
    * Abandon a quest
-   *
-   * @param {string} questId - Quest ID
-   * @returns {boolean} Success
    */
-  abandonQuest(questId) {
+  abandonQuest(questId: string): boolean {
     const questIndex = this.activeQuests.findIndex((q) => q.id === questId);
     if (questIndex === -1) return false;
 
     const quest = this.activeQuests[questIndex];
-
-    // Can't abandon non-optional quests
     if (!quest.optional) {
-      console.warn(`Cannot abandon required quest: ${questId}`);
       return false;
     }
 
@@ -217,12 +180,8 @@ export class QuestSystem {
 
   /**
    * Get quest completion percentage
-   *
-   * @param {string} questId - Quest ID
-   * @returns {number} Percentage (0-100)
    */
-  getQuestProgress(questId) {
-    // Check if quest is completed first
+  getQuestProgress(questId: string): number {
     if (this.isQuestCompleted(questId)) {
       return 100;
     }
@@ -238,10 +197,8 @@ export class QuestSystem {
 
   /**
    * Serialize quest system state
-   *
-   * @returns {Object} Serialized state
    */
-  serialize() {
+  serialize(): { activeQuests: QuestState[]; completedQuests: string[] } {
     return {
       activeQuests: this.activeQuests,
       completedQuests: this.completedQuests,
@@ -250,27 +207,19 @@ export class QuestSystem {
 
   /**
    * Deserialize quest system state
-   *
-   * @param {Object} data - Serialized state
    */
-  deserialize(data) {
-    if (data.activeQuests) {
-      this.activeQuests = data.activeQuests;
-    }
-    if (data.completedQuests) {
-      this.completedQuests = data.completedQuests;
-    }
+  deserialize(state: { activeQuests?: QuestState[]; completedQuests?: string[] }): void {
+    this.activeQuests = state.activeQuests || [];
+    this.completedQuests = state.completedQuests || [];
   }
 
-  /**
-   * Clear all quests
-   */
-  clear() {
-    this.activeQuests = [];
-    this.completedQuests = [];
-    this.questDefinitions.clear();
+  private checkQuestCompletion(questId: string): void {
+    const quest = this.activeQuests.find((q) => q.id === questId);
+    if (!quest) return;
+
+    const allCompleted = quest.objectives.every((obj) => obj.completed);
+    if (allCompleted) {
+      this.completeQuest(questId);
+    }
   }
 }
-
-// Export singleton instance
-export const questSystem = new QuestSystem();

@@ -3,24 +3,30 @@
  * Tests JSON validation and typed data loading
  */
 
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   getBiomeByChapterId,
   getBiomeColorsArray,
   getChapterById,
+  getBiomesSync,
+  getChaptersSync,
   loadBiomes,
   loadChapters,
 } from '@/game/data';
 
 describe('Data Loaders', () => {
+  beforeAll(async () => {
+    await Promise.all([loadChapters(), loadBiomes()]);
+  });
+
   describe('loadChapters', () => {
     it('should load all 10 chapters', () => {
-      const chapters = loadChapters();
+      const chapters = getChaptersSync();
       expect(chapters).toHaveLength(10);
     });
 
     it('should have valid chapter structure', () => {
-      const chapters = loadChapters();
+      const chapters = getChaptersSync();
 
       for (const chapter of chapters) {
         expect(chapter).toHaveProperty('id');
@@ -36,7 +42,7 @@ describe('Data Loaders', () => {
     });
 
     it('should have chapters in correct order', () => {
-      const chapters = loadChapters();
+      const chapters = getChaptersSync();
 
       for (let i = 0; i < chapters.length; i++) {
         expect(chapters[i].id).toBe(i);
@@ -44,7 +50,7 @@ describe('Data Loaders', () => {
     });
 
     it('should have valid boss configuration', () => {
-      const chapters = loadChapters();
+      const chapters = getChaptersSync();
 
       for (const chapter of chapters) {
         if (chapter.hasBoss) {
@@ -57,7 +63,7 @@ describe('Data Loaders', () => {
     });
 
     it('should have 5 boss chapters', () => {
-      const chapters = loadChapters();
+      const chapters = getChaptersSync();
       const bossChapters = chapters.filter((ch) => ch.hasBoss);
       expect(bossChapters).toHaveLength(5);
     });
@@ -65,12 +71,12 @@ describe('Data Loaders', () => {
 
   describe('loadBiomes', () => {
     it('should load all biomes', () => {
-      const biomes = loadBiomes();
+      const biomes = getBiomesSync();
       expect(biomes.length).toBeGreaterThan(0);
     });
 
     it('should have valid biome structure', () => {
-      const biomes = loadBiomes();
+      const biomes = getBiomesSync();
 
       for (const biome of biomes) {
         expect(biome).toHaveProperty('id');
@@ -86,7 +92,7 @@ describe('Data Loaders', () => {
     });
 
     it('should have valid color hex codes', () => {
-      const biomes = loadBiomes();
+      const biomes = getBiomesSync();
       const hexRegex = /^#[0-9a-fA-F]{6}$/;
 
       for (const biome of biomes) {
@@ -99,7 +105,7 @@ describe('Data Loaders', () => {
     });
 
     it('should have valid atmosphere values', () => {
-      const biomes = loadBiomes();
+      const biomes = getBiomesSync();
       const validAtmospheres = [
         'warm',
         'serene',
@@ -116,7 +122,7 @@ describe('Data Loaders', () => {
     });
 
     it('should have valid timeOfDay values', () => {
-      const biomes = loadBiomes();
+      const biomes = getBiomesSync();
       const validTimes = ['morning', 'afternoon', 'evening', 'night', 'dawn', 'sunset', 'sunrise'];
 
       for (const biome of biomes) {
@@ -168,7 +174,7 @@ describe('Data Loaders', () => {
 
   describe('getBiomeColorsArray', () => {
     it('should return array with same length as chapters', () => {
-      const chapters = loadChapters();
+      const chapters = getChaptersSync();
       const colors = getBiomeColorsArray();
       expect(colors).toHaveLength(chapters.length);
     });
@@ -191,8 +197,8 @@ describe('Data Loaders', () => {
 
 describe('Data Consistency', () => {
   it('should have all chapters mapped to biomes', () => {
-    const chapters = loadChapters();
-    const biomes = loadBiomes();
+    const chapters = getChaptersSync();
+    const biomes = getBiomesSync();
 
     for (const chapter of chapters) {
       const hasBiome = biomes.some((b) => b.chapterIds.includes(chapter.id));
@@ -201,7 +207,7 @@ describe('Data Consistency', () => {
   });
 
   it('should have chapter IDs referenced only once in biomes', () => {
-    const biomes = loadBiomes();
+    const biomes = getBiomesSync();
     const allChapterIds = biomes.flatMap((b) => b.chapterIds);
     const uniqueChapterIds = [...new Set(allChapterIds)];
 
