@@ -245,10 +245,10 @@ If something goes wrong:
 ls /workspace/scripts/replay_agent_session.py
 
 # Check handoff notes
-cat AGENT_HANDOFF.md 2>/dev/null
+cat AGENT_HANDOFF.md 2>/dev/null || echo "No handoff file found"
 
 # Check memory bank
-cat memory-bank/activeContext.md
+cat memory-bank/activeContext.md 2>/dev/null || echo "No active context file found"
 ```
 
 ---
