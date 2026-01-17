@@ -9,12 +9,11 @@ import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
 import type { GameLoopParams, GameLoopController } from '../types/systems';
 
-const { Runner, Body } = getMatterModules();
-
 /**
  * Create game loop with proper delta time tracking
  */
 export function createGameLoop(params: GameLoopParams): GameLoopController {
+  const { Runner, Body } = getMatterModules();
   const {
     canvas,
     ctx,
@@ -38,6 +37,7 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
     timingSequences,
     gameStateObj,
     renderScene,
+    triggerSystem,
   } = params;
 
   let animFrame = 0;
@@ -55,7 +55,17 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
     // Proper delta time calculation (not fixed 16.67ms)
     const delta = Math.min(currentTime - lastTime, MAX_DELTA_MS); // Cap at 100ms to prevent spiral of death
     lastTime = currentTime;
-    const deltaSec = delta / 1000;
+    if (gameStateObj.updateTimeScale) {
+      gameStateObj.updateTimeScale(currentTime);
+    }
+    const timeScale = gameStateObj.getTimeScale ? gameStateObj.getTimeScale() : 1;
+    if (gameStateObj.isPaused?.()) {
+      renderScene(ctx, camera, animFrame, playerFacing, bossAI);
+      animationFrameId = requestAnimationFrame(gameLoop);
+      return;
+    }
+    const scaledDelta = delta * timeScale;
+    const deltaSec = scaledDelta / 1000;
 
     animFrame++;
 
@@ -64,22 +74,19 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
 
     // Get unified controls
     const controls = {
-      left: inputManager.isPressed('left'),
-      right: inputManager.isPressed('right'),
-      up: inputManager.isPressed('up'),
+      moveLeft: inputManager.isHeld('moveLeft'),
+      moveRight: inputManager.isHeld('moveRight'),
       jump: inputManager.isPressed('jump'),
       attack: inputManager.isPressed('attack'),
-      parry: inputManager.isPressed('parry'),
-      roll: inputManager.isPressed('roll'),
-      slink: inputManager.isPressed('slink'),
       interact: inputManager.isPressed('interact'),
+      pause: inputManager.isPressed('pause'),
     };
 
     // Update advanced player controller
     playerController.update(controls, deltaSec);
 
     // Update physics with actual delta time
-    Runner.tick(runner, engine, delta);
+    Runner.tick(runner, engine, scaledDelta);
 
     // Update environmental systems
     lanternSystem.update(deltaSec);
@@ -130,6 +137,13 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
 
     // Update boss AI
     if (bossAI && !bossAI.isDead) {
+      if (bossAI.updateTarget && gameStateObj.health && gameStateObj.maxHealth) {
+        bossAI.updateTarget(
+          { x: player.position.x, y: player.position.y },
+          gameStateObj.health(),
+          gameStateObj.maxHealth()
+        );
+      }
       bossAI.update(deltaSec);
       bossAI.selectAndExecuteAttack();
 
@@ -188,39 +202,49 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
     if (controls.interact) {
       // Check lanterns
       for (const lantern of lanternSystem.lanterns) {
-        if (
-          lanternSystem.lightLantern(lantern, {
-            position: player.position,
-            gameState: gameStateObj,
-          })
-        ) {
-          console.log('Lit lantern');
-        }
+        lanternSystem.lightLantern(lantern, {
+          position: player.position,
+          gameState: gameStateObj,
+        });
       }
 
       // Check bells
       for (const bell of bellSystem.bells) {
-        if (bellSystem.ringBell(bell, { position: player.position, gameState: gameStateObj })) {
-          console.log('Rang bell');
-        }
+        bellSystem.ringBell(bell, { position: player.position, gameState: gameStateObj });
       }
 
       // Check hearths
       for (const hearth of hearthSystem.hearths) {
-        if (
-          hearthSystem.kindleHearth(hearth, {
-            position: player.position,
-            gameState: gameStateObj,
-          })
-        ) {
-          console.log('Kindled hearth');
-        }
+        hearthSystem.kindleHearth(hearth, {
+          position: player.position,
+          gameState: gameStateObj,
+        });
       }
     }
 
+    // Trigger system
+    if (triggerSystem) {
+      triggerSystem.update({ gameTime: currentTime });
+    }
+
     // Update camera
-    camera.x = player.position.x - canvas.width / 2;
-    camera.y = player.position.y - canvas.height / 2;
+    if (gameStateObj.getCameraPan) {
+      const pan = gameStateObj.getCameraPan(currentTime);
+      if (pan) {
+        const progress = Math.min(1, (currentTime - pan.startTime) / pan.duration);
+        const eased = progress * (2 - progress);
+        camera.x = pan.target.x - canvas.width / 2;
+        camera.y = pan.target.y - canvas.height / 2;
+        camera.x += (player.position.x - canvas.width / 2 - camera.x) * eased;
+        camera.y += (player.position.y - canvas.height / 2 - camera.y) * eased;
+      } else {
+        camera.x = player.position.x - canvas.width / 2;
+        camera.y = player.position.y - canvas.height / 2;
+      }
+    } else {
+      camera.x = player.position.x - canvas.width / 2;
+      camera.y = player.position.y - canvas.height / 2;
+    }
 
     // Render scene
     renderScene(ctx, camera, animFrame, playerFacing, bossAI);

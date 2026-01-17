@@ -8,13 +8,13 @@
  */
 
 import { getMatterModules } from '../physics/matter-wrapper';
-import { getChapterManifestSync } from '../../../ddl/loader';
+import { getChapterManifestSync } from '@ddl/loader';
 import {
   createPlatform,
   HazardSystem,
   MovingPlatform,
   WaterZone,
-} from '../physics/PhysicsManager.js';
+} from '../physics/PhysicsManager';
 
 
 /**
@@ -32,6 +32,8 @@ export function buildLevel(chapterId, engine) {
   if (!engine || !engine.world) {
     throw new Error('Invalid Matter.js engine provided to buildLevel');
   }
+
+  const { World, Bodies } = getMatterModules();
 
   // Load chapter manifest from DDL using sync accessor
   const manifest = getChapterManifestSync(chapterId);
@@ -64,16 +66,18 @@ export function buildLevel(chapterId, engine) {
   // Build hazards
   if (manifest.level?.hazards) {
     for (const hazardDef of manifest.level.hazards) {
-      const hazard = new HazardSystem(
-        hazardDef.x,
-        hazardDef.y,
-        hazardDef.width,
-        hazardDef.height,
-        hazardDef.damage || 1,
-        hazardDef.type || 'spikes'
-      );
-      level.hazards.push(hazard);
-      World.add(engine.world, hazard.body);
+      level.hazards.push({
+        type: hazardDef.type || 'spikes',
+        region: {
+          x: hazardDef.x,
+          y: hazardDef.y,
+          width: hazardDef.width,
+          height: hazardDef.height,
+        },
+        damage: hazardDef.damage ?? 1,
+        cooldown: hazardDef.cooldown ?? 1000,
+        warmthDrain: hazardDef.warmthDrain ?? 0,
+      });
     }
   }
 
@@ -95,16 +99,19 @@ export function buildLevel(chapterId, engine) {
   // Build moving platforms
   if (manifest.level?.movingPlatforms) {
     for (const platformDef of manifest.level.movingPlatforms) {
-      const movingPlatform = new MovingPlatform(
-        platformDef.startX,
-        platformDef.startY,
-        platformDef.endX,
-        platformDef.endY,
-        platformDef.width,
-        platformDef.height,
-        platformDef.speed || 2,
-        platformDef.pauseDuration || 1000
-      );
+      const start = { x: platformDef.startX, y: platformDef.startY };
+      const end = { x: platformDef.endX, y: platformDef.endY };
+      const movingPlatform = new MovingPlatform({
+        x: start.x,
+        y: start.y,
+        width: platformDef.width,
+        height: platformDef.height,
+        type: platformDef.type || 'wood',
+        waypoints: [start, end],
+        speed: platformDef.speed || 2,
+        waitTime: (platformDef.pauseDuration || 1000) / 1000,
+        loop: platformDef.loop !== false,
+      });
       level.movingPlatforms.push(movingPlatform);
       World.add(engine.world, movingPlatform.body);
     }
@@ -113,14 +120,18 @@ export function buildLevel(chapterId, engine) {
   // Build checkpoints
   if (manifest.level?.checkpoints) {
     for (const checkpointDef of manifest.level.checkpoints) {
+      const checkpointPos = checkpointDef.position || checkpointDef;
+      if (!checkpointPos?.x || !checkpointPos?.y) {
+        continue;
+      }
       const checkpoint = {
         id: checkpointDef.id,
-        position: { x: checkpointDef.x, y: checkpointDef.y },
+        position: { x: checkpointPos.x, y: checkpointPos.y },
         type: checkpointDef.type || 'hearth',
         activated: false,
         sensor: Bodies.rectangle(
-          checkpointDef.x,
-          checkpointDef.y,
+          checkpointPos.x,
+          checkpointPos.y,
           checkpointDef.width || 60,
           checkpointDef.height || 80,
           { isSensor: true, label: 'checkpoint' }
@@ -134,6 +145,9 @@ export function buildLevel(chapterId, engine) {
   // Build exits
   if (manifest.level?.exits) {
     for (const exitDef of manifest.level.exits) {
+      if (exitDef.x === undefined || exitDef.y === undefined) {
+        continue;
+      }
       const exit = {
         id: exitDef.id,
         position: { x: exitDef.x, y: exitDef.y },
@@ -153,6 +167,9 @@ export function buildLevel(chapterId, engine) {
   // Build secrets
   if (manifest.level?.secrets) {
     for (const secretDef of manifest.level.secrets) {
+      if (secretDef.x === undefined || secretDef.y === undefined) {
+        continue;
+      }
       const secret = {
         id: secretDef.id,
         position: { x: secretDef.x, y: secretDef.y },
@@ -175,10 +192,10 @@ export function buildLevel(chapterId, engine) {
   // Set level bounds
   if (manifest.level?.bounds) {
     level.bounds = {
-      minX: manifest.level.bounds.minX,
-      minY: manifest.level.bounds.minY,
-      maxX: manifest.level.bounds.maxX,
-      maxY: manifest.level.bounds.maxY,
+      minX: manifest.level.bounds.minX ?? manifest.level.bounds.startX ?? 0,
+      minY: manifest.level.bounds.minY ?? 0,
+      maxX: manifest.level.bounds.maxX ?? manifest.level.bounds.endX ?? 0,
+      maxY: manifest.level.bounds.maxY ?? 0,
     };
   } else {
     // Calculate bounds from platforms
@@ -193,24 +210,24 @@ export function buildLevel(chapterId, engine) {
  * @private
  */
 function buildSegment(segment, engine, level) {
+  const { World, Bodies } = getMatterModules();
   // Build platforms
   if (segment.platforms) {
     for (const platformDef of segment.platforms) {
-      const platform = createPlatform(engine, {
+      const platform = createPlatform({
         x: platformDef.x,
         y: platformDef.y,
         width: platformDef.width,
         height: platformDef.height,
-        friction: platformDef.friction || 0.8,
         asset: platformDef.asset,
-        type: platformDef.type || 'solid',
+        type: platformDef.type || 'stone',
       });
 
+      World.add(engine.world, platform);
       level.platforms.push({
         body: platform,
         asset: platformDef.asset,
-        type: platformDef.type || 'solid',
-        friction: platformDef.friction || 0.8,
+        type: platformDef.type || 'stone',
       });
     }
   }
@@ -218,11 +235,17 @@ function buildSegment(segment, engine, level) {
   // Build walls
   if (segment.walls) {
     for (const wallDef of segment.walls) {
-      const wall = Bodies.rectangle(wallDef.x, wallDef.y, wallDef.width, wallDef.height, {
+      const wall = Bodies.rectangle(
+        wallDef.x + wallDef.width / 2,
+        wallDef.y + wallDef.height / 2,
+        wallDef.width,
+        wallDef.height,
+        {
         isStatic: true,
         label: 'wall',
         friction: 0.1,
-      });
+        }
+      );
       World.add(engine.world, wall);
 
       level.walls.push({
@@ -236,8 +259,8 @@ function buildSegment(segment, engine, level) {
   if (segment.ceilings) {
     for (const ceilingDef of segment.ceilings) {
       const ceiling = Bodies.rectangle(
-        ceilingDef.x,
-        ceilingDef.y,
+        ceilingDef.x + ceilingDef.width / 2,
+        ceilingDef.y + ceilingDef.height / 2,
         ceilingDef.width,
         ceilingDef.height,
         {
@@ -296,6 +319,7 @@ function calculateBoundsFromPlatforms(level) {
  */
 export function cleanupLevel(level, engine) {
   if (!level || !engine) return;
+  const { World } = getMatterModules();
 
   // Remove all platforms
   for (const platform of level.platforms) {

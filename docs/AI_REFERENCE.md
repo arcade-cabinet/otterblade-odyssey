@@ -19,7 +19,7 @@
 
 - **Runtime**: Astro + Solid islands with Matter.js physics and Canvas 2D rendering
 - **Data**: All behavior parameters in `client/src/data/manifests/` (enemies.json, chapter manifests)
-- **Language**: JavaScript (ES2022) with JSDoc; small, composable functions
+- **Language**: TypeScript (ES2022 target); small, composable functions
 - **Implementation**: Reference code in `game/src/game/ai/` and `game/src/game/systems/AIManager.js`
 
 ## Wiring YUKA into the Game Loop
@@ -647,7 +647,7 @@ export class PerceptiveEntity {
 
 ## Fuzzy Logic for Nuanced Behavior
 
-Smooth decision-making for boss AI. Reference: `game/src/game/ai/BossAI.js` lines 10-101
+Smooth decision-making for boss AI. Reference: `game/src/game/ai/BossAI.ts` lines 10-101
 
 ### Threat Assessment System
 
@@ -768,7 +768,7 @@ if (aggression > 0.75) {
 
 ## Boss AI: Multi-Phase System
 
-Complete boss implementation with attack patterns. Reference: `game/src/game/ai/BossAI.js`
+Complete boss implementation with attack patterns. Reference: `game/src/game/ai/BossAI.ts`
 
 ### Attack Pattern Architecture
 
@@ -1256,7 +1256,7 @@ function setEntityPath(enemy, targetPosition, navMesh) {
 
 ```javascript
 import { describe, it, expect } from 'vitest';
-import { ThreatAssessment } from '../game/ai/BossAI.js';
+import { ThreatAssessment } from '../game/ai/BossAI.ts';
 
 describe('ThreatAssessment', () => {
   it('should return high aggression for close low-health player', () => {

@@ -26,6 +26,15 @@ interface SceneRendererParams {
   timingSequences: Array<{ render: (ctx: RenderContext, camera: Camera) => void }>;
   collectibles: Array<{ body: Matter.Body; collected: boolean }>;
   aiManager: AISystem;
+  particleBursts: Array<{
+    x: number;
+    y: number;
+    startTime: number;
+    duration: number;
+    color: string;
+    particles: Array<{ dx: number; dy: number; size: number }>;
+  }>;
+  debugSystem?: { renderOverlay: (ctx: RenderContext) => void };
 }
 
 /**
@@ -73,6 +82,8 @@ export function createSceneRenderer(params: SceneRendererParams): SceneRenderFun
     timingSequences,
     collectibles,
     aiManager,
+    particleBursts,
+    debugSystem,
   } = params;
 
   return function renderScene(
@@ -236,6 +247,31 @@ export function createSceneRenderer(params: SceneRendererParams): SceneRenderFun
       }
     }
 
+    // Draw particle bursts
+    const now = performance.now();
+    for (let i = particleBursts.length - 1; i >= 0; i--) {
+      const burst = particleBursts[i];
+      const age = now - burst.startTime;
+      if (age >= burst.duration) {
+        particleBursts.splice(i, 1);
+        continue;
+      }
+      const progress = age / burst.duration;
+      ctx.save();
+      ctx.translate(burst.x, burst.y);
+      ctx.globalAlpha = 1 - progress;
+      ctx.fillStyle = burst.color;
+      for (const particle of burst.particles) {
+        const drift = 1 + progress * 0.6;
+        const px = particle.dx * drift;
+        const py = particle.dy * drift - progress * 10;
+        ctx.beginPath();
+        ctx.arc(px, py, particle.size * (1 - progress * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
     // Draw NPCs
     for (const npc of aiManager.npcs.values()) {
       drawNPC(ctx, npc, animFrame);
@@ -251,6 +287,9 @@ export function createSceneRenderer(params: SceneRendererParams): SceneRenderFun
     // Draw boss
     if (bossAI && !bossAI.isDead) {
       drawBoss(ctx, bossAI, animFrame);
+      if (bossAI.renderFrostParticles) {
+        bossAI.renderFrostParticles(ctx, camera);
+      }
 
       // Draw boss projectiles
       for (const proj of bossAI.projectiles) {
@@ -290,5 +329,9 @@ export function createSceneRenderer(params: SceneRendererParams): SceneRenderFun
     drawFinn(ctx, player.position, playerFacing, animFrame);
 
     ctx.restore();
+
+    if (debugSystem) {
+      debugSystem.renderOverlay(ctx);
+    }
   };
 }

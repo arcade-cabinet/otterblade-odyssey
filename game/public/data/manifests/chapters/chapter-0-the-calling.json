@@ -1,0 +1,492 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 0,
+  "name": "The Calling",
+  "location": "Finn's Cottage",
+
+  "narrative": {
+    "theme": "Leaving comfort for duty",
+    "quest": "Answer the Call",
+    
+    "emotionalArc": {
+      "opening": "Safety, warmth, the comfort of home. The hearth crackles. Everything is as it should be.",
+      "midpoint": "A distant sound—bells? A glimpse of smoke on the horizon? Something is wrong at the Hearthhold.",
+      "climax": "The Otterblade hangs on the wall. Father's blade. The weight of legacy in Finn's paws.",
+      "resolution": "The threshold. One last look back at warmth. One step forward into the unknown."
+    },
+
+    "storyBeats": [
+      {
+        "id": "awakening",
+        "moment": "Finn stirs by the cottage hearth. Morning light through the window. A moment of peace before everything changes.",
+        "triggeredBy": "chapter_start",
+        "expression": "wonder"
+      },
+      {
+        "id": "the_sign",
+        "moment": "Through the window, distant smoke rises from Willowmere's direction. The great bells toll—faint, urgent.",
+        "triggeredBy": "approach_window",
+        "expression": "fear"
+      },
+      {
+        "id": "fathers_blade",
+        "moment": "Finn's gaze finds the Otterblade, mounted above the cold fireplace where father once sat. It hasn't been touched since...",
+        "triggeredBy": "approach_blade",
+        "expression": "sorrow"
+      },
+      {
+        "id": "taking_up",
+        "moment": "Finn reaches up. The blade feels right in paw, despite everything. Father's legacy, now Finn's burden.",
+        "triggeredBy": "interact_blade",
+        "expression": "determination"
+      },
+      {
+        "id": "the_threshold",
+        "moment": "At the cottage door. The warmth of home at Finn's back, the cold unknown ahead. There is no going back.",
+        "triggeredBy": "reach_door",
+        "expression": "resolve"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": null,
+    "nextChapter": 1,
+    
+    "transitionIn": {
+      "type": "cinematic",
+      "cinematicId": "intro_cinematic_otters_journey",
+      "playerSpawnPoint": { "x": 150, "y": 300 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_0_departure",
+      "exitPoint": { "x": 780, "y": 400 }
+    },
+    
+    "unlockRequirements": []
+  },
+
+  "npcs": [
+    {
+      "id": "mother_riverstone",
+      "characterId": "npc_otter_elder_female",
+      "name": "Mother",
+      "role": "mentor",
+      "position": { "x": 300, "y": 320 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "sit",
+        "interactRadius": 60
+      },
+      
+      "storyState": {
+        "initialState": "worried",
+        "states": {
+          "worried": {
+            "animation": "sitting_worried",
+            "expression": "concern",
+            "canInteract": true
+          },
+          "blessing_given": {
+            "animation": "sitting_peaceful",
+            "expression": "hope",
+            "canInteract": false
+          }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": "blade_taken",
+          "gesture": "nod",
+          "finnResponse": "bow",
+          "actions": [
+            { "type": "play_sound", "target": "mother_blessing_sigh" },
+            { "type": "npc_action", "target": "mother_riverstone", "value": "blessing_given" },
+            { "type": "restore_warmth", "value": 10 },
+            { "type": "show_toast", "value": "Mother's blessing warms your heart" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_answer_call",
+      "name": "Answer the Call",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_take_blade",
+          "description": "Take up the Otterblade",
+          "type": "interact",
+          "target": "otterblade_mount"
+        },
+        {
+          "id": "obj_receive_blessing",
+          "description": "Receive Mother's blessing",
+          "type": "interact",
+          "target": "mother_riverstone",
+          "optional": true
+        },
+        {
+          "id": "obj_leave_cottage",
+          "description": "Step into the world",
+          "type": "reach_location",
+          "target": "cottage_exit"
+        }
+      ],
+      
+      "rewards": {
+        "achievement": "The Journey Begins"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 800,
+      "minY": 0,
+      "maxY": 500
+    },
+    
+    "biome": "village",
+    "spawnPoint": { "x": 150, "y": 300 },
+    
+    "segments": [
+      {
+        "id": "cottage_interior",
+        "startX": 0,
+        "endX": 600,
+        
+        "platforms": [
+          {
+            "x": 0,
+            "y": 350,
+            "width": 600,
+            "height": 30,
+            "type": "wood",
+            "asset": "platform_cottage_floor"
+          }
+        ],
+        
+        "walls": [
+          {
+            "x": 0,
+            "y": 0,
+            "width": 20,
+            "height": 350,
+            "asset": "wall_cottage_left"
+          },
+          {
+            "x": 580,
+            "y": 150,
+            "width": 20,
+            "height": 200,
+            "asset": "wall_cottage_right"
+          }
+        ],
+        
+        "ceilings": [
+          {
+            "x": 0,
+            "y": 100,
+            "width": 600,
+            "height": 20,
+            "asset": "ceiling_cottage_thatch"
+          }
+        ]
+      },
+      {
+        "id": "cottage_exterior",
+        "startX": 600,
+        "endX": 800,
+        
+        "platforms": [
+          {
+            "x": 600,
+            "y": 420,
+            "width": 200,
+            "height": 30,
+            "type": "stone",
+            "asset": "platform_path_stones"
+          }
+        ],
+        
+        "walls": [],
+        "ceilings": []
+      }
+    ],
+    
+    "checkpoints": [
+      {
+        "id": "cottage_hearth",
+        "position": { "x": 150, "y": 320 },
+        "type": "hearth",
+        "requiresTrigger": null,
+        "restoresWarmth": true,
+        "restoresHealth": true
+      }
+    ]
+  },
+
+  "encounters": [],
+
+  "boss": null,
+
+  "interactions": [
+    {
+      "id": "cottage_hearth",
+      "type": "shrine",
+      "position": { "x": 100, "y": 280 },
+      "asset": "hearth_home",
+      "activateRadius": 80,
+      "initialState": "burning",
+      "states": {
+        "burning": {
+          "asset": "hearth_home_lit",
+          "actions": [
+            { "type": "restore_warmth", "value": 5 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cottage_window",
+      "type": "sign",
+      "position": { "x": 400, "y": 200 },
+      "asset": "window_cottage",
+      "activateRadius": 50,
+      "initialState": "closed",
+      "states": {
+        "closed": {
+          "asset": "window_cottage_closed"
+        },
+        "looked": {
+          "asset": "window_cottage_view",
+          "actions": [
+            { "type": "play_sound", "target": "distant_bells_faint" },
+            { "type": "camera_pan", "target": "window_view", "value": 2000 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "otterblade_mount",
+      "type": "shrine",
+      "position": { "x": 250, "y": 180 },
+      "asset": "blade_mount",
+      "activateRadius": 60,
+      "activateKey": "interact",
+      "initialState": "mounted",
+      "states": {
+        "mounted": {
+          "asset": "otterblade_mounted",
+          "solid": false
+        },
+        "taken": {
+          "asset": "blade_mount_empty",
+          "solid": false,
+          "actions": [
+            { "type": "play_sound", "target": "blade_drawn_reverent" },
+            { "type": "show_toast", "value": "The Otterblade answers your call" },
+            { "type": "slow_motion", "value": 1500 },
+            { "type": "particle_burst", "target": "ember_spiral", "value": "warm" }
+          ]
+        }
+      },
+      "requires": {}
+    },
+    {
+      "id": "cottage_door",
+      "type": "door",
+      "position": { "x": 580, "y": 280 },
+      "asset": "door_cottage",
+      "activateRadius": 50,
+      "initialState": "closed",
+      "states": {
+        "closed": {
+          "asset": "door_cottage_closed",
+          "solid": true
+        },
+        "open": {
+          "asset": "door_cottage_open",
+          "solid": false,
+          "actions": [
+            { "type": "play_sound", "target": "door_creak_gentle" },
+            { "type": "change_music", "target": "music_departure" }
+          ]
+        }
+      },
+      "requires": {
+        "trigger": "blade_taken"
+      }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 0, "width": 800, "height": 500 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_cottage_morning" },
+        { "type": "show_toast", "value": "Home", "delay": 2000 }
+      ]
+    },
+    {
+      "id": "approach_window",
+      "type": "enter_region",
+      "region": { "x": 350, "y": 150, "width": 100, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "play_sound", "target": "distant_bells_faint" },
+        { "type": "show_toast", "value": "Something stirs in the distance..." }
+      ]
+    },
+    {
+      "id": "approach_blade",
+      "type": "enter_region",
+      "region": { "x": 200, "y": 150, "width": 100, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "play_sound", "target": "blade_hum_faint" },
+        { "type": "particle_burst", "target": "ember_motes", "value": "subtle" }
+      ]
+    },
+    {
+      "id": "blade_taken",
+      "type": "interact",
+      "targetId": "otterblade_mount",
+      "once": true,
+      "actions": [
+        { "type": "unlock_achievement", "target": "Bearer of the Blade" },
+        { "type": "npc_action", "target": "mother_riverstone", "value": "looks_at_finn" }
+      ]
+    },
+    {
+      "id": "door_opened",
+      "type": "interact",
+      "targetId": "cottage_door",
+      "once": true,
+      "requires": ["blade_taken"],
+      "actions": [
+        { "type": "change_music", "target": "music_departure_swell" }
+      ]
+    },
+    {
+      "id": "reach_threshold",
+      "type": "enter_region",
+      "region": { "x": 600, "y": 350, "width": 50, "height": 100 },
+      "once": true,
+      "requires": ["door_opened"],
+      "actions": [
+        { "type": "slow_motion", "value": 500 },
+        { "type": "camera_pan", "target": "look_back", "value": 1500 }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "enter_region",
+      "region": { "x": 750, "y": 350, "width": 50, "height": 100 },
+      "once": true,
+      "requires": ["blade_taken"],
+      "actions": [
+        { "type": "complete_quest", "target": "quest_answer_call" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_0_departure" }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    {
+      "id": "shard_cottage_hidden",
+      "type": "ember_shard",
+      "position": { "x": 50, "y": 280 },
+      "hidden": true
+    },
+    {
+      "id": "lore_fathers_journal",
+      "type": "lore_fragment",
+      "position": { "x": 450, "y": 300 },
+      "hidden": false
+    }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_fathers_chest",
+      "name": "Father's Legacy",
+      "type": "hidden_room",
+      "entrance": { "x": 80, "y": 200, "width": 40, "height": 40 },
+      "hint": "A loose stone in the hearth's foundation, worn smooth by years of touching",
+      "rewards": {
+        "emberShards": 5,
+        "achievement": "Keeper of Memory",
+        "loreFragment": "lore_fathers_final_words"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "prologue_village_chapter_plate",
+    "parallaxBackground": "village_morning_parallax_background",
+    "introCinematic": "intro_cinematic_otters_journey",
+    "outroCinematic": "chapter_0_departure",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_cottage_morning",
+      "tension": "music_cottage_tension",
+      "combat": null,
+      "boss": null,
+      "victory": "music_departure"
+    },
+    
+    "ambientSounds": [
+      "ambient_hearth_crackle",
+      "ambient_morning_birds",
+      "ambient_wind_gentle"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#F4D03F",
+      "ambientIntensity": 0.8,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "clear",
+      "intensity": 0,
+      "affectsGameplay": false
+    },
+    
+    "warmthDrain": 0,
+    
+    "particles": [
+      {
+        "type": "dust",
+        "density": 0.3,
+        "region": { "x": 0, "y": 100, "width": 600, "height": 250 }
+      },
+      {
+        "type": "embers",
+        "density": 0.5,
+        "region": { "x": 80, "y": 250, "width": 100, "height": 80 }
+      }
+    ]
+  }
+}

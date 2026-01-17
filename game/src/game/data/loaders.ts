@@ -4,55 +4,80 @@
  */
 
 import { fromError } from 'zod-validation-error';
-import biomesData from '../../data/biomes.json';
-
-import chaptersData from '../../data/chapters.json';
 import { type Biome, BiomesArraySchema, type Chapter, ChaptersArraySchema } from './schemas';
+
+let cachedChapters: Chapter[] | null = null;
+let cachedBiomes: Biome[] | null = null;
+
+async function fetchJson(url: string, filePath: string): Promise<unknown> {
+  if (typeof window === 'undefined') {
+    const { readFile } = await import('node:fs/promises');
+    const raw = await readFile(new URL(filePath, import.meta.url), 'utf8');
+    return JSON.parse(raw);
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Preloads chapters and biomes data into cache.
+ */
+export async function preloadLegacyData(): Promise<void> {
+  await Promise.all([loadChapters(), loadBiomes()]);
+}
 
 /**
  * Loads and validates chapter data from JSON.
  * Throws descriptive error if validation fails.
  */
-export function loadChapters(): Chapter[] {
-  const result = ChaptersArraySchema.safeParse(chaptersData);
+export async function loadChapters(): Promise<Chapter[]> {
+  if (cachedChapters) return cachedChapters;
+  const data = await fetchJson('/data/chapters.json', '../../data/chapters.json');
+  const result = ChaptersArraySchema.safeParse(data);
 
   if (!result.success) {
     const error = fromError(result.error);
     throw new Error(`Invalid chapters.json: ${error.message}`);
   }
 
-  return result.data;
+  cachedChapters = result.data;
+  return cachedChapters;
 }
 
 /**
  * Loads and validates biome data from JSON.
  * Throws descriptive error if validation fails.
  */
-export function loadBiomes(): Biome[] {
-  const result = BiomesArraySchema.safeParse(biomesData);
+export async function loadBiomes(): Promise<Biome[]> {
+  if (cachedBiomes) return cachedBiomes;
+  const data = await fetchJson('/data/biomes.json', '../../data/biomes.json');
+  const result = BiomesArraySchema.safeParse(data);
 
   if (!result.success) {
     const error = fromError(result.error);
     throw new Error(`Invalid biomes.json: ${error.message}`);
   }
 
-  return result.data;
+  cachedBiomes = result.data;
+  return cachedBiomes;
 }
 
 /**
  * Get a chapter by ID with type safety.
  */
 export function getChapterById(id: number): Chapter | undefined {
-  const chapters = loadChapters();
-  return chapters.find((ch) => ch.id === id);
+  return getChaptersSync().find((ch) => ch.id === id);
 }
 
 /**
  * Get a biome by chapter ID.
  */
 export function getBiomeByChapterId(chapterId: number): Biome | undefined {
-  const biomes = loadBiomes();
-  return biomes.find((b) => b.chapterIds.includes(chapterId));
+  return getBiomesSync().find((b) => b.chapterIds.includes(chapterId));
 }
 
 /**
@@ -67,8 +92,8 @@ export function getBiomeColorsArray(): Array<{
   sky2: string;
   quest: string;
 }> {
-  const chapters = loadChapters();
-  const biomes = loadBiomes();
+  const chapters = getChaptersSync();
+  const biomes = getBiomesSync();
 
   return chapters.map((ch) => {
     const biome = biomes.find((b) => b.chapterIds.includes(ch.id));
@@ -90,4 +115,26 @@ export function getBiomeColorsArray(): Array<{
       quest: ch.quest,
     };
   });
+}
+
+/**
+ * Gets cached chapters data synchronously.
+ * Throws if preloadLegacyData has not completed.
+ */
+export function getChaptersSync(): Chapter[] {
+  if (!cachedChapters) {
+    throw new Error('Chapters not loaded. Call preloadLegacyData() first.');
+  }
+  return cachedChapters;
+}
+
+/**
+ * Gets cached biomes data synchronously.
+ * Throws if preloadLegacyData has not completed.
+ */
+export function getBiomesSync(): Biome[] {
+  if (!cachedBiomes) {
+    throw new Error('Biomes not loaded. Call preloadLegacyData() first.');
+  }
+  return cachedBiomes;
 }

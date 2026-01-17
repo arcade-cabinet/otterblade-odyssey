@@ -6,18 +6,19 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter5Manifest from '../../game/src/data/manifests/chapters/chapter-5-deep-cellars.json';
+
+test.use({
+  video: 'on',
+  timeout: 300000,
+});
 
 test.describe('Chapter 5: Deep Cellars - Automated Playthrough', () => {
-  test.use({
-    video: 'on',
-    timeout: 300000,
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 5: Deep Cellars');
 
+    const chapter5Manifest = await loadChapterManifest(page, 'chapter-5-deep-cellars.json');
     const result = await executePlaythrough(page, {
       chapter: chapter5Manifest as any,
       maxDuration: 180000,

@@ -75,6 +75,8 @@ export interface InputSystem extends GameSystem {
   
   // Methods
   isPressed(key: string): boolean;
+  isHeld(key: string): boolean;
+  isReleased(key: string): boolean;
 }
 
 /**
@@ -116,10 +118,11 @@ export interface AISystem extends GameSystem {
  * Manages game sounds using Howler.js
  */
 export interface AudioSystem extends GameSystem {
-  playSound(soundId: string, options?: { volume?: number; loop?: boolean }): void;
-  playMusic(musicId: string, options?: { volume?: number; fadeIn?: number }): void;
-  stopMusic(fadeOut?: number): void;
-  setVolume(volume: number): void;
+  playSound(soundId: string, options?: { rate?: number; volume?: number; sprite?: string }): number | null;
+  playSFX(soundId: string, options?: { rate?: number; volume?: number; sprite?: string }): number | null;
+  playMusic(trackId: string, crossfade?: boolean): void;
+  stopMusic(): void;
+  setVolume(category: 'master' | 'music' | 'sfx' | 'ambient', value: number): void;
   mute(muted: boolean): void;
 }
 
@@ -155,6 +158,8 @@ export interface BossAI {
   hazardZones: Array<{ x: number; y: number; width: number; height: number; damage: number; warmthDrain: number }>;
   update(deltaTime: number): void;
   selectAndExecuteAttack(): void;
+  updateTarget?: (position: { x: number; y: number }, hp: number, maxHp: number) => void;
+  renderFrostParticles?: (ctx: CanvasRenderingContext2D, camera: { x: number; y: number }) => void;
 }
 
 /**
@@ -216,17 +221,38 @@ export interface TimingSequence {
 }
 
 /**
+ * Trigger system interface
+ */
+export interface TriggerSystem {
+  update(gameState: { gameTime?: number; completedQuests?: string[]; inventory?: string[] }): void;
+}
+
+/**
  * Game State Object Interface
  * Centralized game state
  */
 export interface GameState {
-  health: number;
-  maxHealth: number;
-  shards: number;
-  warmth: number;
-  maxWarmth: number;
-  currentChapter: number;
-  checkpointReached: boolean;
+  health?: () => number;
+  maxHealth?: () => number;
+  shards?: () => number;
+  warmth?: () => number;
+  maxWarmth?: () => number;
+  currentChapter?: () => number;
+  checkpointReached?: () => boolean;
+  takeDamage: (amount: number) => void;
+  restoreHealth?: (amount: number) => void;
+  drainWarmth: (amount: number) => void;
+  restoreWarmth: (amount: number) => void;
+  setCheckpoint?: (pos: { x: number; y: number }) => void;
+  summonAlly?: (pos: { x: number; y: number }) => void;
+  alertGuards?: (pos: { x: number; y: number }) => void;
+  rallyAllies?: () => void;
+  onBossDefeated?: () => void;
+  setSlowMotion?: (durationMs: number) => void;
+  getTimeScale?: () => number;
+  updateTimeScale?: (now: number) => void;
+  isPaused?: () => boolean;
+  getCameraPan?: (now: number) => { target: { x: number; y: number }; startTime: number; duration: number } | null;
 }
 
 /**
@@ -250,12 +276,13 @@ export interface GameLoopParams {
   bellSystem: BellSystem;
   hearthSystem: HearthSystem;
   hazardSystem: HazardSystem;
-  movingPlatforms: Array<{ body: Matter.Body; def: { amplitude: number; frequency: number; axis: 'x' | 'y' } }>;
-  waterZones: Array<{ x: number; y: number; width: number; height: number }>;
+  movingPlatforms: Array<{ update: (delta: number) => void }>;
+  waterZones: Array<{ applyToBody: (body: Matter.Body, deltaTime: number, gameState: GameState) => void }>;
   flowPuzzles: FlowPuzzle[];
   timingSequences: TimingSequence[];
   gameStateObj: GameState;
   renderScene: (ctx: CanvasRenderingContext2D, camera: Camera, animFrame: number, playerFacing: number, bossAI: BossAI | null) => void;
+  triggerSystem?: TriggerSystem;
 }
 
 /**

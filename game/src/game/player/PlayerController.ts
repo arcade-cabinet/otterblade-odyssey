@@ -1,5 +1,5 @@
 import type * as Matter from 'matter-js';
-import type { AudioSystem } from '../types/systems';
+import type { AudioSystem, InputControls } from '../types/systems';
 import { getMatterModules } from '../physics/matter-wrapper';
 
 interface PlayerPhysics {
@@ -76,10 +76,14 @@ export class PlayerController {
     ];
   }
 
-  update(deltaTime: number): void {
+  update(controls: InputControls, deltaTime: number): void {
     const { Body } = getMatterModules();
     
     this.isGrounded = this.checkGrounded();
+    if (this.isGrounded) {
+      (this.player as any).canJump = true;
+    }
+    (this.player as any).isGrounded = this.isGrounded;
 
     if (this.isGrounded) {
       this.coyoteTime = PLAYER_PHYSICS.coyoteTimeMs;
@@ -104,6 +108,21 @@ export class PlayerController {
       this.parryWindow = Math.max(0, this.parryWindow - deltaTime);
     }
 
+    if (controls.moveLeft) {
+      this.moveLeft();
+    }
+    if (controls.moveRight) {
+      this.moveRight();
+    }
+
+    if (controls.jump) {
+      this.jump();
+    }
+
+    if (controls.attack) {
+      this.attack();
+    }
+
     // Speed limit
     if (Math.abs(this.player.velocity.x) > PLAYER_PHYSICS.maxSpeed) {
       Body.setVelocity(this.player, {
@@ -119,6 +138,7 @@ export class PlayerController {
       ? PLAYER_PHYSICS.acceleration
       : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: -force, y: 0 });
+    (this.player as any).facingDirection = -1;
   }
 
   moveRight(): void {
@@ -127,6 +147,7 @@ export class PlayerController {
       ? PLAYER_PHYSICS.acceleration
       : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: force, y: 0 });
+    (this.player as any).facingDirection = 1;
   }
 
   jump(): boolean {

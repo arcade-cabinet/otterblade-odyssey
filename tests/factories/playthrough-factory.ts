@@ -208,16 +208,20 @@ export function generateTestCode(config: PlaythroughConfig): string {
 
   return `
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../factories/playthrough-factory';
-import chapter${chapter.chapterId}Manifest from '../../game/src/data/manifests/chapters/chapter-${chapter.chapterId}-${chapter.name.toLowerCase().replace(/\s+/g, '-')}.json';
 
 test.describe('Chapter ${chapter.chapterId}: ${chapter.name}', () => {
   test('should complete automated playthrough', async ({ page }) => {
     // Enable video recording
     test.setTimeout(300000); // 5 minute timeout
 
+    const chapterManifest = await loadChapterManifest(
+      page,
+      'chapter-${chapter.chapterId}-${chapter.name.toLowerCase().replace(/\s+/g, '-')}.json'
+    );
     const result = await executePlaythrough(page, {
-      chapter: chapter${chapter.chapterId}Manifest,
+      chapter: chapterManifest,
       maxDuration: 180000, // 3 minutes
       screenshotInterval: 5000, // Screenshot every 5 seconds
       videoEnabled: true,
@@ -239,8 +243,12 @@ test.describe('Chapter ${chapter.chapterId}: ${chapter.name}', () => {
     // - No impossible jumps
     // - All triggers fire correctly
 
+    const chapterManifest = await loadChapterManifest(
+      page,
+      'chapter-${chapter.chapterId}-${chapter.name.toLowerCase().replace(/\s+/g, '-')}.json'
+    );
     const result = await executePlaythrough(page, {
-      chapter: chapter${chapter.chapterId}Manifest,
+      chapter: chapterManifest,
       maxDuration: 180000,
       screenshotInterval: 10000,
       videoEnabled: false,

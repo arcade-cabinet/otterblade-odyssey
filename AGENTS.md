@@ -14,6 +14,7 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 3. **Clean As You Go**: Remove obsolete code immediately when refactoring.
 4. **Test-Driven**: Write tests for new functionality.
 5. **Document**: All exports must have JSDoc comments.
+6. **Memory Bank First**: Read `.clinerules` and the `memory-bank/` files before starting any work.
 
 ---
 
@@ -26,7 +27,7 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 | **Runtime** | Node.js 25.x | Latest stable, defined in `.nvmrc` |
 | **Framework** | Astro 5.x | Static site generation, GitHub Pages deployment |
 | **UI Components** | Solid.js | Reactive UI, 7KB runtime (vs 140KB React) |
-| **Language** | JavaScript (ES2022) | No TypeScript compilation overhead |
+| **Language** | TypeScript (ES2022 target) | Type safety with ES2022 output |
 | **Physics** | Matter.js 0.20 | POC-proven, 2D rigid body physics |
 | **Rendering** | Canvas 2D API | Procedural character rendering, parallax |
 | **AI/Pathfinding** | YUKA 0.7.8 | Enemy AI, steering behaviors, FSM |
@@ -54,66 +55,56 @@ These standards must be enforced rigorously to prevent technical debt accumulati
 
 ### Directory Responsibilities
 ```
-game/src/                  # Astro + Solid.js game
+game/src/                     # Astro + Solid.js game
 ├── pages/
-│   └── index.astro        # Main game page
-├── components/            # Solid.js components
-│   ├── GameCanvas.jsx     # Game canvas wrapper
-│   ├── HUD.jsx            # Health, shards, quest display
-│   ├── TouchControls.jsx  # Mobile controls
-│   ├── StartMenu.jsx      # Start screen
-│   └── ChapterPlate.jsx   # Chapter transitions
-├── game/                  # Core game engine
-│   ├── engine/
-│   │   ├── physics.js     # Matter.js engine setup
-│   │   ├── renderer.js    # Canvas 2D rendering pipeline
-│   │   └── gameLoop.js    # RequestAnimationFrame loop
-│   ├── entities/
-│   │   ├── Player.js      # Finn (otter protagonist)
-│   │   ├── Enemy.js       # Galeborn enemies
-│   │   ├── Platform.js    # Platforms, walls, hazards
-│   │   └── Item.js        # Collectibles, powerups
-│   ├── systems/
-│   │   ├── collision.js   # Collision handlers
-│   │   ├── ai.js          # YUKA AI manager
-│   │   ├── input.js       # Unified input (keyboard, gamepad, touch)
-│   │   └── audio.js       # Howler.js audio manager
-│   ├── rendering/
-│   │   ├── finn.js        # Procedural Finn rendering
-│   │   ├── enemies.js     # Procedural enemy rendering
-│   │   ├── environment.js # Platforms, parallax backgrounds
-│   │   └── effects.js     # Particles, post-process
-│   ├── store.js           # Zustand state management
-│   └── constants.js       # Game constants, collision groups
-└── ui/
-    └── styles.css         # Warm Redwall-inspired CSS
+│   └── index.astro           # Main game page
+├── game/                     # Core game engine + UI shell
+│   ├── OtterbladeGame.tsx    # Root Solid game component
+│   ├── components/           # Solid UI building blocks
+│   │   ├── TouchControls.tsx
+│   │   └── LoadingScreen.tsx
+│   ├── ui/                   # HUD + menu UI
+│   │   ├── HUD.tsx
+│   │   └── Menu.tsx
+│   ├── engine/               # Game loop + renderer
+│   │   ├── physics.ts
+│   │   ├── rendering.ts
+│   │   └── gameLoop.ts
+│   ├── systems/              # Collision, AI, input, audio, triggers
+│   ├── factories/            # Level/NPC/enemy construction
+│   ├── rendering/            # Procedural render helpers
+│   ├── store.ts              # Zustand state management
+│   └── constants.ts          # Game constants, collision groups
+└── styles.css                # Warm Willowmere styling
 
-game/src/data/
-├── manifests/             # JSON DDL definitions
-│   ├── chapters/          # 10 chapter definitions
-│   ├── schema/            # JSON schemas
+game/public/data/
+├── manifests/                # JSON DDL definitions
+│   ├── chapters/             # 10 chapter definitions
+│   ├── schema/               # JSON schemas
 │   ├── enemies.json
 │   └── sounds.json
-└── approvals.json         # Asset approval tracking
+└── biomes.json               # Shared authored data
+
+game/src/data/approvals.json  # Asset approval tracking (committed)
 ```
 
 ---
 
 ## Data Architecture
 
-### Static Content (JSON files in `game/src/data/`)
+### Static Content (JSON files in `game/public/data/`)
 - Legacy chapter definitions → `chapters.json`
 - Biome configurations → `biomes.json`
 - **Chapter manifests** → `manifests/chapters/chapter-*.json` (comprehensive)
 - **NPC definitions** → `manifests/npcs.json`
 - Asset manifests → `manifests/sprites.json`, `cinematics.json`, etc.
 
-### Data Loaders (in `game/src/ddl/loader.js`)
+### Data Loaders (in `game/src/ddl/loader.ts`)
 
-```javascript
+```ts
 // Load chapter manifests
 export async function loadChapterManifest(chapterId) {
-  const response = await fetch(`../../game/src/data/manifests/chapters/chapter-${chapterId}.json`);
+  const response = await fetch(`/data/manifests/chapters/chapter-${chapterId}.json`);
   return await response.json();
 }
 
@@ -127,9 +118,9 @@ const chapter0 = await loadChapterManifest(0);
 const boss = await getChapterBoss(8); // Returns Zephyros data
 ```
 
-### Runtime State (Vanilla JS store)
-- Current chapter progress → Vanilla JS store (persisted via localStorage)
-- Player state → Vanilla JS store (persisted via localStorage)
+### Runtime State (Zustand store)
+- Current chapter progress → Zustand store (persisted via localStorage)
+- Player state → Zustand store (persisted via localStorage)
 - Physics bodies → Matter.js world
 - Active entities → Simple array/object tracking
 
@@ -138,7 +129,7 @@ const boss = await getChapterBoss(8); // Returns Zephyros data
 - **NEVER** put authored content in JavaScript constants
 - **NEVER** import JSON directly - always use async loaders
 - **ALWAYS** validate JSON structure (optional: use JSON Schema)
-- **Keep it simple** - Vanilla JS patterns, no over-engineering
+- **Keep it simple** - TypeScript-first patterns, no over-engineering
 
 ### Documentation Alignment
 - Keep `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` synchronized so agent guidance consistently reflects the Astro + Solid + Matter.js stack and manifest-driven data flow.
@@ -158,16 +149,16 @@ Before completing any task, verify ALL of these:
 - [ ] No hardcoded magic strings/numbers
 - [ ] No duplicate code
 - [ ] Obsolete files removed
-- [ ] ES2022 features only (no TypeScript)
+- [ ] TypeScript only (ES2022 target)
 
 ---
 
 ## Naming Conventions
 
 ### Files
-- Modules: `PascalCase.js` (classes) or `camelCase.js` (utilities)
+- Modules: `PascalCase.ts` (classes) or `camelCase.ts` (utilities)
 - Data: `kebab-case.json`
-- Tests: `*.test.js` or `*.spec.js`
+- Tests: `*.test.ts` or `*.spec.ts`
 - HTML: `index.html`
 - CSS: `styles.css`
 
@@ -182,18 +173,18 @@ Before completing any task, verify ALL of these:
 
 ## Forbidden Patterns
 
-```javascript
+```ts
 // ❌ Hardcoded magic numbers
 const damage = 10;
 
 // ✅ Named constants or JSON data
-import { PLAYER_BASE_DAMAGE } from "./constants.js";
+import { PLAYER_BASE_DAMAGE } from "./constants";
 
 // ❌ Direct JSON import (doesn't work well in browsers anyway)
 import data from './data.json';
 
 // ✅ Async loader
-import { loadChapters } from './ddl/loader.js';
+import { loadChapters } from './ddl/loader';
 const chapters = await loadChapters();
 
 // ❌ Massive function (500+ lines)
@@ -213,11 +204,11 @@ npm install something
 // ✅ Using pnpm
 pnpm add something
 
-// ❌ Adding frameworks when vanilla JS works
+// ❌ Adding frameworks when vanilla DOM works
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-// ✅ Vanilla JS DOM manipulation
+// ✅ Vanilla DOM manipulation (TypeScript)
 const hud = document.createElement('div');
 hud.className = 'hud';
 document.body.appendChild(hud);
@@ -258,10 +249,10 @@ See `WORLD.md` for complete lore and world-building details.
 
 ---
 
-## Matter.js + Vanilla JS Patterns (from POC)
+## Matter.js + TypeScript Patterns (from POC)
 
 ### Matter.js Physics Setup
-```javascript
+```ts
 import Matter from 'matter-js';
 
 const { Engine, World, Bodies, Body, Events } = Matter;
@@ -289,7 +280,7 @@ function gameLoop() {
 ```
 
 ### Entity Tracking (Simple Arrays)
-```javascript
+```ts
 // Track entities in simple arrays
 const enemies = [];
 const platforms = [];
@@ -337,7 +328,7 @@ function cleanupEnemies() {
 ### Before Starting Work
 1. Read this document
 2. Read `WORLD.md` for lore context
-3. Review `BUILD_PLAN_TONIGHT.md` and `VANILLA_JS_PLAN.md` for architecture
+3. Review `BUILD_PLAN_TONIGHT.md` for architecture
 4. Study POC (`pocs/otterblade_odyssey.html`) for proven patterns
 5. Check existing code patterns
 
@@ -346,7 +337,7 @@ function cleanupEnemies() {
 2. Clean up as you go
 3. Test your changes
 4. Use async data loaders (not direct imports)
-5. Keep it simple - vanilla JS patterns from POC
+5. Keep it simple - TypeScript-first patterns from POC
 
 ### Before Completing
 1. Run `pnpm biome check .`
@@ -361,10 +352,10 @@ function cleanupEnemies() {
 
 ### Manifest-Driven Architecture
 
-All visual assets are managed through JSON manifests in `game/src/data/manifests/`:
+All visual assets are managed through JSON manifests in `game/public/data/manifests/`:
 
 ```
-game/src/data/manifests/
+game/public/data/manifests/
 ├── sprites.json        # Finn + NPCs (OpenAI GPT-Image-1)
 ├── enemies.json        # 6 enemies + Zephyros boss (OpenAI)
 ├── cinematics.json     # 18 story/boss cinematics (Google Veo 3.1)
@@ -462,9 +453,10 @@ All generation prompts enforce these rules from `BRAND.md`:
 | `WORLD.md` | World-building and lore |
 | `BRAND.md` | Visual style guide |
 | `replit.md` | Project architecture |
-| `game/src/data/*.json` | Game content data |
+| `game/public/data/*.json` | Game content data |
 | `game/src/game/data/` | Typed data loaders |
-| `game/src/data/manifests/` | Asset generation manifests |
+| `game/public/data/manifests/` | Asset generation manifests |
+| `game/src/data/approvals.json` | Asset approval tracking |
 
 ---
 

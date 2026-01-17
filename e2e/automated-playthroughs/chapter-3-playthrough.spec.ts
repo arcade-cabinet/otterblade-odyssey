@@ -6,18 +6,19 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter3Manifest from '../../game/src/data/manifests/chapters/chapter-3-great-hall.json';
+
+test.use({
+  video: 'on',
+  timeout: 300000,
+});
 
 test.describe('Chapter 3: Great Hall - Automated Playthrough', () => {
-  test.use({
-    video: 'on',
-    timeout: 300000,
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 3: Great Hall');
 
+    const chapter3Manifest = await loadChapterManifest(page, 'chapter-3-great-hall.json');
     const result = await executePlaythrough(page, {
       chapter: chapter3Manifest as any,
       maxDuration: 240000, // 4 minutes for combat

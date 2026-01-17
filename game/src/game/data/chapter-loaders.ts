@@ -2,117 +2,53 @@
  * @fileoverview Loaders for chapter manifest files.
  * These functions load and validate chapter data with full type safety.
  *
- * MIGRATION NOTE: This module provides compatibility bridge between:
- * 1. Legacy static imports (bundled JSON) - used during build/SSR
- * 2. New DDL loader (fetch-based) - used at runtime after preload
- *
- * The loader will automatically use DDL cache if available, falling back
- * to static imports. This enables gradual migration to fetch-based loading.
+ * MIGRATION NOTE: This module now relies exclusively on the DDL loader
+ * for fetch-based loading and cache access. Call preloadManifests()
+ * before using the sync helpers to ensure data is cached.
  */
 
-import { fromError } from 'zod-validation-error';
-// Static imports for all chapter manifests (fallback for build/SSR)
-import chapter0Data from '../../data/manifests/chapters/chapter-0-the-calling.json';
-import chapter1Data from '../../data/manifests/chapters/chapter-1-river-path.json';
-import chapter2Data from '../../data/manifests/chapters/chapter-2-gatehouse.json';
-import chapter3Data from '../../data/manifests/chapters/chapter-3-great-hall.json';
-import chapter4Data from '../../data/manifests/chapters/chapter-4-archives.json';
-import chapter5Data from '../../data/manifests/chapters/chapter-5-deep-cellars.json';
-import chapter6Data from '../../data/manifests/chapters/chapter-6-kitchen-gardens.json';
-import chapter7Data from '../../data/manifests/chapters/chapter-7-bell-tower.json';
-import chapter8Data from '../../data/manifests/chapters/chapter-8-storms-edge.json';
-import chapter9Data from '../../data/manifests/chapters/chapter-9-new-dawn.json';
-import { type ChapterManifest, ChapterManifestSchema, type ChapterNPC } from './manifest-schemas';
-
-// Import DDL loader for runtime fetch-based loading
-// This is optional - if DDL loader hasn't preloaded, we fall back to static imports
-let ddlLoader: typeof import('../../ddl/loader') | null = null;
-
-// Kick off dynamic import without using top-level await to maintain SSR/build compatibility.
-// Only attempt the import in browser context to avoid unnecessary failed imports during SSR/build.
-// NOTE: This import runs asynchronously at module initialization. Calls to
-// `loadChapterManifest(chapterId)` that occur before this import resolves will
-// intentionally fall back to static imports for that invocation. Once the import
-// completes, subsequent `loadChapterManifest` calls may use the DDL loader cache
-// via `ddlLoader.getChapterManifestSync`. This timing-dependent behavior is
-// expected and is part of the compatibility bridge between static and DDL loading.
-if (typeof window !== 'undefined') {
-  import('../../ddl/loader')
-    .then((module) => {
-      ddlLoader = module;
-    })
-    .catch(() => {
-      // DDL loader not available - will use static imports
-      console.log('[chapter-loaders] Using static imports (DDL loader unavailable)');
-    });
-}
-/** All chapter data indexed by ID */
-const CHAPTER_DATA_MAP: Record<number, unknown> = {
-  0: chapter0Data,
-  1: chapter1Data,
-  2: chapter2Data,
-  3: chapter3Data,
-  4: chapter4Data,
-  5: chapter5Data,
-  6: chapter6Data,
-  7: chapter7Data,
-  8: chapter8Data,
-  9: chapter9Data,
-};
-
-/** Cache for validated chapters */
-const chapterCache = new Map<number, ChapterManifest>();
+import type { ChapterManifest, ChapterNPC } from './manifest-schemas';
+import {
+  getChapterManifestSync,
+  loadChapterManifest as fetchChapterManifest,
+  TOTAL_CHAPTERS,
+} from '../../ddl/loader';
 
 /**
  * Loads and validates a chapter manifest by ID.
  * Results are cached after first load.
  *
- * COMPATIBILITY BRIDGE: This function will use the DDL loader cache if available,
- * otherwise falls back to static imports. This enables seamless migration to
- * fetch-based loading without breaking existing code.
+ * Requires DDL manifests to be preloaded. Use preloadManifests() before
+ * invoking this sync helper, or call loadChapterManifestAsync instead.
  *
  * @throws Error if chapter doesn't exist or fails validation
  */
 export function loadChapterManifest(chapterId: number): ChapterManifest {
-  // Try to use DDL loader cache first (if manifests were preloaded)
-  if (ddlLoader) {
-    try {
-      return ddlLoader.getChapterManifestSync(chapterId);
-    } catch {
-      // DDL cache miss - fall through to static imports
-    }
+  try {
+    return getChapterManifestSync(chapterId);
+  } catch (error) {
+    throw new Error(
+      `Chapter ${chapterId} not loaded. Call preloadManifests() or use loadChapterManifestAsync(). (${(error as Error).message})`
+    );
   }
+}
 
-  // Check local cache
-  const cached = chapterCache.get(chapterId);
-  if (cached) return cached;
-
-  // Get raw data from static imports (fallback)
-  const rawData = CHAPTER_DATA_MAP[chapterId];
-  if (!rawData) {
-    throw new Error(`Chapter ${chapterId} not found. Valid chapters: 0-9`);
-  }
-
-  // Validate
-  const result = ChapterManifestSchema.safeParse(rawData);
-  if (!result.success) {
-    const error = fromError(result.error);
-    throw new Error(`Invalid chapter-${chapterId} manifest: ${error.message}`);
-  }
-
-  // Cache and return
-  chapterCache.set(chapterId, result.data);
-  return result.data;
+/**
+ * Loads and validates a chapter manifest by ID asynchronously.
+ * Use this when the DDL cache is not yet warmed.
+ */
+export async function loadChapterManifestAsync(chapterId: number): Promise<ChapterManifest> {
+  return fetchChapterManifest(chapterId);
 }
 
 /**
  * Loads all chapter manifests.
  * Useful for preloading or generating world maps.
  */
-export function loadAllChapterManifests(): ChapterManifest[] {
+export async function loadAllChapterManifests(): Promise<ChapterManifest[]> {
   const chapters: ChapterManifest[] = [];
-  for (let i = 0; i <= 9; i++) {
-    chapters.push(loadChapterManifest(i));
+  for (let i = 0; i < TOTAL_CHAPTERS; i++) {
+    chapters.push(await loadChapterManifestAsync(i));
   }
   return chapters;
 }
@@ -236,7 +172,7 @@ export function clearChapterCache(): void {
  * Call this during game initialization for faster subsequent loads.
  */
 export function preloadAllChapters(): void {
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i < TOTAL_CHAPTERS; i++) {
     try {
       loadChapterManifest(i);
     } catch {
@@ -246,17 +182,12 @@ export function preloadAllChapters(): void {
 }
 
 /**
- * Gets the total number of chapters.
- */
-export const TOTAL_CHAPTERS = 10;
-
-/**
  * Gets chapter IDs that are available (not locked by progression).
  */
 export function getUnlockedChapters(completedChapters: number[]): number[] {
   const unlocked: number[] = [0]; // Chapter 0 is always unlocked
 
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i < TOTAL_CHAPTERS; i++) {
     const chapter = loadChapterManifest(i);
     const prevChapter = chapter.connections.previousChapter;
 

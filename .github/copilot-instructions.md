@@ -4,10 +4,11 @@
 
 **CRITICAL**: You are continuing work across sessions. Before ANY code changes:
 
-1. **Read ALL documentation in `docs/`** - Essential context is there
-2. **Review recent commits** - Use `git log --oneline -15` to understand what was done
-3. **Check the PR description** - Contains current state and goals
-4. **Read comment history** - Understand user's vision and requests
+1. **Read `.clinerules` + `memory-bank/`** - Required session context
+2. **Read ALL documentation in `docs/`** - Essential context is there
+3. **Review recent commits** - Use `git log --oneline -15` to understand what was done
+4. **Check the PR description** - Contains current state and goals
+5. **Read comment history** - Understand user's vision and requests
 
 ### Key Documents (READ THESE FIRST)
 - `docs/COMPLETE_JOURNEY_VALIDATION.md` - Architecture & validation system
@@ -17,9 +18,9 @@
 - `IMPLEMENTATION.md` - Technical architecture
 
 ### Tool Preferences
-1. **ALWAYS prefer Playwright MCP over bash** for browser automation
-2. **ALWAYS prefer GitHub MCP over bash** for repo operations
-3. Use MCP tools for deterministic testing and validation
+1. **Prefer Playwright MCP when available** for browser automation (use Docker MCP if configured)
+2. **Prefer GitHub MCP when available** for repo operations
+3. Use MCP tools for deterministic testing and validation; fall back to CLI if MCP is unavailable
 
 ### ACTIVE ENGAGEMENT PROTOCOL ⚡
 
@@ -176,14 +177,14 @@ pnpm run build
 
 ## Code Style
 
-### JavaScript Configuration
+### TypeScript Configuration
 - Target: ES2022
-- JavaScript (no TypeScript compilation overhead)
+- TypeScript for source with ES module output
 - Astro for pages, Solid.js for components
 - ES modules
 
 ### Import Patterns
-```javascript
+```ts
 // Matter.js Physics
 import Matter from 'matter-js';
 const { Engine, World, Bodies, Body, Events } = Matter;
@@ -195,11 +196,11 @@ import * as YUKA from 'yuka';
 import { Howl } from 'howler';
 
 // Data loaders - always async
-import { loadChapterManifest, getChapterBoss } from './ddl/loader.js';
+import { loadChapterManifest, getChapterBoss } from './ddl/loader';
 ```
 
 ### Matter.js Physics Setup (from POC)
-```javascript
+```ts
 // Create engine
 const engine = Engine.create();
 engine.gravity.y = 1.5; // POC-proven gravity value
@@ -223,7 +224,7 @@ function gameLoop() {
 ```
 
 ### Entity Tracking (Simple Arrays)
-```javascript
+```ts
 // Track entities in simple arrays
 const enemies = [];
 const platforms = [];
@@ -264,81 +265,40 @@ function cleanupEnemies() {
 }
 ```
 
-### State Management (Vanilla JS - 20 lines)
-```javascript
-// Simple vanilla JS state management
-const state = {
-  health: 5,
-  maxHealth: 5,
-  shards: 0,
-  currentChapter: 0,
-  listeners: []
-};
-
-function subscribe(callback) {
-  state.listeners.push(callback);
-}
-
-function notify() {
-  state.listeners.forEach(callback => callback(state));
-}
-
-function takeDamage(amount) {
-  state.health = Math.max(0, state.health - amount);
-  notify();
-}
-
-function collectShard() {
-  state.shards += 1;
-  notify();
-}
-```
+### State Management (Zustand)
+Use Zustand for runtime state with persistence where needed.
 
 ## File Structure
 
 ```
 game/src/
-├── index.html          # Entry point
-├── main.js             # Game initialization
-├── ui/
-│   └── styles.css      # Warm Redwall styling
-├── core/
-│   ├── Game.js         # Main game loop controller
-│   ├── Physics.js      # Matter.js engine wrapper
-│   ├── Renderer.js     # Canvas 2D rendering pipeline
-│   └── Camera.js       # Camera follow system
-├── entities/
-│   ├── Player.js       # Finn (otter protagonist)
-│   ├── Enemy.js        # Galeborn enemies
-│   └── Platform.js     # Platforms, walls, hazards
-├── systems/
-│   ├── collision.js    # Collision handlers
-│   ├── ai.js           # YUKA AI manager
-│   ├── input.js        # Unified input (keyboard, gamepad, touch)
-│   └── audio.js        # Howler.js audio manager
-├── rendering/
-│   ├── finn.js         # Procedural Finn (from POC)
-│   ├── enemies.js      # Procedural enemies
-│   ├── parallax.js     # Parallax backgrounds
-│   └── particles.js    # Particle effects
-├── ddl/
-│   ├── loader.js       # Load chapter JSON manifests
-│   └── builder.js      # Build levels from DDL
-└── state/
-    └── store.js        # Vanilla JS state management
+├── pages/
+│   └── index.astro           # Main game page
+├── game/
+│   ├── OtterbladeGame.tsx    # Root Solid component
+│   ├── components/           # TouchControls, LoadingScreen
+│   ├── ui/                   # HUD, Menu
+│   ├── engine/               # physics, rendering, gameLoop
+│   ├── systems/              # collision, AI, input, audio, triggers
+│   ├── factories/            # level/npc/enemy construction
+│   ├── rendering/            # procedural render helpers
+│   └── store.ts              # Zustand state management
+└── styles.css                # Warm Willowmere styling
 
-client/src/data/
-├── manifests/          # JSON DDL definitions
-│   ├── chapters/       # 10 chapter definitions
-│   ├── schema/         # JSON schemas
+game/public/data/
+├── manifests/                # JSON DDL definitions
+│   ├── chapters/             # 10 chapter definitions
+│   ├── schema/               # JSON schemas
 │   ├── enemies.json
 │   └── sounds.json
-└── approvals.json      # Asset approval tracking
+└── biomes.json               # Shared authored data
+
+game/src/data/approvals.json  # Asset approval tracking (committed)
 ```
 
 ## Chapter System
 
-```javascript
+```ts
 // Load chapters from JSON manifests
 const CHAPTERS = [
   { id: 0, name: "The Calling", location: "Finn's Cottage", quest: "Answer the Call" },
@@ -362,7 +322,7 @@ async function loadChapter(chapterId) {
 
 ## Testing Patterns
 
-```javascript
+```ts
 // Vitest unit tests
 import { describe, it, expect } from "vitest";
 
@@ -394,7 +354,7 @@ test("game canvas renders", async ({ page }) => {
 
 ## Avoid These Patterns
 
-```javascript
+```ts
 // WRONG: npm commands
 npm install  // Use: pnpm install
 
@@ -410,8 +370,8 @@ const damage = 10;  // Use: named constants or JSON data
 // WRONG: Using npm/yarn
 npm install something  // Use: pnpm add something
 
-// WRONG: Adding frameworks when vanilla JS works
-import React from 'react';  // Use: vanilla JS DOM manipulation
+// WRONG: Adding frameworks when vanilla DOM works
+import React from 'react';  // Use: TypeScript DOM manipulation
 ```
 
 ## Automated Testing & Validation
@@ -468,7 +428,7 @@ See `BRAND.md` for complete visual and narrative guidelines.
 
 ### JSON DDL System
 All game content is defined in JSON manifests:
-- `client/src/data/manifests/chapters/*.json` - 10 chapter definitions
+- `game/public/data/manifests/chapters/*.json` - 10 chapter definitions
 - Each defines: level geometry, quests, NPCs, enemies, triggers, cinematics
 - Parsed at runtime to generate procedural content
 
@@ -476,7 +436,7 @@ All game content is defined in JSON manifests:
 As proven in `pocs/otterblade_odyssey.html` (2,847 lines):
 - Player and enemies are procedurally rendered with Canvas 2D (not sprite sheets)
 - Matter.js for physics engine
-- Vanilla JavaScript for game logic
+- TypeScript for game logic
 - No React overhead - simpler, faster, more maintainable
 - Performance: 8MB memory (vs 120MB React), <100KB bundle (vs 1.2MB), 60fps stable (vs 15-25fps)
 
@@ -487,7 +447,7 @@ As proven in `pocs/otterblade_odyssey.html` (2,847 lines):
 - Same system used by AI player in automated tests
 
 ### Matter.js Patterns from POC
-```javascript
+```ts
 // POC-proven physics values
 engine.gravity.y = 1.5;  // Perfect for platforming feel
 

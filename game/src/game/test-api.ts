@@ -63,10 +63,15 @@ export interface GameTestAPI {
   isReady(): boolean;
 }
 
+interface GameRuntimeRef {
+  player?: { position: { x: number; y: number }; velocity: { x: number; y: number }; facingDirection?: number; isGrounded?: boolean };
+}
+
 // Extend Window interface to include test API
 declare global {
   interface Window {
     __GAME_TEST_API__?: GameTestAPI;
+    __GAME_RUNTIME__?: GameRuntimeRef;
   }
 }
 
@@ -83,13 +88,21 @@ export function initializeTestAPI(): void {
   const api: GameTestAPI = {
     getPlayerState() {
       const store = useStore.getState();
+      const runtimePlayer = window.__GAME_RUNTIME__?.player;
+      const playerX = runtimePlayer?.position.x ?? store.playerX;
+      const playerY = runtimePlayer?.position.y ?? store.playerY;
+      const velocityX = runtimePlayer?.velocity.x ?? 0;
+      const velocityY = runtimePlayer?.velocity.y ?? 0;
+      const facing = runtimePlayer?.facingDirection ? (runtimePlayer.facingDirection >= 0 ? 1 : -1) : store.playerFacingRight ? 1 : -1;
+      const grounded = runtimePlayer?.isGrounded ?? store.playerState !== 'jump';
+
       return {
-        x: store.playerX,
-        y: store.playerY,
-        velocityX: 0, // TODO: Track velocity in store
-        velocityY: 0,
-        facing: store.playerFacingRight ? 1 : -1,
-        grounded: true, // TODO: Track grounded state
+        x: playerX,
+        y: playerY,
+        velocityX,
+        velocityY,
+        facing,
+        grounded,
         action: store.playerState,
         health: store.health,
         currentPlatformId: null,
@@ -144,7 +157,6 @@ export function initializeTestAPI(): void {
 
   // Expose on window
   window.__GAME_TEST_API__ = api;
-  console.log('[Test API] Initialized - available as window.__GAME_TEST_API__');
 }
 
 /**

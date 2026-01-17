@@ -3,8 +3,6 @@
  * These functions load and validate NPC data with full type safety.
  */
 
-import { fromError } from 'zod-validation-error';
-import npcData from '../../data/manifests/npcs.json';
 import {
   type CharacterDefinition,
   type GestureLibrary,
@@ -29,9 +27,37 @@ let cachedManifest: NPCManifest | null = null;
 export function loadNPCManifest(): NPCManifest {
   if (cachedManifest) return cachedManifest;
 
-  const result = NPCManifestSchema.safeParse(npcData);
+  throw new Error('NPC manifest not loaded. Call loadNPCManifestAsync() first.');
+}
+
+/**
+ * Loads and validates the NPC manifest asynchronously.
+ * Results are cached after first load.
+ *
+ * @throws Error if validation fails
+ */
+export async function loadNPCManifestAsync(): Promise<NPCManifest> {
+  if (cachedManifest) return cachedManifest;
+
+  const data = await (async () => {
+    if (typeof window === 'undefined') {
+      const { readFile } = await import('node:fs/promises');
+      const manifestUrl = new URL('../../data/manifests/npcs.json', import.meta.url);
+      const raw = await readFile(manifestUrl, 'utf8');
+      return JSON.parse(raw);
+    }
+
+    const response = await fetch('/data/manifests/npcs.json');
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch /data/manifests/npcs.json: ${response.status} ${response.statusText}`
+      );
+    }
+    return response.json();
+  })();
+  const result = NPCManifestSchema.safeParse(data);
   if (!result.success) {
-    const error = fromError(result.error);
+    const error = result.error;
     throw new Error(`Invalid npcs.json manifest: ${error.message}`);
   }
 

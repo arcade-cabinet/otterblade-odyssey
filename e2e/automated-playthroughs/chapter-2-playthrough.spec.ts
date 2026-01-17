@@ -6,18 +6,19 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter2Manifest from '../../game/src/data/manifests/chapters/chapter-2-gatehouse.json';
+
+test.use({
+  video: 'on',
+  timeout: 300000,
+});
 
 test.describe('Chapter 2: The Gatehouse - Automated Playthrough', () => {
-  test.use({
-    video: 'on',
-    timeout: 300000,
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 2: The Gatehouse');
 
+    const chapter2Manifest = await loadChapterManifest(page, 'chapter-2-gatehouse.json');
     const result = await executePlaythrough(page, {
       chapter: chapter2Manifest as any,
       maxDuration: 180000,

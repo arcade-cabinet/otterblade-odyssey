@@ -12,7 +12,7 @@ This document explains the complete game implementation in `client/src/game/Otte
 - **Physics**: Matter.js 0.20 (POC-proven)
 - **Rendering**: Canvas 2D API (procedural)
 - **Data**: DDL JSON manifests (factory-driven)
-- **Language**: JavaScript ES2022 (per CLAUDE.md)
+- **Language**: TypeScript (ES2022 target, per CLAUDE.md)
 
 ## Factory Pattern Implementation
 
@@ -388,8 +388,8 @@ if (!gameCanvas || !ctx) {
 - Removed unused setters from signals
 - Only declared variables that are used
 
-### JavaScript (Not TypeScript)
-- Pure ES2022 JavaScript
+### TypeScript (ES2022 Target)
+- TypeScript source compiled to ES2022 JavaScript
 - No type annotations
 - No `!` non-null assertions
 - Per CLAUDE.md line 45

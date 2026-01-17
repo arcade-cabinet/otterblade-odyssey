@@ -1,0 +1,441 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://otterblade-odyssey.game/schemas/audio.json",
+  "title": "Audio Generation & Playback Schema",
+  "description": "Comprehensive audio manifest for procedural generation, Howler.js/Tone.js playback, and haptic feedback",
+  "type": "object",
+
+  "definitions": {
+    "audioGenerationPrompt": {
+      "type": "object",
+      "description": "Prompt for AI audio generation (e.g., Suno, ElevenLabs SFX, Stable Audio)",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["suno", "elevenlabs_sfx", "stable_audio", "bark", "audiogen", "local_synth"]
+        },
+        "prompt": { "type": "string" },
+        "negativePrompt": { "type": "string" },
+        "duration": { "type": "number", "description": "Target duration in seconds" },
+        "style": {
+          "type": "string",
+          "enum": ["orchestral", "ambient", "folk", "percussion", "choral", "nature", "foley", "synth_pad"]
+        },
+        "mood": {
+          "type": "string",
+          "enum": ["warm", "tense", "heroic", "mysterious", "peaceful", "urgent", "triumphant", "sorrowful", "whimsical"]
+        },
+        "instruments": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tempo": {
+          "type": "object",
+          "properties": {
+            "bpm": { "type": "integer" },
+            "feel": { "type": "string", "enum": ["steady", "building", "fading", "variable"] }
+          }
+        },
+        "brandKeywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["woodland", "medieval", "warm", "storybook", "Willowmere-inspired", "cozy-heroic"]
+        }
+      },
+      "required": ["provider", "prompt"]
+    },
+
+    "proceduralSynth": {
+      "type": "object",
+      "description": "Tone.js procedural audio synthesis definition",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["oscillator", "noise", "sampler", "fm", "am", "membrane", "metal", "pluck"]
+        },
+        "envelope": {
+          "type": "object",
+          "properties": {
+            "attack": { "type": "number" },
+            "decay": { "type": "number" },
+            "sustain": { "type": "number" },
+            "release": { "type": "number" }
+          }
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["reverb", "delay", "chorus", "distortion", "filter", "tremolo", "vibrato", "phaser"] },
+              "params": { "type": "object" }
+            }
+          }
+        },
+        "modulation": {
+          "type": "object",
+          "properties": {
+            "warmthInfluence": { "type": "boolean", "description": "Modulate based on player warmth level" },
+            "healthInfluence": { "type": "boolean" },
+            "proximityInfluence": { "type": "string", "description": "Entity ID to base proximity modulation on" }
+          }
+        }
+      }
+    },
+
+    "musicTrack": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["exploration", "tension", "combat", "boss", "victory", "chase", "emotional", "menu", "cinematic"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "generating", "complete", "approved", "needs_regeneration"]
+        },
+        "source": {
+          "oneOf": [
+            { "type": "string", "description": "Path to audio file" },
+            { "$ref": "#/definitions/audioGenerationPrompt" },
+            { "$ref": "#/definitions/proceduralSynth" }
+          ]
+        },
+        "loopable": { "type": "boolean", "default": true },
+        "loopPoints": {
+          "type": "object",
+          "properties": {
+            "start": { "type": "number" },
+            "end": { "type": "number" }
+          }
+        },
+        "bpm": { "type": "integer" },
+        "stems": {
+          "type": "object",
+          "description": "Separate audio stems for dynamic mixing",
+          "properties": {
+            "melody": { "type": "string" },
+            "harmony": { "type": "string" },
+            "bass": { "type": "string" },
+            "percussion": { "type": "string" },
+            "ambient": { "type": "string" }
+          }
+        },
+        "transitions": {
+          "type": "object",
+          "properties": {
+            "fadeIn": { "type": "number", "default": 1000 },
+            "fadeOut": { "type": "number", "default": 1000 },
+            "crossfade": { "type": "boolean", "default": true }
+          }
+        },
+        "layers": {
+          "type": "array",
+          "description": "Dynamic layers that add/remove based on game state",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "source": { "type": "string" },
+              "condition": {
+                "type": "object",
+                "properties": {
+                  "warmthAbove": { "type": "number" },
+                  "warmthBelow": { "type": "number" },
+                  "healthAbove": { "type": "number" },
+                  "healthBelow": { "type": "number" },
+                  "enemiesNearby": { "type": "boolean" },
+                  "inCombat": { "type": "boolean" }
+                }
+              },
+              "volume": { "type": "number", "default": 1.0 },
+              "fadeTime": { "type": "number", "default": 500 }
+            }
+          }
+        }
+      },
+      "required": ["id", "category", "source"]
+    },
+
+    "soundEffect": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["ui", "player", "enemy", "environment", "combat", "interaction", "ambient", "foley", "voice"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "generating", "complete", "approved", "needs_regeneration"]
+        },
+        "source": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/definitions/audioGenerationPrompt" },
+            { "$ref": "#/definitions/proceduralSynth" }
+          ]
+        },
+        "variants": {
+          "type": "array",
+          "description": "Multiple variants for variety (randomly selected)",
+          "items": { "type": "string" }
+        },
+        "volume": { "type": "number", "default": 1.0 },
+        "pitch": {
+          "type": "object",
+          "properties": {
+            "base": { "type": "number", "default": 1.0 },
+            "variance": { "type": "number", "default": 0 }
+          }
+        },
+        "spatial": {
+          "type": "boolean",
+          "default": false,
+          "description": "3D positional audio"
+        },
+        "maxInstances": { "type": "integer", "default": 3 },
+        "cooldown": { "type": "number", "description": "Minimum ms between plays" }
+      },
+      "required": ["id", "category", "source"]
+    },
+
+    "ambientLoop": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "biome": {
+          "type": "string",
+          "enum": ["village", "forest", "fortress", "interior", "dungeon", "rooftop", "exterior_cold"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "generating", "complete", "approved"]
+        },
+        "source": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/definitions/audioGenerationPrompt" }
+          ]
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "source": { "type": "string" },
+              "volume": { "type": "number" },
+              "condition": { "type": "object" }
+            }
+          }
+        },
+        "randomEvents": {
+          "type": "array",
+          "description": "Random one-shot sounds that play occasionally",
+          "items": {
+            "type": "object",
+            "properties": {
+              "soundId": { "type": "string" },
+              "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+              "minInterval": { "type": "number" },
+              "maxInterval": { "type": "number" },
+              "volumeRange": { "type": "array", "items": { "type": "number" } }
+            }
+          }
+        }
+      },
+      "required": ["id", "biome", "source"]
+    },
+
+    "hapticPattern": {
+      "type": "object",
+      "description": "Haptic feedback pattern for Capacitor/Web Vibration API",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["impact", "notification", "selection", "warning", "success", "damage", "interaction", "environment"]
+        },
+        "pattern": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["light", "medium", "heavy", "soft", "rigid", "success", "warning", "error"],
+              "description": "Capacitor preset"
+            },
+            {
+              "type": "array",
+              "items": { "type": "integer" },
+              "description": "Web Vibration API pattern [vibrate, pause, vibrate, ...]"
+            }
+          ]
+        },
+        "intensity": { "type": "number", "minimum": 0, "maximum": 1, "default": 1.0 },
+        "fallback": {
+          "type": "string",
+          "description": "Visual/audio fallback when haptics unavailable",
+          "enum": ["screen_shake", "flash", "sound", "none"]
+        }
+      },
+      "required": ["id", "pattern"]
+    },
+
+    "audioCue": {
+      "type": "object",
+      "description": "A complete audio moment combining music, SFX, and haptics",
+      "properties": {
+        "id": { "type": "string" },
+        "trigger": { "type": "string" },
+        "music": {
+          "type": "object",
+          "properties": {
+            "trackId": { "type": "string" },
+            "action": { "type": "string", "enum": ["play", "stop", "crossfade", "layer_add", "layer_remove", "duck", "unduck"] },
+            "volume": { "type": "number" },
+            "fadeTime": { "type": "number" }
+          }
+        },
+        "sounds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "soundId": { "type": "string" },
+              "delay": { "type": "number", "default": 0 },
+              "volume": { "type": "number" },
+              "position": { "type": "object", "description": "For spatial audio" }
+            }
+          }
+        },
+        "haptic": {
+          "type": "object",
+          "properties": {
+            "patternId": { "type": "string" },
+            "delay": { "type": "number", "default": 0 }
+          }
+        },
+        "voiceLine": {
+          "type": "object",
+          "description": "Animal vocalization (not speech - grunts, growls, chirps)",
+          "properties": {
+            "characterId": { "type": "string" },
+            "emotion": { "type": "string", "enum": ["greeting", "alarm", "pain", "effort", "triumph", "sorrow", "determination"] },
+            "duckMusic": { "type": "boolean", "default": true }
+          }
+        }
+      },
+      "required": ["id", "trigger"]
+    }
+  },
+
+  "properties": {
+    "version": { "type": "string" },
+    
+    "generationConfig": {
+      "type": "object",
+      "properties": {
+        "defaultProvider": { "type": "string", "default": "stable_audio" },
+        "brandPromptPrefix": {
+          "type": "string",
+          "default": "Warm, orchestral, medieval fantasy. Willowmere Hearthhold woodland adventure. Cozy but heroic. Acoustic instruments, gentle brass, soft strings."
+        },
+        "brandPromptSuffix": {
+          "type": "string",
+          "default": "No electronic sounds, no modern instruments, no harsh tones."
+        },
+        "outputFormat": { "type": "string", "default": "mp3" },
+        "sampleRate": { "type": "integer", "default": 44100 },
+        "outputDirectory": { "type": "string", "default": "client/public/audio" }
+      }
+    },
+
+    "music": {
+      "type": "object",
+      "properties": {
+        "mainTheme": { "$ref": "#/definitions/musicTrack" },
+        "menuTheme": { "$ref": "#/definitions/musicTrack" },
+        "tracks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/musicTrack" }
+        }
+      }
+    },
+
+    "soundEffects": {
+      "type": "object",
+      "properties": {
+        "player": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/soundEffect" }
+        },
+        "enemies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/soundEffect" }
+        },
+        "combat": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/soundEffect" }
+        },
+        "environment": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/soundEffect" }
+        },
+        "ui": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/soundEffect" }
+        },
+        "interactions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/soundEffect" }
+        }
+      }
+    },
+
+    "ambience": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ambientLoop" }
+    },
+
+    "haptics": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/hapticPattern" }
+    },
+
+    "cues": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/audioCue" }
+    },
+
+    "voiceBank": {
+      "type": "object",
+      "description": "Animal vocalizations by species",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "species": { "type": "string" },
+          "vocalizations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "emotion": { "type": "string" },
+                "source": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "$ref": "#/definitions/audioGenerationPrompt" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

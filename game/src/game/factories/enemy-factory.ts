@@ -11,7 +11,7 @@ import type { Enemy, EnemyType } from '../types/entities';
 import type { EnemyVehicle } from '../types/ai';
 import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
-import { getChapterManifestSync, getEnemiesManifestSync } from '../../../ddl/loader';
+import { getChapterManifestSync, getEnemiesManifestSync } from '@ddl/loader';
 
 /**
  * Enemy definition from chapter manifest
@@ -74,6 +74,7 @@ export function createEnemy(enemyDef: EnemyDefinition, engine: Matter.Engine): E
 
   // Get enemy stats from type
   const stats = getEnemyStats(enemyDef.enemyType);
+  const { Bodies, World } = getMatterModules();
 
   // Create physics body
   const body = Bodies.rectangle(

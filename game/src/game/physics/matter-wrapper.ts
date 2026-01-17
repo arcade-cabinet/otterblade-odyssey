@@ -55,7 +55,6 @@ export async function initializeMatter(): Promise<MatterModulesType> {
     // Export to global for compatibility with existing code
     (window as any).Matter = MatterLib;
     
-    console.log('[Physics] Matter.js initialized');
   }
   
   return MatterModules;
