@@ -88,7 +88,10 @@ export class LanternSystem {
     }
   }
 
-  isInLightRadius(position: Position, lantern: { position: Position; radius: number; lit: boolean }) {
+  isInLightRadius(
+    position: Position,
+    lantern: { position: Position; radius: number; lit: boolean }
+  ) {
     if (!lantern.lit) return false;
 
     const distance = Math.sqrt(
@@ -166,7 +169,13 @@ export class LanternSystem {
  * Bell ringing system (WORLD.md:143)
  */
 export class BellSystem {
-  bells: Array<{ position: Position; rung: boolean; cooldown: number; summons: SummonType; timingWindow: number }>;
+  bells: Array<{
+    position: Position;
+    rung: boolean;
+    cooldown: number;
+    summons: SummonType;
+    timingWindow: number;
+  }>;
   audioManager: AudioSystem | null;
 
   constructor(audioManager: AudioSystem | null) {
@@ -187,7 +196,10 @@ export class BellSystem {
     return bell;
   }
 
-  ringBell(bell: { position: Position; cooldown: number; summons: SummonType }, player: PlayerContext) {
+  ringBell(
+    bell: { position: Position; cooldown: number; summons: SummonType },
+    player: PlayerContext
+  ) {
     if (bell.cooldown > 0) return false;
 
     const distance = Math.sqrt(
@@ -266,7 +278,13 @@ export class BellSystem {
  * Hearth system (WORLD.md:144)
  */
 export class HearthSystem {
-  hearths: Array<{ position: Position; lit: boolean; warmth: number; radius: number; cooldown: number }>;
+  hearths: Array<{
+    position: Position;
+    lit: boolean;
+    warmth: number;
+    radius: number;
+    cooldown: number;
+  }>;
   audioManager: AudioSystem | null;
 
   constructor(audioManager: AudioSystem | null) {
@@ -343,7 +361,14 @@ export class HearthSystem {
  * Flow puzzle system
  */
 export class FlowPuzzle {
-  regions: Array<{ x: number; y: number; width: number; height: number; direction: Direction; strength: number }>;
+  regions: Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    direction: Direction;
+    strength: number;
+  }>;
   valves: Array<{ x: number; y: number; controlsRegionIndex: number; active: boolean }>;
 
   constructor() {

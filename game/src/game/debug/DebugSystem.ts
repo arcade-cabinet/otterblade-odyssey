@@ -22,6 +22,7 @@ export class DebugSystem {
   private collidersVisible = false;
   private triggersVisible = false;
   private aiVisible = false;
+  private keydownHandler?: (event: KeyboardEvent) => void;
 
   constructor(config: DebugSystemConfig) {
     this.config = config;
@@ -31,7 +32,7 @@ export class DebugSystem {
   }
 
   private bindShortcuts(): void {
-    window.addEventListener('keydown', (event) => {
+    this.keydownHandler = (event: KeyboardEvent) => {
       if (!this.config.enabled) return;
 
       switch (event.key) {
@@ -56,7 +57,18 @@ export class DebugSystem {
           this.spawnBurstAtPlayer();
           break;
       }
-    });
+    };
+    window.addEventListener('keydown', this.keydownHandler);
+  }
+
+  /**
+   * Dispose of the debug system and clean up event listeners
+   */
+  dispose(): void {
+    if (this.keydownHandler) {
+      window.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = undefined;
+    }
   }
 
   private toggleOverlay(): void {

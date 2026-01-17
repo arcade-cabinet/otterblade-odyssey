@@ -6,8 +6,8 @@
  * @module factories/npc-factory
  */
 
+import { getChapterManifestSync } from '@ddl/loader';
 import { Vector3 } from 'yuka';
-import { getChapterManifestSync, getNPCsManifestSync } from '@ddl/loader';
 
 /**
  * Build NPCs for a chapter

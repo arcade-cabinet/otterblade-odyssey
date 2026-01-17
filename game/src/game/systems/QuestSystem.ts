@@ -148,7 +148,9 @@ export class QuestSystem {
   /**
    * Get objective progress for a quest
    */
-  getObjectiveProgress(questId: string): Array<QuestObjectiveDefinition & { current: number; completed: boolean }> | null {
+  getObjectiveProgress(
+    questId: string
+  ): Array<QuestObjectiveDefinition & { current: number; completed: boolean }> | null {
     const quest = this.activeQuests.find((q) => q.id === questId);
     if (!quest) return null;
 

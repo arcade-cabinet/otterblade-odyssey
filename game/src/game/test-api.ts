@@ -64,7 +64,12 @@ export interface GameTestAPI {
 }
 
 interface GameRuntimeRef {
-  player?: { position: { x: number; y: number }; velocity: { x: number; y: number }; facingDirection?: number; isGrounded?: boolean };
+  player?: {
+    position: { x: number; y: number };
+    velocity: { x: number; y: number };
+    facingDirection?: number;
+    isGrounded?: boolean;
+  };
 }
 
 // Extend Window interface to include test API
@@ -93,7 +98,13 @@ export function initializeTestAPI(): void {
       const playerY = runtimePlayer?.position.y ?? store.playerY;
       const velocityX = runtimePlayer?.velocity.x ?? 0;
       const velocityY = runtimePlayer?.velocity.y ?? 0;
-      const facing = runtimePlayer?.facingDirection ? (runtimePlayer.facingDirection >= 0 ? 1 : -1) : store.playerFacingRight ? 1 : -1;
+      const facing = runtimePlayer?.facingDirection
+        ? runtimePlayer.facingDirection >= 0
+          ? 1
+          : -1
+        : store.playerFacingRight
+          ? 1
+          : -1;
       const grounded = runtimePlayer?.isGrounded ?? store.playerState !== 'jump';
 
       return {

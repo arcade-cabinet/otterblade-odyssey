@@ -32,11 +32,11 @@ export async function initializeMatter(): Promise<MatterModulesType> {
   if (typeof window === 'undefined') {
     throw new Error('Matter.js can only be initialized in browser context');
   }
-  
+
   if (!MatterModules) {
     // Dynamic import ensures Matter.js only loads in browser
     const MatterLib = (await import('matter-js')).default;
-    
+
     // Pre-extract all modules so they're ready to use
     MatterModules = {
       Engine: MatterLib.Engine,
@@ -51,12 +51,11 @@ export async function initializeMatter(): Promise<MatterModulesType> {
       Vector: MatterLib.Vector,
       Matter: MatterLib, // Full library if needed
     };
-    
+
     // Export to global for compatibility with existing code
     (window as any).Matter = MatterLib;
-    
   }
-  
+
   return MatterModules;
 }
 

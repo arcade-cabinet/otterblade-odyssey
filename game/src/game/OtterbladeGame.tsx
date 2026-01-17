@@ -1,12 +1,9 @@
 /**
  * Otterblade Odyssey - Main Game Component
-/**
- * Otterblade Odyssey - Main Game Component
  * Modular TypeScript architecture with DDL-based manifest loading
  */
- * Clean: 3 JS files total (monolith + DDL + this), plus external libs
- */
 
+import type * as Matter from 'matter-js';
 import {
   createEffect,
   createResource,
@@ -16,36 +13,34 @@ import {
   onCleanup,
   Show,
 } from 'solid-js';
-
-// ONE import - the entire game engine (TypeScript modules)
-import {
-  initializeGame,
-  createPhysicsEngine,
-  createFinnBody,
-  createGameLoop,
-  initializeChapter,
-  PlayerController,
-  audioManager,
-  aiManager,
-  inputManager,
-  CHAPTER_FILES,
-} from './index';
-
+import { Vector3 } from 'yuka';
+import { ZephyrosAI } from './ai/BossAI';
 // DDL loader (second file)
 import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
 import { initializeChapterConstants } from './constants';
-import { createSceneRenderer } from './engine/rendering';
-import { HazardSystem } from './physics/PhysicsManager';
-import { LanternSystem, BellSystem, HearthSystem } from './environment/EnvironmentalSystems';
-import { buildInteractionsAndCollectibles } from './factories/interaction-factory';
-import { Vector3 } from 'yuka';
-import { setupCollisionHandlers } from './systems/collision';
-import { getMatterModules } from './physics/matter-wrapper';
-import type * as Matter from 'matter-js';
-import { TriggerSystem } from './systems/TriggerSystem';
-import { ZephyrosAI } from './ai/BossAI';
 import { DebugSystem } from './debug/DebugSystem';
+import { createSceneRenderer } from './engine/rendering';
+import { BellSystem, HearthSystem, LanternSystem } from './environment/EnvironmentalSystems';
+import { buildInteractionsAndCollectibles } from './factories/interaction-factory';
+// ONE import - the entire game engine (TypeScript modules)
+import {
+  aiManager,
+  audioManager,
+  CHAPTER_FILES,
+  createFinnBody,
+  createGameLoop,
+  createPhysicsEngine,
+  initializeChapter,
+  initializeGame,
+  inputManager,
+  PlayerController,
+} from './index';
+import { getMatterModules } from './physics/matter-wrapper';
+import { HazardSystem } from './physics/PhysicsManager';
+import type { NPCAIEntity } from './systems/AIManager';
+import { setupCollisionHandlers } from './systems/collision';
+import { TriggerSystem } from './systems/TriggerSystem';
 
 const cinematicVideoUrls = import.meta.glob('../assets/videos/*.mp4', {
   eager: true,
@@ -53,10 +48,7 @@ const cinematicVideoUrls = import.meta.glob('../assets/videos/*.mp4', {
   import: 'default',
 }) as Record<string, string>;
 const cinematicUrlByFilename = new Map(
-  Object.entries(cinematicVideoUrls).map(([path, url]) => [
-    path.split('/').pop() || path,
-    url,
-  ])
+  Object.entries(cinematicVideoUrls).map(([path, url]) => [path.split('/').pop() || path, url])
 );
 
 /**
@@ -105,6 +97,7 @@ async function preloadGameManifests(onProgress: (percent: number) => void) {
             updateProgress();
           })
           .catch((error) => {
+            console.error(`Failed to load chapter ${i}:`, error);
             updateProgress(); // Still count as progress even if failed
           })
       );
@@ -123,13 +116,14 @@ async function preloadGameManifests(onProgress: (percent: number) => void) {
       { loader: loadChapterPlatesManifest, name: 'Chapter Plates' },
     ];
 
-    for (const { loader, name } of manifestLoaders) {
+    for (const { loader } of manifestLoaders) {
       loaders.push(
         loader()
           .then(() => {
             updateProgress();
           })
           .catch((error) => {
+            console.error('Failed to load manifest:', error);
             updateProgress();
           })
       );
@@ -184,9 +178,9 @@ function OtterbladeGameContent() {
   const [gameStarted, setGameStarted] = createSignal(false);
   const [questObjectives, setQuestObjectives] = createSignal([]);
   const [activeQuest, setActiveQuest] = createSignal(null);
-  const [checkpoint, setCheckpoint] = createSignal<{ x: number; y: number } | null>(null);
-  const [allyCalls, setAllyCalls] = createSignal(0);
-  const [guardAlerts, setGuardAlerts] = createSignal(0);
+  const [_checkpoint, setCheckpoint] = createSignal<{ x: number; y: number } | null>(null);
+  const [_allyCalls, setAllyCalls] = createSignal(0);
+  const [_guardAlerts, setGuardAlerts] = createSignal(0);
 
   let slowMotionUntil = 0;
   let timeScale = 1;
@@ -293,8 +287,9 @@ function OtterbladeGameContent() {
     canvas.height = window.innerHeight;
 
     // Load chapter manifest using DDL sync accessor (already preloaded)
-    const { getChapterManifestSync, loadChapterManifest, getCinematicsManifestSync } =
-      await import('../ddl/loader');
+    const { getChapterManifestSync, loadChapterManifest, getCinematicsManifestSync } = await import(
+      '../ddl/loader'
+    );
 
     // Ensure current chapter is loaded (in case cache was cleared)
     await loadChapterManifest(currentChapter());
@@ -351,7 +346,7 @@ function OtterbladeGameContent() {
       gameStateObj
     );
     const { interactions, collectibles } = buildInteractionsAndCollectibles(manifest, engine);
-    const interactionById = new Map<string, typeof interactions[number]>();
+    const interactionById = new Map<string, (typeof interactions)[number]>();
     for (const interaction of interactions) {
       interactionById.set(interaction.def.id, interaction);
     }
@@ -376,7 +371,7 @@ function OtterbladeGameContent() {
     const flowPuzzles = [];
     const timingSequences = [];
 
-    const npcBodies = new Map<string, { body: Matter.Body; npc: any }>();
+    const npcBodies = new Map<string, { body: Matter.Body; npc: NPCAIEntity }>();
     if (manifest.npcs?.length) {
       for (const npcDef of manifest.npcs) {
         if (!npcDef.position) {
@@ -404,7 +399,10 @@ function OtterbladeGameContent() {
 
     let bossAI = null;
     if (manifest.boss?.stats) {
-      const bossPos = manifest.boss.arenaPosition ?? { x: player.position.x + 400, y: player.position.y };
+      const bossPos = manifest.boss.arenaPosition ?? {
+        x: player.position.x + 400,
+        y: player.position.y,
+      };
       bossAI = new ZephyrosAI(
         {
           x: bossPos.x,
@@ -587,6 +585,11 @@ function OtterbladeGameContent() {
       }
     );
 
+    // Validate required systems
+    if (!inputManager) {
+      throw new Error('InputManager is not available (window is undefined)');
+    }
+
     // Create game loop
     const loop = createGameLoop({
       canvas,
@@ -596,7 +599,7 @@ function OtterbladeGameContent() {
       player,
       playerController,
       playerRef,
-      inputManager: inputManager!,
+      inputManager: inputManager,
       _audioManager: audioManager,
       aiManager,
       bossAI,
@@ -647,7 +650,7 @@ function OtterbladeGameContent() {
           error={manifestsLoaded.error?.message || 'Unknown error occurred'}
         />
       </Show>
-      
+
       {/* Runtime Error Screen - Show if game initialization failed */}
       <Show when={runtimeError()}>
         <LoadingScreen
@@ -685,33 +688,33 @@ function OtterbladeGameContent() {
           >
             Otterblade Odyssey
           </h1>
-        <h2
-          style={{
-            'font-size': '24px',
-            'margin-bottom': '40px',
-            color: '#F4D03F',
-          }}
-        >
-          A Willowmere Hearthhold woodland epic
-        </h2>
-        <button
-          type="button"
-          onClick={() => setGameStarted(true)}
-          data-testid="button-start-game"
-          style={{
-            padding: '15px 40px',
-            'font-size': '20px',
-            background: '#E67E22',
-            color: 'white',
-            border: 'none',
-            'border-radius': '8px',
-            cursor: 'pointer',
-            'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
-          }}
-          disabled={manifestsLoaded.loading}
-        >
-          Begin Journey
-        </button>
+          <h2
+            style={{
+              'font-size': '24px',
+              'margin-bottom': '40px',
+              color: '#F4D03F',
+            }}
+          >
+            A Willowmere Hearthhold woodland epic
+          </h2>
+          <button
+            type="button"
+            onClick={() => setGameStarted(true)}
+            data-testid="button-start-game"
+            style={{
+              padding: '15px 40px',
+              'font-size': '20px',
+              background: '#E67E22',
+              color: 'white',
+              border: 'none',
+              'border-radius': '8px',
+              cursor: 'pointer',
+              'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
+            }}
+            disabled={manifestsLoaded.loading}
+          >
+            Begin Journey
+          </button>
         </div>
       </Show>
 

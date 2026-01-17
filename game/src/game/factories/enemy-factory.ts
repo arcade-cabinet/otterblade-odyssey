@@ -6,12 +6,12 @@
  * @module factories/enemy-factory
  */
 
-import type * as Matter from 'matter-js';
-import type { Enemy, EnemyType } from '../types/entities';
-import type { EnemyVehicle } from '../types/ai';
-import { getMatterModules } from '../physics/matter-wrapper';
-import { Vector3 } from 'yuka';
 import { getChapterManifestSync, getEnemiesManifestSync } from '@ddl/loader';
+import type * as Matter from 'matter-js';
+import { Vector3 } from 'yuka';
+import { getMatterModules } from '../physics/matter-wrapper';
+import type { EnemyVehicle } from '../types/ai';
+import type { EnemyType } from '../types/entities';
 
 /**
  * Enemy definition from chapter manifest
@@ -143,8 +143,10 @@ function getEnemyStats(enemyType: string): EnemyStats {
   // Try to load from DDL first
   try {
     const enemiesManifest = getEnemiesManifestSync();
-    const enemyData = enemiesManifest.enemies?.find(e => e.type.toLowerCase() === enemyType.toLowerCase());
-    
+    const enemyData = enemiesManifest.enemies?.find(
+      (e) => e.type.toLowerCase() === enemyType.toLowerCase()
+    );
+
     if (enemyData) {
       return {
         width: enemyData.size?.width || 28,

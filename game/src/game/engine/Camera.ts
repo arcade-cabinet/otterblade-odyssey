@@ -31,18 +31,15 @@ export class Camera {
   follow(target: CameraTarget, bounds: CameraBounds | null = null): void {
     this.targetX = target.position.x - this.canvas.width / 2;
     this.targetY = target.position.y - this.canvas.height / 2;
-    
+
     if (bounds) {
-      this.targetX = Math.max(
-        bounds.minX,
-        Math.min(bounds.maxX - this.canvas.width, this.targetX)
-      );
+      this.targetX = Math.max(bounds.minX, Math.min(bounds.maxX - this.canvas.width, this.targetX));
       this.targetY = Math.max(
         bounds.minY,
         Math.min(bounds.maxY - this.canvas.height, this.targetY)
       );
     }
-    
+
     this.x += (this.targetX - this.x) * this.smoothing;
     this.y += (this.targetY - this.y) * this.smoothing;
   }
@@ -77,18 +74,15 @@ export class Camera {
   snap(target: CameraTarget, bounds: CameraBounds | null = null): void {
     this.targetX = target.position.x - this.canvas.width / 2;
     this.targetY = target.position.y - this.canvas.height / 2;
-    
+
     if (bounds) {
-      this.targetX = Math.max(
-        bounds.minX,
-        Math.min(bounds.maxX - this.canvas.width, this.targetX)
-      );
+      this.targetX = Math.max(bounds.minX, Math.min(bounds.maxX - this.canvas.width, this.targetX));
       this.targetY = Math.max(
         bounds.minY,
         Math.min(bounds.maxY - this.canvas.height, this.targetY)
       );
     }
-    
+
     this.x = this.targetX;
     this.y = this.targetY;
   }

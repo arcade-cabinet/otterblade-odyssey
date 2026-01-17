@@ -49,7 +49,7 @@ const FALLBACK_COLORS: BiomeColors = {
 function loadChaptersWithColors(): Chapter[] {
   try {
     const chapters = getChaptersSync();
-    const biomes = getBiomesSync();
+    const _biomes = getBiomesSync();
     const biomeColors = getBiomeColorsArray();
 
     return chapters.map((ch, idx) => {
@@ -63,7 +63,7 @@ function loadChaptersWithColors(): Chapter[] {
         sky2: colors?.sky2 ?? FALLBACK_COLORS.sky2,
       };
     });
-  } catch (error) {
+  } catch (_error) {
     return [
       {
         id: 0,

@@ -3,8 +3,7 @@
  * Health, warmth, shards, chapter info
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useStore } from '../store/gameStore';
 
 export function HUD() {
@@ -44,7 +43,9 @@ export function HUD() {
             ]}
           />
         </View>
-        <Text style={styles.warmthText}>{warmth}/{maxWarmth}</Text>
+        <Text style={styles.warmthText}>
+          {warmth}/{maxWarmth}
+        </Text>
       </View>
 
       {/* Shards & Blade */}

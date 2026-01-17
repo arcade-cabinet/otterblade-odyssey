@@ -6,7 +6,7 @@
 import type * as Matter from 'matter-js';
 import { drawBoss, drawEnemy, drawNPC } from '../rendering/enemies';
 import { drawFinn } from '../rendering/finn';
-import type { Camera, RenderContext, ChapterManifest, AISystem, BossAI } from '../types';
+import type { AISystem, BossAI, Camera, ChapterManifest, RenderContext } from '../types';
 
 /**
  * Scene renderer parameters
@@ -91,7 +91,7 @@ export function createSceneRenderer(params: SceneRendererParams): SceneRenderFun
     camera: Camera,
     animFrame: number,
     playerFacing: number,
-    bossAI: any
+    bossAI: ZephyrosAI | null
   ): void {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);

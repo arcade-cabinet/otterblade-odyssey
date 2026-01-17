@@ -7,15 +7,9 @@
  * @module factories/level-factory
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
 import { getChapterManifestSync } from '@ddl/loader';
-import {
-  createPlatform,
-  HazardSystem,
-  MovingPlatform,
-  WaterZone,
-} from '../physics/PhysicsManager';
-
+import { getMatterModules } from '../physics/matter-wrapper';
+import { createPlatform, MovingPlatform, WaterZone } from '../physics/PhysicsManager';
 
 /**
  * Build a complete level from a chapter manifest
@@ -121,7 +115,7 @@ export function buildLevel(chapterId, engine) {
   if (manifest.level?.checkpoints) {
     for (const checkpointDef of manifest.level.checkpoints) {
       const checkpointPos = checkpointDef.position || checkpointDef;
-      if (!checkpointPos?.x || !checkpointPos?.y) {
+      if (checkpointPos?.x === undefined || checkpointPos?.y === undefined) {
         continue;
       }
       const checkpoint = {
@@ -241,9 +235,9 @@ function buildSegment(segment, engine, level) {
         wallDef.width,
         wallDef.height,
         {
-        isStatic: true,
-        label: 'wall',
-        friction: 0.1,
+          isStatic: true,
+          label: 'wall',
+          friction: 0.1,
         }
       );
       World.add(engine.world, wall);

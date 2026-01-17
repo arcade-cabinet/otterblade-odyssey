@@ -6,8 +6,6 @@
 
 import type * as Matter from 'matter-js';
 import { getMatterModules } from '../physics/matter-wrapper';
-import type { EnemyType } from '../types/entities';
-
 
 // Collision category bitmasks (PHYSICS.md:100-154)
 export const COLLISION_GROUPS = {
@@ -415,7 +413,11 @@ export class HazardSystem {
 
   checkCollisions(
     player: Matter.Body & { isInvulnerable?: boolean; slowedUntil?: number },
-    gameState: { takeDamage(amount: number): void; drainWarmth(amount: number): void; restoreWarmth(amount: number): void }
+    gameState: {
+      takeDamage(amount: number): void;
+      drainWarmth(amount: number): void;
+      restoreWarmth(amount: number): void;
+    }
   ): void {
     if (player.isInvulnerable) return;
 
@@ -433,7 +435,10 @@ export class HazardSystem {
     }
   }
 
-  isBodyInRegion(body: Matter.Body, region: { x: number; y: number; width: number; height: number }): boolean {
+  isBodyInRegion(
+    body: Matter.Body,
+    region: { x: number; y: number; width: number; height: number }
+  ): boolean {
     const { x, y } = body.position;
     return (
       x >= region.x &&
@@ -446,7 +451,11 @@ export class HazardSystem {
   applyHazardEffect(
     player: Matter.Body & { slowedUntil?: number },
     hazard: Hazard,
-    gameState: { takeDamage(amount: number): void; drainWarmth(amount: number): void; restoreWarmth(amount: number): void }
+    gameState: {
+      takeDamage(amount: number): void;
+      drainWarmth(amount: number): void;
+      restoreWarmth(amount: number): void;
+    }
   ): void {
     switch (hazard.type) {
       case 'spikes':

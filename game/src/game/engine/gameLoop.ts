@@ -3,11 +3,10 @@
  * Main update and render loop with proper delta time calculation
  */
 
-import type * as Matter from 'matter-js';
-import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { hearingSystem } from '../ai/PerceptionSystem';
-import type { GameLoopParams, GameLoopController } from '../types/systems';
+import { getMatterModules } from '../physics/matter-wrapper';
+import type { GameLoopController, GameLoopParams } from '../types/systems';
 
 /**
  * Create game loop with proper delta time tracking
@@ -45,7 +44,7 @@ export function createGameLoop(params: GameLoopParams): GameLoopController {
   let lastTime = performance.now();
   let animationFrameId: number | null = null;
   const camera = { x: 0, y: 0 };
-  
+
   // Max delta to prevent spiral of death when frame rate drops
   const MAX_DELTA_MS = 100;
 
