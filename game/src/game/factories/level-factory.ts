@@ -7,7 +7,6 @@
  * @module factories/level-factory
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
 import { getChapterManifestSync } from '../../../ddl/loader';
 import {
   createPlatform,
@@ -15,7 +14,6 @@ import {
   MovingPlatform,
   WaterZone,
 } from '../physics/PhysicsManager.js';
-
 
 /**
  * Build a complete level from a chapter manifest

@@ -4,6 +4,7 @@
  * Implements proper AI system per CLAUDE.md line 61 and docs/AI.md
  */
 
+import type * as Matter from 'matter-js';
 import {
   EntityManager,
   FleeBehavior,
@@ -17,8 +18,7 @@ import {
   Vehicle,
   WanderBehavior,
 } from 'yuka';
-import type { AISystem, PatrolZone } from '../types/systems';
-import type * as Matter from 'matter-js';
+import type { PatrolZone } from '../types/systems';
 
 /**
  * Enemy vehicle interface extending YUKA Vehicle

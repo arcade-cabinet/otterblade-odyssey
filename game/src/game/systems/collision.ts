@@ -6,7 +6,7 @@
 import type * as Matter from 'matter-js';
 import { World } from 'matter-js';
 import { Vector3 } from 'yuka';
-import type { InputSystem, AudioSystem, PlayerController } from '../types/systems';
+import type { AudioSystem, InputSystem, PlayerController } from '../types/systems';
 
 /**
  * Quest objective definition

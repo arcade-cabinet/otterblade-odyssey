@@ -1,124 +1,115 @@
 /**
  * Type Definitions Index
- * 
+ *
  * Central export point for all TypeScript type definitions
  * Import from this file to access all game types
- * 
+ *
  * @example
  * import type { Player, Enemy, GameSystem } from '@game/types';
  */
 
-// System types
+// AI types
 export type {
-  GameSystem,
-  PhysicsSystem,
-  Renderer,
-  Camera,
-  InputSystem,
-  AISystem,
-  AudioSystem,
-  GameLoopParams,
-  GameLoopController,
-} from './systems';
-
+  AIBehaviorConfig,
+  AIManager,
+  AIStateMachine,
+  BossAIConfig,
+  EnemyVehicle,
+  NavigationMesh,
+  PerceptionSystem,
+  SteeringBehaviorConfig,
+  SteeringBehaviorType,
+} from './ai';
+export {
+  toMatterVector,
+  toYukaVector,
+} from './ai';
+// Canvas rendering types
+export type {
+  AnimationFrame,
+  AnimationSequence,
+  CameraConfig,
+  DebugRenderOptions,
+  EnemyRenderConfig,
+  FinnRenderConfig,
+  HexColor,
+  ParallaxLayerConfig,
+  ParticleConfig,
+  ParticleEmitterConfig,
+  ProceduralRenderer,
+  RenderContext,
+  SceneRenderer,
+} from './canvas';
+export { RenderLayer } from './canvas';
 // Entity types
 export type {
-  Entity,
-  Player,
-  Enemy,
   Boss,
-  Platform,
-  Item,
-  NPC,
-  Trigger,
-  Hazard,
+  Enemy,
   EnemyAIState,
-  EnemyType,
   EnemyBehavior,
-  PlatformType,
-  ItemType,
+  EnemyType,
+  Entity,
+  Hazard,
   HazardType,
+  Item,
+  ItemType,
+  NPC,
+  Platform,
+  PlatformType,
+  Player,
+  Trigger,
 } from './entities';
-
 // Entity type guards
 export {
-  isPlayer,
-  isEnemy,
   isBoss,
-  isPlatform,
+  isEnemy,
+  isHazard,
   isItem,
   isNPC,
+  isPlatform,
+  isPlayer,
   isTrigger,
-  isHazard,
 } from './entities';
-
+// Manifest types
+export type {
+  ChapterManifest,
+  Connections,
+  EnemyManifest,
+  Narrative,
+  Position2D,
+  Region,
+  SoundManifest,
+} from './manifests';
 // Physics types
 export type {
   BodyLabel,
+  BodyOptions,
+  CollisionHandler,
+  CollisionPair,
   GameBody,
   PhysicsConfig,
-  BodyOptions,
-  CollisionPair,
-  CollisionHandler,
 } from './physics';
-
 export {
   COLLISION_GROUPS,
   COLLISION_MASKS,
   DEFAULT_PHYSICS_CONFIG,
-  isPlayerBody,
-  isEnemyBody,
-  isPlatformBody,
-  isItemBody,
-  isTriggerBody,
-  isHazardBody,
   isBossBody,
+  isEnemyBody,
+  isHazardBody,
+  isItemBody,
+  isPlatformBody,
+  isPlayerBody,
+  isTriggerBody,
 } from './physics';
-
-// AI types
+// System types
 export type {
-  EnemyVehicle,
-  AIBehaviorConfig,
-  AIStateMachine,
-  AIManager,
-  SteeringBehaviorType,
-  SteeringBehaviorConfig,
-  NavigationMesh,
-  PerceptionSystem,
-  BossAIConfig,
-} from './ai';
-
-export {
-  toYukaVector,
-  toMatterVector,
-} from './ai';
-
-// Manifest types
-export type {
-  ChapterManifest,
-  EnemyManifest,
-  SoundManifest,
-  Position2D,
-  Region,
-  Narrative,
-  Connections,
-} from './manifests';
-
-// Canvas rendering types
-export type {
-  RenderContext,
-  HexColor,
-  CameraConfig,
-  FinnRenderConfig,
-  EnemyRenderConfig,
-  ParticleConfig,
-  ParticleEmitterConfig,
-  ParallaxLayerConfig,
-  AnimationFrame,
-  AnimationSequence,
-  ProceduralRenderer,
-  DebugRenderOptions,
-  SceneRenderer,
-} from './canvas';
-
-export { RenderLayer } from './canvas';
+  AISystem,
+  AudioSystem,
+  Camera,
+  GameLoopController,
+  GameLoopParams,
+  GameSystem,
+  InputSystem,
+  PhysicsSystem,
+  Renderer,
+} from './systems';

@@ -7,7 +7,7 @@
  */
 
 import { Vector3 } from 'yuka';
-import { getChapterManifestSync, getNPCsManifestSync } from '../../../ddl/loader';
+import { getChapterManifestSync } from '../../../ddl/loader';
 
 /**
  * Build NPCs for a chapter

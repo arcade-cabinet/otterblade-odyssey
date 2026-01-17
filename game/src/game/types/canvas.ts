@@ -1,6 +1,6 @@
 /**
  * Canvas Rendering Type Definitions
- * 
+ *
  * Types for procedural rendering using Canvas 2D API
  * All entities are rendered procedurally (no sprite sheets)
  */
@@ -42,11 +42,11 @@ export interface CameraConfig {
   width: number;
   height: number;
   zoom: number;
-  
+
   // Follow behavior
   followSmoothing: number;
   followOffset: { x: number; y: number };
-  
+
   // Bounds
   minX: number;
   maxX: number;
@@ -64,14 +64,14 @@ export interface FinnRenderConfig {
   tailColor: HexColor;
   eyeColor: HexColor;
   noseColor: HexColor;
-  
+
   // Sizes
   headRadius: number;
   bodyWidth: number;
   bodyHeight: number;
   tailWidth: number;
   tailLength: number;
-  
+
   // Animation
   bobAmount: number;
   bobSpeed: number;
@@ -87,17 +87,17 @@ export interface EnemyRenderConfig {
   primaryColor: HexColor;
   secondaryColor: HexColor;
   eyeColor: HexColor;
-  
+
   // Size
   width: number;
   height: number;
-  
+
   // Features
   hasHelmet: boolean;
   hasWeapon: boolean;
   hasCape: boolean;
   hasArmor: boolean;
-  
+
   // Animation
   bobAmount: number;
   bobSpeed: number;
@@ -110,12 +110,12 @@ export interface ParticleConfig {
   position: { x: number; y: number };
   velocity: { x: number; y: number };
   acceleration: { x: number; y: number };
-  
+
   color: HexColor;
   size: number;
   lifetime: number;
   fadeOut: boolean;
-  
+
   // Visual effects
   glow: boolean;
   glowRadius?: number;
@@ -128,18 +128,18 @@ export interface ParticleConfig {
 export interface ParticleEmitterConfig {
   position: { x: number; y: number };
   rate: number; // Particles per second
-  
+
   // Spawn area
   spawnRadius: number;
-  
+
   // Particle properties
   particleConfig: Partial<ParticleConfig>;
-  
+
   // Randomization
   velocityVariance: number;
   sizeVariance: number;
   lifetimeVariance: number;
-  
+
   // Emitter lifetime
   duration: number; // -1 for infinite
   autoDestroy: boolean;
@@ -151,14 +151,14 @@ export interface ParticleEmitterConfig {
 export interface ParallaxLayerConfig {
   // Scroll factor (0 = static, 1 = moves with camera)
   scrollFactor: { x: number; y: number };
-  
+
   // Repeat behavior
   repeatX: boolean;
   repeatY: boolean;
-  
+
   // Rendering
   render: (ctx: RenderContext, camera: CameraConfig, offset: { x: number; y: number }) => void;
-  
+
   // Layer depth (for sorting)
   depth: number;
 }
@@ -193,7 +193,7 @@ export interface ProceduralRenderer {
     animState: string,
     animFrame: number
   ): void;
-  
+
   // Enemy rendering
   renderEnemy(
     ctx: RenderContext,
@@ -205,7 +205,7 @@ export interface ProceduralRenderer {
     health: number,
     maxHealth: number
   ): void;
-  
+
   // Boss rendering
   renderBoss(
     ctx: RenderContext,
@@ -216,7 +216,7 @@ export interface ProceduralRenderer {
     health: number,
     maxHealth: number
   ): void;
-  
+
   // NPC rendering
   renderNPC(
     ctx: RenderContext,
@@ -226,7 +226,7 @@ export interface ProceduralRenderer {
     animState: string,
     facing: number
   ): void;
-  
+
   // Platform rendering
   renderPlatform(
     ctx: RenderContext,
@@ -236,16 +236,10 @@ export interface ProceduralRenderer {
     height: number,
     platformType: string
   ): void;
-  
+
   // Item rendering
-  renderItem(
-    ctx: RenderContext,
-    x: number,
-    y: number,
-    itemType: string,
-    bobOffset: number
-  ): void;
-  
+  renderItem(ctx: RenderContext, x: number, y: number, itemType: string, bobOffset: number): void;
+
   // Hazard rendering
   renderHazard(
     ctx: RenderContext,
