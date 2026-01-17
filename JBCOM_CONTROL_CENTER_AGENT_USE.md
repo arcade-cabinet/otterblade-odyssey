@@ -115,7 +115,7 @@ When you're assigned to or open a PR:
 
 When AI reviewers comment (Gemini, Copilot, Amazon Q, CodeRabbit):
 ```markdown
-@gemini-code-assist Thank you for the review.
+@<reviewer-handle> Thank you for the review.
 ✅ Fixed: [description]
 ✅ Committed: [hash]
 ```
