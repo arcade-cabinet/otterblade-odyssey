@@ -692,7 +692,7 @@ function OtterbladeGameContent() {
             color: '#F4D03F',
           }}
         >
-          A Willowmere-inspired woodland epic
+          A Willowmere Hearthhold woodland epic
         </h2>
         <button
           type="button"
