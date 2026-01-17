@@ -12,13 +12,13 @@ export async function initPhysics() {
   if (typeof window === 'undefined') {
     throw new Error('Physics only available in browser');
   }
-  
+
   if (!MatterLib) {
     MatterLib = (await import('matter-js')).default;
     window.Matter = MatterLib; // Global for compatibility
     console.log('[Physics] Matter.js loaded');
   }
-  
+
   return MatterLib;
 }
 
@@ -89,11 +89,11 @@ export function createPhysicsEngine() {
 
 export function createFinnBody(x, y) {
   const { Bodies, Body } = M();
-  
+
   const torso = Bodies.rectangle(0, 0, 28, 40, { label: 'finn_torso' });
   const head = Bodies.circle(0, -20, 12, { label: 'finn_head' });
   const feet = Bodies.rectangle(0, 24, 20, 8, { label: 'finn_feet', isSensor: true });
-  
+
   const finn = Body.create({
     parts: [torso, head, feet],
     friction: 0.3,
@@ -106,26 +106,26 @@ export function createFinnBody(x, y) {
       mask: COLLISION_MASKS.PLAYER,
     },
   });
-  
+
   Body.setPosition(finn, { x, y });
   finn.isGrounded = false;
   finn.canJump = true;
-  
+
   return finn;
 }
 
 export function createEnemyBody(x, y, type) {
   const { Bodies } = M();
-  
+
   const sizes = {
     scout: { w: 28, h: 45 },
     frostwolf: { w: 50, h: 40 },
     frost_captain: { w: 35, h: 55 },
     frost_specter: { w: 40, h: 50 },
   };
-  
+
   const size = sizes[type] || { w: 35, h: 50 };
-  
+
   return Bodies.rectangle(x, y, size.w, size.h, {
     label: 'enemy',
     friction: 0.1,
@@ -145,43 +145,43 @@ export function createEnemyBody(x, y, type) {
 export function createPlatform(config) {
   const { Bodies } = M();
   const { x, y, width, height, type = 'stone' } = config;
-  
+
   const frictions = {
     stone: 0.8,
     wood: 0.6,
     ice: 0.05,
     moss: 0.9,
   };
-  
+
   return Bodies.rectangle(x, y, width, height, {
     isStatic: true,
     label: `platform_${type}`,
     friction: frictions[type] || 0.8,
     collisionFilter: {
       category: COLLISION_GROUPS.PLATFORM,
-      mask: 0xFFFF,
+      mask: 0xffff,
     },
   });
 }
 
 export function createAttackHitbox(source, offsetX, offsetY, width, height, damage, knockback) {
   const { Bodies, Body } = M();
-  
+
   const facing = source.velocity.x >= 0 ? 1 : -1;
   const x = source.position.x + offsetX * facing;
   const y = source.position.y + offsetY;
-  
+
   const hitbox = Bodies.rectangle(x, y, width, height, {
     isSensor: true,
     label: 'attack_hitbox',
   });
-  
+
   hitbox.damage = damage;
   hitbox.knockback = { x: knockback.x * facing, y: knockback.y };
   hitbox.source = source;
-  
+
   setTimeout(() => Body.setPosition(hitbox, { x: -9999, y: -9999 }), 200);
-  
+
   return hitbox;
 }
 
@@ -260,13 +260,13 @@ export class HazardSystem {
 export class MovingPlatform {
   constructor({ x, y, width, height, waypoints, speed = 2, waitTime = 1000, loop = true }) {
     const { Bodies } = M();
-    
+
     this.body = Bodies.rectangle(x, y, width, height, {
       isStatic: true,
       label: 'moving_platform',
       friction: 0.8,
     });
-    
+
     this.waypoints = waypoints;
     this.speed = speed;
     this.waitTime = waitTime;
@@ -278,7 +278,7 @@ export class MovingPlatform {
 
   update(deltaTime) {
     const { Body } = M();
-    
+
     if (this.isWaiting) {
       this.waitTimer += deltaTime;
       if (this.waitTimer >= this.waitTime) {
@@ -314,7 +314,7 @@ export class MovingPlatform {
 
 export function checkGrounded(player, engine) {
   const { Query } = M();
-  
+
   const feetSensor = player.parts.find((p) => p.label === 'finn_feet');
   if (!feetSensor) return false;
 
@@ -333,7 +333,7 @@ export function checkGrounded(player, engine) {
 
 export function updateActiveRegion(engine, playerPos) {
   const { Sleeping } = M();
-  
+
   const activationRadius = 800;
 
   for (const body of engine.world.bodies) {
@@ -395,7 +395,7 @@ export class PlayerController {
 
   update(deltaTime) {
     const { Body } = M();
-    
+
     this.isGrounded = checkGrounded(this.player, this.engine);
 
     if (this.isGrounded) {
@@ -431,19 +431,23 @@ export class PlayerController {
 
   moveLeft() {
     const { Body } = M();
-    const force = this.isGrounded ? PLAYER_PHYSICS.acceleration : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
+    const force = this.isGrounded
+      ? PLAYER_PHYSICS.acceleration
+      : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: -force, y: 0 });
   }
 
   moveRight() {
     const { Body } = M();
-    const force = this.isGrounded ? PLAYER_PHYSICS.acceleration : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
+    const force = this.isGrounded
+      ? PLAYER_PHYSICS.acceleration
+      : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: force, y: 0 });
   }
 
   jump() {
     const { Body } = M();
-    
+
     if (this.coyoteTime > 0 && this.player.canJump) {
       Body.setVelocity(this.player, { x: this.player.velocity.x, y: PLAYER_PHYSICS.jumpForce });
       this.player.canJump = false;
@@ -524,14 +528,17 @@ export class PlayerController {
 
   takeDamage(amount, knockback = { x: 0, y: 0 }) {
     const { Body } = M();
-    
+
     if (this.parryWindow > 0) {
       this.audioManager?.playSFX('parry_success');
       return { parried: true };
     }
 
     this.gameState.takeDamage(amount);
-    Body.applyForce(this.player, this.player.position, { x: knockback.x * 0.1, y: knockback.y * 0.1 });
+    Body.applyForce(this.player, this.player.position, {
+      x: knockback.x * 0.1,
+      y: knockback.y * 0.1,
+    });
     this.audioManager?.playSFX('player_hit');
 
     return { parried: false };

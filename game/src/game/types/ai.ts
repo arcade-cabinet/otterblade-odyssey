@@ -1,12 +1,12 @@
 /**
  * YUKA AI Type Definitions
- * 
+ *
  * Type definitions for YUKA AI entities and behaviors
  * Used for enemy pathfinding and navigation
  */
 
-import type * as YUKA from 'yuka';
 import type * as Matter from 'matter-js';
+import type * as YUKA from 'yuka';
 import type { EnemyAIState, EnemyBehavior } from './entities';
 
 /**
@@ -16,7 +16,7 @@ export interface EnemyVehicle extends YUKA.Vehicle {
   // AI state
   aiState: EnemyAIState;
   behavior: EnemyBehavior;
-  
+
   // Combat
   hp: number;
   maxHp: number;
@@ -24,19 +24,19 @@ export interface EnemyVehicle extends YUKA.Vehicle {
   attackRange: number;
   attackCooldown: number;
   lastAttackTime: number;
-  
+
   // Detection
   alertRadius: number;
   detectionRadius: number;
-  
+
   // Target
   target: Matter.Body | null;
   targetPosition: YUKA.Vector3 | null;
-  
+
   // Patrol
   patrolPoints: YUKA.Vector3[];
   currentPatrolIndex: number;
-  
+
   // Physics link
   matterBody: Matter.Body;
   entityId: string;
@@ -50,10 +50,10 @@ export interface AIBehaviorConfig {
   maxForce: number;
   mass: number;
   updateOrientation: boolean;
-  
+
   // Steering behaviors
   arriveDeceleration?: YUKA.Vector3;
-  
+
   // Pathfinding
   usePathfinding: boolean;
   pathUpdateInterval: number;
@@ -65,10 +65,10 @@ export interface AIBehaviorConfig {
 export interface AIStateMachine {
   currentState: EnemyAIState;
   previousState: EnemyAIState | null;
-  
+
   update(deltaTime: number): void;
   changeState(newState: EnemyAIState): void;
-  
+
   // State handlers
   onEnterState?(state: EnemyAIState): void;
   onExitState?(state: EnemyAIState): void;
@@ -82,18 +82,18 @@ export interface AIStateMachine {
 export interface AIManager {
   time: YUKA.Time;
   entityManager: YUKA.EntityManager;
-  
+
   // Entity management
   register(vehicle: EnemyVehicle): void;
   unregister(vehicle: EnemyVehicle): void;
-  
+
   // Update
   update(deltaTime: number): void;
-  
+
   // Target management
   setTarget(entityId: string, target: Matter.Body): void;
   clearTarget(entityId: string): void;
-  
+
   // Pathfinding
   findPath(start: YUKA.Vector3, end: YUKA.Vector3): YUKA.Vector3[] | null;
 }
@@ -101,7 +101,7 @@ export interface AIManager {
 /**
  * Steering behavior types
  */
-export type SteeringBehaviorType = 
+export type SteeringBehaviorType =
   | 'seek'
   | 'flee'
   | 'arrive'
@@ -117,7 +117,7 @@ export interface SteeringBehaviorConfig {
   type: SteeringBehaviorType;
   weight?: number;
   enabled: boolean;
-  
+
   // Behavior-specific config
   arriveRadius?: number;
   fleeRadius?: number;
@@ -132,7 +132,7 @@ export interface SteeringBehaviorConfig {
 export interface NavigationMesh {
   graph: YUKA.Graph;
   regions: YUKA.Polygon[];
-  
+
   findPath(start: YUKA.Vector3, end: YUKA.Vector3): YUKA.Vector3[];
   clampToMesh(position: YUKA.Vector3): YUKA.Vector3;
 }
@@ -143,13 +143,13 @@ export interface NavigationMesh {
 export interface PerceptionSystem {
   // Vision
   canSee(observer: YUKA.Vector3, target: YUKA.Vector3, obstacles: Matter.Body[]): boolean;
-  
+
   // Hearing
   canHear(listener: YUKA.Vector3, sound: { position: YUKA.Vector3; volume: number }): boolean;
-  
+
   // Memory
   lastSeenPosition: Map<string, { position: YUKA.Vector3; time: number }>;
-  
+
   update(deltaTime: number): void;
 }
 
@@ -163,9 +163,9 @@ export interface BossAIConfig extends AIBehaviorConfig {
     attackPattern: string;
     speedMultiplier: number;
   }>;
-  
+
   currentPhase: number;
-  
+
   // Special attacks
   specialAttacks: Array<{
     id: string;

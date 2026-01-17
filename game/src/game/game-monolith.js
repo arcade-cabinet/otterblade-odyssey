@@ -2,7 +2,7 @@
  * OTTERBLADE ODYSSEY - GAME MONOLITH
  * Complete game engine in single file for optimal JavaScript performance
  * ~4000 lines: Physics, AI, Systems, Controllers, Factories, Rendering
- * 
+ *
  * Architecture: Vanilla JS monolith > TypeScript micro-modules
  * Minifies well, loads fast, zero import complexity
  */
@@ -17,7 +17,7 @@ export async function initializeGame() {
   if (typeof window === 'undefined') {
     throw new Error('Game only runs in browser');
   }
-  
+
   if (!Matter) {
     console.log('[Game] Loading Matter.js dynamically...');
     Matter = (await import('matter-js')).default;
@@ -26,7 +26,7 @@ export async function initializeGame() {
   } else {
     console.log('[Game] Matter.js already initialized');
   }
-  
+
   return Matter;
 }
 
@@ -35,7 +35,9 @@ function M() {
   if (!Matter) {
     console.error('[Game] ❌ Matter.js not initialized! Call initializeGame() first.');
     console.trace('Stack trace for Matter.js access before initialization:');
-    throw new Error('Matter.js not initialized. Call initializeGame() and await it before using game functions.');
+    throw new Error(
+      'Matter.js not initialized. Call initializeGame() and await it before using game functions.'
+    );
   }
   return Matter;
 }
@@ -44,8 +46,8 @@ function M() {
 // IMPORTS - Only external dependencies (YUKA, Howler)
 // ============================================================================
 
-import { Vector3, Vehicle, StateMachine, State } from 'yuka';
 import { Howl, Howler } from 'howler';
+import { Vector3, Vehicle } from 'yuka';
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -103,11 +105,11 @@ export function createPhysicsEngine() {
 
 export function createFinnBody(x, y) {
   const { Bodies, Body } = M();
-  
+
   const torso = Bodies.rectangle(0, 0, 28, 40, { label: 'finn_torso' });
   const head = Bodies.circle(0, -20, 12, { label: 'finn_head' });
   const feet = Bodies.rectangle(0, 24, 20, 8, { label: 'finn_feet', isSensor: true });
-  
+
   const finn = Body.create({
     parts: [torso, head, feet],
     friction: 0.3,
@@ -117,34 +119,34 @@ export function createFinnBody(x, y) {
     label: 'player',
     collisionFilter: {
       category: COLLISION_GROUPS.PLAYER,
-      mask: 0xFFFF,
+      mask: 0xffff,
     },
   });
-  
+
   Body.setPosition(finn, { x, y });
   finn.isGrounded = false;
   finn.canJump = true;
-  
+
   return finn;
 }
 
 export function createPlatform(config) {
   const { Bodies } = M();
   const { x, y, width, height, type = 'stone' } = config;
-  
+
   const frictions = { stone: 0.8, wood: 0.6, ice: 0.05, moss: 0.9 };
-  
+
   return Bodies.rectangle(x, y, width, height, {
     isStatic: true,
     label: `platform_${type}`,
     friction: frictions[type] || 0.8,
-    collisionFilter: { category: COLLISION_GROUPS.PLATFORM, mask: 0xFFFF },
+    collisionFilter: { category: COLLISION_GROUPS.PLATFORM, mask: 0xffff },
   });
 }
 
 export function checkGrounded(player, engine) {
   const { Query } = M();
-  
+
   const feetSensor = player.parts.find((p) => p.label === 'finn_feet');
   if (!feetSensor) return false;
 
@@ -185,7 +187,7 @@ export class PlayerController {
 
   update(deltaTime) {
     const { Body } = M();
-    
+
     this.isGrounded = checkGrounded(this.player, this.engine);
 
     if (this.isGrounded) {
@@ -222,19 +224,23 @@ export class PlayerController {
 
   moveLeft() {
     const { Body } = M();
-    const force = this.isGrounded ? PLAYER_PHYSICS.acceleration : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
+    const force = this.isGrounded
+      ? PLAYER_PHYSICS.acceleration
+      : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: -force, y: 0 });
   }
 
   moveRight() {
     const { Body } = M();
-    const force = this.isGrounded ? PLAYER_PHYSICS.acceleration : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
+    const force = this.isGrounded
+      ? PLAYER_PHYSICS.acceleration
+      : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: force, y: 0 });
   }
 
   jump() {
     const { Body } = M();
-    
+
     if (this.coyoteTime > 0 && this.player.canJump) {
       Body.setVelocity(this.player, { x: this.player.velocity.x, y: PLAYER_PHYSICS.jumpForce });
       this.player.canJump = false;
@@ -263,32 +269,35 @@ export class PlayerController {
 
   createAttackHitbox(attackDef) {
     const { Bodies } = M();
-    
+
     const facing = this.player.velocity.x >= 0 ? 1 : -1;
     const x = this.player.position.x + attackDef.offsetX * facing;
     const y = this.player.position.y + attackDef.offsetY;
-    
+
     const hitbox = Bodies.rectangle(x, y, attackDef.width, attackDef.height, {
       isSensor: true,
       label: 'attack_hitbox',
     });
-    
+
     hitbox.damage = attackDef.damage;
     hitbox.knockback = { x: attackDef.kb.x * facing, y: attackDef.kb.y };
-    
+
     return hitbox;
   }
 
   takeDamage(amount, knockback = { x: 0, y: 0 }) {
     const { Body } = M();
-    
+
     if (this.parryWindow > 0) {
       this.audioManager?.playSFX('parry_success');
       return { parried: true };
     }
 
     this.gameState.takeDamage(amount);
-    Body.applyForce(this.player, this.player.position, { x: knockback.x * 0.1, y: knockback.y * 0.1 });
+    Body.applyForce(this.player, this.player.position, {
+      x: knockback.x * 0.1,
+      y: knockback.y * 0.1,
+    });
     this.audioManager?.playSFX('player_hit');
 
     return { parried: false };
@@ -361,7 +370,7 @@ export const audioManager = new AudioManager();
 export class InputManager {
   constructor() {
     if (typeof window === 'undefined') return; // SSR guard
-    
+
     this.keys = {};
     this.gamepad = null;
     this.deadzone = 0.15;
@@ -395,7 +404,7 @@ export class InputManager {
 
   update() {
     const gamepads = navigator.getGamepads?.();
-    if (gamepads && gamepads[0]) {
+    if (gamepads?.[0]) {
       this.gamepad = gamepads[0];
     }
   }
@@ -435,7 +444,7 @@ export class AIManager {
     enemy.onDeath = config.onDeath;
     enemy.playerTarget = null;
     enemy.state = 'patrol';
-    
+
     this.entities.set(id, enemy);
     return enemy;
   }
@@ -452,7 +461,7 @@ export class AIManager {
     return npc;
   }
 
-  update(deltaTime) {
+  update(_deltaTime) {
     for (const [id, enemy] of this.entities) {
       if (!enemy.playerTarget) continue;
 
@@ -493,9 +502,9 @@ export const aiManager = new AIManager();
 // GAME INITIALIZATION FROM MANIFESTS
 // ============================================================================
 
-export function initializeChapter(chapterId, manifest, engine, gameState) {
+export function initializeChapter(_chapterId, manifest, engine, _gameState) {
   const { World, Bodies } = M();
-  
+
   const platforms = [];
   const enemies = [];
   const npcs = [];
@@ -539,17 +548,11 @@ export function initializeChapter(chapterId, manifest, engine, gameState) {
     for (const encounter of manifest.encounters) {
       if (encounter.enemies) {
         for (const enemyDef of encounter.enemies) {
-          const enemyBody = Bodies.rectangle(
-            enemyDef.spawnPoint.x,
-            enemyDef.spawnPoint.y,
-            40,
-            50,
-            {
-              label: 'enemy',
-              friction: 0.1,
-              frictionAir: 0.02,
-            }
-          );
+          const enemyBody = Bodies.rectangle(enemyDef.spawnPoint.x, enemyDef.spawnPoint.y, 40, 50, {
+            label: 'enemy',
+            friction: 0.1,
+            frictionAir: 0.02,
+          });
           World.add(engine.world, enemyBody);
 
           const enemyAI = aiManager.addEnemy(enemyDef.id, {
@@ -582,14 +585,7 @@ export function initializeChapter(chapterId, manifest, engine, gameState) {
 // ============================================================================
 
 export function createGameLoop(params) {
-  const {
-    canvas,
-    ctx,
-    engine,
-    player,
-    playerController,
-    gameState,
-  } = params;
+  const { canvas, ctx, engine, player, playerController, gameState } = params;
 
   let lastTime = performance.now();
   let animationFrameId = null;
@@ -711,12 +707,15 @@ export class Camera {
   follow(target, bounds = null) {
     this.targetX = target.position.x - this.canvas.width / 2;
     this.targetY = target.position.y - this.canvas.height / 2;
-    
+
     if (bounds) {
       this.targetX = Math.max(bounds.minX, Math.min(bounds.maxX - this.canvas.width, this.targetX));
-      this.targetY = Math.max(bounds.minY, Math.min(bounds.maxY - this.canvas.height, this.targetY));
+      this.targetY = Math.max(
+        bounds.minY,
+        Math.min(bounds.maxY - this.canvas.height, this.targetY)
+      );
     }
-    
+
     this.x += (this.targetX - this.x) * this.smoothing;
     this.y += (this.targetY - this.y) * this.smoothing;
   }
@@ -736,23 +735,27 @@ export class Camera {
  * Ported from POC otterblade_odyssey.html lines 575-818
  * Full character with tail wag, breathing, vest, Otterblade, warmth aura
  */
-export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, warmth: 100, maxWarmth: 100, animFrame: 0 }) {
+export function renderFinn(
+  ctx,
+  body,
+  state = { animation: 'idle', facing: 1, warmth: 100, maxWarmth: 100, animFrame: 0 }
+) {
   const { position, angle } = body;
   const { animation, facing, warmth, maxWarmth, animFrame } = state;
-  
+
   ctx.save();
   ctx.translate(position.x, position.y);
   if (facing < 0) ctx.scale(-1, 1);
-  
+
   const frame = Math.floor(animFrame / 10) % 4;
   const breathe = Math.sin(animFrame * 0.05) * 2;
-  
+
   // Shadow
   ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
   ctx.beginPath();
   ctx.ellipse(0, 28, 20, 6, 0, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Glow aura (warmth indicator)
   const warmthGlow = warmth / maxWarmth;
   const glowGradient = ctx.createRadialGradient(0, -10, 5, 0, -10, 40);
@@ -762,12 +765,12 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.beginPath();
   ctx.arc(0, -10, 40, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Tail with wag animation
   ctx.fillStyle = '#8B6F47';
   ctx.strokeStyle = '#6B5D4F';
   ctx.lineWidth = 2;
-  const tailWag = Math.sin(frame * Math.PI / 2) * 8;
+  const tailWag = Math.sin((frame * Math.PI) / 2) * 8;
   ctx.beginPath();
   ctx.moveTo(-8, 10);
   ctx.quadraticCurveTo(-20 + tailWag, 15, -25, 20);
@@ -776,11 +779,11 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  
+
   // Back leg with walking animation
   ctx.fillStyle = '#8B6F47';
   if (animation === 'walking') {
-    const legSwing = Math.sin(frame * Math.PI / 2 + Math.PI) * 8;
+    const legSwing = Math.sin((frame * Math.PI) / 2 + Math.PI) * 8;
     ctx.fillRect(-12 - legSwing, 12, 7, 16);
     ctx.beginPath();
     ctx.arc(-8 - legSwing, 28, 4, 0, Math.PI * 2);
@@ -791,7 +794,7 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
     ctx.arc(-8, 28, 4, 0, Math.PI * 2);
     ctx.fill();
   }
-  
+
   // Body (otter torso) with breathing
   ctx.fillStyle = '#8B6F47';
   ctx.strokeStyle = '#6B5D4F';
@@ -800,13 +803,13 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.ellipse(0, 0 + breathe, 16, 22, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
-  
+
   // Chest fur (lighter tan)
   ctx.fillStyle = '#D4A574';
   ctx.beginPath();
   ctx.ellipse(2, 2 + breathe, 10, 15, 0, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Leather vest
   ctx.fillStyle = '#654321';
   ctx.beginPath();
@@ -816,17 +819,17 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.lineTo(10, -8 + breathe);
   ctx.closePath();
   ctx.fill();
-  
+
   // Belt with golden buckle
   ctx.fillStyle = '#5D4E37';
   ctx.fillRect(-10, 8 + breathe, 20, 4);
   ctx.fillStyle = '#F4D03F';
   ctx.fillRect(-2, 8 + breathe, 4, 4);
-  
+
   // Front leg with walking animation
   ctx.fillStyle = '#8B6F47';
   if (animation === 'walking') {
-    const legSwing = Math.sin(frame * Math.PI / 2) * 8;
+    const legSwing = Math.sin((frame * Math.PI) / 2) * 8;
     ctx.fillRect(5 + legSwing, 12, 7, 16);
     ctx.beginPath();
     ctx.arc(8 + legSwing, 28, 4, 0, Math.PI * 2);
@@ -837,7 +840,7 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
     ctx.arc(8, 28, 4, 0, Math.PI * 2);
     ctx.fill();
   }
-  
+
   // Head
   ctx.fillStyle = '#8B6F47';
   ctx.strokeStyle = '#6B5D4F';
@@ -846,19 +849,19 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.arc(0, -18 + breathe, 11, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
-  
+
   // Snout
   ctx.fillStyle = '#D4A574';
   ctx.beginPath();
   ctx.ellipse(8, -16 + breathe, 6, 5, -0.3, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Nose
   ctx.fillStyle = '#2C3E50';
   ctx.beginPath();
   ctx.arc(12, -16 + breathe, 2, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Whiskers
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.lineWidth = 1;
@@ -868,7 +871,7 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
     ctx.lineTo(18, -15 + i * 2 + breathe);
     ctx.stroke();
   }
-  
+
   // Eyes
   ctx.fillStyle = '#2C3E50';
   ctx.beginPath();
@@ -877,12 +880,12 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.beginPath();
   ctx.arc(3, -20 + breathe, 2.5, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Eye gleam
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.fillRect(-4, -21 + breathe, 1, 1);
   ctx.fillRect(2, -21 + breathe, 1, 1);
-  
+
   // Ears
   ctx.fillStyle = '#8B6F47';
   ctx.beginPath();
@@ -891,10 +894,10 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.beginPath();
   ctx.arc(7, -24 + breathe, 4, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Back arm
   ctx.fillStyle = '#8B6F47';
-  const armAngle = animation === 'walking' ? Math.sin(frame * Math.PI / 2 + Math.PI) * 0.3 : 0;
+  const armAngle = animation === 'walking' ? Math.sin((frame * Math.PI) / 2 + Math.PI) * 0.3 : 0;
   ctx.save();
   ctx.translate(-10, -5 + breathe);
   ctx.rotate(armAngle);
@@ -903,17 +906,17 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.arc(0, 15, 3, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
-  
+
   // The Otterblade (when attacking)
   if (animation === 'attacking') {
     ctx.save();
     ctx.translate(18, -8 + breathe);
     ctx.rotate(-Math.PI / 3);
-    
+
     // Blade glow
     ctx.shadowBlur = 12;
     ctx.shadowColor = '#E67E22';
-    
+
     // Blade with gradient
     const bladeGradient = ctx.createLinearGradient(0, -30, 0, 0);
     bladeGradient.addColorStop(0, '#ECF0F1');
@@ -921,29 +924,29 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
     bladeGradient.addColorStop(1, '#95A5A6');
     ctx.fillStyle = bladeGradient;
     ctx.fillRect(-3, -30, 6, 30);
-    
+
     // Blade edge gleam
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.fillRect(-1, -30, 2, 30);
-    
+
     // Everember glow on blade
     ctx.fillStyle = 'rgba(230, 126, 34, 0.5)';
     ctx.fillRect(-2, -30, 4, 15);
-    
+
     // Guard
     ctx.fillStyle = '#5D4E37';
     ctx.fillRect(-6, 0, 12, 3);
-    
+
     // Handle
     ctx.fillStyle = '#8B4513';
     ctx.fillRect(-2, 3, 4, 10);
-    
+
     // Pommel
     ctx.fillStyle = '#F4D03F';
     ctx.beginPath();
     ctx.arc(0, 13, 3, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Legacy marks on handle
     ctx.strokeStyle = '#2C3E50';
     ctx.lineWidth = 1;
@@ -953,15 +956,19 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
       ctx.lineTo(1, 5 + i * 2);
       ctx.stroke();
     }
-    
+
     ctx.shadowBlur = 0;
     ctx.restore();
   }
-  
+
   // Front arm
   ctx.fillStyle = '#8B6F47';
-  const frontArmAngle = animation === 'walking' ? Math.sin(frame * Math.PI / 2) * 0.3 : 
-                        animation === 'attacking' ? -Math.PI / 4 : 0;
+  const frontArmAngle =
+    animation === 'walking'
+      ? Math.sin((frame * Math.PI) / 2) * 0.3
+      : animation === 'attacking'
+        ? -Math.PI / 4
+        : 0;
   ctx.save();
   ctx.translate(10, -5 + breathe);
   ctx.rotate(frontArmAngle);
@@ -970,7 +977,7 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
   ctx.arc(0, 15, 3, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
-  
+
   // Roll indicator
   if (animation === 'rolling') {
     ctx.globalAlpha = 0.7;
@@ -981,7 +988,7 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
-  
+
   ctx.restore();
 }
 
@@ -993,12 +1000,12 @@ export function renderFinn(ctx, body, state = { animation: 'idle', facing: 1, wa
 export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 0 }) {
   const { position, angle } = body;
   const { enemyType, animFrame } = state;
-  
+
   ctx.save();
   ctx.translate(position.x, position.y);
-  
+
   const frame = Math.floor(animFrame / 15) % 3;
-  
+
   // Cold aura (all Galeborn have this)
   const coldGradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 30);
   coldGradient.addColorStop(0, 'rgba(93, 173, 226, 0.3)');
@@ -1007,31 +1014,31 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
   ctx.beginPath();
   ctx.arc(0, 0, 30, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Shadow
   ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   ctx.beginPath();
   ctx.ellipse(0, 20, 18, 5, 0, 0, Math.PI * 2);
   ctx.fill();
-  
+
   if (enemyType === 'scout') {
     // Galeborn Scout (Stoat/Weasel design)
     ctx.fillStyle = '#7F8C8D';
     ctx.strokeStyle = '#5D6D7E';
     ctx.lineWidth = 2;
-    
+
     // Body
     ctx.beginPath();
     ctx.ellipse(0, -5, 12, 18, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    
+
     // Head
     ctx.beginPath();
     ctx.ellipse(0, -20, 8, 10, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    
+
     // Ears
     ctx.beginPath();
     ctx.arc(-5, -26, 3, 0, Math.PI * 2);
@@ -1039,12 +1046,12 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.beginPath();
     ctx.arc(5, -26, 3, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Cold eyes (glowing blue)
     ctx.fillStyle = '#5DADE2';
     ctx.fillRect(-3, -21, 2, 3);
     ctx.fillRect(1, -21, 2, 3);
-    
+
     // Frost breath particles
     ctx.fillStyle = 'rgba(236, 240, 241, 0.5)';
     for (let i = 0; i < 3; i++) {
@@ -1052,7 +1059,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
       ctx.arc(8 + i * 4, -18 + Math.random() * 3, 2, 0, Math.PI * 2);
       ctx.fill();
     }
-    
+
     // Arms with spear
     ctx.strokeStyle = '#5D6D7E';
     ctx.lineWidth = 3;
@@ -1074,25 +1081,24 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.closePath();
     ctx.fill();
     ctx.restore();
-    
   } else if (enemyType === 'warrior') {
     // Galeborn Warrior (larger, more menacing)
     ctx.fillStyle = '#5D6D7E';
     ctx.strokeStyle = '#34495E';
     ctx.lineWidth = 2.5;
-    
+
     // Larger body
     ctx.beginPath();
     ctx.ellipse(0, -5, 16, 24, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    
+
     // Head
     ctx.beginPath();
     ctx.ellipse(0, -25, 10, 12, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    
+
     // Horned ears
     ctx.beginPath();
     ctx.moveTo(-7, -32);
@@ -1106,7 +1112,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.lineTo(5, -33);
     ctx.closePath();
     ctx.fill();
-    
+
     // Fierce cold eyes
     ctx.fillStyle = '#3498DB';
     ctx.shadowBlur = 8;
@@ -1114,7 +1120,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.fillRect(-4, -26, 3, 4);
     ctx.fillRect(1, -26, 3, 4);
     ctx.shadowBlur = 0;
-    
+
     // Ice crystals on body
     ctx.fillStyle = 'rgba(174, 214, 241, 0.6)';
     ctx.beginPath();
@@ -1129,7 +1135,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.lineTo(8, -5);
     ctx.closePath();
     ctx.fill();
-    
+
     // Large weapon
     ctx.strokeStyle = '#2C3E50';
     ctx.lineWidth = 4;
@@ -1149,25 +1155,24 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.closePath();
     ctx.fill();
     ctx.restore();
-    
   } else if (enemyType === 'boss') {
     // Galeborn Boss (massive, terrifying)
     ctx.fillStyle = '#34495E';
     ctx.strokeStyle = '#1A202C';
     ctx.lineWidth = 3;
-    
+
     // Massive body
     ctx.beginPath();
     ctx.ellipse(0, -5, 24, 32, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    
+
     // Large head
     ctx.beginPath();
     ctx.ellipse(0, -32, 14, 16, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    
+
     // Crown-like horns
     for (let i = -1; i <= 1; i++) {
       ctx.beginPath();
@@ -1177,7 +1182,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
       ctx.closePath();
       ctx.fill();
     }
-    
+
     // Piercing cold eyes with intense glow
     ctx.fillStyle = '#2980B9';
     ctx.shadowBlur = 15;
@@ -1185,12 +1190,12 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     ctx.fillRect(-6, -34, 4, 5);
     ctx.fillRect(2, -34, 4, 5);
     ctx.shadowBlur = 0;
-    
+
     // Eye gleam
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.fillRect(-5, -35, 2, 2);
     ctx.fillRect(3, -35, 2, 2);
-    
+
     // Frost armor plates
     ctx.fillStyle = 'rgba(189, 195, 199, 0.7)';
     ctx.strokeStyle = '#BDC3C7';
@@ -1204,7 +1209,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
       ctx.fill();
       ctx.stroke();
     }
-    
+
     // Frost breath (constant for boss)
     ctx.fillStyle = 'rgba(236, 240, 241, 0.6)';
     for (let i = 0; i < 5; i++) {
@@ -1212,7 +1217,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
       ctx.arc(12 + i * 5, -30 + Math.random() * 4, 3, 0, Math.PI * 2);
       ctx.fill();
     }
-    
+
     // Massive clawed arms
     ctx.strokeStyle = '#1A202C';
     ctx.lineWidth = 6;
@@ -1235,7 +1240,7 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
     }
     ctx.restore();
   }
-  
+
   ctx.restore();
 }
 
@@ -1244,11 +1249,11 @@ export function renderEnemy(ctx, body, state = { enemyType: 'scout', animFrame: 
  */
 export function renderPlatform(ctx, body, texture = 'stone') {
   const vertices = body.vertices;
-  
+
   ctx.fillStyle = texture === 'wood' ? '#8B7355' : '#696969';
   ctx.strokeStyle = '#333';
   ctx.lineWidth = 2;
-  
+
   ctx.beginPath();
   ctx.moveTo(vertices[0].x, vertices[0].y);
   for (let i = 1; i < vertices.length; i++) {
@@ -1257,7 +1262,7 @@ export function renderPlatform(ctx, body, texture = 'stone') {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  
+
   // Add texture lines
   if (texture === 'wood') {
     ctx.strokeStyle = '#654321';
@@ -1277,22 +1282,22 @@ export function renderPlatform(ctx, body, texture = 'stone') {
  */
 export function renderShard(ctx, position, time) {
   const pulse = Math.sin(time * 0.005) * 0.2 + 1;
-  
+
   ctx.save();
   ctx.translate(position.x, position.y);
   ctx.scale(pulse, pulse);
-  
+
   // Glow effect
   const gradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 15);
   gradient.addColorStop(0, '#FFD700');
   gradient.addColorStop(0.5, '#FFA500');
   gradient.addColorStop(1, 'rgba(255, 165, 0, 0)');
-  
+
   ctx.fillStyle = gradient;
   ctx.beginPath();
   ctx.arc(0, 0, 15, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Crystal shape
   ctx.fillStyle = '#FFD700';
   ctx.beginPath();
@@ -1302,11 +1307,11 @@ export function renderShard(ctx, position, time) {
   ctx.lineTo(-6, 0);
   ctx.closePath();
   ctx.fill();
-  
+
   ctx.strokeStyle = '#FFA500';
   ctx.lineWidth = 2;
   ctx.stroke();
-  
+
   ctx.restore();
 }
 
@@ -1321,7 +1326,8 @@ export class ParticleSystem {
   emit(x, y, count, config = {}) {
     for (let i = 0; i < count; i++) {
       this.particles.push({
-        x, y,
+        x,
+        y,
         vx: (Math.random() - 0.5) * (config.speed || 2),
         vy: (Math.random() - 0.5) * (config.speed || 2) - (config.gravity || 0.5),
         life: config.life || 60,
@@ -1339,7 +1345,7 @@ export class ParticleSystem {
       p.y += p.vy;
       p.vy += 0.1; // gravity
       p.life--;
-      
+
       if (p.life <= 0) {
         this.particles.splice(i, 1);
       }
@@ -1347,7 +1353,7 @@ export class ParticleSystem {
   }
 
   render(ctx) {
-    this.particles.forEach(p => {
+    this.particles.forEach((p) => {
       const alpha = p.life / p.maxLife;
       ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
       ctx.beginPath();
@@ -1372,12 +1378,12 @@ export class NPC {
     this.state = config.initialState || 'idle';
   }
 
-  interact(player) {
+  interact(_player) {
     if (!this.isInteractable) return null;
-    
+
     const dialogue = this.dialogue[this.currentDialogueIndex];
     this.currentDialogueIndex = (this.currentDialogueIndex + 1) % this.dialogue.length;
-    
+
     return dialogue;
   }
 
@@ -1390,30 +1396,30 @@ export class NPC {
 
   render(ctx) {
     const { position } = this.body;
-    
+
     ctx.save();
     ctx.translate(position.x, position.y);
-    
+
     // Draw NPC (friendly woodland creature)
     ctx.fillStyle = '#CD853F';
     ctx.beginPath();
     ctx.arc(0, 0, 15, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Face
     ctx.fillStyle = '#000';
     ctx.beginPath();
     ctx.arc(-5, -3, 2, 0, Math.PI * 2);
     ctx.arc(5, -3, 2, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Speech indicator
     if (this.isInteractable) {
       ctx.fillStyle = '#FFD700';
       ctx.font = '20px Arial';
       ctx.fillText('💬', 0, -25);
     }
-    
+
     ctx.restore();
   }
 }
@@ -1433,9 +1439,9 @@ export class Collectible {
 
   collect(gameState) {
     if (this.collected) return;
-    
+
     this.collected = true;
-    
+
     switch (this.type) {
       case 'shard':
         // Handled by game state
@@ -1447,15 +1453,15 @@ export class Collectible {
         gameState.restoreWarmth(this.value);
         break;
     }
-    
+
     return this.type;
   }
 
   render(ctx) {
     if (this.collected) return;
-    
+
     const time = Date.now() - this.spawnTime;
-    
+
     switch (this.type) {
       case 'shard':
         renderShard(ctx, this.position, time);
@@ -1492,31 +1498,25 @@ export class Trigger {
   check(player, gameState) {
     if (this.triggered && this.once) return null;
     if (!this.condition(gameState)) return null;
-    
+
     const { position } = player;
     const { x, y, width, height } = this.bounds;
-    
-    if (position.x >= x && position.x <= x + width &&
-        position.y >= y && position.y <= y + height) {
+
+    if (position.x >= x && position.x <= x + width && position.y >= y && position.y <= y + height) {
       this.triggered = true;
       return this.action;
     }
-    
+
     return null;
   }
 
   render(ctx, debug = false) {
     if (!debug) return;
-    
+
     ctx.strokeStyle = this.triggered ? '#48BB78' : '#F6AD55';
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
-    ctx.strokeRect(
-      this.bounds.x,
-      this.bounds.y,
-      this.bounds.width,
-      this.bounds.height
-    );
+    ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
     ctx.setLineDash([]);
   }
 }
@@ -1531,44 +1531,42 @@ export function buildLevel(manifest, engine) {
   const npcs = [];
   const collectibles = [];
   const triggers = [];
-  
+
   // Build platforms from manifest
   if (manifest.level?.platforms) {
-    manifest.level.platforms.forEach(platformConfig => {
+    manifest.level.platforms.forEach((platformConfig) => {
       const platform = createPlatform(platformConfig);
       platforms.push(platform);
       World.add(engine.world, platform);
     });
   }
-  
+
   // Build walls
   if (manifest.level?.walls) {
-    manifest.level.walls.forEach(wallConfig => {
+    manifest.level.walls.forEach((wallConfig) => {
       const wall = createPlatform({ ...wallConfig, isWall: true });
       platforms.push(wall);
       World.add(engine.world, wall);
     });
   }
-  
+
   // Create NPCs
   if (manifest.npcs) {
-    manifest.npcs.forEach(npcConfig => {
+    manifest.npcs.forEach((npcConfig) => {
       const { Bodies } = M();
-      const body = Bodies.circle(
-        npcConfig.position.x,
-        npcConfig.position.y,
-        15,
-        { isStatic: true, label: 'npc' }
-      );
+      const body = Bodies.circle(npcConfig.position.x, npcConfig.position.y, 15, {
+        isStatic: true,
+        label: 'npc',
+      });
       const npc = new NPC(npcConfig, body);
       npcs.push(npc);
       World.add(engine.world, body);
     });
   }
-  
+
   // Create collectibles
   if (manifest.collectibles) {
-    manifest.collectibles.forEach(collectConfig => {
+    manifest.collectibles.forEach((collectConfig) => {
       const collectible = new Collectible(
         collectConfig.type,
         collectConfig.position,
@@ -1577,15 +1575,15 @@ export function buildLevel(manifest, engine) {
       collectibles.push(collectible);
     });
   }
-  
+
   // Create triggers
   if (manifest.triggers) {
-    manifest.triggers.forEach(triggerConfig => {
+    manifest.triggers.forEach((triggerConfig) => {
       const trigger = new Trigger(triggerConfig);
       triggers.push(trigger);
     });
   }
-  
+
   return { platforms, npcs, collectibles, triggers };
 }
 
@@ -1611,14 +1609,14 @@ export class EnemyAI {
     this.attackCooldown = 1000;
   }
 
-  update(deltaTime) {
+  update(_deltaTime) {
     if (this.hp <= 0) {
       this.state = 'dead';
       return;
     }
-    
+
     const playerDist = this.getPlayerDistance();
-    
+
     // State machine
     switch (this.state) {
       case 'patrol':
@@ -1628,7 +1626,7 @@ export class EnemyAI {
           this.patrol();
         }
         break;
-        
+
       case 'chase':
         if (playerDist > this.detectionRadius * 1.5) {
           this.state = 'patrol';
@@ -1638,7 +1636,7 @@ export class EnemyAI {
           this.chasePlayer();
         }
         break;
-        
+
       case 'attack':
         if (playerDist > this.attackRadius) {
           this.state = 'chase';
@@ -1659,34 +1657,34 @@ export class EnemyAI {
   patrol() {
     // Simple patrol movement
     if (this.patrolPoints.length === 0) return;
-    
+
     const target = this.patrolPoints[this.currentPatrolIndex];
     const dx = target.x - this.body.position.x;
-    
+
     if (Math.abs(dx) < 10) {
       this.currentPatrolIndex = (this.currentPatrolIndex + 1) % this.patrolPoints.length;
     } else {
       const { Body } = M();
       Body.setVelocity(this.body, {
         x: dx > 0 ? 1 : -1,
-        y: this.body.velocity.y
+        y: this.body.velocity.y,
       });
     }
   }
 
   chasePlayer() {
     if (!this.playerRef) return;
-    
+
     const dx = this.playerRef.position.x - this.body.position.x;
     const dy = this.playerRef.position.y - this.body.position.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    
+
     if (dist > 0) {
       const { Body } = M();
       const speed = this.type === 'boss' ? 2 : this.type === 'warrior' ? 1.5 : 1.2;
       Body.setVelocity(this.body, {
         x: (dx / dist) * speed,
-        y: this.body.velocity.y
+        y: this.body.velocity.y,
       });
     }
   }
@@ -1694,7 +1692,7 @@ export class EnemyAI {
   attack() {
     const now = Date.now();
     if (now - this.lastAttackTime < this.attackCooldown) return;
-    
+
     this.lastAttackTime = now;
     return { damage: this.damage, position: this.body.position };
   }
@@ -1709,13 +1707,13 @@ export class EnemyAI {
 
   render(ctx, animFrame = 0) {
     if (this.state === 'dead') return;
-    
+
     renderEnemy(ctx, this.body, { enemyType: this.type, animFrame });
-    
+
     // Health bar
     const { position } = this.body;
     const hpPercent = this.hp / this.maxHp;
-    
+
     ctx.fillStyle = '#E53E3E';
     ctx.fillRect(position.x - 15, position.y - 30, 30, 3);
     ctx.fillStyle = '#48BB78';
@@ -1745,7 +1743,7 @@ export class AnimationController {
 
   play(name, loop = true) {
     if (this.currentAnim === name) return;
-    
+
     this.currentAnim = name;
     this.frame = 0;
     this.frameTime = 0;
@@ -1754,16 +1752,16 @@ export class AnimationController {
 
   update(deltaTime) {
     if (!this.currentAnim) return;
-    
+
     const anim = this.animations.get(this.currentAnim);
     if (!anim) return;
-    
+
     this.frameTime += deltaTime;
-    
+
     if (this.frameTime >= anim.frameDuration) {
       this.frameTime = 0;
       this.frame++;
-      
+
       if (this.frame >= anim.frames.length) {
         if (this.loop) {
           this.frame = 0;
@@ -1798,11 +1796,11 @@ export class ParallaxLayer {
   render(ctx, cameraX, canvasWidth, canvasHeight) {
     // Calculate parallax offset
     const parallaxX = cameraX * this.speed;
-    
+
     if (this.image) {
       // Image-based layer (when we have assets)
       ctx.drawImage(this.image, -parallaxX + this.offset, this.y);
-      
+
       if (this.repeat && this.image.width < canvasWidth + parallaxX) {
         ctx.drawImage(this.image, -parallaxX + this.offset + this.image.width, this.y);
       }
@@ -1827,7 +1825,7 @@ export class ParallaxBackground {
   }
 
   render(ctx, camera, canvas) {
-    this.layers.forEach(layer => {
+    this.layers.forEach((layer) => {
       layer.render(ctx, camera.x, canvas.width, canvas.height);
     });
   }
@@ -1849,23 +1847,23 @@ export class Quest {
   }
 
   updateObjective(objectiveId, progress) {
-    const obj = this.objectives.find(o => o.id === objectiveId);
+    const obj = this.objectives.find((o) => o.id === objectiveId);
     if (!obj) return false;
-    
+
     obj.current = Math.min(obj.required, progress);
-    
+
     if (obj.current >= obj.required) {
       obj.completed = true;
       this.currentObjective++;
-      
+
       if (this.currentObjective >= this.objectives.length) {
         this.completed = true;
         return { completed: true, quest: this };
       }
-      
+
       return { objectiveComplete: true, objective: obj };
     }
-    
+
     return { progress: obj.current / obj.required };
   }
 
@@ -1878,14 +1876,14 @@ export class Quest {
     ctx.font = '16px Arial';
     ctx.fillStyle = '#F4D03F';
     ctx.fillText(this.name, x, y);
-    
+
     const current = this.getCurrentObjective();
     if (current) {
       ctx.font = '14px Arial';
       ctx.fillStyle = '#FFF';
       ctx.fillText(`${current.description} (${current.current}/${current.required})`, x, y + 20);
     }
-    
+
     ctx.restore();
   }
 }
@@ -1907,14 +1905,14 @@ export class QuestManager {
   updateObjective(questId, objectiveId, progress) {
     const quest = this.quests.get(questId);
     if (!quest) return null;
-    
+
     const result = quest.updateObjective(objectiveId, progress);
-    
+
     if (result.completed) {
-      this.activeQuests = this.activeQuests.filter(q => q.id !== questId);
+      this.activeQuests = this.activeQuests.filter((q) => q.id !== questId);
       this.completedQuests.push(quest);
     }
-    
+
     return result;
   }
 
@@ -1938,7 +1936,7 @@ export class CinematicAction {
 
   update(deltaTime, context) {
     this.elapsed += deltaTime;
-    
+
     switch (this.type) {
       case 'camera':
         this.updateCamera(context.camera);
@@ -1956,18 +1954,18 @@ export class CinematicAction {
         this.updateEffect(context);
         break;
     }
-    
+
     if (this.elapsed >= this.duration) {
       this.completed = true;
     }
-    
+
     return this.completed;
   }
 
   updateCamera(camera) {
     const progress = Math.min(1, this.elapsed / this.duration);
     const eased = this.easeInOutCubic(progress);
-    
+
     camera.x = this.config.startX + (this.config.endX - this.config.startX) * eased;
     camera.y = this.config.startY + (this.config.endY - this.config.startY) * eased;
   }
@@ -1982,7 +1980,7 @@ export class CinematicAction {
   updateMove(context) {
     const progress = Math.min(1, this.elapsed / this.duration);
     const entity = context.entities.get(this.config.entityId);
-    
+
     if (entity) {
       const { Body } = M();
       Body.setPosition(entity.body, {
@@ -1994,24 +1992,19 @@ export class CinematicAction {
 
   updateEffect(context) {
     if (!this.triggered) {
-      context.particles.emit(
-        this.config.x,
-        this.config.y,
-        this.config.count || 10,
-        this.config
-      );
+      context.particles.emit(this.config.x, this.config.y, this.config.count || 10, this.config);
       this.triggered = true;
     }
   }
 
   easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
   }
 }
 
 export class CinematicSequence {
   constructor(actions) {
-    this.actions = actions.map(a => new CinematicAction(a.type, a));
+    this.actions = actions.map((a) => new CinematicAction(a.type, a));
     this.currentAction = 0;
     this.playing = false;
     this.completed = false;
@@ -2024,17 +2017,17 @@ export class CinematicSequence {
 
   update(deltaTime, context) {
     if (!this.playing || this.completed) return;
-    
+
     const action = this.actions[this.currentAction];
     if (!action) {
       this.completed = true;
       this.playing = false;
       return;
     }
-    
+
     if (action.update(deltaTime, context)) {
       this.currentAction++;
-      
+
       if (this.currentAction >= this.actions.length) {
         this.completed = true;
         this.playing = false;
@@ -2068,45 +2061,45 @@ export class CombatController {
 
   attack() {
     const now = Date.now();
-    
+
     if (this.attacking || now - this.lastAttackTime < this.attackCooldown) {
       return false;
     }
-    
+
     // Check combo
     if (now - this.lastComboTime < this.comboWindow) {
       this.comboCount++;
     } else {
       this.comboCount = 1;
     }
-    
+
     this.lastComboTime = now;
     this.lastAttackTime = now;
     this.attacking = true;
-    
+
     // Create attack hitbox
     const direction = this.entity.facingRight ? 1 : -1;
     const hitbox = {
-      x: this.entity.body.position.x + (30 * direction),
+      x: this.entity.body.position.x + 30 * direction,
       y: this.entity.body.position.y,
       width: 40,
       height: 40,
-      damage: 10 + (this.comboCount * 2),
+      damage: 10 + this.comboCount * 2,
       knockback: 5 + this.comboCount,
       lifetime: 150,
       direction,
     };
-    
+
     this.hitboxes.push(hitbox);
-    
+
     // Play attack sound
     this.audioManager?.playSound('sword_swing');
-    
+
     // Reset attacking after animation
     setTimeout(() => {
       this.attacking = false;
     }, 300);
-    
+
     return true;
   }
 
@@ -2118,21 +2111,22 @@ export class CombatController {
         this.hitboxes.splice(i, 1);
       }
     }
-    
+
     // Reset combo if window expired
     if (Date.now() - this.lastComboTime > this.comboWindow) {
       this.comboCount = 0;
     }
   }
 
-  checkHit(targetBody, targetRect) {
+  checkHit(_targetBody, targetRect) {
     for (const hitbox of this.hitboxes) {
       // Simple AABB collision
-      if (targetRect.x < hitbox.x + hitbox.width &&
-          targetRect.x + targetRect.width > hitbox.x &&
-          targetRect.y < hitbox.y + hitbox.height &&
-          targetRect.y + targetRect.height > hitbox.y) {
-        
+      if (
+        targetRect.x < hitbox.x + hitbox.width &&
+        targetRect.x + targetRect.width > hitbox.x &&
+        targetRect.y < hitbox.y + hitbox.height &&
+        targetRect.y + targetRect.height > hitbox.y
+      ) {
         return {
           damage: hitbox.damage,
           knockback: hitbox.knockback,
@@ -2140,15 +2134,15 @@ export class CombatController {
         };
       }
     }
-    
+
     return null;
   }
 
   renderDebug(ctx) {
     ctx.strokeStyle = '#FF0000';
     ctx.lineWidth = 2;
-    
-    this.hitboxes.forEach(hitbox => {
+
+    this.hitboxes.forEach((hitbox) => {
       ctx.strokeRect(
         hitbox.x - hitbox.width / 2,
         hitbox.y - hitbox.height / 2,
@@ -2175,7 +2169,7 @@ export class WeatherSystem {
     this.currentWeather = type;
     this.intensity = intensity;
     this.particles = [];
-    
+
     switch (type) {
       case 'rain':
         this.windSpeed = -0.5;
@@ -2193,7 +2187,7 @@ export class WeatherSystem {
 
   update(canvas) {
     const particleCount = Math.floor(100 * this.intensity);
-    
+
     // Add new particles
     while (this.particles.length < particleCount) {
       this.particles.push({
@@ -2203,13 +2197,13 @@ export class WeatherSystem {
         size: this.currentWeather === 'snow' ? 3 : 1,
       });
     }
-    
+
     // Update particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
       p.y += p.speed * this.intensity;
       p.x += this.windSpeed;
-      
+
       // Remove if off screen
       if (p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
         this.particles.splice(i, 1);
@@ -2219,38 +2213,38 @@ export class WeatherSystem {
 
   render(ctx, canvas) {
     if (this.currentWeather === 'clear') return;
-    
+
     ctx.save();
-    
+
     switch (this.currentWeather) {
       case 'rain':
       case 'storm':
         ctx.strokeStyle = 'rgba(174, 194, 224, 0.6)';
         ctx.lineWidth = 1;
-        this.particles.forEach(p => {
+        this.particles.forEach((p) => {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x + this.windSpeed * 2, p.y + 10);
           ctx.stroke();
         });
         break;
-        
+
       case 'snow':
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        this.particles.forEach(p => {
+        this.particles.forEach((p) => {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           ctx.fill();
         });
         break;
     }
-    
+
     // Storm lightning
     if (this.currentWeather === 'storm' && Math.random() < 0.001) {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-    
+
     ctx.restore();
   }
 }
@@ -2284,9 +2278,9 @@ export class DialogueBox {
 
   update(deltaTime) {
     if (!this.active || this.charIndex >= this.text.length) return;
-    
+
     this.lastCharTime += deltaTime;
-    
+
     if (this.lastCharTime >= this.typeSpeed) {
       this.lastCharTime = 0;
       this.displayedText += this.text[this.charIndex];
@@ -2308,31 +2302,31 @@ export class DialogueBox {
 
   render(ctx, canvas) {
     if (!this.active) return;
-    
+
     const boxHeight = 120;
     const boxY = canvas.height - boxHeight - 20;
-    
+
     // Background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(20, boxY, canvas.width - 40, boxHeight);
-    
+
     // Border
     ctx.strokeStyle = '#F4D03F';
     ctx.lineWidth = 3;
     ctx.strokeRect(20, boxY, canvas.width - 40, boxHeight);
-    
+
     // Speaker name
     if (this.speaker) {
       ctx.fillStyle = '#F4D03F';
       ctx.font = 'bold 18px Arial';
       ctx.fillText(this.speaker, 40, boxY + 30);
     }
-    
+
     // Dialogue text
     ctx.fillStyle = '#FFF';
     ctx.font = '16px Arial';
     this.wrapText(ctx, this.displayedText, 40, boxY + 55, canvas.width - 80, 20);
-    
+
     // Choices
     if (this.charIndex >= this.text.length && this.choices.length > 0) {
       ctx.font = '14px Arial';
@@ -2342,7 +2336,7 @@ export class DialogueBox {
         ctx.fillText(`${i + 1}. ${choice.text}`, 40, y);
       });
     }
-    
+
     // Continue indicator
     if (this.charIndex >= this.text.length && this.choices.length === 0) {
       ctx.fillStyle = '#F4D03F';
@@ -2355,20 +2349,20 @@ export class DialogueBox {
     const words = text.split(' ');
     let line = '';
     let lineY = y;
-    
-    words.forEach(word => {
-      const testLine = line + word + ' ';
+
+    words.forEach((word) => {
+      const testLine = `${line + word} `;
       const metrics = ctx.measureText(testLine);
-      
+
       if (metrics.width > maxWidth && line.length > 0) {
         ctx.fillText(line, x, lineY);
-        line = word + ' ';
+        line = `${word} `;
         lineY += lineHeight;
       } else {
         line = testLine;
       }
     });
-    
+
     ctx.fillText(line, x, lineY);
   }
 }
@@ -2431,7 +2425,7 @@ export class SaveManager {
     try {
       const data = localStorage.getItem(this.storageKey);
       if (!data) return null;
-      
+
       const saveData = JSON.parse(data);
       console.log('[Save] Game loaded successfully');
       return saveData;
@@ -2476,28 +2470,28 @@ export class Achievement {
 
   check(gameState) {
     if (this.unlocked) return false;
-    
+
     if (this.condition(gameState)) {
       this.unlocked = true;
       this.unlockedAt = Date.now();
       return true;
     }
-    
+
     return false;
   }
 
   render(ctx, x, y) {
     const size = 64;
-    
+
     // Background
     ctx.fillStyle = this.unlocked ? '#48BB78' : '#4A5568';
     ctx.fillRect(x, y, size, size);
-    
+
     // Border
     ctx.strokeStyle = this.unlocked ? '#F4D03F' : '#718096';
     ctx.lineWidth = 2;
     ctx.strokeRect(x, y, size, size);
-    
+
     // Icon
     if (this.unlocked || !this.hidden) {
       ctx.fillStyle = '#FFF';
@@ -2508,12 +2502,12 @@ export class Achievement {
       ctx.font = '32px Arial';
       ctx.fillText('?', x + 20, y + 45);
     }
-    
+
     // Name
     ctx.font = '12px Arial';
     ctx.fillStyle = '#FFF';
     ctx.fillText(this.name, x + size + 10, y + 20);
-    
+
     // Description
     if (this.unlocked || !this.hidden) {
       ctx.font = '10px Arial';
@@ -2528,7 +2522,7 @@ export class AchievementManager {
     this.achievements = [];
     this.unlockedAchievements = [];
     this.notificationQueue = [];
-    
+
     this.initializeAchievements();
   }
 
@@ -2582,7 +2576,7 @@ export class AchievementManager {
   }
 
   checkAchievements(gameState) {
-    this.achievements.forEach(achievement => {
+    this.achievements.forEach((achievement) => {
       if (achievement.check(gameState)) {
         this.unlockedAchievements.push(achievement);
         this.notificationQueue.push(achievement);
@@ -2635,14 +2629,11 @@ export class SoundEffectPlayer {
   }
 
   playPositional(id, position, listener, maxDistance = 500) {
-    const distance = Math.sqrt(
-      Math.pow(position.x - listener.x, 2) +
-      Math.pow(position.y - listener.y, 2)
-    );
+    const distance = Math.sqrt((position.x - listener.x) ** 2 + (position.y - listener.y) ** 2);
 
     if (distance > maxDistance) return null;
 
-    const volume = Math.max(0, 1 - (distance / maxDistance));
+    const volume = Math.max(0, 1 - distance / maxDistance);
     const pan = Math.max(-1, Math.min(1, (position.x - listener.x) / maxDistance));
 
     return this.play(id, { volume, pan });
@@ -2654,18 +2645,18 @@ export class SoundEffectPlayer {
     this.register('jump', { volume: 0.5 });
     this.register('land', { volume: 0.4 });
     this.register('dash', { volume: 0.6 });
-    
+
     // Combat
     this.register('sword_swing', { volume: 0.5 });
     this.register('sword_hit', { volume: 0.7 });
     this.register('enemy_hurt', { volume: 0.6 });
     this.register('enemy_death', { volume: 0.5 });
-    
+
     // Collectibles
     this.register('shard_collect', { volume: 0.7, pitch: 1.2 });
     this.register('health_pickup', { volume: 0.6 });
     this.register('checkpoint', { volume: 0.5 });
-    
+
     // Environment
     this.register('door_open', { volume: 0.5 });
     this.register('lever_pull', { volume: 0.6 });
@@ -2693,14 +2684,11 @@ export class PhysicsHelper {
   }
 
   static getVelocityMagnitude(body) {
-    return Math.sqrt(
-      body.velocity.x * body.velocity.x +
-      body.velocity.y * body.velocity.y
-    );
+    return Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
   }
 
   static limitVelocity(body, maxSpeed) {
-    const speed = this.getVelocityMagnitude(body);
+    const speed = PhysicsHelper.getVelocityMagnitude(body);
     if (speed > maxSpeed) {
       const { Body } = M();
       const scale = maxSpeed / speed;
@@ -2721,11 +2709,7 @@ export class PhysicsHelper {
 
   static raycast(engine, start, end) {
     const { Query } = M();
-    const bodies = Query.ray(
-      engine.world.bodies,
-      start,
-      end
-    );
+    const bodies = Query.ray(engine.world.bodies, start, end);
     return bodies;
   }
 
@@ -2733,7 +2717,7 @@ export class PhysicsHelper {
     const { Query } = M();
     const start = { x: body.position.x, y: body.position.y + 25 };
     const end = { x: body.position.x, y: body.position.y + 25 + checkDistance };
-    
+
     const collisions = Query.ray(engine.world.bodies, start, end);
     return collisions.length > 0 ? collisions[0] : null;
   }
@@ -2777,14 +2761,14 @@ export class MovingPlatform {
       const { Body } = M();
       const vx = (dx / dist) * this.speed;
       const vy = (dy / dist) * this.speed;
-      
+
       Body.setPosition(this.body, {
         x: this.body.position.x + vx,
         y: this.body.position.y + vy,
       });
 
       // Move passengers
-      this.passengers.forEach(passenger => {
+      this.passengers.forEach((passenger) => {
         Body.setPosition(passenger, {
           x: passenger.position.x + vx,
           y: passenger.position.y + vy,
@@ -2803,15 +2787,16 @@ export class MovingPlatform {
 
   render(ctx) {
     renderPlatform(ctx, this.body, 'wood');
-    
+
     // Debug: Show path
-    if (false) { // Set to true for debug
+    if (false) {
+      // Set to true for debug
       ctx.strokeStyle = '#F4D03F';
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
       ctx.moveTo(this.path[0].x, this.path[0].y);
-      this.path.forEach(point => {
+      this.path.forEach((point) => {
         ctx.lineTo(point.x, point.y);
       });
       ctx.stroke();
@@ -2840,7 +2825,7 @@ export class Hazard {
 
     const { Query } = M();
     const colliding = Query.collides(this.body, [player]);
-    
+
     if (colliding.length > 0) {
       const now = Date.now();
       if (now - this.lastDamageTime >= this.damageInterval) {
@@ -2866,11 +2851,11 @@ export class Hazard {
     ctx.save();
 
     switch (this.type) {
-      case 'spikes':
+      case 'spikes': {
         ctx.fillStyle = '#718096';
         ctx.strokeStyle = '#4A5568';
         ctx.lineWidth = 2;
-        
+
         // Draw base
         ctx.beginPath();
         ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -2880,12 +2865,12 @@ export class Hazard {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        
+
         // Draw spikes
         const width = Math.abs(vertices[1].x - vertices[0].x);
         const spikeCount = Math.floor(width / 20);
         for (let i = 0; i < spikeCount; i++) {
-          const x = vertices[0].x + (i * 20) + 10;
+          const x = vertices[0].x + i * 20 + 10;
           const y = vertices[0].y;
           ctx.beginPath();
           ctx.moveTo(x - 8, y);
@@ -2896,24 +2881,30 @@ export class Hazard {
           ctx.stroke();
         }
         break;
+      }
 
-      case 'fire':
+      case 'fire': {
         const flicker = Math.sin(this.animationTime * 0.01) * 0.2 + 0.8;
         const gradient = ctx.createRadialGradient(
-          position.x, position.y, 10,
-          position.x, position.y, 40
+          position.x,
+          position.y,
+          10,
+          position.x,
+          position.y,
+          40
         );
         gradient.addColorStop(0, `rgba(255, 200, 0, ${flicker})`);
         gradient.addColorStop(0.5, `rgba(255, 100, 0, ${flicker * 0.7})`);
         gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
-        
+
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(position.x, position.y, 40, 0, Math.PI * 2);
         ctx.fill();
         break;
+      }
 
-      case 'water':
+      case 'water': {
         ctx.fillStyle = 'rgba(64, 164, 223, 0.6)';
         ctx.beginPath();
         ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -2922,7 +2913,7 @@ export class Hazard {
         }
         ctx.closePath();
         ctx.fill();
-        
+
         // Wave effect
         const wave = Math.sin(this.animationTime * 0.003) * 2;
         ctx.strokeStyle = 'rgba(100, 200, 255, 0.8)';
@@ -2932,6 +2923,7 @@ export class Hazard {
         ctx.lineTo(vertices[1].x, vertices[1].y + wave);
         ctx.stroke();
         break;
+      }
     }
 
     ctx.restore();
@@ -3041,7 +3033,7 @@ export class TutorialHint {
     if (!this.shown || this.dismissed) return;
 
     ctx.save();
-    
+
     // Background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     const padding = 10;
@@ -3088,8 +3080,8 @@ export class TutorialManager {
     this.hints.push(new TutorialHint(config));
   }
 
-  checkTriggers(gameState, player) {
-    this.hints.forEach(hint => {
+  checkTriggers(_gameState, player) {
+    this.hints.forEach((hint) => {
       if (hint.shown || hint.dismissed) return;
 
       if (hint.trigger === 'proximity') {
@@ -3106,11 +3098,11 @@ export class TutorialManager {
     });
 
     // Remove dismissed hints
-    this.activeHints = this.activeHints.filter(h => !h.dismissed);
+    this.activeHints = this.activeHints.filter((h) => !h.dismissed);
   }
 
   render(ctx) {
-    this.activeHints.forEach(hint => hint.render(ctx));
+    this.activeHints.forEach((hint) => hint.render(ctx));
   }
 
   initializeBasicTutorials() {
@@ -3148,7 +3140,7 @@ export class AbilitySystem {
     this.abilities = new Map();
     this.cooldowns = new Map();
     this.unlocked = new Set();
-    
+
     this.initializeAbilities();
   }
 
@@ -3166,7 +3158,7 @@ export class AbilitySystem {
           y: this.player.velocity.y * 0.5,
         });
         this.audioManager?.playSound('dash');
-        
+
         // Add dash particles
         return {
           particles: true,
@@ -3250,20 +3242,20 @@ export class AbilitySystem {
 
   canUse(abilityId) {
     if (!this.unlocked.has(abilityId)) return false;
-    
+
     const lastUse = this.cooldowns.get(abilityId) || 0;
     const ability = this.abilities.get(abilityId);
     const now = Date.now();
-    
+
     return now - lastUse >= ability.cooldown;
   }
 
   use(abilityId, ...args) {
     if (!this.canUse(abilityId)) return null;
-    
+
     const ability = this.abilities.get(abilityId);
     this.cooldowns.set(abilityId, Date.now());
-    
+
     return ability.execute(...args);
   }
 
@@ -3271,43 +3263,43 @@ export class AbilitySystem {
     const lastUse = this.cooldowns.get(abilityId) || 0;
     const ability = this.abilities.get(abilityId);
     const elapsed = Date.now() - lastUse;
-    
+
     return Math.max(0, ability.cooldown - elapsed);
   }
 
   renderCooldowns(ctx, x, y) {
     let offsetY = 0;
-    
-    this.unlocked.forEach(abilityId => {
+
+    this.unlocked.forEach((abilityId) => {
       const ability = this.abilities.get(abilityId);
       const remaining = this.getCooldownRemaining(abilityId);
       const cooldownPercent = remaining / ability.cooldown;
-      
+
       // Ability icon background
       ctx.fillStyle = remaining > 0 ? '#4A5568' : '#48BB78';
       ctx.fillRect(x, y + offsetY, 40, 40);
-      
+
       // Cooldown overlay
       if (remaining > 0) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(x, y + offsetY, 40, 40 * cooldownPercent);
       }
-      
+
       // Border
       ctx.strokeStyle = '#F4D03F';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y + offsetY, 40, 40);
-      
+
       // Ability name
       ctx.fillStyle = '#FFF';
       ctx.font = '10px Arial';
       ctx.fillText(ability.name.substring(0, 6), x + 45, y + offsetY + 15);
-      
+
       // Cooldown time
       if (remaining > 0) {
         ctx.fillText(`${(remaining / 1000).toFixed(1)}s`, x + 45, y + offsetY + 30);
       }
-      
+
       offsetY += 50;
     });
   }
@@ -3339,11 +3331,11 @@ export class UIManager {
 
   updateNotifications() {
     const now = Date.now();
-    
+
     for (let i = this.notifications.length - 1; i >= 0; i--) {
       const notif = this.notifications[i];
       const elapsed = now - notif.createdAt;
-      
+
       // Fade in
       if (elapsed < this.fadeInDuration) {
         notif.alpha = elapsed / this.fadeInDuration;
@@ -3354,7 +3346,8 @@ export class UIManager {
       }
       // Fade out
       else if (elapsed < notif.duration) {
-        const fadeProgress = (elapsed - (notif.duration - this.fadeOutDuration)) / this.fadeOutDuration;
+        const fadeProgress =
+          (elapsed - (notif.duration - this.fadeOutDuration)) / this.fadeOutDuration;
         notif.alpha = 1 - fadeProgress;
         notif.fadingOut = true;
       }
@@ -3367,11 +3360,11 @@ export class UIManager {
 
   renderNotifications(ctx) {
     let offsetY = 100;
-    
-    this.notifications.forEach(notif => {
+
+    this.notifications.forEach((notif) => {
       ctx.save();
       ctx.globalAlpha = notif.alpha;
-      
+
       // Background
       const colors = {
         info: 'rgba(66, 153, 225, 0.9)',
@@ -3379,27 +3372,27 @@ export class UIManager {
         warning: 'rgba(237, 137, 54, 0.9)',
         error: 'rgba(229, 62, 62, 0.9)',
       };
-      
+
       ctx.fillStyle = colors[notif.type] || colors.info;
       const textWidth = ctx.measureText(notif.text).width;
       const boxWidth = textWidth + 40;
       const x = (this.canvas.width - boxWidth) / 2;
-      
+
       ctx.fillRect(x, offsetY, boxWidth, 50);
-      
+
       // Border
       ctx.strokeStyle = '#FFF';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, offsetY, boxWidth, 50);
-      
+
       // Text
       ctx.fillStyle = '#FFF';
       ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
       ctx.fillText(notif.text, this.canvas.width / 2, offsetY + 30);
-      
+
       ctx.restore();
-      
+
       offsetY += 60;
     });
   }
@@ -3440,10 +3433,10 @@ export class SceneTransition {
 
   update() {
     if (!this.active) return;
-    
+
     const elapsed = Date.now() - this.startTime;
     this.progress = Math.min(1, elapsed / this.duration);
-    
+
     if (this.progress >= 1) {
       this.active = false;
       if (this.onComplete) {
@@ -3454,46 +3447,39 @@ export class SceneTransition {
 
   render(ctx) {
     if (!this.active) return;
-    
+
     ctx.save();
-    
+
     const alpha = this.direction === 'out' ? this.progress : 1 - this.progress;
-    
+
     switch (this.type) {
       case 'fade':
         ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         break;
-        
-      case 'wipe':
+
+      case 'wipe': {
         ctx.fillStyle = '#000';
         const wipeWidth = this.canvas.width * alpha;
         ctx.fillRect(0, 0, wipeWidth, this.canvas.height);
         break;
-        
-      case 'circle':
+      }
+
+      case 'circle': {
         ctx.fillStyle = '#000';
-        const maxRadius = Math.sqrt(
-          Math.pow(this.canvas.width / 2, 2) +
-          Math.pow(this.canvas.height / 2, 2)
-        );
+        const maxRadius = Math.sqrt((this.canvas.width / 2) ** 2 + (this.canvas.height / 2) ** 2);
         const radius = maxRadius * (this.direction === 'out' ? 1 - alpha : alpha);
-        
+
         ctx.save();
         ctx.beginPath();
-        ctx.arc(
-          this.canvas.width / 2,
-          this.canvas.height / 2,
-          radius,
-          0,
-          Math.PI * 2
-        );
+        ctx.arc(this.canvas.width / 2, this.canvas.height / 2, radius, 0, Math.PI * 2);
         ctx.clip();
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.restore();
         break;
+      }
     }
-    
+
     ctx.restore();
   }
 }
@@ -3515,12 +3501,12 @@ export class PerformanceMonitor {
     const now = performance.now();
     const delta = now - this.lastTime;
     this.lastTime = now;
-    
+
     this.frames.push(delta);
     if (this.frames.length > this.maxSamples) {
       this.frames.shift();
     }
-    
+
     const avgDelta = this.frames.reduce((a, b) => a + b, 0) / this.frames.length;
     this.frameTime = avgDelta;
     this.fps = 1000 / avgDelta;
@@ -3556,7 +3542,7 @@ export class SpatialGrid {
 
   insert(entity) {
     const cells = this.getCells(entity.bounds);
-    cells.forEach(cellKey => {
+    cells.forEach((cellKey) => {
       if (!this.grid.has(cellKey)) {
         this.grid.set(cellKey, []);
       }
@@ -3567,14 +3553,14 @@ export class SpatialGrid {
   query(bounds) {
     const cells = this.getCells(bounds);
     const results = new Set();
-    
-    cells.forEach(cellKey => {
+
+    cells.forEach((cellKey) => {
       const entities = this.grid.get(cellKey);
       if (entities) {
-        entities.forEach(entity => results.add(entity));
+        entities.forEach((entity) => results.add(entity));
       }
     });
-    
+
     return Array.from(results);
   }
 
@@ -3584,13 +3570,13 @@ export class SpatialGrid {
     const maxX = Math.floor(bounds.maxX / this.cellSize);
     const minY = Math.floor(bounds.minY / this.cellSize);
     const maxY = Math.floor(bounds.maxY / this.cellSize);
-    
+
     for (let x = minX; x <= maxX; x++) {
       for (let y = minY; y <= maxY; y++) {
         cells.push(`${x},${y}`);
       }
     }
-    
+
     return cells;
   }
 }
@@ -3600,7 +3586,7 @@ export class ObjectPool {
     this.factory = factory;
     this.available = [];
     this.inUse = new Set();
-    
+
     // Pre-create objects
     for (let i = 0; i < initialSize; i++) {
       this.available.push(this.factory());
@@ -3609,23 +3595,23 @@ export class ObjectPool {
 
   acquire() {
     let obj;
-    
+
     if (this.available.length > 0) {
       obj = this.available.pop();
     } else {
       obj = this.factory();
     }
-    
+
     this.inUse.add(obj);
     return obj;
   }
 
   release(obj) {
     if (!this.inUse.has(obj)) return;
-    
+
     this.inUse.delete(obj);
     this.available.push(obj);
-    
+
     // Reset object if it has a reset method
     if (obj.reset) {
       obj.reset();
@@ -3659,29 +3645,29 @@ export class Minimap {
 
   render(ctx, player, entities, platforms) {
     if (!this.visible) return;
-    
+
     ctx.save();
-    
+
     // Background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(this.x, this.y, this.width, this.height);
-    
+
     // Border
     ctx.strokeStyle = '#F4D03F';
     ctx.lineWidth = 2;
     ctx.strokeRect(this.x, this.y, this.width, this.height);
-    
+
     // Platforms
     ctx.fillStyle = '#718096';
-    platforms.forEach(platform => {
+    platforms.forEach((platform) => {
       const x = this.x + (platform.position.x - this.levelBounds.minX) * this.scale;
       const y = this.y + (platform.position.y - this.levelBounds.minY) * this.scale;
       ctx.fillRect(x, y, 5, 2);
     });
-    
+
     // Enemies
     ctx.fillStyle = '#E53E3E';
-    entities.enemies?.forEach(enemy => {
+    entities.enemies?.forEach((enemy) => {
       if (enemy.state === 'dead') return;
       const x = this.x + (enemy.body.position.x - this.levelBounds.minX) * this.scale;
       const y = this.y + (enemy.body.position.y - this.levelBounds.minY) * this.scale;
@@ -3689,17 +3675,17 @@ export class Minimap {
       ctx.arc(x, y, 3, 0, Math.PI * 2);
       ctx.fill();
     });
-    
+
     // NPCs
     ctx.fillStyle = '#48BB78';
-    entities.npcs?.forEach(npc => {
+    entities.npcs?.forEach((npc) => {
       const x = this.x + (npc.body.position.x - this.levelBounds.minX) * this.scale;
       const y = this.y + (npc.body.position.y - this.levelBounds.minY) * this.scale;
       ctx.beginPath();
       ctx.arc(x, y, 3, 0, Math.PI * 2);
       ctx.fill();
     });
-    
+
     // Player
     ctx.fillStyle = '#F4D03F';
     const px = this.x + (player.position.x - this.levelBounds.minX) * this.scale;
@@ -3707,7 +3693,7 @@ export class Minimap {
     ctx.beginPath();
     ctx.arc(px, py, 4, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Player direction indicator
     ctx.strokeStyle = '#F4D03F';
     ctx.lineWidth = 2;
@@ -3715,7 +3701,7 @@ export class Minimap {
     ctx.moveTo(px, py);
     ctx.lineTo(px + Math.cos(player.angle) * 8, py + Math.sin(player.angle) * 8);
     ctx.stroke();
-    
+
     ctx.restore();
   }
 }
@@ -3739,12 +3725,12 @@ export class DebugOverlay {
 
   renderColliders(ctx, bodies) {
     if (!this.enabled || !this.showColliders) return;
-    
+
     ctx.save();
     ctx.strokeStyle = '#00FF00';
     ctx.lineWidth = 2;
-    
-    bodies.forEach(body => {
+
+    bodies.forEach((body) => {
       ctx.beginPath();
       const vertices = body.vertices;
       ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -3753,42 +3739,39 @@ export class DebugOverlay {
       }
       ctx.closePath();
       ctx.stroke();
-      
+
       // Center of mass
       ctx.fillStyle = '#FF0000';
       ctx.beginPath();
       ctx.arc(body.position.x, body.position.y, 3, 0, Math.PI * 2);
       ctx.fill();
     });
-    
+
     ctx.restore();
   }
 
   renderVelocity(ctx, body) {
     if (!this.enabled || !this.showVelocity) return;
-    
+
     ctx.save();
     ctx.strokeStyle = '#FF00FF';
     ctx.lineWidth = 3;
-    
+
     ctx.beginPath();
     ctx.moveTo(body.position.x, body.position.y);
-    ctx.lineTo(
-      body.position.x + body.velocity.x * 10,
-      body.position.y + body.velocity.y * 10
-    );
+    ctx.lineTo(body.position.x + body.velocity.x * 10, body.position.y + body.velocity.y * 10);
     ctx.stroke();
-    
+
     ctx.restore();
   }
 
   renderGrid(ctx, canvas, cellSize = 100) {
     if (!this.enabled || !this.showGrid) return;
-    
+
     ctx.save();
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
-    
+
     // Vertical lines
     for (let x = 0; x < canvas.width; x += cellSize) {
       ctx.beginPath();
@@ -3796,7 +3779,7 @@ export class DebugOverlay {
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
-    
+
     // Horizontal lines
     for (let y = 0; y < canvas.height; y += cellSize) {
       ctx.beginPath();
@@ -3804,28 +3787,28 @@ export class DebugOverlay {
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
-    
+
     ctx.restore();
   }
 
   renderAIDebug(ctx, enemies) {
     if (!this.enabled || !this.showAI) return;
-    
-    enemies.forEach(enemy => {
+
+    enemies.forEach((enemy) => {
       const { position } = enemy.body;
-      
+
       // State text
       ctx.fillStyle = '#FFD700';
       ctx.font = '12px monospace';
       ctx.fillText(enemy.state, position.x - 20, position.y - 30);
-      
+
       // Detection radius
       ctx.strokeStyle = 'rgba(255, 165, 0, 0.3)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(position.x, position.y, enemy.detectionRadius, 0, Math.PI * 2);
       ctx.stroke();
-      
+
       // Attack radius
       ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
       ctx.beginPath();
@@ -3834,13 +3817,13 @@ export class DebugOverlay {
     });
   }
 
-  render(ctx, gameState) {
+  render(ctx, _gameState) {
     if (!this.enabled) return;
-    
+
     ctx.save();
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(10, 10, 200, 120);
-    
+
     ctx.fillStyle = '#00FF00';
     ctx.font = '12px monospace';
     ctx.fillText('DEBUG MODE', 20, 30);
@@ -3849,7 +3832,7 @@ export class DebugOverlay {
     ctx.fillText(`[3] Velocity: ${this.showVelocity}`, 20, 80);
     ctx.fillText(`[4] AI: ${this.showAI}`, 20, 95);
     ctx.fillText(`[~] Toggle Debug`, 20, 115);
-    
+
     ctx.restore();
   }
 }
@@ -3891,7 +3874,7 @@ export class GameStateManager {
   emit(event, data) {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
-      callbacks.forEach(cb => cb(data));
+      callbacks.forEach((cb) => cb(data));
     }
   }
 
@@ -3899,31 +3882,31 @@ export class GameStateManager {
   takeDamage(amount) {
     const oldHealth = this.health;
     this.health = Math.max(0, this.health - amount);
-    
+
     this.emit('healthChanged', {
       old: oldHealth,
       new: this.health,
       damage: amount,
     });
-    
+
     if (this.health <= 0) {
       this.emit('death', {});
       this.deaths++;
     }
-    
+
     return this.health;
   }
 
   restoreHealth(amount) {
     const oldHealth = this.health;
     this.health = Math.min(this.maxHealth, this.health + amount);
-    
+
     this.emit('healthChanged', {
       old: oldHealth,
       new: this.health,
       healed: amount,
     });
-    
+
     return this.health;
   }
 
@@ -3931,29 +3914,29 @@ export class GameStateManager {
   drainWarmth(amount) {
     const oldWarmth = this.warmth;
     this.warmth = Math.max(0, this.warmth - amount);
-    
+
     this.emit('warmthChanged', {
       old: oldWarmth,
       new: this.warmth,
     });
-    
+
     // Take damage when warmth reaches zero
     if (this.warmth <= 0) {
       this.takeDamage(1);
     }
-    
+
     return this.warmth;
   }
 
   restoreWarmth(amount) {
     const oldWarmth = this.warmth;
     this.warmth = Math.min(this.maxWarmth, this.warmth + amount);
-    
+
     this.emit('warmthChanged', {
       old: oldWarmth,
       new: this.warmth,
     });
-    
+
     return this.warmth;
   }
 
@@ -3961,23 +3944,23 @@ export class GameStateManager {
   collectShard() {
     this.shards++;
     this.shardsCollected++;
-    
+
     this.emit('shardCollected', {
       total: this.shards,
     });
-    
+
     return this.shards;
   }
 
   spendShards(amount) {
     if (this.shards < amount) return false;
-    
+
     this.shards -= amount;
     this.emit('shardsSpent', {
       amount,
       remaining: this.shards,
     });
-    
+
     return true;
   }
 
@@ -4002,18 +3985,18 @@ export class GameStateManager {
       position,
       timestamp: Date.now(),
     };
-    
+
     this.emit('checkpointReached', this.currentCheckpoint);
   }
 
   respawn() {
     if (!this.currentCheckpoint) return null;
-    
+
     this.health = this.maxHealth;
     this.warmth = this.maxWarmth;
-    
+
     this.emit('respawn', this.currentCheckpoint);
-    
+
     return this.currentCheckpoint.position;
   }
 
@@ -4024,10 +4007,10 @@ export class GameStateManager {
   }
 
   completeQuest(quest) {
-    this.activeQuests = this.activeQuests.filter(q => q.id !== quest.id);
+    this.activeQuests = this.activeQuests.filter((q) => q.id !== quest.id);
     this.completedQuests.push(quest);
     this.emit('questCompleted', quest);
-    
+
     // Apply rewards
     if (quest.rewards.shards) {
       this.shards += quest.rewards.shards;
@@ -4048,7 +4031,7 @@ export class GameStateManager {
   }
 
   removeItem(itemId) {
-    const index = this.inventory.findIndex(i => i.id === itemId);
+    const index = this.inventory.findIndex((i) => i.id === itemId);
     if (index !== -1) {
       const item = this.inventory.splice(index, 1)[0];
       this.emit('itemRemoved', item);
@@ -4058,7 +4041,7 @@ export class GameStateManager {
   }
 
   hasItem(itemId) {
-    return this.inventory.some(i => i.id === itemId);
+    return this.inventory.some((i) => i.id === itemId);
   }
 
   // Serialization
@@ -4108,7 +4091,7 @@ export class InteractiveDoor {
     this.destination = config.destination;
   }
 
-  interact(player, gameState) {
+  interact(_player, gameState) {
     if (this.locked) {
       if (this.keyRequired && !gameState.hasItem(this.keyRequired)) {
         return {
@@ -4118,7 +4101,7 @@ export class InteractiveDoor {
       }
       this.locked = false;
     }
-    
+
     this.opening = true;
     return {
       success: true,
@@ -4138,34 +4121,34 @@ export class InteractiveDoor {
 
   render(ctx) {
     const { position } = this;
-    
+
     ctx.save();
     ctx.translate(position.x, position.y);
-    
+
     // Door frame
     ctx.fillStyle = '#8B4513';
     ctx.fillRect(-40, -80, 80, 160);
-    
+
     // Door
     if (!this.open) {
       const offset = this.openProgress * 70;
       ctx.fillStyle = '#654321';
       ctx.fillRect(-35 + offset, -75, 70, 150);
-      
+
       // Handle
       ctx.fillStyle = '#FFD700';
       ctx.beginPath();
       ctx.arc(-10 + offset, 0, 5, 0, Math.PI * 2);
       ctx.fill();
     }
-    
+
     // Lock indicator
     if (this.locked) {
       ctx.fillStyle = '#E53E3E';
       ctx.font = '24px Arial';
       ctx.fillText('🔒', -12, -85);
     }
-    
+
     ctx.restore();
   }
 }
@@ -4182,42 +4165,42 @@ export class Lever {
 
   interact() {
     if (this.oneTime && this.used) return false;
-    
+
     this.active = !this.active;
     this.used = true;
-    
+
     if (this.onActivate) {
       this.onActivate(this.active);
     }
-    
+
     return true;
   }
 
   render(ctx) {
     ctx.save();
     ctx.translate(this.position.x, this.position.y);
-    
+
     // Base
     ctx.fillStyle = '#718096';
     ctx.fillRect(-15, 0, 30, 40);
-    
+
     // Lever
     ctx.strokeStyle = this.active ? '#48BB78' : '#E53E3E';
     ctx.lineWidth = 6;
     ctx.lineCap = 'round';
-    
+
     const angle = this.active ? -Math.PI / 4 : Math.PI / 4;
     ctx.beginPath();
     ctx.moveTo(0, 20);
     ctx.lineTo(Math.cos(angle) * 25, 20 + Math.sin(angle) * 25);
     ctx.stroke();
-    
+
     // Handle
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
     ctx.arc(Math.cos(angle) * 25, 20 + Math.sin(angle) * 25, 8, 0, Math.PI * 2);
     ctx.fill();
-    
+
     ctx.restore();
   }
 }
@@ -4237,13 +4220,13 @@ export class PressurePlate {
   update(bodies) {
     const { Query } = M();
     const touching = Query.collides(this.body, bodies);
-    
-    const oldWeight = this.currentWeight;
+
+    const _oldWeight = this.currentWeight;
     this.currentWeight = touching.length;
-    
+
     const wasPressed = this.pressed;
     this.pressed = this.currentWeight >= this.requiredWeight;
-    
+
     if (this.pressed && !wasPressed) {
       if (this.onActivate) this.onActivate();
     } else if (!this.pressed && wasPressed) {
@@ -4253,9 +4236,9 @@ export class PressurePlate {
 
   render(ctx) {
     ctx.save();
-    
+
     const vertices = this.body.vertices;
-    
+
     ctx.fillStyle = this.pressed ? '#48BB78' : '#718096';
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -4264,11 +4247,11 @@ export class PressurePlate {
     }
     ctx.closePath();
     ctx.fill();
-    
+
     ctx.strokeStyle = '#4A5568';
     ctx.lineWidth = 3;
     ctx.stroke();
-    
+
     ctx.restore();
   }
 }
@@ -4285,34 +4268,34 @@ export class BreakableWall {
 
   takeDamage(amount) {
     if (this.broken) return false;
-    
+
     this.hp -= amount;
-    
+
     // Add crack visual
     this.cracks.push({
       x: Math.random(),
       y: Math.random(),
       angle: Math.random() * Math.PI * 2,
     });
-    
+
     if (this.hp <= 0) {
       this.broken = true;
       return true; // Wall destroyed
     }
-    
+
     return false;
   }
 
   render(ctx) {
     if (this.broken) return;
-    
+
     const vertices = this.body.vertices;
-    
+
     // Wall
     ctx.fillStyle = '#A0AEC0';
     ctx.strokeStyle = '#718096';
     ctx.lineWidth = 2;
-    
+
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
     for (let i = 1; i < vertices.length; i++) {
@@ -4321,38 +4304,32 @@ export class BreakableWall {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    
+
     // Cracks
     ctx.strokeStyle = '#4A5568';
     ctx.lineWidth = 2;
-    
+
     const width = Math.abs(vertices[1].x - vertices[0].x);
     const height = Math.abs(vertices[2].y - vertices[0].y);
-    
-    this.cracks.forEach(crack => {
+
+    this.cracks.forEach((crack) => {
       const x = vertices[0].x + crack.x * width;
       const y = vertices[0].y + crack.y * height;
       const len = 20;
-      
+
       ctx.beginPath();
-      ctx.moveTo(
-        x - Math.cos(crack.angle) * len,
-        y - Math.sin(crack.angle) * len
-      );
-      ctx.lineTo(
-        x + Math.cos(crack.angle) * len,
-        y + Math.sin(crack.angle) * len
-      );
+      ctx.moveTo(x - Math.cos(crack.angle) * len, y - Math.sin(crack.angle) * len);
+      ctx.lineTo(x + Math.cos(crack.angle) * len, y + Math.sin(crack.angle) * len);
       ctx.stroke();
     });
-    
+
     // HP indicator
     const hpPercent = this.hp / this.maxHp;
     ctx.fillStyle = hpPercent > 0.5 ? '#48BB78' : hpPercent > 0.25 ? '#F6AD55' : '#E53E3E';
     const barWidth = width * 0.8;
     const barX = vertices[0].x + (width - barWidth) / 2;
     const barY = vertices[0].y + height + 10;
-    
+
     ctx.fillRect(barX, barY, barWidth * hpPercent, 5);
     ctx.strokeStyle = '#FFF';
     ctx.strokeRect(barX, barY, barWidth, 5);
@@ -4377,12 +4354,12 @@ export class TeleportPad {
 
   use(player) {
     if (!this.canUse()) return null;
-    
+
     this.lastUsed = Date.now();
-    
+
     const { Body } = M();
     Body.setPosition(player, this.destination);
-    
+
     return {
       success: true,
       destination: this.destination,
@@ -4396,40 +4373,40 @@ export class TeleportPad {
   render(ctx) {
     const { position } = this;
     const pulse = Math.sin(this.animationTime * 0.005) * 0.3 + 0.7;
-    
+
     ctx.save();
     ctx.translate(position.x, position.y);
-    
+
     // Outer ring
     ctx.strokeStyle = `rgba(100, 200, 255, ${pulse})`;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(0, 0, 40, 0, Math.PI * 2);
     ctx.stroke();
-    
+
     // Inner ring
     ctx.beginPath();
     ctx.arc(0, 0, 25, 0, Math.PI * 2);
     ctx.stroke();
-    
+
     // Center
     ctx.fillStyle = `rgba(150, 220, 255, ${pulse * 0.5})`;
     ctx.beginPath();
     ctx.arc(0, 0, 20, 0, Math.PI * 2);
     ctx.fill();
-    
+
     // Particles
     for (let i = 0; i < 8; i++) {
-      const angle = (this.animationTime * 0.001 + i * Math.PI / 4) % (Math.PI * 2);
+      const angle = (this.animationTime * 0.001 + (i * Math.PI) / 4) % (Math.PI * 2);
       const x = Math.cos(angle) * 30;
       const y = Math.sin(angle) * 30;
-      
+
       ctx.fillStyle = '#64B5F6';
       ctx.beginPath();
       ctx.arc(x, y, 3, 0, Math.PI * 2);
       ctx.fill();
     }
-    
+
     ctx.restore();
   }
 }
@@ -4441,7 +4418,7 @@ export class TeleportPad {
 export class BossController extends EnemyAI {
   constructor(body, bossConfig, aiManager, playerRef) {
     super(body, 'boss', aiManager, playerRef);
-    
+
     this.name = bossConfig.name;
     this.hp = bossConfig.hp || 200;
     this.maxHp = this.hp;
@@ -4456,15 +4433,15 @@ export class BossController extends EnemyAI {
 
   update(deltaTime) {
     super.update(deltaTime);
-    
+
     // Phase transitions
     const hpPercent = this.hp / this.maxHp;
     const phaseThreshold = 1 - (this.currentPhase + 1) / this.phases.length;
-    
+
     if (hpPercent <= phaseThreshold && this.currentPhase < this.phases.length - 1) {
       this.enterNextPhase();
     }
-    
+
     // Boss-specific AI
     this.updateBossAI(deltaTime);
   }
@@ -4472,14 +4449,14 @@ export class BossController extends EnemyAI {
   enterNextPhase() {
     this.currentPhase++;
     const phase = this.phases[this.currentPhase];
-    
+
     console.log(`[Boss] Entering phase ${this.currentPhase + 1}: ${phase.name}`);
-    
+
     // Apply phase changes
     if (phase.enraged) this.enraged = true;
     if (phase.speed) this.speed = phase.speed;
     if (phase.damage) this.damage = phase.damage;
-    
+
     // Trigger phase event (cutscene, dialogue, etc.)
     this.emit('phaseChange', {
       phase: this.currentPhase,
@@ -4487,9 +4464,9 @@ export class BossController extends EnemyAI {
     });
   }
 
-  updateBossAI(deltaTime) {
+  updateBossAI(_deltaTime) {
     if (this.invulnerable) return;
-    
+
     // Execute attack pattern
     const attack = this.attacks[this.attackPattern];
     if (attack && this.canAttack()) {
@@ -4500,7 +4477,7 @@ export class BossController extends EnemyAI {
 
   executeAttack(attack) {
     console.log(`[Boss] Executing attack: ${attack.name}`);
-    
+
     switch (attack.type) {
       case 'charge':
         this.chargeAttack();
@@ -4519,11 +4496,11 @@ export class BossController extends EnemyAI {
 
   chargeAttack() {
     if (!this.playerRef) return;
-    
+
     const dx = this.playerRef.position.x - this.body.position.x;
     const dy = this.playerRef.position.y - this.body.position.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    
+
     if (dist > 0) {
       const { Body } = M();
       Body.setVelocity(this.body, {
@@ -4562,37 +4539,37 @@ export class BossController extends EnemyAI {
 
   getPlayerDirection() {
     if (!this.playerRef) return { x: 1, y: 0 };
-    
+
     const dx = this.playerRef.position.x - this.body.position.x;
     const dy = this.playerRef.position.y - this.body.position.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    
+
     return dist > 0 ? { x: dx / dist, y: dy / dist } : { x: 1, y: 0 };
   }
 
   render(ctx) {
     super.render(ctx);
-    
+
     // Boss name plate
     const { position } = this.body;
-    
+
     ctx.save();
-    
+
     // Background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(position.x - 100, position.y - 60, 200, 30);
-    
+
     // Border
     ctx.strokeStyle = '#E53E3E';
     ctx.lineWidth = 2;
     ctx.strokeRect(position.x - 100, position.y - 60, 200, 30);
-    
+
     // Boss name
     ctx.fillStyle = '#FFD700';
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(this.name, position.x, position.y - 40);
-    
+
     // Phase indicator
     if (this.phases.length > 0) {
       ctx.font = '10px Arial';
@@ -4603,7 +4580,7 @@ export class BossController extends EnemyAI {
         position.y - 65
       );
     }
-    
+
     ctx.restore();
   }
 }

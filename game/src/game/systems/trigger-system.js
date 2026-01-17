@@ -6,9 +6,6 @@
  * @module systems/trigger-system
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
-
-
 /**
  * Trigger System class
  */

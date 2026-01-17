@@ -1,6 +1,6 @@
 /**
  * System Type Definitions
- * 
+ *
  * Inspired by Phaser3 Matter.js BitECS example (/tmp/Matter.ts)
  * Defines interfaces for game systems following the modular pattern
  */
@@ -72,7 +72,7 @@ export interface InputSystem extends GameSystem {
     active: boolean;
     joystick: { x: number; y: number } | null;
   };
-  
+
   // Methods
   isPressed(key: string): boolean;
 }
@@ -151,8 +151,22 @@ export interface PlayerReference {
  */
 export interface BossAI {
   isDead: boolean;
-  projectiles: Array<{ x: number; y: number; vx: number; vy: number; damage: number; warmthDrain?: number }>;
-  hazardZones: Array<{ x: number; y: number; width: number; height: number; damage: number; warmthDrain: number }>;
+  projectiles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    damage: number;
+    warmthDrain?: number;
+  }>;
+  hazardZones: Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    damage: number;
+    warmthDrain: number;
+  }>;
   update(deltaTime: number): void;
   selectAndExecuteAttack(): void;
 }
@@ -168,7 +182,10 @@ export interface LanternSystem {
     lit: boolean;
     warmth: number;
   }>;
-  lightLantern(lantern: { body: Matter.Body; lit: boolean }, context: { player: Matter.Body }): boolean;
+  lightLantern(
+    lantern: { body: Matter.Body; lit: boolean },
+    context: { player: Matter.Body }
+  ): boolean;
 }
 
 /**
@@ -250,12 +267,21 @@ export interface GameLoopParams {
   bellSystem: BellSystem;
   hearthSystem: HearthSystem;
   hazardSystem: HazardSystem;
-  movingPlatforms: Array<{ body: Matter.Body; def: { amplitude: number; frequency: number; axis: 'x' | 'y' } }>;
+  movingPlatforms: Array<{
+    body: Matter.Body;
+    def: { amplitude: number; frequency: number; axis: 'x' | 'y' };
+  }>;
   waterZones: Array<{ x: number; y: number; width: number; height: number }>;
   flowPuzzles: FlowPuzzle[];
   timingSequences: TimingSequence[];
   gameStateObj: GameState;
-  renderScene: (ctx: CanvasRenderingContext2D, camera: Camera, animFrame: number, playerFacing: number, bossAI: BossAI | null) => void;
+  renderScene: (
+    ctx: CanvasRenderingContext2D,
+    camera: Camera,
+    animFrame: number,
+    playerFacing: number,
+    bossAI: BossAI | null
+  ) => void;
 }
 
 /**

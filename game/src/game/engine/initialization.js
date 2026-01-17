@@ -3,7 +3,6 @@
  * Handles level loading, entity spawning, and system setup from DDL manifests
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
 import { Vector3 } from 'yuka';
 import { ZephyrosAI } from '../ai/BossAI';
 import { hearingSystem } from '../ai/PerceptionSystem';
@@ -15,6 +14,7 @@ import {
   loadChapterManifest,
 } from '../data/chapter-loaders';
 import { FlowPuzzle, TimingSequence } from '../environment/EnvironmentalSystems';
+import { getMatterModules } from '../physics/matter-wrapper';
 import { createPlatform, MovingPlatform, WaterZone } from '../physics/PhysicsManager';
 
 /**

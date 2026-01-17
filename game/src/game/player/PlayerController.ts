@@ -1,6 +1,6 @@
 import type * as Matter from 'matter-js';
-import type { AudioSystem } from '../types/systems';
 import { getMatterModules } from '../physics/matter-wrapper';
+import type { AudioSystem } from '../types/systems';
 
 interface PlayerPhysics {
   maxSpeed: number;
@@ -78,7 +78,7 @@ export class PlayerController {
 
   update(deltaTime: number): void {
     const { Body } = getMatterModules();
-    
+
     this.isGrounded = this.checkGrounded();
 
     if (this.isGrounded) {
@@ -131,15 +131,15 @@ export class PlayerController {
 
   jump(): boolean {
     const { Body } = getMatterModules();
-    
-    const canJump = (this.player as any).canJump !== false;
-    
+
+    const canJump = (this.player as Matter.Body & { canJump?: boolean }).canJump !== false;
+
     if (this.coyoteTime > 0 && canJump) {
       Body.setVelocity(this.player, {
         x: this.player.velocity.x,
         y: PLAYER_PHYSICS.jumpForce,
       });
-      (this.player as any).canJump = false;
+      (this.player as Matter.Body & { canJump?: boolean }).canJump = false;
       this.coyoteTime = 0;
       this.audioManager?.playSound?.('jump');
       return true;
@@ -165,25 +165,28 @@ export class PlayerController {
 
   createAttackHitbox(attackDef: AttackDefinition): AttackHitbox {
     const { Bodies } = getMatterModules();
-    
+
     const facing = this.player.velocity.x >= 0 ? 1 : -1;
     const x = this.player.position.x + attackDef.offsetX * facing;
     const y = this.player.position.y + attackDef.offsetY;
-    
+
     const hitbox = Bodies.rectangle(x, y, attackDef.width, attackDef.height, {
       isSensor: true,
       label: 'attack_hitbox',
     }) as AttackHitbox;
-    
+
     hitbox.damage = attackDef.damage;
     hitbox.knockback = { x: attackDef.kb.x * facing, y: attackDef.kb.y };
-    
+
     return hitbox;
   }
 
-  takeDamage(amount: number, knockback: { x: number; y: number } = { x: 0, y: 0 }): { parried: boolean } {
+  takeDamage(
+    amount: number,
+    knockback: { x: number; y: number } = { x: 0, y: 0 }
+  ): { parried: boolean } {
     const { Body } = getMatterModules();
-    
+
     if (this.parryWindow > 0) {
       this.audioManager?.playSound?.('parry_success');
       return { parried: true };
@@ -201,7 +204,9 @@ export class PlayerController {
 
   private checkGrounded(): boolean {
     const { Query } = getMatterModules();
-    const feetSensor = (this.player as any).parts?.find((p: any) => p.label === 'feet_sensor');
+    const feetSensor = (this.player as Matter.Body & { parts?: Matter.Body[] }).parts?.find(
+      (p: Matter.Body) => p.label === 'feet_sensor'
+    );
     if (!feetSensor) return false;
 
     const collisions = Query.collides(feetSensor, this.engine.world.bodies);

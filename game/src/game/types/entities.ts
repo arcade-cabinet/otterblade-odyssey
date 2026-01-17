@@ -1,6 +1,6 @@
 /**
  * Entity Type Definitions
- * 
+ *
  * Defines types for all game entities (Player, Enemies, Platforms, Items, NPCs)
  * following the vanilla pattern from the POC
  */
@@ -24,31 +24,31 @@ export interface Entity {
  */
 export interface Player extends Entity {
   type: 'player';
-  
+
   // Health
   health: number;
   maxHealth: number;
-  
+
   // Combat
   attackDamage: number;
   attackCooldown: number;
   lastAttackTime: number;
-  
+
   // Movement
   velocity: { x: number; y: number };
   grounded: boolean;
   jumpForce: number;
   moveSpeed: number;
-  
+
   // Animation
   facing: 1 | -1; // 1 = right, -1 = left
   animState: 'idle' | 'running' | 'jumping' | 'falling' | 'attacking' | 'hurt' | 'dying';
   animFrame: number;
-  
+
   // Inventory
   shards: number;
   hasOtterblade: boolean;
-  
+
   // Status
   invulnerable: boolean;
   invulnerabilityTime: number;
@@ -57,36 +57,30 @@ export interface Player extends Entity {
 /**
  * Enemy AI states
  */
-export type EnemyAIState = 
-  | 'idle' 
-  | 'patrol' 
-  | 'chase' 
-  | 'attack' 
-  | 'flee' 
-  | 'hurt' 
-  | 'dying' 
+export type EnemyAIState =
+  | 'idle'
+  | 'patrol'
+  | 'chase'
+  | 'attack'
+  | 'flee'
+  | 'hurt'
+  | 'dying'
   | 'dead';
 
 /**
  * Enemy types from DDL manifests
  */
-export type EnemyType = 
-  | 'scout' 
-  | 'warrior' 
-  | 'brute' 
-  | 'archer' 
-  | 'shaman' 
-  | 'boss';
+export type EnemyType = 'scout' | 'warrior' | 'brute' | 'archer' | 'shaman' | 'boss';
 
 /**
  * Enemy behavior patterns
  */
-export type EnemyBehavior = 
-  | 'patrol' 
-  | 'stationary' 
-  | 'aggressive' 
-  | 'defensive' 
-  | 'coward' 
+export type EnemyBehavior =
+  | 'patrol'
+  | 'stationary'
+  | 'aggressive'
+  | 'defensive'
+  | 'coward'
   | 'boss';
 
 /**
@@ -95,20 +89,20 @@ export type EnemyBehavior =
 export interface Enemy extends Entity {
   type: 'enemy';
   enemyType: EnemyType;
-  
+
   // Health
   health: number;
   maxHealth: number;
-  
+
   // Combat
   damage: number;
   attackRange: number;
   attackCooldown: number;
   lastAttackTime: number;
-  
+
   // Movement
   speed: number;
-  
+
   // AI
   aiState: EnemyAIState;
   behavior: EnemyBehavior;
@@ -116,15 +110,15 @@ export interface Enemy extends Entity {
   patrolPoints: Array<{ x: number; y: number }>;
   currentPatrolIndex: number;
   alertRadius: number;
-  
+
   // YUKA AI (optional, if using YUKA navigation)
   vehicle?: YUKA.Vehicle;
-  
+
   // Animation
   facing: 1 | -1;
   animFrame: number;
   animSpeed: number;
-  
+
   // Status
   invulnerable: boolean;
   invulnerabilityTime: number;
@@ -137,13 +131,13 @@ export interface Enemy extends Entity {
 export interface Boss extends Omit<Enemy, 'type'> {
   type: 'boss';
   enemyType: 'boss';
-  
+
   // Boss-specific
   phase: 1 | 2 | 3;
   phaseTransitionHealth: number[];
   specialAttacks: string[];
   currentAttackPattern: string;
-  
+
   // Multi-part body (for complex bosses)
   bodyParts?: Matter.Body[];
 }
@@ -151,13 +145,13 @@ export interface Boss extends Omit<Enemy, 'type'> {
 /**
  * Platform types
  */
-export type PlatformType = 
-  | 'static' 
-  | 'moving' 
-  | 'crumbling' 
-  | 'semi-solid' 
-  | 'ice' 
-  | 'wood' 
+export type PlatformType =
+  | 'static'
+  | 'moving'
+  | 'crumbling'
+  | 'semi-solid'
+  | 'ice'
+  | 'wood'
   | 'stone';
 
 /**
@@ -166,18 +160,18 @@ export type PlatformType =
 export interface Platform extends Entity {
   type: 'platform';
   platformType: PlatformType;
-  
+
   // Movement (for moving platforms)
   isMoving?: boolean;
   movePoints?: Array<{ x: number; y: number }>;
   moveSpeed?: number;
   currentMoveIndex?: number;
-  
+
   // Crumbling platforms
   isCrumbling?: boolean;
   crumbleTime?: number;
   crumbleDelay?: number;
-  
+
   // Physics properties
   friction?: number;
   restitution?: number;
@@ -186,12 +180,7 @@ export interface Platform extends Entity {
 /**
  * Item types
  */
-export type ItemType = 
-  | 'shard' 
-  | 'health' 
-  | 'key' 
-  | 'otterblade' 
-  | 'collectible';
+export type ItemType = 'shard' | 'health' | 'key' | 'otterblade' | 'collectible';
 
 /**
  * Collectible item entity
@@ -199,16 +188,16 @@ export type ItemType =
 export interface Item extends Entity {
   type: 'item';
   itemType: ItemType;
-  
+
   // Properties
   value?: number; // For shards, health amount, etc.
   collected: boolean;
-  
+
   // Animation
   bobOffset: number;
   bobSpeed: number;
   rotationSpeed?: number;
-  
+
   // Trigger
   triggerRadius?: number;
 }
@@ -218,21 +207,21 @@ export interface Item extends Entity {
  */
 export interface NPC extends Entity {
   type: 'npc';
-  
+
   // Identity
   npcId: string;
   npcType: string;
-  
+
   // Dialogue
   dialogue?: string[];
   currentDialogueIndex: number;
   hasInteracted: boolean;
-  
+
   // Animation
   facing: 1 | -1;
   animState: 'idle' | 'talking' | 'gesturing';
   animFrame: number;
-  
+
   // Interaction
   interactionRadius: number;
   isInteractable: boolean;
@@ -254,15 +243,15 @@ export interface ActionParams {
  */
 export interface Trigger extends Entity {
   type: 'trigger';
-  
+
   // Trigger properties
   triggerId: string;
   triggerType: 'cinematic' | 'checkpoint' | 'enemy_spawn' | 'dialogue' | 'chapter_transition';
-  
+
   // State
   triggered: boolean;
   repeatable: boolean;
-  
+
   // Action
   action: string;
   actionParams?: ActionParams;
@@ -271,13 +260,7 @@ export interface Trigger extends Entity {
 /**
  * Hazard types
  */
-export type HazardType = 
-  | 'spikes' 
-  | 'fire' 
-  | 'water' 
-  | 'wind' 
-  | 'falling_block' 
-  | 'crusher';
+export type HazardType = 'spikes' | 'fire' | 'water' | 'wind' | 'falling_block' | 'crusher';
 
 /**
  * Hazard entity
@@ -285,12 +268,12 @@ export type HazardType =
 export interface Hazard extends Entity {
   type: 'hazard';
   hazardType: HazardType;
-  
+
   // Damage
   damage: number;
   damageInterval: number; // For continuous damage
   lastDamageTime: number;
-  
+
   // Animation/Movement
   isActive: boolean;
   activationDelay?: number;

@@ -6,9 +6,6 @@
  * @module systems/collision-system
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
-
-
 /**
  * Collision System class
  */
