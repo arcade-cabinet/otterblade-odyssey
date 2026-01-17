@@ -148,7 +148,7 @@ gh issue list --state open --label "agent-assigned"
 
 ```bash
 # Update context for next agent
-cat >> memory-bank/activeContext.md << 'EOF'
+cat >> memory-bank/activeContext.md << EOF
 
 ## Session: $(date +%Y-%m-%d %H:%M)
 ### Completed
