@@ -1,6 +1,6 @@
 /**
  * Matter.js Physics Type Definitions
- * 
+ *
  * Type helpers and utilities for Matter.js physics bodies
  * Ensures type safety for collision detection and body manipulation
  */
@@ -11,7 +11,7 @@ import type * as Matter from 'matter-js';
  * Body labels used for collision detection
  * These match the labels in PhysicsManager.js and enemy-factory.js
  */
-export type BodyLabel = 
+export type BodyLabel =
   | 'player'
   | 'finn_torso'
   | 'finn_head'

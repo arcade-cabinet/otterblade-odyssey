@@ -6,9 +6,6 @@
  * @module factories/interaction-factory
  */
 
-import { getMatterModules } from '../physics/matter-wrapper';
-
-
 /**
  * Build interactions for a chapter
  *

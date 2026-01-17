@@ -13,23 +13,19 @@ import {
   onCleanup,
   Show,
 } from 'solid-js';
-
-// ONE import - the entire game engine
-import {
-  initializeGame,
-  createPhysicsEngine,
-  createFinnBody,
-  createGameLoop,
-  initializeChapter,
-  PlayerController,
-  audioManager,
-  inputManager,
-  CHAPTER_FILES,
-} from './game-monolith';
-
 // DDL loader (second file)
 import LoadingScreen from './components/LoadingScreen';
 import TouchControls from './components/TouchControls';
+// ONE import - the entire game engine
+import {
+  audioManager,
+  createFinnBody,
+  createGameLoop,
+  createPhysicsEngine,
+  initializeChapter,
+  initializeGame,
+  PlayerController,
+} from './game-monolith';
 
 /**
  * Preload all game manifests using the DDL loader with progress tracking.
@@ -137,10 +133,10 @@ function OtterbladeGameContent() {
   const [maxHealth] = createSignal(5);
   const [warmth, setWarmth] = createSignal(100);
   const [maxWarmth] = createSignal(100);
-  const [shards, setShards] = createSignal(0);
+  const [shards, _setShards] = createSignal(0);
   const [gameStarted, setGameStarted] = createSignal(false);
-  const [questObjectives, setQuestObjectives] = createSignal([]);
-  const [activeQuest, setActiveQuest] = createSignal(null);
+  const [questObjectives, _setQuestObjectives] = createSignal([]);
+  const [activeQuest, _setActiveQuest] = createSignal(null);
 
   // Game state object for systems
   const gameStateObj = {
@@ -185,7 +181,7 @@ function OtterbladeGameContent() {
     // Load chapter manifest using DDL sync accessor (already preloaded)
     const { getChapterManifestSync } = await import('../ddl/loader');
     const manifest = getChapterManifestSync(currentChapter());
-    
+
     if (!manifest) {
       console.error('Failed to load chapter manifest');
       return;
@@ -291,32 +287,32 @@ function OtterbladeGameContent() {
           >
             Otterblade Odyssey
           </h1>
-        <h2
-          style={{
-            'font-size': '24px',
-            'margin-bottom': '40px',
-            color: '#F4D03F',
-          }}
-        >
-          A Redwall-inspired woodland epic
-        </h2>
-        <button
-          type="button"
-          onClick={() => setGameStarted(true)}
-          style={{
-            padding: '15px 40px',
-            'font-size': '20px',
-            background: '#E67E22',
-            color: 'white',
-            border: 'none',
-            'border-radius': '8px',
-            cursor: 'pointer',
-            'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
-          }}
-          disabled={manifestsLoaded.loading}
-        >
-          Begin Journey
-        </button>
+          <h2
+            style={{
+              'font-size': '24px',
+              'margin-bottom': '40px',
+              color: '#F4D03F',
+            }}
+          >
+            A Redwall-inspired woodland epic
+          </h2>
+          <button
+            type="button"
+            onClick={() => setGameStarted(true)}
+            style={{
+              padding: '15px 40px',
+              'font-size': '20px',
+              background: '#E67E22',
+              color: 'white',
+              border: 'none',
+              'border-radius': '8px',
+              cursor: 'pointer',
+              'box-shadow': '0 4px 8px rgba(0,0,0,0.3)',
+            }}
+            disabled={manifestsLoaded.loading}
+          >
+            Begin Journey
+          </button>
         </div>
       </Show>
 
@@ -339,7 +335,10 @@ function OtterbladeGameContent() {
           }}
         >
           <div style={{ 'font-size': '18px', 'margin-bottom': '10px', color: '#E67E22' }}>
-            <Show when={currentChapterManifest()} fallback={<span>Chapter {currentChapter()}</span>}>
+            <Show
+              when={currentChapterManifest()}
+              fallback={<span>Chapter {currentChapter()}</span>}
+            >
               Chapter {currentChapter()}: {currentChapterManifest().name}
             </Show>
           </div>

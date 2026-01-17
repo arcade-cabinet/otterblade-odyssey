@@ -1,16 +1,16 @@
 /**
  * Debug/Diagnostics System
- * 
+ *
  * Provides comprehensive debugging tools for isolated system testing.
  * Allows testing ANY game system independently without playing through the game.
- * 
+ *
  * Features:
  * - Entity spawner for all game elements
  * - Visual debugging (colliders, paths, states)
  * - Performance monitoring
  * - System isolation modes
  * - Screenshot-friendly test scenarios
- * 
+ *
  * @module debug/DebugSystem
  */
 
@@ -34,9 +34,9 @@ export class DebugSystem {
       'health-pickup',
       'platform-stone',
       'hazard-spikes',
-      'particle-spark'
+      'particle-spark',
     ];
-    
+
     if (this.enabled) {
       this.setupKeyboardShortcuts();
       console.log('[Debug] Debug system enabled. Press F1 for help.');
@@ -47,9 +47,11 @@ export class DebugSystem {
    * Check if running in development mode
    */
   isDevMode() {
-    return import.meta.env?.DEV || 
-           import.meta.env?.MODE === 'development' ||
-           window.location.hostname === 'localhost';
+    return (
+      import.meta.env?.DEV ||
+      import.meta.env?.MODE === 'development' ||
+      window.location.hostname === 'localhost'
+    );
   }
 
   /**
@@ -110,7 +112,7 @@ export class DebugSystem {
   toggleOverlay() {
     this.overlayVisible = !this.overlayVisible;
     console.log(`[Debug] Overlay ${this.overlayVisible ? 'ON' : 'OFF'}`);
-    
+
     if (this.overlayVisible) {
       this.showHelp();
     }
@@ -209,9 +211,9 @@ ENTITY SPAWNERS:
     const entity = this.testEntities[this.currentTestEntity];
     const x = this.game.mouseX || 400;
     const y = this.game.mouseY || 300;
-    
+
     console.log(`[Debug] Spawning ${entity} at (${x}, ${y})`);
-    
+
     // Route to appropriate spawner
     if (entity === 'finn') {
       this.spawnFinn(x, y);
@@ -239,10 +241,10 @@ ENTITY SPAWNERS:
       console.log('[Debug] No player to teleport');
       return;
     }
-    
+
     const x = this.game.mouseX || 400;
     const y = this.game.mouseY || 300;
-    
+
     // Use Matter.js Body.setPosition
     if (this.game.Matter && this.game.player.body) {
       this.game.Matter.Body.setPosition(this.game.player.body, { x, y });
@@ -258,7 +260,7 @@ ENTITY SPAWNERS:
     const current = this.game.weather || 'none';
     const index = weathers.indexOf(current);
     const next = weathers[(index + 1) % weathers.length];
-    
+
     this.game.weather = next;
     console.log(`[Debug] Weather: ${next}`);
   }
@@ -426,7 +428,7 @@ ENTITY SPAWNERS:
   renderColliders(ctx) {
     ctx.strokeStyle = '#00ff00';
     ctx.lineWidth = 2;
-    
+
     // Will draw all physics bodies when integrated
   }
 
@@ -436,7 +438,7 @@ ENTITY SPAWNERS:
   renderAIVisuals(ctx) {
     ctx.strokeStyle = '#ff00ff';
     ctx.lineWidth = 1;
-    
+
     // Will draw AI paths and states when integrated
   }
 
@@ -447,7 +449,7 @@ ENTITY SPAWNERS:
     ctx.strokeStyle = '#ffff00';
     ctx.fillStyle = 'rgba(255, 255, 0, 0.1)';
     ctx.lineWidth = 2;
-    
+
     // Will draw trigger zones when integrated
   }
 
@@ -457,7 +459,7 @@ ENTITY SPAWNERS:
   renderPerformanceStats(ctx) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(10, 10, 200, 100);
-    
+
     ctx.fillStyle = '#00ff00';
     ctx.font = '12px monospace';
     ctx.fillText(`FPS: ${Math.round(this.game.fps || 60)}`, 20, 30);
@@ -471,7 +473,7 @@ ENTITY SPAWNERS:
   renderOverlay(ctx) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(0, 0, 300, 150);
-    
+
     ctx.fillStyle = '#00ff00';
     ctx.font = '14px monospace';
     ctx.fillText('DEBUG MODE - Press F1 for help', 10, 30);

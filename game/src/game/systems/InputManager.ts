@@ -31,7 +31,7 @@ interface TouchState {
  */
 class InputManager implements InputSystem {
   name = 'InputManager';
-  
+
   // Private internal state
   private keys: Record<string, boolean> = {};
   private gamepadInstance: Gamepad | null = null;
@@ -120,7 +120,7 @@ class InputManager implements InputSystem {
    * Update input state from all sources
    * Call this once per frame
    */
-  update(deltaTime?: number): void {
+  update(_deltaTime?: number): void {
     // Store previous state for edge detection
     this.prevState = { ...this.state };
 
@@ -181,7 +181,7 @@ class InputManager implements InputSystem {
     this.state.interact = gp.buttons[1]?.pressed ?? false; // B / Circle
     this.state.attack = gp.buttons[2]?.pressed ?? false; // X / Square
     this.state.pause = gp.buttons[9]?.pressed ?? false; // Start
-    
+
     this.gamepad.jump = this.state.jump;
     this.gamepad.attack = this.state.attack;
   }
@@ -305,9 +305,7 @@ class InputManager implements InputSystem {
 }
 
 // Export singleton instance (lazy initialization for SSR compatibility)
-let _instance: InputManager | null = null;
-export const inputManager = typeof window !== 'undefined' 
-  ? new InputManager() 
-  : null;
+const _instance: InputManager | null = null;
+export const inputManager = typeof window !== 'undefined' ? new InputManager() : null;
 
 export default InputManager;

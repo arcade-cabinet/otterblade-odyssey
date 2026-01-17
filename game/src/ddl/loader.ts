@@ -173,7 +173,13 @@ const CHAPTER_FILENAMES: Record<number, string> = {
  * ```
  */
 export async function loadChapterManifest(chapterId: number): Promise<ChapterManifest> {
-  if (typeof chapterId !== 'number' || Number.isNaN(chapterId) || chapterId < 0 || chapterId > 9 || !Number.isInteger(chapterId)) {
+  if (
+    typeof chapterId !== 'number' ||
+    Number.isNaN(chapterId) ||
+    chapterId < 0 ||
+    chapterId > 9 ||
+    !Number.isInteger(chapterId)
+  ) {
     throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-9.`);
   }
 
@@ -190,7 +196,7 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
   // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
   const fetchPath = `/data/manifests/${path}`;
 
-  let rawData;
+  let rawData: unknown;
   try {
     const response = await fetch(fetchPath);
 
