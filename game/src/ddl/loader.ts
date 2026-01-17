@@ -179,7 +179,13 @@ export const TOTAL_CHAPTERS = Object.keys(CHAPTER_FILENAMES).length;
  * ```
  */
 export async function loadChapterManifest(chapterId: number): Promise<ChapterManifest> {
-  if (typeof chapterId !== 'number' || Number.isNaN(chapterId) || chapterId < 0 || chapterId >= TOTAL_CHAPTERS || !Number.isInteger(chapterId)) {
+  if (
+    typeof chapterId !== 'number' ||
+    Number.isNaN(chapterId) ||
+    chapterId < 0 ||
+    chapterId >= TOTAL_CHAPTERS ||
+    !Number.isInteger(chapterId)
+  ) {
     throw new Error(`Invalid chapter ID: ${chapterId}. Must be 0-${TOTAL_CHAPTERS - 1}.`);
   }
 

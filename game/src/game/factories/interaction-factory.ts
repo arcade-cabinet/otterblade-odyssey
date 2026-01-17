@@ -14,12 +14,28 @@ export function buildInteractionsAndCollectibles(
   manifest: ChapterManifest,
   engine: Matter.Engine
 ): {
-  interactions: Array<{ body: Matter.Body; def: ChapterManifest['interactions'][number]; state: string | null }>;
-  collectibles: Array<{ body: Matter.Body; def: ChapterManifest['collectibles'][number]; collected: boolean }>;
+  interactions: Array<{
+    body: Matter.Body;
+    def: ChapterManifest['interactions'][number];
+    state: string | null;
+  }>;
+  collectibles: Array<{
+    body: Matter.Body;
+    def: ChapterManifest['collectibles'][number];
+    collected: boolean;
+  }>;
 } {
   const { World, Bodies } = getMatterModules();
-  const interactions: Array<{ body: Matter.Body; def: ChapterManifest['interactions'][number]; state: string | null }> = [];
-  const collectibles: Array<{ body: Matter.Body; def: ChapterManifest['collectibles'][number]; collected: boolean }> = [];
+  const interactions: Array<{
+    body: Matter.Body;
+    def: ChapterManifest['interactions'][number];
+    state: string | null;
+  }> = [];
+  const collectibles: Array<{
+    body: Matter.Body;
+    def: ChapterManifest['collectibles'][number];
+    collected: boolean;
+  }> = [];
 
   if (manifest.interactions) {
     for (const interactionDef of manifest.interactions) {

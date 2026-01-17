@@ -1,16 +1,16 @@
 /**
  * DDL Manifest Type Definitions
- * 
+ *
  * TypeScript types derived from Zod schemas in manifest-schemas.ts
  * These types ensure type safety when loading and using chapter manifests
  */
 
-import { z } from 'zod';
-import type { 
+import type { z } from 'zod';
+import type {
+  ConnectionsSchema,
+  NarrativeSchema,
   Position2DSchema,
   RegionSchema,
-  NarrativeSchema,
-  ConnectionsSchema,
 } from '../data/manifest-schemas';
 
 /**
@@ -21,7 +21,7 @@ export interface ChapterManifest {
   id: number;
   name: string;
   location: string;
-  
+
   narrative: {
     theme: string;
     quest: string;
@@ -38,7 +38,7 @@ export interface ChapterManifest {
       expression: string;
     }>;
   };
-  
+
   connections: {
     previousChapter: number | null;
     nextChapter: number | null;
@@ -59,7 +59,7 @@ export interface ChapterManifest {
       value: string | number;
     }>;
   };
-  
+
   level: {
     bounds: {
       x: number;
@@ -94,7 +94,7 @@ export interface ChapterManifest {
       currentDirection?: { x: number; y: number };
     }>;
   };
-  
+
   npcs?: Array<{
     id: string;
     type: string;
@@ -103,7 +103,7 @@ export interface ChapterManifest {
     dialogue?: any;
     storyState?: any;
   }>;
-  
+
   encounters?: Array<{
     id: string;
     enemyType: string;
@@ -116,7 +116,7 @@ export interface ChapterManifest {
     alertRadius?: number;
     attackRange?: number;
   }>;
-  
+
   collectibles?: Array<{
     id: string;
     type: 'shard' | 'health' | 'key' | 'otterblade' | 'collectible';
@@ -124,7 +124,7 @@ export interface ChapterManifest {
     value?: number;
     required?: boolean;
   }>;
-  
+
   triggers?: Array<{
     id: string;
     type: 'cinematic' | 'checkpoint' | 'enemy_spawn' | 'dialogue' | 'chapter_transition';
@@ -133,7 +133,7 @@ export interface ChapterManifest {
     repeatable?: boolean;
     conditions?: any;
   }>;
-  
+
   cinematics?: Array<{
     id: string;
     triggerId?: string;
@@ -143,7 +143,7 @@ export interface ChapterManifest {
       [key: string]: any;
     }>;
   }>;
-  
+
   quests?: Array<{
     id: string;
     objectives: Array<{
@@ -154,7 +154,7 @@ export interface ChapterManifest {
       condition?: any;
     }>;
   }>;
-  
+
   settings?: {
     ambientSound?: string;
     musicTrack?: string;
@@ -179,7 +179,7 @@ export interface EnemyManifest {
   id: string;
   name: string;
   description: string;
-  
+
   stats: {
     health: number;
     damage: number;
@@ -189,21 +189,21 @@ export interface EnemyManifest {
     width: number;
     height: number;
   };
-  
+
   behavior: {
     defaultBehavior: 'patrol' | 'stationary' | 'aggressive' | 'defensive' | 'coward';
     patrolSpeed?: number;
     chaseSpeed?: number;
     fleeHealthThreshold?: number;
   };
-  
+
   rendering: {
     color: string;
     secondaryColor?: string;
     size: { width: number; height: number };
     features?: string[];
   };
-  
+
   sounds?: {
     alert?: string;
     attack?: string;
@@ -217,25 +217,34 @@ export interface EnemyManifest {
  * Defines all game sounds
  */
 export interface SoundManifest {
-  music: Record<string, {
-    id: string;
-    file: string;
-    volume: number;
-    loop: boolean;
-  }>;
-  
-  sfx: Record<string, {
-    id: string;
-    file: string;
-    volume: number;
-  }>;
-  
-  ambient: Record<string, {
-    id: string;
-    file: string;
-    volume: number;
-    loop: boolean;
-  }>;
+  music: Record<
+    string,
+    {
+      id: string;
+      file: string;
+      volume: number;
+      loop: boolean;
+    }
+  >;
+
+  sfx: Record<
+    string,
+    {
+      id: string;
+      file: string;
+      volume: number;
+    }
+  >;
+
+  ambient: Record<
+    string,
+    {
+      id: string;
+      file: string;
+      volume: number;
+      loop: boolean;
+    }
+  >;
 }
 
 /**

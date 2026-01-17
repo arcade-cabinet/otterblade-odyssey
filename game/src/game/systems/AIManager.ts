@@ -4,6 +4,7 @@
  * Implements proper AI system per CLAUDE.md line 61 and docs/AI.md
  */
 
+import type * as Matter from 'matter-js';
 import {
   EntityManager,
   FleeBehavior,
@@ -17,8 +18,7 @@ import {
   Vehicle,
   WanderBehavior,
 } from 'yuka';
-import type { AISystem, PatrolZone } from '../types/systems';
-import type * as Matter from 'matter-js';
+import type { PatrolZone } from '../types/systems';
 
 /**
  * Enemy vehicle interface extending YUKA Vehicle
@@ -387,9 +387,35 @@ class EnemyAI extends Vehicle {
 }
 
 /**
+ * NPC AI entity interface
+ */
+export interface NPCAIEntity {
+  uuid: string;
+  npcType: string;
+  position: Vector3;
+  behaviorType: string;
+  patrolPath: Array<{ x: number; y: number }>;
+  currentWaypoint: number;
+  currentAnimation: string;
+  facingDirection: number;
+  canInteract: boolean;
+  interactRadius: number;
+  storyState: string;
+  storyStates: Record<string, unknown>;
+  interaction?: unknown;
+  followTarget: { position: Vector3 } | null;
+  followDistance: number;
+  followSpeed: number;
+  stoppingDistance: number;
+  update(delta: number): void;
+  triggerInteraction?(playerPosition: { x: number; y: number }): void;
+  updateStoryState?(newState: string): void;
+}
+
+/**
  * NPC AI entity
  */
-class NPCAI {
+class NPCAI implements NPCAIEntity {
   constructor(config) {
     this.uuid = config.id;
     this.npcType = config.type;

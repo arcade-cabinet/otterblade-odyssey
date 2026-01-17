@@ -1,6 +1,6 @@
 /**
  * System Type Definitions
- * 
+ *
  * Inspired by Phaser3 Matter.js BitECS example (/tmp/Matter.ts)
  * Defines interfaces for game systems following the modular pattern
  */
@@ -72,7 +72,7 @@ export interface InputSystem extends GameSystem {
     active: boolean;
     joystick: { x: number; y: number } | null;
   };
-  
+
   // Methods
   isPressed(key: string): boolean;
   isHeld(key: string): boolean;
@@ -118,8 +118,14 @@ export interface AISystem extends GameSystem {
  * Manages game sounds using Howler.js
  */
 export interface AudioSystem extends GameSystem {
-  playSound(soundId: string, options?: { rate?: number; volume?: number; sprite?: string }): number | null;
-  playSFX(soundId: string, options?: { rate?: number; volume?: number; sprite?: string }): number | null;
+  playSound(
+    soundId: string,
+    options?: { rate?: number; volume?: number; sprite?: string }
+  ): number | null;
+  playSFX(
+    soundId: string,
+    options?: { rate?: number; volume?: number; sprite?: string }
+  ): number | null;
   playMusic(trackId: string, crossfade?: boolean): void;
   stopMusic(): void;
   setVolume(category: 'master' | 'music' | 'sfx' | 'ambient', value: number): void;
@@ -154,8 +160,22 @@ export interface PlayerReference {
  */
 export interface BossAI {
   isDead: boolean;
-  projectiles: Array<{ x: number; y: number; vx: number; vy: number; damage: number; warmthDrain?: number }>;
-  hazardZones: Array<{ x: number; y: number; width: number; height: number; damage: number; warmthDrain: number }>;
+  projectiles: Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    damage: number;
+    warmthDrain?: number;
+  }>;
+  hazardZones: Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    damage: number;
+    warmthDrain: number;
+  }>;
   update(deltaTime: number): void;
   selectAndExecuteAttack(): void;
   updateTarget?: (position: { x: number; y: number }, hp: number, maxHp: number) => void;
@@ -173,7 +193,10 @@ export interface LanternSystem {
     lit: boolean;
     warmth: number;
   }>;
-  lightLantern(lantern: { body: Matter.Body; lit: boolean }, context: { player: Matter.Body }): boolean;
+  lightLantern(
+    lantern: { body: Matter.Body; lit: boolean },
+    context: { player: Matter.Body }
+  ): boolean;
 }
 
 /**
@@ -252,7 +275,9 @@ export interface GameState {
   getTimeScale?: () => number;
   updateTimeScale?: (now: number) => void;
   isPaused?: () => boolean;
-  getCameraPan?: (now: number) => { target: { x: number; y: number }; startTime: number; duration: number } | null;
+  getCameraPan?: (
+    now: number
+  ) => { target: { x: number; y: number }; startTime: number; duration: number } | null;
 }
 
 /**
@@ -277,11 +302,19 @@ export interface GameLoopParams {
   hearthSystem: HearthSystem;
   hazardSystem: HazardSystem;
   movingPlatforms: Array<{ update: (delta: number) => void }>;
-  waterZones: Array<{ applyToBody: (body: Matter.Body, deltaTime: number, gameState: GameState) => void }>;
+  waterZones: Array<{
+    applyToBody: (body: Matter.Body, deltaTime: number, gameState: GameState) => void;
+  }>;
   flowPuzzles: FlowPuzzle[];
   timingSequences: TimingSequence[];
   gameStateObj: GameState;
-  renderScene: (ctx: CanvasRenderingContext2D, camera: Camera, animFrame: number, playerFacing: number, bossAI: BossAI | null) => void;
+  renderScene: (
+    ctx: CanvasRenderingContext2D,
+    camera: Camera,
+    animFrame: number,
+    playerFacing: number,
+    bossAI: BossAI | null
+  ) => void;
   triggerSystem?: TriggerSystem;
 }
 

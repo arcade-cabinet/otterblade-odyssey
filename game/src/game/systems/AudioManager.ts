@@ -6,8 +6,8 @@
  */
 
 import { Howl, Howler } from 'howler';
-import type { AudioSystem } from '../types/systems';
 import type { SoundManifest } from '../types/manifests';
+import type { AudioSystem } from '../types/systems';
 
 /**
  * Volume configuration
@@ -24,7 +24,7 @@ interface VolumeConfig {
  */
 class AudioManager implements AudioSystem {
   name = 'AudioManager';
-  
+
   music: Map<string, Howl> = new Map();
   sfx: Map<string, Howl> = new Map();
   ambience: Map<string, Howl> = new Map();
@@ -64,9 +64,9 @@ class AudioManager implements AudioSystem {
         console.warn(`Failed to load sound manifest from ${manifestPath}, using defaults`);
         return;
       }
-      
+
       const manifest: SoundManifest = await response.json();
-      
+
       // Load SFX from manifest
       if (manifest.sfx) {
         for (const [id, sound] of Object.entries(manifest.sfx)) {
@@ -77,7 +77,7 @@ class AudioManager implements AudioSystem {
           this.sfx.set(id, howl);
         }
       }
-      
+
       // Load music from manifest
       if (manifest.music) {
         for (const [id, musicTrack] of Object.entries(manifest.music)) {
@@ -89,7 +89,7 @@ class AudioManager implements AudioSystem {
           this.music.set(id, howl);
         }
       }
-      
+
       // Load ambient sounds from manifest
       if (manifest.ambient) {
         for (const [id, ambientSound] of Object.entries(manifest.ambient)) {
@@ -101,7 +101,6 @@ class AudioManager implements AudioSystem {
           this.ambience.set(id, howl);
         }
       }
-      
     } catch (error) {
       console.error('Error loading sound manifest:', error);
     }
@@ -111,7 +110,20 @@ class AudioManager implements AudioSystem {
    * Load chapter-specific audio from DDL manifest
    * Fully DDL-compliant: loads complete paths from manifest, no hardcoded paths
    */
-  loadChapterAudio(manifest: { media?: { musicTracks?: Record<string, { file: string; alternates?: string[]; volume?: number; loop?: boolean }>; ambientSounds?: Array<{ file: string; alternates?: string[]; volume?: number; loop?: boolean }> } }): void {
+  loadChapterAudio(manifest: {
+    media?: {
+      musicTracks?: Record<
+        string,
+        { file: string; alternates?: string[]; volume?: number; loop?: boolean }
+      >;
+      ambientSounds?: Array<{
+        file: string;
+        alternates?: string[];
+        volume?: number;
+        loop?: boolean;
+      }>;
+    };
+  }): void {
     if (!manifest.media) {
       console.warn('No media section in chapter manifest');
       return;
@@ -136,7 +148,11 @@ class AudioManager implements AudioSystem {
     // Load ambient sounds from DDL format - uses complete file paths from manifest
     if (manifest.media.ambientSounds) {
       for (const ambient of manifest.media.ambientSounds) {
-        const id = ambient.file.split('/').pop()?.replace(/\.[^/.]+$/, '') || 'unknown';
+        const id =
+          ambient.file
+            .split('/')
+            .pop()
+            ?.replace(/\.[^/.]+$/, '') || 'unknown';
         if (!this.ambience.has(id)) {
           this.ambience.set(
             id,
@@ -217,7 +233,10 @@ class AudioManager implements AudioSystem {
   /**
    * Play sound effect
    */
-  playSFX(soundId: string, options: { rate?: number; volume?: number; sprite?: string } = {}): number | null {
+  playSFX(
+    soundId: string,
+    options: { rate?: number; volume?: number; sprite?: string } = {}
+  ): number | null {
     const sound = this.sfx.get(soundId);
     if (!sound) {
       console.warn(`SFX not found: ${soundId}`);
@@ -244,7 +263,10 @@ class AudioManager implements AudioSystem {
   /**
    * Alias for playSFX (used by legacy call sites)
    */
-  playSound(soundId: string, options: { rate?: number; volume?: number; sprite?: string } = {}): number | null {
+  playSound(
+    soundId: string,
+    options: { rate?: number; volume?: number; sprite?: string } = {}
+  ): number | null {
     return this.playSFX(soundId, options);
   }
 
@@ -350,7 +372,7 @@ class AudioManager implements AudioSystem {
   /**
    * Update method required by AudioSystem interface
    */
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     // Audio system doesn't need frame updates
     // All audio is event-driven through Howler.js
   }

@@ -8,6 +8,16 @@
 import type * as Matter from 'matter-js';
 import { getMatterModules } from '../physics/matter-wrapper';
 
+/**
+ * Type guard to check if a body has a triggerId
+ */
+function hasTriggerId(body: Matter.Body): body is Matter.Body & { triggerId: string } {
+  return (
+    'triggerId' in body &&
+    typeof (body as Matter.Body & { triggerId?: string }).triggerId === 'string'
+  );
+}
+
 export interface TriggerAction {
   type: string;
   target?: string;
@@ -66,11 +76,7 @@ export class TriggerSystem {
   private triggers: TriggerEntry[] = [];
   private activeTriggers = new Set<string>();
 
-  constructor(
-    engine: Matter.Engine,
-    player: Matter.Body,
-    handlers: TriggerActionHandlers
-  ) {
+  constructor(engine: Matter.Engine, player: Matter.Body, handlers: TriggerActionHandlers) {
     this.engine = engine;
     this.player = player;
     this.handlers = handlers;
@@ -80,14 +86,12 @@ export class TriggerSystem {
       for (const pair of event.pairs) {
         const { bodyA, bodyB } = pair;
         if (bodyA === this.player && bodyB.label === 'trigger') {
-          const triggerId = (bodyB as any).triggerId;
-          if (triggerId) {
-            this.activeTriggers.add(triggerId);
+          if (hasTriggerId(bodyB)) {
+            this.activeTriggers.add(bodyB.triggerId);
           }
         } else if (bodyB === this.player && bodyA.label === 'trigger') {
-          const triggerId = (bodyA as any).triggerId;
-          if (triggerId) {
-            this.activeTriggers.add(triggerId);
+          if (hasTriggerId(bodyA)) {
+            this.activeTriggers.add(bodyA.triggerId);
           }
         }
       }
@@ -97,14 +101,12 @@ export class TriggerSystem {
       for (const pair of event.pairs) {
         const { bodyA, bodyB } = pair;
         if (bodyA === this.player && bodyB.label === 'trigger') {
-          const triggerId = (bodyB as any).triggerId;
-          if (triggerId) {
-            this.activeTriggers.delete(triggerId);
+          if (hasTriggerId(bodyB)) {
+            this.activeTriggers.delete(bodyB.triggerId);
           }
         } else if (bodyB === this.player && bodyA.label === 'trigger') {
-          const triggerId = (bodyA as any).triggerId;
-          if (triggerId) {
-            this.activeTriggers.delete(triggerId);
+          if (hasTriggerId(bodyA)) {
+            this.activeTriggers.delete(bodyA.triggerId);
           }
         }
       }
@@ -186,32 +188,26 @@ export class TriggerSystem {
       case 'enter_region':
         trigger.wasActive = this.activeTriggers.has(trigger.id);
         return this.activeTriggers.has(trigger.id);
-      case 'exit_region':
-        {
-          const wasActive = !!trigger.wasActive;
-          const isActive = this.activeTriggers.has(trigger.id);
-          trigger.wasActive = isActive;
-          return wasActive && !isActive;
-        }
+      case 'exit_region': {
+        const wasActive = !!trigger.wasActive;
+        const isActive = this.activeTriggers.has(trigger.id);
+        trigger.wasActive = isActive;
+        return wasActive && !isActive;
+      }
       case 'timer':
         return this.checkTimerCondition(trigger, gameState);
       case 'quest_complete':
         return this.checkQuestCompleteCondition(trigger, gameState);
       case 'collect_item':
         return this.checkCollectItemCondition(trigger, gameState);
-      case 'interact':
-      case 'defeat_enemies':
-      case 'npc_dialogue':
       default:
         return false;
     }
   }
 
-  private checkTimerCondition(
-    trigger: TriggerEntry,
-    gameState: { gameTime?: number }
-  ): boolean {
-    const duration = typeof trigger.condition?.duration === 'number' ? trigger.condition.duration : 0;
+  private checkTimerCondition(trigger: TriggerEntry, gameState: { gameTime?: number }): boolean {
+    const duration =
+      typeof trigger.condition?.duration === 'number' ? trigger.condition.duration : 0;
     if (!trigger.wasActive) {
       trigger.wasActive = true;
       (trigger as any).timerStart = gameState.gameTime || performance.now();
@@ -300,7 +296,11 @@ export class TriggerSystem {
       return;
     }
 
-    if (type === 'interaction_state' && typeof target === 'string' && typeof action.value === 'string') {
+    if (
+      type === 'interaction_state' &&
+      typeof target === 'string' &&
+      typeof action.value === 'string'
+    ) {
       this.handlers.setInteractionState(target, action.value);
       return;
     }

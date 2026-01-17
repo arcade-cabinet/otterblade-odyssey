@@ -3,22 +3,22 @@
  * Renders the 2.5D platformer world
  */
 
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { EngineView, useEngine } from '@babylonjs/react-native';
 import {
-  Scene,
   ArcRotateCamera,
-  HemisphericLight,
-  Vector3,
+  type Camera,
   Color3,
   Color4,
+  HemisphericLight,
   MeshBuilder,
+  Scene,
   StandardMaterial,
-  Camera,
+  Vector3,
 } from '@babylonjs/core';
+import { EngineView, useEngine } from '@babylonjs/react-native';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
-import { createFinnMesh, animateFinn } from '../rendering/finn';
+import { animateFinn, createFinnMesh } from '../rendering/finn';
 import { useStore } from '../store/gameStore';
 
 export function GameScene() {
@@ -41,9 +41,9 @@ export function GameScene() {
       // Camera - fixed 2.5D side view
       const cam = new ArcRotateCamera(
         'camera',
-        -Math.PI / 2,  // Alpha - side view
+        -Math.PI / 2, // Alpha - side view
         Math.PI / 2.5, // Beta - slight angle from above
-        8,             // Radius
+        8, // Radius
         new Vector3(0, 1, 0),
         scene
       );
@@ -57,10 +57,14 @@ export function GameScene() {
       light.groundColor = new Color3(0.3, 0.25, 0.2);
 
       // Ground plane
-      const ground = MeshBuilder.CreateGround('ground', {
-        width: 20,
-        height: 6,
-      }, scene);
+      const ground = MeshBuilder.CreateGround(
+        'ground',
+        {
+          width: 20,
+          height: 6,
+        },
+        scene
+      );
       ground.position.y = 0;
 
       const groundMat = new StandardMaterial('ground-mat', scene);
@@ -103,18 +107,16 @@ export function GameScene() {
   );
 }
 
-function createPlatform(
-  scene: Scene,
-  x: number,
-  y: number,
-  width: number,
-  height: number
-): void {
-  const platform = MeshBuilder.CreateBox(`platform-${x}-${y}`, {
-    width: width,
-    height: height,
-    depth: 2,
-  }, scene);
+function createPlatform(scene: Scene, x: number, y: number, width: number, height: number): void {
+  const platform = MeshBuilder.CreateBox(
+    `platform-${x}-${y}`,
+    {
+      width: width,
+      height: height,
+      depth: 2,
+    },
+    scene
+  );
   platform.position = new Vector3(x, y, 0);
 
   const mat = new StandardMaterial(`platform-mat-${x}-${y}`, scene);

@@ -3,18 +3,10 @@
  * Mobile-first 2.5D platformer
  */
 
-import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
-
-import { GameScene } from './src/scene/GameScene';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { HUD } from './src/components/HUD';
+import { GameScene } from './src/scene/GameScene';
 import { useStore } from './src/store/gameStore';
 
 function StartScreen({ onStart }: { onStart: () => void }) {

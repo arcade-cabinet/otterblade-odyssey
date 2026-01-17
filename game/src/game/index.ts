@@ -4,27 +4,29 @@
  * Consolidates TypeScript modules into single import interface
  */
 
-// Physics & initialization
-export { initializeMatter as initializeGame } from './physics/matter-wrapper';
-export { createPhysicsEngine, createFinnBody } from './physics/PhysicsManager';
-
 // Game loop and rendering
 export { createGameLoop } from './engine/gameLoop';
-
+// Physics & initialization
+export { initializeMatter as initializeGame } from './physics/matter-wrapper';
+export { createFinnBody, createPhysicsEngine } from './physics/PhysicsManager';
+// Player
+export { PlayerController } from './player/PlayerController';
+export { aiManager } from './systems/AIManager';
 // Game systems (singletons)
 export { audioManager } from './systems/AudioManager';
 export { inputManager } from './systems/InputManager';
-export { aiManager } from './systems/AIManager';
 
-// Player
-export { PlayerController } from './player/PlayerController';
-
+import type * as Matter from 'matter-js';
+import { buildEnemies } from './factories/enemy-factory';
 // Level building
 import { buildLevel } from './factories/level-factory';
-import { buildEnemies } from './factories/enemy-factory';
-import type * as Matter from 'matter-js';
 
-export function initializeChapter(chapterId: number, manifest: any, engine: Matter.Engine, gameState: any) {
+export function initializeChapter(
+  chapterId: number,
+  _manifest: unknown,
+  engine: Matter.Engine,
+  _gameState: unknown
+) {
   // Build level (platforms, walls, hazards, etc.)
   const level = buildLevel(chapterId, engine);
 

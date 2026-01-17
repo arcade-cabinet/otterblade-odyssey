@@ -4,8 +4,8 @@
  */
 
 import { Vector3 } from 'yuka';
-import { PerceptiveEntity } from './PerceptionSystem';
 import type { AudioSystem } from '../types/systems';
+import { PerceptiveEntity } from './PerceptionSystem';
 
 interface BossTarget {
   position: Vector3;
@@ -349,7 +349,11 @@ export class ZephyrosAI extends PerceptiveEntity {
     color: string;
   }>;
 
-  constructor(config: BossConfig, gameState: GameStateHandlers | null, audioManager: AudioSystem | null) {
+  constructor(
+    config: BossConfig,
+    gameState: GameStateHandlers | null,
+    audioManager: AudioSystem | null
+  ) {
     super({
       fieldOfView: Math.PI,
       visionRange: 500,
@@ -502,7 +506,9 @@ export class ZephyrosAI extends PerceptiveEntity {
     const defensive = patterns.filter(
       (pattern) => pattern.name.includes('Zone') || pattern.name.includes('Pillar')
     );
-    return defensive.length > 0 ? defensive[Math.floor(Math.random() * defensive.length)] : patterns[0];
+    return defensive.length > 0
+      ? defensive[Math.floor(Math.random() * defensive.length)]
+      : patterns[0];
   }
 
   private updateProjectiles(delta: number): void {

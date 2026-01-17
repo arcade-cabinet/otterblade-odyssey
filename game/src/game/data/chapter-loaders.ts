@@ -7,12 +7,12 @@
  * before using the sync helpers to ensure data is cached.
  */
 
-import type { ChapterManifest, ChapterNPC } from './manifest-schemas';
 import {
-  getChapterManifestSync,
   loadChapterManifest as fetchChapterManifest,
+  getChapterManifestSync,
   TOTAL_CHAPTERS,
 } from '../../ddl/loader';
+import type { ChapterManifest, ChapterNPC } from './manifest-schemas';
 
 /**
  * Loads and validates a chapter manifest by ID.

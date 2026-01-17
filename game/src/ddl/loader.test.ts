@@ -3,31 +3,33 @@
  * Tests cover caching, validation, error handling, and all manifest types
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  loadChapterManifest,
-  getChapterManifestSync,
-  loadEnemiesManifest,
-  getEnemiesManifestSync,
-  loadNPCsManifest,
-  getNPCsManifestSync,
-  loadSpritesManifest,
-  loadCinematicsManifest,
-  loadSoundsManifest,
-  loadEffectsManifest,
-  loadItemsManifest,
-  loadScenesManifest,
-  loadChapterPlatesManifest,
-  preloadManifests,
+  ALL_CHAPTER_IDS,
   clearManifestCache,
   getCacheStats,
+  getChapterManifestSync,
+  getEnemiesManifestSync,
+  getNPCsManifestSync,
   isValidChapterId,
-  ALL_CHAPTER_IDS,
+  loadChapterManifest,
+  loadChapterPlatesManifest,
+  loadCinematicsManifest,
+  loadEffectsManifest,
+  loadEnemiesManifest,
+  loadItemsManifest,
+  loadNPCsManifest,
+  loadScenesManifest,
+  loadSoundsManifest,
+  loadSpritesManifest,
+  preloadManifests,
   TOTAL_CHAPTERS,
 } from './loader';
 
-// Mock fetch globally
-global.fetch = vi.fn();
+// Mock fetch globally with proper typing
+const mockFetch = vi.fn() as Mock;
+global.fetch = mockFetch;
 
 describe('DDL Loader - Cache Management', () => {
   beforeEach(() => {
@@ -79,7 +81,7 @@ describe('DDL Loader - Cache Management', () => {
       },
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     });
@@ -129,7 +131,7 @@ describe('DDL Loader - Cache Management', () => {
       },
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     });
@@ -149,7 +151,7 @@ describe('DDL Loader - Cache Management', () => {
       assets: [],
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     });
@@ -172,7 +174,9 @@ describe('DDL Loader - Chapter Loading', () => {
     await expect(loadChapterManifest(-1)).rejects.toThrow('Invalid chapter ID: -1');
     await expect(loadChapterManifest(10)).rejects.toThrow('Invalid chapter ID: 10');
     await expect(loadChapterManifest(NaN)).rejects.toThrow('Invalid chapter ID');
-    await expect(loadChapterManifest('foo' as any)).rejects.toThrow('Invalid chapter ID');
+    await expect(loadChapterManifest('foo' as unknown as number)).rejects.toThrow(
+      'Invalid chapter ID'
+    );
   });
 
   it('should validate chapter ID helper', () => {
@@ -190,7 +194,7 @@ describe('DDL Loader - Chapter Loading', () => {
   });
 
   it('should throw error for 404 responses', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
       statusText: 'Not Found',
@@ -202,7 +206,7 @@ describe('DDL Loader - Chapter Loading', () => {
   });
 
   it('should throw error for invalid JSON', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => {
         throw new SyntaxError('Unexpected token');
@@ -213,7 +217,7 @@ describe('DDL Loader - Chapter Loading', () => {
   });
 
   it('should throw error for network failures', async () => {
-    (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
     await expect(loadChapterManifest(0)).rejects.toThrow('Failed to load manifest');
   });
@@ -237,7 +241,7 @@ describe('DDL Loader - Schema Validation', () => {
       // Missing name, location, narrative, etc.
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => invalidData,
     });
@@ -257,7 +261,7 @@ describe('DDL Loader - Schema Validation', () => {
       environment: {},
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => invalidData,
     });
@@ -271,7 +275,7 @@ describe('DDL Loader - Schema Validation', () => {
       assets: [],
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => invalidData,
     });
@@ -290,7 +294,7 @@ describe('DDL Loader - Schema Validation', () => {
       ],
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => invalidData,
     });
@@ -307,7 +311,7 @@ describe('DDL Loader - Schema Validation', () => {
       npcs: [],
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => invalidData,
     });
@@ -336,7 +340,7 @@ describe('DDL Loader - Entity Manifests', () => {
       ],
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     });
@@ -364,7 +368,7 @@ describe('DDL Loader - Entity Manifests', () => {
       npcs: [],
     };
 
-    (global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => mockData,
     });
@@ -388,9 +392,9 @@ describe('DDL Loader - Asset Manifests', () => {
   });
 
   const testAssetManifest = (
-    loader: () => Promise<any>,
+    loader: () => Promise<unknown>,
     category: string,
-    filename: string
+    _filename: string
   ) => {
     it(`should load ${category} manifest`, async () => {
       const mockData = {
@@ -406,7 +410,7 @@ describe('DDL Loader - Asset Manifests', () => {
         ],
       };
 
-      (global.fetch as any).mockResolvedValueOnce({
+      mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockData,
       });
@@ -434,8 +438,8 @@ describe('DDL Loader - Preload System', () => {
 
   it('should preload all manifests in parallel', async () => {
     // Mock all manifests
-    (global.fetch as any).mockImplementation((url: string) => {
-      const mockData: any = {};
+    mockFetch.mockImplementation((url: string) => {
+      const mockData: Record<string, unknown> = {};
 
       if (url.includes('chapter-')) {
         mockData.id = 0;
@@ -495,7 +499,7 @@ describe('DDL Loader - Preload System', () => {
   });
 
   it('should support selective preloading', async () => {
-    (global.fetch as any).mockImplementation(() => {
+    mockFetch.mockImplementation(() => {
       return Promise.resolve({
         ok: true,
         json: async () => ({
@@ -517,7 +521,7 @@ describe('DDL Loader - Preload System', () => {
 
   it('should not throw on individual failures when throwOnError=false', async () => {
     let callCount = 0;
-    (global.fetch as any).mockImplementation(() => {
+    mockFetch.mockImplementation(() => {
       callCount++;
       if (callCount === 1) {
         // First call (chapter 0) fails
@@ -590,7 +594,7 @@ describe('DDL Loader - Preload System', () => {
       assets: [],
     };
 
-    (global.fetch as any).mockImplementation((url: string) => {
+    mockFetch.mockImplementation((url: string) => {
       if (url.includes('chapter-0')) {
         return Promise.resolve({
           ok: true,
