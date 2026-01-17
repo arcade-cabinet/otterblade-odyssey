@@ -7,7 +7,6 @@
   "assets": [
     {
       "type": "scene",
-      "type": "scene",
       "id": "parallax_village",
       "name": "Village Morning Parallax",
       "filename": "parallax/village_morning_parallax_background.png",
