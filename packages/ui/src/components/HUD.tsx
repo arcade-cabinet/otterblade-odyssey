@@ -16,10 +16,16 @@ interface HealthDisplayProps {
  * Health Hearts - Procedural 3D hearts following warm, storybook aesthetic
  */
 export function HealthDisplay({ current, max }: HealthDisplayProps) {
+  // Generate stable heart slots
+  const heartSlots = Array.from({ length: max }, (_, i) => ({
+    id: `heart-${i}`,
+    index: i,
+  }));
+
   return (
     <group position={[-8, 7, 0]}>
-      {Array.from({ length: max }, (_, i) => (
-        <HeartMesh key={`heart-slot-${i}`} filled={i < current} index={i} />
+      {heartSlots.map((slot) => (
+        <HeartMesh key={slot.id} filled={slot.index < current} index={slot.index} />
       ))}
     </group>
   );
