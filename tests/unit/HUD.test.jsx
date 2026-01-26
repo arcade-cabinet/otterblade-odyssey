@@ -1,7 +1,7 @@
 /** @jsxImportSource solid-js */
 import { render } from 'solid-js/web';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import HUD from '../../game/src/game/ui/HUD';
+import HUD from '../../apps/web/src/game/ui/HUD';
 
 describe('HUD Component', () => {
   let container;
