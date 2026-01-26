@@ -11,6 +11,7 @@ import { Player } from './Player';
 import { Level } from './Level';
 import { Enemies } from './Enemies';
 import { NPCs } from './NPCs';
+import { HUD } from '@otterblade/ui';
 
 interface GameSceneProps {
   chapterId: number;
@@ -18,6 +19,16 @@ interface GameSceneProps {
 }
 
 export function GameScene({ chapterId, onComplete }: GameSceneProps) {
+  // Example game state - would come from game store in real implementation
+  const gameState = {
+    health: 5,
+    maxHealth: 5,
+    warmth: 75,
+    maxWarmth: 100,
+    shards: 3,
+    chapterName: 'The Calling',
+  };
+
   return (
     <Canvas
       shadows
@@ -32,6 +43,17 @@ export function GameScene({ chapterId, onComplete }: GameSceneProps) {
           intensity={1}
           castShadow
           shadow-mapSize={[1024, 1024]}
+        />
+        
+        {/* HUD - Procedural 3D elements */}
+        <HUD
+          health={gameState.health}
+          maxHealth={gameState.maxHealth}
+          warmth={gameState.warmth}
+          maxWarmth={gameState.maxWarmth}
+          shards={gameState.shards}
+          chapterId={chapterId}
+          chapterName={gameState.chapterName}
         />
         
         <Physics gravity={[0, -9.81, 0]}>

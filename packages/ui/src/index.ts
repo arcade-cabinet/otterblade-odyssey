@@ -5,3 +5,4 @@
 
 export * from './branding/index.js';
 export * from './tokens/index.js';
+export * from './components/HUD.js';
