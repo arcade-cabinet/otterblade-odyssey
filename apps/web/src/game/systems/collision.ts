@@ -83,7 +83,10 @@ export function setupCollisionHandlers(
   setters: Setters,
   getters: Getters,
   controllers: Controllers
-): void {
+): {
+  collectibleMap: Map<number, { body: Matter.Body; def: any; collected: boolean }>;
+  interactionMap: Map<number, { body: Matter.Body; def: any; state: string | null }>;
+} {
   const { Events } = Matter;
   const { inputManager, audioManager } = managers;
   const { collectibles, npcBodies, interactions, _enemyBodyMap } = collections;

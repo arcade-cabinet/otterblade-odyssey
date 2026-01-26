@@ -843,7 +843,9 @@ function OtterbladeGameContent() {
                   setActiveCinematic(null);
                   setPaused(false);
                 }}
-              />
+              >
+                <track kind="captions" />
+              </video>
               <button
                 type="button"
                 onClick={() => {
