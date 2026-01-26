@@ -50,8 +50,8 @@ export function Level({ chapterId }: LevelProps) {
       </RigidBody>
 
       {/* Platforms from manifest */}
-      {platforms.map((platform, index) => (
-        <RigidBody key={`platform-${index}`} type="fixed" colliders={false}>
+      {platforms.map((platform) => (
+        <RigidBody key={`platform-${platform.x}-${platform.y}-${platform.width}`} type="fixed" colliders={false}>
           <CuboidCollider
             args={[platform.width / 2, platform.height / 2, 1]}
             position={[platform.x, platform.y, 0]}

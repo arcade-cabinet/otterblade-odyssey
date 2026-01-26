@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@otterblade/core": "workspace:*",
-    "@react-spring/three": "^9.7.6",
+    "@react-spring/three": "^10.0.3",
     "@react-three/fiber": "^9.5.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/rapier": "^2.2.0",

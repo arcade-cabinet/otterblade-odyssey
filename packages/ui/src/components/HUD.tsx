@@ -19,7 +19,7 @@ export function HealthDisplay({ current, max }: HealthDisplayProps) {
   return (
     <group position={[-8, 7, 0]}>
       {Array.from({ length: max }, (_, i) => (
-        <HeartMesh key={`heart-${i}`} filled={i < current} index={i} />
+        <HeartMesh key={`heart-slot-${i}`} filled={i < current} index={i} />
       ))}
     </group>
   );
