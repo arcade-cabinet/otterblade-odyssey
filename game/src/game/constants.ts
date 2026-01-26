@@ -5,7 +5,7 @@
  */
 
 import type { BiomeColors, Chapter as ChapterData } from './data';
-import { getBiomeColorsArray, getBiomesSync, getChaptersSync, preloadLegacyData } from './data';
+import { getBiomeColorsArray, getChaptersSync, preloadLegacyData } from './data';
 
 /** Chunk size for procedural generation */
 export const CHUNK_SIZE = 48;
