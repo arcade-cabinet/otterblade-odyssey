@@ -49,7 +49,6 @@ const FALLBACK_COLORS: BiomeColors = {
 function loadChaptersWithColors(): Chapter[] {
   try {
     const chapters = getChaptersSync();
-    const biomes = getBiomesSync();
     const biomeColors = getBiomeColorsArray();
 
     return chapters.map((ch, idx) => {
