@@ -3,7 +3,7 @@
  * Tests comprehensive chapter manifest validation and loading
  */
 
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   clearChapterCache,
   getChapterBoss,
@@ -22,11 +22,12 @@ import {
   loadChapterManifest,
   TOTAL_CHAPTERS,
 } from '@/game/data';
+import { preloadManifests } from '../../apps/web/src/ddl/loader';
 
 describe('Chapter Manifest Loaders', () => {
-  // Clear cache before each test for clean state
-  beforeEach(() => {
-    clearChapterCache();
+  // Preload all manifests before running tests
+  beforeAll(async () => {
+    await preloadManifests();
   });
 
   describe('loadChapterManifest', () => {

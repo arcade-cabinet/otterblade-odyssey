@@ -42,8 +42,9 @@ export async function loadNPCManifestAsync(): Promise<NPCManifest> {
   const data = await (async () => {
     if (typeof window === 'undefined') {
       const { readFile } = await import('node:fs/promises');
-      const manifestUrl = new URL('../../data/manifests/npcs.json', import.meta.url);
-      const raw = await readFile(manifestUrl, 'utf8');
+      const { resolve } = await import('node:path');
+      const fullPath = resolve(process.cwd(), 'apps/web/public/data/manifests/npcs.json');
+      const raw = await readFile(fullPath, 'utf8');
       return JSON.parse(raw);
     }
 

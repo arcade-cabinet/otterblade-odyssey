@@ -98,6 +98,30 @@ export function getCacheStats(): {
 // ============================================================================
 
 /**
+ * Fetches JSON data with environment detection.
+ * Uses file system in Node.js/test environment, fetch in browser.
+ */
+async function fetchJson(fetchPath: string, filePath: string): Promise<unknown> {
+  // Node.js/test environment - use file system
+  if (typeof window === 'undefined' || typeof process !== 'undefined') {
+    const { readFile } = await import('node:fs/promises');
+    const { resolve } = await import('node:path');
+    const fullPath = resolve(process.cwd(), filePath);
+    const raw = await readFile(fullPath, 'utf8');
+    return JSON.parse(raw);
+  }
+
+  // Browser environment - use fetch
+  const response = await fetch(fetchPath);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch manifest at ${fetchPath}: ${response.status} ${response.statusText}`
+    );
+  }
+  return response.json();
+}
+
+/**
  * Base manifest loader that fetches JSON from /data/manifests/ paths.
  * Handles caching and provides descriptive errors.
  *
@@ -111,19 +135,12 @@ async function loadManifest(path: string): Promise<unknown> {
     return manifestCache.get(path);
   }
 
-  // Construct full fetch path
+  // Construct paths
   const fetchPath = `/data/manifests/${path}`;
+  const filePath = `apps/web/public/data/manifests/${path}`;
 
   try {
-    const response = await fetch(fetchPath);
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch manifest at ${fetchPath}: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const data = await response.json();
+    const data = await fetchJson(fetchPath, filePath);
 
     // Cache the result
     manifestCache.set(path, data);
@@ -201,18 +218,11 @@ export async function loadChapterManifest(chapterId: number): Promise<ChapterMan
 
   // Fetch raw data (skip the cache in loadManifest since we'll cache validated data)
   const fetchPath = `/data/manifests/${path}`;
+  const filePath = `apps/web/public/data/manifests/${path}`;
 
   let rawData: unknown;
   try {
-    const response = await fetch(fetchPath);
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch manifest at ${fetchPath}: ${response.status} ${response.statusText}`
-      );
-    }
-
-    rawData = await response.json();
+    rawData = await fetchJson(fetchPath, filePath);
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error(`Invalid JSON in manifest ${fetchPath}: ${error.message}`);

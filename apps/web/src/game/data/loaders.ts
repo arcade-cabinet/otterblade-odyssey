@@ -12,7 +12,9 @@ let cachedBiomes: Biome[] | null = null;
 async function fetchJson(url: string, filePath: string): Promise<unknown> {
   if (typeof window === 'undefined') {
     const { readFile } = await import('node:fs/promises');
-    const raw = await readFile(new URL(filePath, import.meta.url), 'utf8');
+    const { resolve } = await import('node:path');
+    const fullPath = resolve(process.cwd(), filePath);
+    const raw = await readFile(fullPath, 'utf8');
     return JSON.parse(raw);
   }
 
@@ -36,7 +38,7 @@ export async function preloadLegacyData(): Promise<void> {
  */
 export async function loadChapters(): Promise<Chapter[]> {
   if (cachedChapters) return cachedChapters;
-  const data = await fetchJson('/data/chapters.json', '../../data/chapters.json');
+  const data = await fetchJson('/data/chapters.json', 'apps/web/public/data/chapters.json');
   const result = ChaptersArraySchema.safeParse(data);
 
   if (!result.success) {
@@ -54,7 +56,7 @@ export async function loadChapters(): Promise<Chapter[]> {
  */
 export async function loadBiomes(): Promise<Biome[]> {
   if (cachedBiomes) return cachedBiomes;
-  const data = await fetchJson('/data/biomes.json', '../../data/biomes.json');
+  const data = await fetchJson('/data/biomes.json', 'apps/web/public/data/biomes.json');
   const result = BiomesArraySchema.safeParse(data);
 
   if (!result.success) {

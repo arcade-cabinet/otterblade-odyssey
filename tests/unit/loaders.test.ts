@@ -13,10 +13,11 @@ import {
   loadBiomes,
   loadChapters,
 } from '@/game/data';
+import { preloadManifests } from '../../apps/web/src/ddl/loader';
 
 describe('Data Loaders', () => {
   beforeAll(async () => {
-    await Promise.all([loadChapters(), loadBiomes()]);
+    await Promise.all([loadChapters(), loadBiomes(), preloadManifests()]);
   });
 
   describe('loadChapters', () => {

@@ -1,12 +1,10 @@
 /**
  * @fileoverview Unit tests for NPC manifest data
  * Tests NPC data structure and consistency
- *
- * NOTE: These tests verify the NPC JSON structure directly since
- * the manifest format is still evolving with the game design.
  */
 
 import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 // Import typed loaders for function tests
 import {
@@ -20,8 +18,9 @@ import {
 let npcData: Record<string, any>;
 
 beforeAll(async () => {
-  const manifestUrl = new URL('../../game/src/data/manifests/npcs.json', import.meta.url);
-  const raw = await readFile(manifestUrl, 'utf8');
+  // Load from file system directly for tests
+  const filePath = resolve(__dirname, '../../apps/web/public/data/manifests/npcs.json');
+  const raw = await readFile(filePath, 'utf8');
   npcData = JSON.parse(raw);
   await loadNPCManifestAsync();
 });
