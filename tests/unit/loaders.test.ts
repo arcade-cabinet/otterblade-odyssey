@@ -7,8 +7,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   getBiomeByChapterId,
   getBiomeColorsArray,
-  getChapterById,
   getBiomesSync,
+  getChapterById,
   getChaptersSync,
   loadBiomes,
   loadChapters,

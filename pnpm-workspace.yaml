@@ -2,9 +2,9 @@
 # See: https://pnpm.io/workspaces
 
 packages:
-  # Main application packages
-  - "."
-  - "game"
+  # Application packages
+  - "apps/*"
+  # Shared packages
   - "packages/*"
 
 # Ignore certain built dependencies to avoid compilation issues

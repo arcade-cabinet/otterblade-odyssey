@@ -9,7 +9,13 @@
 import { readFile } from 'node:fs/promises';
 import { beforeAll, describe, expect, it } from 'vitest';
 // Import typed loaders for function tests
-import { getAllSpecies, getGesture, getGestureLibrary, getSpecies, loadNPCManifestAsync } from '@/game/data';
+import {
+  getAllSpecies,
+  getGesture,
+  getGestureLibrary,
+  getSpecies,
+  loadNPCManifestAsync,
+} from '@/game/data';
 
 let npcData: Record<string, any>;
 
