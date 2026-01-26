@@ -1,6 +1,6 @@
 /**
  * AI system using YUKA
+ * Provides pathfinding, steering behaviors, and FSM for enemies and NPCs
  */
 
-// Placeholder - will be implemented with YUKA
-export const ai = {};
+export * as YUKA from 'yuka';

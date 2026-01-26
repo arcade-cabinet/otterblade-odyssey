@@ -1,6 +1,6 @@
 /**
  * Physics system using React Three Fiber + Rapier
+ * Replaces Matter.js with Rapier for 3D physics simulation
  */
 
-// Placeholder - will be implemented with React Three Fiber
-export const physics = {};
+export { Physics, RigidBody, CuboidCollider, CapsuleCollider } from '@react-three/rapier';
