@@ -44,7 +44,7 @@ export default defineConfig({
     // Test both legacy TypeScript and new JavaScript code
     include: [
       'tests/**/*.{test,spec}.{ts,tsx,js,jsx}',
-      'game/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+      'apps/web/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
     ],
     exclude: [
       'node_modules',
@@ -71,9 +71,9 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /\.mp4$/, replacement: path.resolve(__dirname, './__mocks__/mp4Mock.ts') },
-      { find: '@', replacement: path.resolve(__dirname, './game/src') },
+      { find: '@', replacement: path.resolve(__dirname, './apps/web/src') },
       { find: '@shared', replacement: path.resolve(__dirname, './shared') },
-      { find: '@game', replacement: path.resolve(__dirname, './game/src') },
+      { find: '@game', replacement: path.resolve(__dirname, './apps/web/src') },
     ],
     conditions: ['browser', 'development'],
   },
