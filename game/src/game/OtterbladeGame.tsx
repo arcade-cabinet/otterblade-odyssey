@@ -4,6 +4,9 @@
  * Otterblade Odyssey - Main Game Component
  * Modular TypeScript architecture with DDL-based manifest loading
  */
+ * Otterblade Odyssey - Main Game Component
+ * Modular TypeScript architecture with DDL-based manifest loading
+ */
  * Clean: 3 JS files total (monolith + DDL + this), plus external libs
  */
 
