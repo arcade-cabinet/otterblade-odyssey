@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main, release/*, copilot/*]
   pull_request:
     # Run on ALL pull requests regardless of target branch
     types: [opened, synchronize, reopened]

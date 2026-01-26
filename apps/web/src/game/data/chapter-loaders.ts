@@ -10,6 +10,7 @@
 import {
   loadChapterManifest as fetchChapterManifest,
   getChapterManifestSync,
+  clearManifestCache,
   TOTAL_CHAPTERS,
 } from '../../ddl/loader';
 import type { ChapterManifest, ChapterNPC } from './manifest-schemas';
@@ -164,7 +165,7 @@ export function getChapterMotionChallenges(chapterId: number): ChapterManifest['
  * Useful for hot reloading during development.
  */
 export function clearChapterCache(): void {
-  chapterCache.clear();
+  clearManifestCache();
 }
 
 /**

@@ -1,7 +1,9 @@
 # Workflow Consolidation Summary
 
 ## Overview
-Simplified from **32 workflows** down to **14 focused workflows** (plus README) by removing Jules-based, Ollama-based, and duplicate workflows.
+Simplified from **32 workflows** down to **6 essential workflows** (plus README) by removing Jules-based, Ollama-based, duplicate, and non-essential workflows.
+
+**Result**: 81% reduction (32 → 6 workflows)
 
 ## Removed Workflows
 
@@ -15,77 +17,75 @@ Simplified from **32 workflows** down to **14 focused workflows** (plus README) 
 ### Manual/Development (Removed)
 - `manual-code-analysis.yml`
 
-### Duplicates Removed (Kept Most Comprehensive)
+### Non-Essential AI Automation (Removed - Handled by Claude or not critical)
+- `ai-auto-update.yml` (Use Dependabot instead)
+- `ecosystem-delegator.yml` (Claude handles delegation)
+- `ecosystem-fixer.yml` (Claude handles fixes)
+- `equalizer-core.yml` (Not essential for CI/CD)
+- `issue-deduplication.yml` (Nice-to-have, not critical)
+- `issue-triage.yml` (Claude handles triage)
+- `pr-review.yml` (Claude handles reviews)
+- `unified-auto-heal.yml` (Claude handles auto-healing)
 
-**Auto-Heal** (3→1):
-- ❌ `claude-autoheal.yml`
-- ❌ `ci-failure-auto-fix-with-claude.yml`  
-- ✅ `unified-auto-heal.yml` (KEPT - Most comprehensive)
+### Duplicates Removed (First Consolidation)
+- `claude-autoheal.yml`
+- `ci-failure-auto-fix-with-claude.yml`
+- `ai-reviewer.yml`
+- `ecosystem-reviewer.yml`
+- `ecosystem-triage.yml`
+- `ai-fixer.yml`
+- `ai-delegator.yml`
+- `ecosystem-agents.yml`
+- `ecosystem-assessment.yml`
+- `ecosystem-control.yml`
+- `ecosystem-merge.yml`
+- `ecosystem-surveyor.yml`
+- `equalizer.yml`
+- `ai-curator.yml`
+- `test-failure-analysis.yml`
 
-**Review** (3→1):
-- ❌ `ai-reviewer.yml`
-- ❌ `ecosystem-reviewer.yml`
-- ✅ `pr-review.yml` (KEPT - Most comprehensive)
+**Total Removed**: 26 workflows
 
-**Triage** (2→1):
-- ❌ `ecosystem-triage.yml`
-- ✅ `issue-triage.yml` (KEPT)
-
-**Fixer** (2→1):
-- ❌ `ai-fixer.yml`
-- ✅ `ecosystem-fixer.yml` (KEPT - More robust)
-
-**Delegator** (2→1):
-- ❌ `ai-delegator.yml`
-- ✅ `ecosystem-delegator.yml` (KEPT - More robust)
-
-**Ecosystem Management** (5→0 - Merged into remaining workflows):
-- ❌ `ecosystem-agents.yml`
-- ❌ `ecosystem-assessment.yml`
-- ❌ `ecosystem-control.yml`
-- ❌ `ecosystem-merge.yml`
-- ❌ `ecosystem-surveyor.yml`
-
-**Equalizer** (2→1):
-- ❌ `equalizer.yml`
-- ✅ `equalizer-core.yml` (KEPT - Core functionality)
-
-**Other**:
-- ❌ `ai-curator.yml` (Duplicate of other workflows)
-- ❌ `test-failure-analysis.yml` (Merged into unified-auto-heal)
-
-## Remaining Workflows (14 + README)
+## Remaining Workflows (6 Essential)
 
 ### Core CI/CD (4)
-1. `ci.yml` - Lint, test, build
+1. `ci.yml` - Lint, test, build (runs on PRs only)
 2. `cd.yml` - Continuous deployment
 3. `build-android.yml` - Android APK builds
 4. `release-please.yml` - Automated releases
 
-### AI Automation (6)
-5. `claude.yml` - Core Claude agent
-6. `unified-auto-heal.yml` - Auto-fix CI failures
-7. `pr-review.yml` - PR reviews
-8. `issue-triage.yml` - Issue triage
-9. `ecosystem-fixer.yml` - Ecosystem fixes
-10. `ecosystem-delegator.yml` - Task delegation
+### AI & Maintenance (2)
+5. `claude.yml` - Core Claude agent for PR management
+6. `weekly-cleanup.yml` - Weekly maintenance tasks
 
-### Support (4)
-11. `equalizer-core.yml` - Core equalizer functionality
-12. `issue-deduplication.yml` - Prevent duplicate issues
-13. `ai-auto-update.yml` - Dependency updates
-14. `weekly-cleanup.yml` - Maintenance tasks
+## Key Changes
+
+### CI Workflow Updated
+- **Before**: Ran on both pushes and pull requests
+- **After**: Runs on pull requests only (more efficient)
+
+```yaml
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+```
+
+### Test Fixes
+- Fixed `clearChapterCache()` function to use `clearManifestCache()` from DDL loader
+- Resolved "chapterCache is not defined" error
 
 ## Benefits
 
-✅ **53% reduction** in workflows (32 → 15)
+✅ **81% reduction** in workflows (32 → 6)
 ✅ **Clearer purpose** - Each workflow has distinct responsibility
-✅ **Easier maintenance** - Less duplication
+✅ **Easier maintenance** - Minimal duplication
 ✅ **Claude-only** - Consistent AI provider
-✅ **DRY principles** - Removed all redundancy
+✅ **DRY principles** - Maximum code reuse
+✅ **Faster CI** - Fewer workflow triggers
+✅ **Lower costs** - Reduced GitHub Actions minutes
 
 ## Logical Grouping
 
-**CI/CD Pipeline**: ci → cd → build-android → release-please
-**AI Agents**: claude → unified-auto-heal → pr-review → issue-triage → ecosystem-fixer → ecosystem-delegator
-**Support**: equalizer-core → issue-deduplication → ai-auto-update → weekly-cleanup
+**CI/CD Pipeline**: ci (PRs) → cd (deploy) → build-android (mobile) → release-please (releases)
+**AI**: claude (PR management)
+**Maintenance**: weekly-cleanup (housekeeping)
