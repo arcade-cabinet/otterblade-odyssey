@@ -4,9 +4,9 @@
  */
 
 import { useFrame } from '@react-three/fiber';
-import { RigidBody, CapsuleCollider } from '@react-three/rapier';
-import { useEffect, useRef, useState } from 'react';
 import type { RapierRigidBody } from '@react-three/rapier';
+import { CapsuleCollider, RigidBody } from '@react-three/rapier';
+import { useEffect, useRef, useState } from 'react';
 import * as YUKA from 'yuka';
 
 interface Enemy {
@@ -14,6 +14,16 @@ interface Enemy {
   position: [number, number, number];
   type: string;
   vehicle: YUKA.Vehicle;
+}
+
+interface EnemyData {
+  x: number;
+  y?: number;
+  type: string;
+}
+
+interface Segment {
+  enemies?: EnemyData[];
 }
 
 interface EnemiesProps {
@@ -30,27 +40,28 @@ export function Enemies({ chapterId }: EnemiesProps) {
     fetch(`/data/manifests/chapters/chapter-${chapterId}.json`)
       .then((res) => res.json())
       .then((manifest) => {
-        const enemyData = manifest.level?.segments?.flatMap((segment: any) =>
-          segment.enemies?.map((e: any) => {
-            const vehicle = new YUKA.Vehicle();
-            vehicle.position.set(e.x, e.y || 1, 0);
-            vehicle.maxSpeed = 2;
-            
-            // Add wander behavior
-            const wanderBehavior = new YUKA.WanderBehavior();
-            vehicle.steering.add(wanderBehavior);
-            
-            entityManager.current.add(vehicle);
-            
-            return {
-              id: `enemy-${e.x}-${e.y}`,
-              position: [e.x, e.y || 1, 0] as [number, number, number],
-              type: e.type || 'default',
-              vehicle,
-            };
-          })
-        ) || [];
-        
+        const enemyData =
+          manifest.level?.segments?.flatMap((segment: Segment) =>
+            segment.enemies?.map((e: EnemyData) => {
+              const vehicle = new YUKA.Vehicle();
+              vehicle.position.set(e.x, e.y || 1, 0);
+              vehicle.maxSpeed = 2;
+
+              // Add wander behavior
+              const wanderBehavior = new YUKA.WanderBehavior();
+              vehicle.steering.add(wanderBehavior);
+
+              entityManager.current.add(vehicle);
+
+              return {
+                id: `enemy-${e.x}-${e.y}`,
+                position: [e.x, e.y || 1, 0] as [number, number, number],
+                type: e.type || 'default',
+                vehicle,
+              };
+            })
+          ) || [];
+
         setEnemies(enemyData);
       })
       .catch((err) => console.error('Failed to load enemies:', err));
@@ -60,7 +71,7 @@ export function Enemies({ chapterId }: EnemiesProps) {
     };
   }, [chapterId]);
 
-  useFrame((state, delta) => {
+  useFrame((_state, _delta) => {
     time.current.update();
     entityManager.current.update(time.current.getDelta());
   });
@@ -79,13 +90,10 @@ function EnemyMesh({ enemy }: { enemy: Enemy }) {
 
   useFrame(() => {
     if (!rigidBodyRef.current) return;
-    
+
     // Sync physics body with YUKA vehicle position
     const yukPos = enemy.vehicle.position;
-    rigidBodyRef.current.setTranslation(
-      { x: yukPos.x, y: yukPos.y, z: yukPos.z },
-      true
-    );
+    rigidBodyRef.current.setTranslation({ x: yukPos.x, y: yukPos.y, z: yukPos.z }, true);
   });
 
   return (
@@ -96,7 +104,7 @@ function EnemyMesh({ enemy }: { enemy: Enemy }) {
       enabledRotations={[false, true, false]}
     >
       <CapsuleCollider args={[0.4, 0.4]} />
-      
+
       {/* Enemy mesh - procedural */}
       <group>
         <mesh castShadow>

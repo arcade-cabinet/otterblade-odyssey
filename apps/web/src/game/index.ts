@@ -20,12 +20,13 @@ import type * as Matter from 'matter-js';
 import { buildEnemies } from './factories/enemy-factory';
 // Level building
 import { buildLevel } from './factories/level-factory';
+import type { ChapterManifest, GameState } from './types';
 
 export function initializeChapter(
   chapterId: number,
-  _manifest: any,
+  _manifest: ChapterManifest,
   engine: Matter.Engine,
-  _gameState: any
+  _gameState: GameState
 ) {
   // Build level (platforms, walls, hazards, etc.)
   const level = buildLevel(chapterId, engine);

@@ -4,8 +4,8 @@
  * Implements touch controls per CLAUDE.md line 64
  */
 
-import { onCleanup, onMount, Show } from 'solid-js';
 import type { JoystickManager } from 'nipplejs';
+import { onCleanup, onMount, Show } from 'solid-js';
 import { inputManager } from '../systems/InputManager';
 
 /**

@@ -8,9 +8,9 @@
  */
 
 import {
+  clearManifestCache,
   loadChapterManifest as fetchChapterManifest,
   getChapterManifestSync,
-  clearManifestCache,
   TOTAL_CHAPTERS,
 } from '../../ddl/loader';
 import type { ChapterManifest, ChapterNPC } from './manifest-schemas';

@@ -179,15 +179,15 @@ export interface BossAIConfig extends AIBehaviorConfig {
 /**
  * Helper to convert Matter.js position to YUKA Vector3
  */
-export function toYukaVector(matterVector: Matter.Vector): any {
+export function toYukaVector(matterVector: Matter.Vector): Vector3 {
   // Import YUKA dynamically at runtime
-  const { Vector3 } = require('yuka');
-  return new Vector3(matterVector.x, matterVector.y, 0);
+  const { Vector3: YukaVector3 } = require('yuka');
+  return new YukaVector3(matterVector.x, matterVector.y, 0);
 }
 
 /**
  * Helper to convert YUKA Vector3 to Matter.js position
  */
-export function toMatterVector(yukaVector: any): Matter.Vector {
+export function toMatterVector(yukaVector: Vector3): Matter.Vector {
   return { x: yukaVector.x, y: yukaVector.y };
 }

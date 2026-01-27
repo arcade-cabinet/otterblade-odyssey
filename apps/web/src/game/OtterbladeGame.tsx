@@ -40,6 +40,7 @@ import { getMatterModules } from './physics/matter-wrapper';
 import { HazardSystem } from './physics/PhysicsManager';
 import { setupCollisionHandlers } from './systems/collision';
 import { TriggerSystem } from './systems/TriggerSystem';
+import type { NPC } from './types/entities';
 
 const cinematicVideoUrls = import.meta.glob('../assets/videos/*.mp4', {
   eager: true,
@@ -114,7 +115,7 @@ async function preloadGameManifests(onProgress: (percent: number) => void) {
       { loader: loadChapterPlatesManifest, name: 'Chapter Plates' },
     ];
 
-    for (const { loader, name } of manifestLoaders) {
+    for (const { loader } of manifestLoaders) {
       loaders.push(
         loader()
           .then(() => {
@@ -322,6 +323,9 @@ function OtterbladeGameContent() {
       return;
     }
 
+    // Safe to use - we've verified inputManager is not null
+    const safeInputManager = inputManager;
+
     // Create physics engine
     const engine = createPhysicsEngine();
     const runner = window.Matter.Runner.create();
@@ -368,7 +372,7 @@ function OtterbladeGameContent() {
     const flowPuzzles = [];
     const timingSequences = [];
 
-    const npcBodies = new Map<string, { body: Matter.Body; npc: any }>();
+    const npcBodies = new Map<string, { body: Matter.Body; npc: NPC }>();
     if (manifest.npcs?.length) {
       for (const npcDef of manifest.npcs) {
         if (!npcDef.position) {
@@ -591,7 +595,7 @@ function OtterbladeGameContent() {
       player,
       playerController,
       playerRef,
-      inputManager: inputManager!,
+      inputManager: safeInputManager,
       _audioManager: audioManager,
       aiManager,
       bossAI,

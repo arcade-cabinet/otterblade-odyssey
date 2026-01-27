@@ -52,8 +52,13 @@ interface TriggerEntry {
   once: boolean;
   triggered: boolean;
   enabled: boolean;
-  sensor?: Matter.Body & { triggerId?: string };
+  sensor?: TriggerBody;
   wasActive?: boolean;
+  timerStart?: number;
+}
+
+interface TriggerBody extends Matter.Body {
+  triggerId?: string;
 }
 
 /**
@@ -76,12 +81,12 @@ export class TriggerSystem {
       for (const pair of event.pairs) {
         const { bodyA, bodyB } = pair;
         if (bodyA === this.player && bodyB.label === 'trigger') {
-          const triggerId = (bodyB as any).triggerId;
+          const triggerId = (bodyB as TriggerBody).triggerId;
           if (triggerId) {
             this.activeTriggers.add(triggerId);
           }
         } else if (bodyB === this.player && bodyA.label === 'trigger') {
-          const triggerId = (bodyA as any).triggerId;
+          const triggerId = (bodyA as TriggerBody).triggerId;
           if (triggerId) {
             this.activeTriggers.add(triggerId);
           }
@@ -93,12 +98,12 @@ export class TriggerSystem {
       for (const pair of event.pairs) {
         const { bodyA, bodyB } = pair;
         if (bodyA === this.player && bodyB.label === 'trigger') {
-          const triggerId = (bodyB as any).triggerId;
+          const triggerId = (bodyB as TriggerBody).triggerId;
           if (triggerId) {
             this.activeTriggers.delete(triggerId);
           }
         } else if (bodyB === this.player && bodyA.label === 'trigger') {
-          const triggerId = (bodyA as any).triggerId;
+          const triggerId = (bodyA as TriggerBody).triggerId;
           if (triggerId) {
             this.activeTriggers.delete(triggerId);
           }
@@ -204,9 +209,9 @@ export class TriggerSystem {
       typeof trigger.condition?.duration === 'number' ? trigger.condition.duration : 0;
     if (!trigger.wasActive) {
       trigger.wasActive = true;
-      (trigger as any).timerStart = gameState.gameTime || performance.now();
+      trigger.timerStart = gameState.gameTime || performance.now();
     }
-    const elapsed = (gameState.gameTime || performance.now()) - ((trigger as any).timerStart || 0);
+    const elapsed = (gameState.gameTime || performance.now()) - (trigger.timerStart || 0);
     return elapsed >= duration;
   }
 

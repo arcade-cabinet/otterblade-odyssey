@@ -285,10 +285,10 @@ docs/
 
 | System | File | Key Classes |
 |--------|------|-------------|
-| FSM States | `systems/EnemyStates.js` | IdleState, PatrolState, ChaseState, AttackState, FleeState, HurtState |
+| FSM States | `systems/EnemyStates.ts` | IdleState, PatrolState, ChaseState, AttackState, FleeState, HurtState |
 | Boss AI | `ai/BossAI.ts` | ZephyrosAI, BossPattern, ThreatAssessment, FrostWavePattern |
-| Perception | `ai/PerceptionSystem.js` | VisionSystem, MemorySystem, HearingSystem, PerceptiveEntity |
-| AI Manager | `systems/AIManager.js` | AIManager, EnemyAI, NPCAI, pathfinding functions |
+| Perception | `ai/PerceptionSystem.ts` | VisionSystem, MemorySystem, HearingSystem, PerceptiveEntity |
+| AI Manager | `systems/AIManager.ts` | AIManager, EnemyAI, NPCAI, pathfinding functions |
 
 ## Summary
 

@@ -5,8 +5,6 @@
 
 import { Vector3 } from 'yuka';
 
-type Position = { x: number; y: number; z?: number };
-
 interface PerceptionOwner {
   position: Vector3;
   facingDirection?: number;

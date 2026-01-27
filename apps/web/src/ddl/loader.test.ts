@@ -391,7 +391,7 @@ describe('DDL Loader - Asset Manifests', () => {
     vi.clearAllMocks();
   });
 
-  const testAssetManifest = (loader: () => Promise<any>, category: string, _filename: string) => {
+  const testAssetManifest = (loader: () => Promise<unknown>, category: string, _filename: string) => {
     it(`should load ${category} manifest`, async () => {
       const mockData = {
         category,
@@ -435,7 +435,7 @@ describe('DDL Loader - Preload System', () => {
   it('should preload all manifests in parallel', async () => {
     // Mock all manifests
     mockFetch.mockImplementation((url: string) => {
-      const mockData: any = {};
+      const mockData: Record<string, unknown> = {};
 
       if (url.includes('chapter-')) {
         mockData.id = 0;

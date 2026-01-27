@@ -14,8 +14,9 @@ import {
   getSpecies,
   loadNPCManifestAsync,
 } from '@/game/data';
+import type { NPCsManifest } from '@/game/data/manifest-schemas';
 
-let npcData: Record<string, any>;
+let npcData: NPCsManifest;
 
 beforeAll(async () => {
   // Load from file system directly for tests

@@ -7,6 +7,7 @@ import type * as Matter from 'matter-js';
 import { World } from 'matter-js';
 import { Vector3 } from 'yuka';
 import type { AudioSystem, InputSystem, PlayerController } from '../types/systems';
+import type { NPC } from '../types/entities';
 
 /**
  * Quest objective definition
@@ -28,9 +29,9 @@ const DEFAULT_RESTORE_WARMTH = 5;
  */
 interface Collections {
   collectibles: Array<{ body: Matter.Body; collected: boolean }>;
-  npcBodies: Map<string, any>;
+  npcBodies: Map<string, { body: Matter.Body; npc: NPC }>;
   interactions: Array<{ body: Matter.Body }>;
-  _enemyBodyMap: Map<number, any>;
+  _enemyBodyMap: Map<number, Matter.Body>;
 }
 
 /**
@@ -84,8 +85,8 @@ export function setupCollisionHandlers(
   getters: Getters,
   controllers: Controllers
 ): {
-  collectibleMap: Map<number, { body: Matter.Body; def: any; collected: boolean }>;
-  interactionMap: Map<number, { body: Matter.Body; def: any; state: string | null }>;
+  collectibleMap: Map<number, { body: Matter.Body; def: unknown; collected: boolean }>;
+  interactionMap: Map<number, { body: Matter.Body; def: unknown; state: string | null }>;
 } {
   const { Events } = Matter;
   const { inputManager, audioManager } = managers;

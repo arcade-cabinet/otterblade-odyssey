@@ -91,7 +91,7 @@ export function createSceneRenderer(params: SceneRendererParams): SceneRenderFun
     camera: Camera,
     animFrame: number,
     playerFacing: number,
-    bossAI: any
+    bossAI: BossAI | null
   ): void {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);

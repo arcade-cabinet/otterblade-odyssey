@@ -3,22 +3,22 @@
  * Main 3D game scene using R3F + Rapier physics
  */
 
+import { HUD } from '@otterblade/ui';
+import { OrbitControls, Sky } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
-import { OrbitControls, Sky } from '@react-three/drei';
 import { Suspense } from 'react';
-import { Player } from './Player';
-import { Level } from './Level';
 import { Enemies } from './Enemies';
+import { Level } from './Level';
 import { NPCs } from './NPCs';
-import { HUD } from '@otterblade/ui';
+import { Player } from './Player';
 
 interface GameSceneProps {
   chapterId: number;
   onComplete?: () => void;
 }
 
-export function GameScene({ chapterId, onComplete }: GameSceneProps) {
+export function GameScene({ chapterId }: GameSceneProps) {
   // Example game state - would come from game store in real implementation
   const gameState = {
     health: 5,
@@ -44,7 +44,7 @@ export function GameScene({ chapterId, onComplete }: GameSceneProps) {
           castShadow
           shadow-mapSize={[1024, 1024]}
         />
-        
+
         {/* HUD - Procedural 3D elements */}
         <HUD
           health={gameState.health}
@@ -55,7 +55,7 @@ export function GameScene({ chapterId, onComplete }: GameSceneProps) {
           chapterId={chapterId}
           chapterName={gameState.chapterName}
         />
-        
+
         <Physics gravity={[0, -9.81, 0]}>
           <Level chapterId={chapterId} />
           <Player />

@@ -226,7 +226,7 @@ interface PlatformConfig {
   width: number;
   height: number;
   type?: string;
-  properties?: any;
+  properties?: Record<string, unknown>;
 }
 
 /**
@@ -486,7 +486,7 @@ interface MovingPlatformConfig {
   waitTime?: number;
   loop?: boolean;
   type?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export class MovingPlatform {

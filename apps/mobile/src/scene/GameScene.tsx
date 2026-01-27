@@ -24,7 +24,7 @@ import { useStore } from '../store/gameStore';
 export function GameScene() {
   const engine = useEngine();
   const [camera, setCamera] = useState<Camera>();
-  const finnRef = useRef<any>(null);
+  const finnRef = useRef<TransformNode | null>(null);
   const timeRef = useRef(0);
   const sceneRef = useRef<Scene | null>(null);
 

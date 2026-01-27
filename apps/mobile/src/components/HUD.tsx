@@ -23,7 +23,10 @@ export function HUD() {
       {/* Health Hearts */}
       <View style={styles.healthRow}>
         {Array.from({ length: maxHealth }, (_, i) => i).map((heartIndex) => (
-          <Text key={`heart-${heartIndex}-${heartIndex < health ? 'full' : 'empty'}`} style={styles.heart}>
+          <Text
+            key={`heart-${heartIndex}-${heartIndex < health ? 'full' : 'empty'}`}
+            style={styles.heart}
+          >
             {heartIndex < health ? '❤️' : '🖤'}
           </Text>
         ))}

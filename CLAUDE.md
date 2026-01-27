@@ -32,6 +32,7 @@ Before generating ANY visual content or making design decisions, read `BRAND.md`
 - Subtle magic (firefly motes, not laser beams)
 
 ### 3. Use Procedural Generation for Characters (Manifest-driven assets for cinematics)
+
 ```ts
 // CORRECT - Procedural rendering like POC
 // See pocs/otterblade_odyssey.html for reference

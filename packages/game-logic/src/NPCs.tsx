@@ -3,7 +3,7 @@
  * Non-player characters with YUKA AI for idle behaviors
  */
 
-import { RigidBody, CapsuleCollider } from '@react-three/rapier';
+import { CapsuleCollider, RigidBody } from '@react-three/rapier';
 import { useEffect, useState } from 'react';
 
 interface NPC {
@@ -11,6 +11,13 @@ interface NPC {
   position: [number, number, number];
   name: string;
   role: string;
+}
+
+interface NPCData {
+  id: string;
+  name?: string;
+  role?: string;
+  position?: { x: number; y: number };
 }
 
 interface NPCsProps {
@@ -25,13 +32,14 @@ export function NPCs({ chapterId }: NPCsProps) {
     fetch(`/data/manifests/chapters/chapter-${chapterId}.json`)
       .then((res) => res.json())
       .then((manifest) => {
-        const npcData = manifest.npcs?.map((npc: any) => ({
-          id: `npc-${npc.id}`,
-          position: [npc.position?.x || 0, npc.position?.y || 1, 0] as [number, number, number],
-          name: npc.name || 'Unknown',
-          role: npc.role || 'villager',
-        })) || [];
-        
+        const npcData =
+          manifest.npcs?.map((npc: NPCData) => ({
+            id: `npc-${npc.id}`,
+            position: [npc.position?.x || 0, npc.position?.y || 1, 0] as [number, number, number],
+            name: npc.name || 'Unknown',
+            role: npc.role || 'villager',
+          })) || [];
+
         setNpcs(npcData);
       })
       .catch((err) => console.error('Failed to load NPCs:', err));
@@ -40,14 +48,9 @@ export function NPCs({ chapterId }: NPCsProps) {
   return (
     <group>
       {npcs.map((npc) => (
-        <RigidBody
-          key={npc.id}
-          position={npc.position}
-          type="fixed"
-          colliders={false}
-        >
+        <RigidBody key={npc.id} position={npc.position} type="fixed" colliders={false}>
           <CapsuleCollider args={[0.4, 0.4]} />
-          
+
           {/* NPC mesh - procedural woodland creature */}
           <group>
             <mesh castShadow>
