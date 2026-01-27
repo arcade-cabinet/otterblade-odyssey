@@ -38,6 +38,7 @@ export {
   loadSpritesManifest,
   preloadManifests,
   type PreloadOptions,
+  type PreloadResult,
 } from '../../ddl/loader';
 
 // Helper functions that were in chapter-loaders.ts - reimplement using DDL

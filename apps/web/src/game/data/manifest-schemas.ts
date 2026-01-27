@@ -779,6 +779,38 @@ export const SpeciesDefinitionSchema = z
   .passthrough();
 
 /**
+ * NPC Character schema for npcs.json characters array
+ */
+export const NPCCharacterSchema = z
+  .object({
+    id: z.string(),
+    species: z.string(),
+    name: z.string(),
+    title: z.string().optional(),
+    role: z.string(),
+    description: z.string().optional(),
+    backstory: z.string().optional(),
+    arc: z.string().optional(),
+    procedural: z
+      .object({
+        type: z.string(),
+        drawFunction: z.string().optional(),
+        hitbox: z
+          .object({
+            width: z.number(),
+            height: z.number(),
+            offsetY: z.number().optional(),
+          })
+          .optional(),
+        animations: z.array(z.string()).optional(),
+      })
+      .passthrough()
+      .optional(),
+    chapters: z.array(z.number()).optional(),
+  })
+  .passthrough();
+
+/**
  * NPCs manifest schema
  */
 export const NPCsManifestSchema = z
@@ -788,7 +820,7 @@ export const NPCsManifestSchema = z
     category: z.literal('npcs'),
     description: z.string(),
     species: z.record(z.string(), SpeciesDefinitionSchema),
-    characters: z.array(AssetEntrySchema), // Changed from 'npcs' to 'characters'
+    characters: z.array(NPCCharacterSchema), // Use proper NPCCharacterSchema
     npcBehaviors: z.record(z.string(), z.object({ description: z.string() })).optional(),
     gestureLibrary: z.record(z.string(), z.array(z.string())).optional(),
   })

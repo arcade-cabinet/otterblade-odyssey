@@ -4,7 +4,6 @@
  */
 
 import type * as Matter from 'matter-js';
-import type { Vector3 } from 'yuka';
 
 // ============================================================================
 // ENTITY TYPES

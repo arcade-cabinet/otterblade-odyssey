@@ -50,7 +50,7 @@ const FALLBACK_COLORS = {
 /**
  * Load biome colors from biomes.json
  */
-async function loadBiomeColors(): Promise<Record<string, any>[]> {
+async function loadBiomeColors(): Promise<Array<{ chapterIds: number[]; colors: Record<string, string> }>> {
   try {
     // Load biomes.json directly (still exists in public/data/)
     if (typeof window === 'undefined') {
@@ -86,7 +86,7 @@ async function loadChaptersWithColors(): Promise<Chapter[]> {
       const manifest = getChapterManifestSync(id);
       
       // Find matching biome by chapter ID
-      const biome = biomes.find((b: any) => b.chapterIds?.includes(id));
+      const biome = biomes.find((b) => b.chapterIds?.includes(id));
       const colors = biome?.colors || FALLBACK_COLORS;
       
       return {

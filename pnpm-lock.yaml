@@ -352,6 +352,19 @@ importers:
         specifier: ^0.172.0
         version: 0.172.0
 
+  packages/config:
+    dependencies:
+      '@otterblade/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^2.3.10
+        version: 2.3.10
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   packages/core:
     dependencies:
       zod:
@@ -407,6 +420,19 @@ importers:
       vitest:
         specifier: ^4.0.16
         version: 4.0.16(@types/node@20.19.27)(@vitest/ui@4.0.16)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0(bufferutil@4.1.0))(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/types:
+    dependencies:
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^2.3.10
+        version: 2.3.10
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
 
   packages/ui:
     dependencies:
@@ -6680,7 +6706,7 @@ snapshots:
 
   '@babel/helper-annotate-as-pure@7.27.3':
     dependencies:
-      '@babel/types': 7.28.5
+      '@babel/types': 7.28.6
 
   '@babel/helper-compilation-targets@7.27.2':
     dependencies:
@@ -8470,7 +8496,7 @@ snapshots:
       '@babel/plugin-transform-sticky-regex': 7.27.1(@babel/core@7.28.5)
       '@babel/plugin-transform-typescript': 7.28.6(@babel/core@7.28.5)
       '@babel/plugin-transform-unicode-regex': 7.27.1(@babel/core@7.28.5)
-      '@babel/template': 7.27.2
+      '@babel/template': 7.28.6
       '@react-native/babel-plugin-codegen': 0.81.5(@babel/core@7.28.5)
       babel-plugin-syntax-hermes-parser: 0.29.1
       babel-plugin-transform-flow-enums: 0.0.2(@babel/core@7.28.5)
@@ -9594,7 +9620,7 @@ snapshots:
 
   babel-plugin-react-compiler@1.0.0:
     dependencies:
-      '@babel/types': 7.28.5
+      '@babel/types': 7.28.6
 
   babel-plugin-react-native-web@0.21.2: {}
 
@@ -11049,7 +11075,7 @@ snapshots:
   istanbul-lib-instrument@5.2.1:
     dependencies:
       '@babel/core': 7.28.5
-      '@babel/parser': 7.28.5
+      '@babel/parser': 7.28.6
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
       semver: 6.3.1
