@@ -788,7 +788,9 @@ export const NPCsManifestSchema = z
     category: z.literal('npcs'),
     description: z.string(),
     species: z.record(z.string(), SpeciesDefinitionSchema),
-    npcs: z.array(AssetEntrySchema),
+    characters: z.array(AssetEntrySchema), // Changed from 'npcs' to 'characters'
+    npcBehaviors: z.record(z.string(), z.object({ description: z.string() })).optional(),
+    gestureLibrary: z.record(z.string(), z.array(z.string())).optional(),
   })
   .passthrough();
 

@@ -36,7 +36,7 @@ describe('Chapter Manifest Loaders', () => {
     });
 
     it('should throw for invalid chapter ID', () => {
-      expect(() => getChapterManifestSync(100)).toThrow('Chapter 100 not');
+      expect(() => getChapterManifestSync(100)).toThrow('Invalid chapter ID');
     });
 
     it('should cache loaded chapters', () => {
