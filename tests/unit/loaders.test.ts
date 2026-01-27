@@ -7,16 +7,17 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   getBiomeByChapterId,
   getBiomeColorsArray,
-  getChapterById,
   getBiomesSync,
+  getChapterById,
   getChaptersSync,
   loadBiomes,
   loadChapters,
 } from '@/game/data';
+import { preloadManifests } from '../../apps/web/src/ddl/loader';
 
 describe('Data Loaders', () => {
   beforeAll(async () => {
-    await Promise.all([loadChapters(), loadBiomes()]);
+    await Promise.all([loadChapters(), loadBiomes(), preloadManifests()]);
   });
 
   describe('loadChapters', () => {
