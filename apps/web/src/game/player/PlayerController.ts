@@ -38,12 +38,19 @@ interface AttackHitbox extends Matter.Body {
   knockback: { x: number; y: number };
 }
 
+interface PlayerBody extends Matter.Body {
+  canJump?: boolean;
+  isGrounded?: boolean;
+  facingDirection?: number;
+  parts?: Array<Matter.Body & { label?: string }>;
+}
+
 /**
  * PlayerController - Handles player movement, combat, and state
  * Migrated from game-monolith.js lines 164-296
  */
 export class PlayerController {
-  player: Matter.Body;
+  player: PlayerBody;
   engine: Matter.Engine;
   gameState: GameState;
   audioManager: AudioSystem | null;
@@ -81,9 +88,9 @@ export class PlayerController {
 
     this.isGrounded = this.checkGrounded();
     if (this.isGrounded) {
-      (this.player as any).canJump = true;
+      this.player.canJump = true;
     }
-    (this.player as any).isGrounded = this.isGrounded;
+    this.player.isGrounded = this.isGrounded;
 
     if (this.isGrounded) {
       this.coyoteTime = PLAYER_PHYSICS.coyoteTimeMs;
@@ -138,7 +145,7 @@ export class PlayerController {
       ? PLAYER_PHYSICS.acceleration
       : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: -force, y: 0 });
-    (this.player as any).facingDirection = -1;
+    this.player.facingDirection = -1;
   }
 
   moveRight(): void {
@@ -147,20 +154,20 @@ export class PlayerController {
       ? PLAYER_PHYSICS.acceleration
       : PLAYER_PHYSICS.acceleration * PLAYER_PHYSICS.airControl;
     Body.applyForce(this.player, this.player.position, { x: force, y: 0 });
-    (this.player as any).facingDirection = 1;
+    this.player.facingDirection = 1;
   }
 
   jump(): boolean {
     const { Body } = getMatterModules();
 
-    const canJump = (this.player as any).canJump !== false;
+    const canJump = this.player.canJump !== false;
 
     if (this.coyoteTime > 0 && canJump) {
       Body.setVelocity(this.player, {
         x: this.player.velocity.x,
         y: PLAYER_PHYSICS.jumpForce,
       });
-      (this.player as any).canJump = false;
+      this.player.canJump = false;
       this.coyoteTime = 0;
       this.audioManager?.playSound?.('jump');
       return true;
@@ -225,7 +232,7 @@ export class PlayerController {
 
   private checkGrounded(): boolean {
     const { Query } = getMatterModules();
-    const feetSensor = (this.player as any).parts?.find((p: any) => p.label === 'feet_sensor');
+    const feetSensor = this.player.parts?.find((p) => p.label === 'feet_sensor');
     if (!feetSensor) return false;
 
     const collisions = Query.collides(feetSensor, this.engine.world.bodies);

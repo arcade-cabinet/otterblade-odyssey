@@ -3,7 +3,7 @@
  * Generates 3D level geometry from manifest data
  */
 
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
+import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import { useEffect, useState } from 'react';
 
 interface LevelProps {
@@ -17,6 +17,17 @@ interface Platform {
   height: number;
 }
 
+interface PlatformData {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Segment {
+  platforms?: PlatformData[];
+}
+
 export function Level({ chapterId }: LevelProps) {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
 
@@ -25,14 +36,15 @@ export function Level({ chapterId }: LevelProps) {
     fetch(`/data/manifests/chapters/chapter-${chapterId}.json`)
       .then((res) => res.json())
       .then((manifest) => {
-        const levelPlatforms = manifest.level?.segments?.flatMap((segment: any) =>
-          segment.platforms?.map((p: any) => ({
-            x: p.x,
-            y: p.y,
-            width: p.width,
-            height: p.height,
-          }))
-        ) || [];
+        const levelPlatforms =
+          manifest.level?.segments?.flatMap((segment: Segment) =>
+            segment.platforms?.map((p: PlatformData) => ({
+              x: p.x,
+              y: p.y,
+              width: p.width,
+              height: p.height,
+            }))
+          ) || [];
         setPlatforms(levelPlatforms);
       })
       .catch((err) => console.error('Failed to load level:', err));
@@ -51,7 +63,11 @@ export function Level({ chapterId }: LevelProps) {
 
       {/* Platforms from manifest */}
       {platforms.map((platform) => (
-        <RigidBody key={`platform-${platform.x}-${platform.y}-${platform.width}`} type="fixed" colliders={false}>
+        <RigidBody
+          key={`platform-${platform.x}-${platform.y}-${platform.width}`}
+          type="fixed"
+          colliders={false}
+        >
           <CuboidCollider
             args={[platform.width / 2, platform.height / 2, 1]}
             position={[platform.x, platform.y, 0]}

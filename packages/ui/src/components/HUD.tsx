@@ -3,8 +3,8 @@
  * Procedural UI elements following BRAND.md aesthetics
  */
 
+import { animated, useSpring } from '@react-spring/three';
 import { Html } from '@react-three/drei';
-import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 
 interface HealthDisplayProps {
@@ -54,11 +54,7 @@ function HeartMesh({ filled, index }: { filled: boolean; index: number }) {
   };
 
   return (
-    <animated.mesh
-      position={[index * 0.7, 0, 0]}
-      scale={scale}
-      castShadow
-    >
+    <animated.mesh position={[index * 0.7, 0, 0]} scale={scale} castShadow>
       <extrudeGeometry args={[heartShape, extrudeSettings]} />
       <meshStandardMaterial
         color={filled ? '#B91C1C' : '#4B5563'}
@@ -79,7 +75,7 @@ interface WarmthBarProps {
  */
 export function WarmthBar({ current, max }: WarmthBarProps) {
   const percentage = current / max;
-  
+
   const { fillWidth } = useSpring({
     fillWidth: percentage * 3,
     config: { tension: 200, friction: 25 },
@@ -92,7 +88,7 @@ export function WarmthBar({ current, max }: WarmthBarProps) {
         <boxGeometry args={[3, 0.3, 0.1]} />
         <meshStandardMaterial color="#2C2C2C" roughness={0.6} />
       </mesh>
-      
+
       {/* Fill bar with warm glow */}
       <animated.mesh position={[fillWidth.to((w) => w / 2), 0, 0]}>
         <boxGeometry args={[fillWidth, 0.25, 0.08]} />
@@ -103,7 +99,7 @@ export function WarmthBar({ current, max }: WarmthBarProps) {
           roughness={0.3}
         />
       </animated.mesh>
-      
+
       {/* Label */}
       <Html position={[-0.5, 0, 0]} transform occlude>
         <div

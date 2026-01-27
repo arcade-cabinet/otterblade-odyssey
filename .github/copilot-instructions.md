@@ -270,7 +270,7 @@ Use Zustand for runtime state with persistence where needed.
 
 ## File Structure
 
-```
+```text
 game/src/
 ├── pages/
 │   └── index.astro           # Main game page

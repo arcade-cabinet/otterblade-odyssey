@@ -44,7 +44,17 @@ import {
 // TYPES
 // ============================================================================
 
-/** Preload configuration */
+/**
+ * Result type for preloadManifests
+ */
+export interface PreloadResult {
+  success: boolean;
+  loaded: string[];
+  failed: Array<{ type: string; error: string }>;
+}
+
+/**
+ * Preload configuration */
 export interface PreloadOptions {
   /** Which manifest types to preload (default: all) */
   manifestTypes?: Array<
@@ -622,7 +632,7 @@ export function getChapterPlatesManifestSync(): ChapterPlatesManifest {
  * await preloadManifests({ manifestTypes: ['chapters', 'enemies'] });
  * ```
  */
-export async function preloadManifests(options: PreloadOptions = {}): Promise<void> {
+export async function preloadManifests(options: PreloadOptions = {}): Promise<PreloadResult> {
   const {
     manifestTypes = [
       'chapters',
@@ -644,6 +654,8 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
     console.log('[DDL] Starting manifest preload...');
   }
 
+  const loaded: string[] = [];
+  const failed: Array<{ type: string; error: string }> = [];
   const loaders: Array<Promise<void>> = [];
 
   // Preload chapters
@@ -652,11 +664,13 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
       loaders.push(
         loadChapterManifest(i)
           .then(() => {
+            loaded.push(`chapter-${i}`);
             if (logProgress) {
               console.log(`[DDL] ✓ Chapter ${i} loaded`);
             }
           })
           .catch((error) => {
+            failed.push({ type: `chapter-${i}`, error: error.message });
             const msg = `[DDL] ✗ Failed to load chapter ${i}: ${error.message}`;
             if (throwOnError) {
               throw new Error(msg);
@@ -671,8 +685,12 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
   if (manifestTypes.includes('enemies')) {
     loaders.push(
       loadEnemiesManifest()
-        .then(() => logProgress && console.log('[DDL] ✓ Enemies loaded'))
+        .then(() => {
+          loaded.push('enemies');
+          logProgress && console.log('[DDL] ✓ Enemies loaded');
+        })
         .catch((error) => {
+          failed.push({ type: 'enemies', error: error.message });
           const msg = `[DDL] ✗ Failed to load enemies: ${error.message}`;
           if (throwOnError) throw new Error(msg);
           console.warn(msg);
@@ -683,8 +701,12 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
   if (manifestTypes.includes('npcs')) {
     loaders.push(
       loadNPCsManifest()
-        .then(() => logProgress && console.log('[DDL] ✓ NPCs loaded'))
+        .then(() => {
+          loaded.push('npcs');
+          logProgress && console.log('[DDL] ✓ NPCs loaded');
+        })
         .catch((error) => {
+          failed.push({ type: 'npcs', error: error.message });
           const msg = `[DDL] ✗ Failed to load NPCs: ${error.message}`;
           if (throwOnError) throw new Error(msg);
           console.warn(msg);
@@ -707,8 +729,12 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
     if (manifestTypes.includes(type as PreloadOptions['manifestTypes'][number])) {
       loaders.push(
         loader()
-          .then(() => logProgress && console.log(`[DDL] ✓ ${type} loaded`))
+          .then(() => {
+            loaded.push(type);
+            logProgress && console.log(`[DDL] ✓ ${type} loaded`);
+          })
           .catch((error) => {
+            failed.push({ type, error: error.message });
             const msg = `[DDL] ✗ Failed to load ${type}: ${error.message}`;
             if (throwOnError) throw new Error(msg);
             console.warn(msg);
@@ -723,6 +749,12 @@ export async function preloadManifests(options: PreloadOptions = {}): Promise<vo
   if (logProgress) {
     console.log('[DDL] Preload complete. Cache size:', manifestCache.size);
   }
+
+  return {
+    success: failed.length === 0,
+    loaded,
+    failed,
+  };
 }
 
 // ============================================================================

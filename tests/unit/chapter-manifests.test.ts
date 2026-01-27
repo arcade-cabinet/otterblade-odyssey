@@ -5,7 +5,6 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
-  clearChapterCache,
   getChapterBoss,
   getChapterCollectibles,
   getChapterEncounters,
@@ -20,7 +19,7 @@ import {
   getUnlockedChapters,
   TOTAL_CHAPTERS,
 } from '@/game/data';
-import { preloadManifests, getChapterManifestSync, getAllChapterManifestsSync } from '../../apps/web/src/ddl/loader';
+import { getChapterManifestSync, preloadManifests } from '../../apps/web/src/ddl/loader';
 
 describe('Chapter Manifest Loaders', () => {
   // Preload all manifests before running tests
@@ -37,7 +36,7 @@ describe('Chapter Manifest Loaders', () => {
     });
 
     it('should throw for invalid chapter ID', () => {
-      expect(() => getChapterManifestSync(100)).toThrow('Chapter 100 not');
+      expect(() => getChapterManifestSync(100)).toThrow('Invalid chapter ID');
     });
 
     it('should cache loaded chapters', () => {

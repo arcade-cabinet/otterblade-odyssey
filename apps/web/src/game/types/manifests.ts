@@ -99,9 +99,9 @@ export interface ChapterManifest {
     id: string;
     type: string;
     position: { x: number; y: number };
-    behavior?: any;
-    dialogue?: any;
-    storyState?: any;
+    behavior?: Record<string, unknown>;
+    dialogue?: Record<string, unknown>;
+    storyState?: Record<string, unknown>;
   }>;
 
   encounters?: Array<{
@@ -131,7 +131,7 @@ export interface ChapterManifest {
     region: { x: number; y: number; width: number; height: number };
     action: string;
     repeatable?: boolean;
-    conditions?: any;
+    conditions?: Record<string, unknown>;
   }>;
 
   cinematics?: Array<{
@@ -140,7 +140,7 @@ export interface ChapterManifest {
     sequence: Array<{
       type: string;
       duration: number;
-      [key: string]: any;
+      [key: string]: unknown;
     }>;
   }>;
 
@@ -150,8 +150,8 @@ export interface ChapterManifest {
       id: string;
       description: string;
       type: string;
-      target?: any;
-      condition?: any;
+      target?: Record<string, unknown>;
+      condition?: Record<string, unknown>;
     }>;
   }>;
 

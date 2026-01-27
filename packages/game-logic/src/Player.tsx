@@ -4,14 +4,14 @@
  */
 
 import { useFrame } from '@react-three/fiber';
-import { RigidBody, CapsuleCollider } from '@react-three/rapier';
-import { useRef, useState } from 'react';
 import type { RapierRigidBody } from '@react-three/rapier';
+import { CapsuleCollider, RigidBody } from '@react-three/rapier';
+import { useRef, useState } from 'react';
 import * as THREE from 'three';
 
 export function Player() {
   const playerRef = useRef<RapierRigidBody>(null);
-  const [position, setPosition] = useState<[number, number, number]>([0, 2, 0]);
+  const [position, _setPosition] = useState<[number, number, number]>([0, 2, 0]);
 
   useFrame((state) => {
     if (!playerRef.current) return;
@@ -27,7 +27,7 @@ export function Player() {
     // Movement
     if (keyboard?.KeyA) newVelocity.x = -speed;
     if (keyboard?.KeyD) newVelocity.x = speed;
-    
+
     // Jump
     if (keyboard?.Space && Math.abs(velocity.y) < 0.1) {
       newVelocity.y = jumpForce;
@@ -51,7 +51,7 @@ export function Player() {
       angularDamping={1}
     >
       <CapsuleCollider args={[0.5, 0.5]} />
-      
+
       {/* Finn the Otter - Procedural mesh */}
       <group>
         {/* Body */}
@@ -59,19 +59,19 @@ export function Player() {
           <capsuleGeometry args={[0.3, 0.6, 8, 16]} />
           <meshStandardMaterial color="#8B6F47" />
         </mesh>
-        
+
         {/* Head */}
         <mesh castShadow position={[0, 0.6, 0]}>
           <sphereGeometry args={[0.35, 16, 16]} />
           <meshStandardMaterial color="#8B6F47" />
         </mesh>
-        
+
         {/* Snout */}
         <mesh castShadow position={[0, 0.5, 0.3]}>
           <sphereGeometry args={[0.15, 8, 8]} />
           <meshStandardMaterial color="#D4A574" />
         </mesh>
-        
+
         {/* Eyes */}
         <mesh castShadow position={[-0.1, 0.65, 0.25]}>
           <sphereGeometry args={[0.05, 8, 8]} />
@@ -81,7 +81,7 @@ export function Player() {
           <sphereGeometry args={[0.05, 8, 8]} />
           <meshStandardMaterial color="#000000" />
         </mesh>
-        
+
         {/* Sword (Otterblade) */}
         <mesh castShadow position={[0.4, 0.2, 0]} rotation={[0, 0, Math.PI / 4]}>
           <boxGeometry args={[0.05, 0.8, 0.05]} />

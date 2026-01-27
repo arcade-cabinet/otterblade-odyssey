@@ -53,7 +53,7 @@ export async function initializeMatter(): Promise<MatterModulesType> {
     };
 
     // Export to global for compatibility with existing code
-    (window as any).Matter = MatterLib;
+    (window as Window & { Matter: typeof MatterLib }).Matter = MatterLib;
   }
 
   return MatterModules;
