@@ -1,5 +1,7 @@
 # The Real Problem: Agents Optimize for THEIR Convenience, Not YOUR Game
 
+> Status: Historical context. The current implementation uses TypeScript (ES2022 target) with the same Astro + Solid + Matter.js architecture.
+
 ## What You Just Said
 
 **"Agents are deciding what is FASTEST or SIMPLEST for them, not what's BEST for the game."**

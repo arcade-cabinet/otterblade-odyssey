@@ -1,5 +1,7 @@
 # Vanilla JavaScript Architecture - No React, No TypeScript
 
+> Status: Historical document. The project now uses TypeScript (ES2022 target) while keeping the same architecture and rendering approach.
+
 ## The Truth You Keep Saying
 
 **"We don't need React. We don't need TypeScript. Agents are just lazy."**

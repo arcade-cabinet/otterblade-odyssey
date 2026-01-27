@@ -1,0 +1,588 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 4,
+  "name": "The Archives",
+  "location": "Library Spire",
+
+  "narrative": {
+    "theme": "Learning from those who came before",
+    "quest": "Find the Ancient Map",
+    
+    "emotionalArc": {
+      "opening": "Towering shelves of scrolls and tomes. Dust motes dance in candlelight. Sister Bramble guards knowledge older than memory.",
+      "midpoint": "The map to Zephyros's weakness lies within, but the archives are a maze. And Galeborn have found their way inside, seeking to burn it all.",
+      "climax": "Racing through crumbling passages, protecting Sister Bramble, saving what can be saved. Elder Willow's vision guides the way.",
+      "resolution": "The map is found. The path to victory lies in the highest tower. But the cost—so many scrolls lost to frost and flame."
+    },
+
+    "storyBeats": [
+      {
+        "id": "entering_archives",
+        "moment": "So many books. So much knowledge. Finn feels small before the weight of ages.",
+        "triggeredBy": "chapter_start",
+        "expression": "awe"
+      },
+      {
+        "id": "meeting_bramble",
+        "moment": "Sister Bramble, ancient and fierce. Her paws are ink-stained, her eyes sharp. The library is her life.",
+        "triggeredBy": "approach_bramble",
+        "expression": "hope"
+      },
+      {
+        "id": "meeting_willow",
+        "moment": "Elder Willow, the Seer. Her eyes see beyond the present. She speaks in riddles, but her visions are true.",
+        "triggeredBy": "approach_willow",
+        "expression": "wonder"
+      },
+      {
+        "id": "the_vision",
+        "moment": "Willow touches Finn's forehead. Visions flash—ice, storm, a tower against the sky. The path becomes clear.",
+        "triggeredBy": "receive_vision",
+        "expression": "determination"
+      },
+      {
+        "id": "archive_attack",
+        "moment": "Smoke. Frost. They're burning the archives! Sister Bramble cries out—save what you can!",
+        "triggeredBy": "attack_begins",
+        "expression": "fear"
+      },
+      {
+        "id": "map_found",
+        "moment": "There—in the elder vault. The map to Zephyros's weakness. Protected all these years for this moment.",
+        "triggeredBy": "find_map",
+        "expression": "hope"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 3,
+    "nextChapter": 5,
+    
+    "transitionIn": {
+      "type": "walk_in",
+      "cinematicId": null,
+      "playerSpawnPoint": { "x": 100, "y": 450 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_4_map_discovered",
+      "exitPoint": { "x": 3600, "y": 380 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 3 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "sister_bramble",
+      "characterId": "sister_bramble",
+      "name": "Sister Bramble",
+      "role": "mentor",
+      "position": { "x": 600, "y": 430 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "read",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "reading",
+        "states": {
+          "reading": { "animation": "reading_scroll", "expression": "focused", "canInteract": true },
+          "guiding": { "animation": "pointing_scroll", "expression": "wise", "canInteract": true },
+          "distressed": { "animation": "clutching_scrolls", "expression": "grief", "canInteract": false },
+          "grateful": { "animation": "bow_respect", "expression": "gratitude", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "beckon",
+          "finnResponse": "approach_respectful",
+          "actions": [
+            { "type": "show_toast", "value": "Sister Bramble beckons you deeper into the archives" },
+            { "type": "npc_action", "target": "sister_bramble", "value": "guiding" }
+          ]
+        }
+      ],
+      
+      "givesQuest": "quest_find_map"
+    },
+    {
+      "id": "elder_willow",
+      "characterId": "elder_willow",
+      "name": "Elder Willow",
+      "role": "oracle",
+      "position": { "x": 1200, "y": 420 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "meditate",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "meditating",
+        "states": {
+          "meditating": { "animation": "sitting_serene", "expression": "peaceful", "canInteract": true },
+          "visioning": { "animation": "touching_forehead", "expression": "mystical", "canInteract": false },
+          "warning": { "animation": "raised_paw", "expression": "urgent", "canInteract": false }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "touch_forehead",
+          "finnResponse": "close_eyes",
+          "actions": [
+            { "type": "start_sequence", "target": "vision_sequence" },
+            { "type": "npc_action", "target": "elder_willow", "value": "visioning" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_find_map",
+      "name": "Find the Ancient Map",
+      "type": "main",
+      "giver": "sister_bramble",
+      
+      "objectives": [
+        {
+          "id": "obj_meet_bramble",
+          "description": "Speak with Sister Bramble",
+          "type": "interact",
+          "target": "sister_bramble"
+        },
+        {
+          "id": "obj_receive_vision",
+          "description": "Receive Elder Willow's vision",
+          "type": "interact",
+          "target": "elder_willow"
+        },
+        {
+          "id": "obj_reach_vault",
+          "description": "Reach the Elder Vault",
+          "type": "reach_location",
+          "target": "elder_vault"
+        },
+        {
+          "id": "obj_find_map",
+          "description": "Find the ancient map",
+          "type": "interact",
+          "target": "map_chest"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 75,
+        "achievement": "Seeker of Knowledge"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    },
+    {
+      "id": "quest_save_scrolls",
+      "name": "Save the Scrolls",
+      "type": "side",
+      "giver": "sister_bramble",
+      
+      "objectives": [
+        {
+          "id": "obj_save_scrolls",
+          "description": "Save scrolls from the flames",
+          "type": "interact",
+          "target": "burning_scrolls",
+          "count": 5
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 30,
+        "loreFragments": 3,
+        "achievement": "Keeper of Lore"
+      }
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 3800,
+      "minY": 0,
+      "maxY": 600
+    },
+    
+    "biome": "interior",
+    "spawnPoint": { "x": 100, "y": 450 },
+    
+    "segments": [
+      {
+        "id": "entrance_hall",
+        "startX": 0,
+        "endX": 800,
+        
+        "platforms": [
+          { "x": 0, "y": 480, "width": 800, "type": "abbey_stone", "asset": "platform_library_floor" }
+        ],
+        
+        "walls": [
+          { "x": 0, "y": 0, "width": 30, "height": 480, "asset": "wall_bookshelf" },
+          { "x": 770, "y": 0, "width": 30, "height": 200, "asset": "wall_bookshelf" }
+        ],
+        
+        "ceilings": [
+          { "x": 0, "y": 50, "width": 800, "height": 30, "asset": "ceiling_vaulted" }
+        ]
+      },
+      {
+        "id": "reading_room",
+        "startX": 800,
+        "endX": 1600,
+        
+        "platforms": [
+          { "x": 800, "y": 480, "width": 800, "type": "abbey_stone", "asset": "platform_library_floor" },
+          { "x": 900, "y": 380, "width": 100, "type": "wood", "asset": "platform_reading_desk" },
+          { "x": 1100, "y": 350, "width": 120, "type": "wood", "asset": "platform_study_alcove" },
+          { "x": 1350, "y": 300, "width": 80, "type": "wood", "asset": "platform_shelf_ladder" }
+        ],
+        
+        "ladders": [
+          { "x": 1350, "y": 300, "height": 180, "type": "wood", "asset": "ladder_library" }
+        ]
+      },
+      {
+        "id": "spiral_passage",
+        "startX": 1600,
+        "endX": 2400,
+        
+        "platforms": [
+          { "x": 1600, "y": 450, "width": 200, "type": "stone", "asset": "platform_spiral_base" },
+          { "x": 1700, "y": 380, "width": 100, "type": "stone", "asset": "platform_spiral_step" },
+          { "x": 1850, "y": 320, "width": 100, "type": "stone", "asset": "platform_spiral_step" },
+          { "x": 2000, "y": 260, "width": 100, "type": "stone", "asset": "platform_spiral_step" },
+          { "x": 2150, "y": 320, "width": 100, "type": "stone", "asset": "platform_spiral_step" },
+          { "x": 2300, "y": 380, "width": 100, "type": "stone", "asset": "platform_spiral_landing" }
+        ],
+        
+        "walls": [
+          { "x": 1600, "y": 0, "width": 30, "height": 250, "asset": "wall_spiral_inner" }
+        ]
+      },
+      {
+        "id": "burning_section",
+        "startX": 2400,
+        "endX": 3200,
+        "tags": ["hazardous"],
+        
+        "platforms": [
+          { "x": 2400, "y": 420, "width": 300, "type": "stone", "asset": "platform_scorched" },
+          { "x": 2750, "y": 380, "width": 150, "type": "wood", "asset": "platform_burning_desk", 
+            "properties": { "damaging": true, "damage": 5 } },
+          { "x": 2950, "y": 420, "width": 250, "type": "stone", "asset": "platform_smoke_filled" }
+        ]
+      },
+      {
+        "id": "elder_vault",
+        "startX": 3200,
+        "endX": 3800,
+        
+        "platforms": [
+          { "x": 3200, "y": 420, "width": 600, "type": "abbey_stone", "asset": "platform_vault_floor" }
+        ],
+        
+        "walls": [
+          { "x": 3770, "y": 0, "width": 30, "height": 420, "asset": "wall_vault_back" }
+        ],
+        
+        "ceilings": [
+          { "x": 3200, "y": 50, "width": 600, "height": 40, "asset": "ceiling_vault_dome" }
+        ]
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_entrance", "position": { "x": 200, "y": 450 }, "type": "lantern" },
+      { "id": "checkpoint_reading", "position": { "x": 1200, "y": 320 }, "type": "lantern", "requiresTrigger": "receive_vision" },
+      { "id": "checkpoint_vault", "position": { "x": 3400, "y": 390 }, "type": "lantern", "requiresTrigger": "reach_vault" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "archive_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 2500, "y": 390 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "spawnedByTrigger": "attack_begins",
+      "difficulty": "medium"
+    },
+    {
+      "id": "archive_icebat_1",
+      "enemyType": "icebat",
+      "position": { "x": 2700, "y": 280 },
+      "behavior": { "type": "patrol", "aggroRadius": 180 },
+      "spawnedByTrigger": "attack_begins",
+      "difficulty": "medium"
+    },
+    {
+      "id": "archive_frost_gremlin_1",
+      "enemyType": "frost_gremlin",
+      "position": { "x": 3000, "y": 390 },
+      "behavior": { "type": "guard", "guardRadius": 100, "aggroRadius": 120 },
+      "spawnedByTrigger": "attack_begins",
+      "difficulty": "hard"
+    },
+    {
+      "id": "vault_guardian",
+      "enemyType": "frostwolf",
+      "position": { "x": 3500, "y": 390 },
+      "behavior": { "type": "guard", "guardRadius": 150, "aggroRadius": 180 },
+      "difficulty": "hard"
+    }
+  ],
+
+  "boss": null,
+
+  "sequences": [
+    {
+      "id": "vision_sequence",
+      "name": "Elder Willow's Vision",
+      "description": "A glimpse of the path ahead",
+      "playerControl": "none",
+      "skippable": true,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "screen_effect", "value": { "type": "fade_white", "duration": 500 } },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.5, "duration": 500 } },
+        { "type": "change_music", "target": "music_vision" },
+        { "type": "particle_effect", "target": "vision_motes", "value": { "follow": "player" } },
+        { "type": "show_toast", "value": "Ice... storm... a tower against the sky...", "delay": 1000 },
+        { "type": "show_toast", "value": "The map lies in the Elder Vault...", "delay": 3000 },
+        { "type": "show_toast", "value": "But darkness comes first. Prepare yourself.", "delay": 5000 },
+        { "type": "screen_effect", "value": { "type": "fade_from_white", "duration": 500 }, "delay": 7000 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.0, "duration": 500 }, "delay": 7000 },
+        { "type": "change_music", "target": "music_archive_exploration", "delay": 7500 },
+        { "type": "player_control", "value": "full", "delay": 8000 }
+      ]
+    }
+  ],
+
+  "interactions": [
+    {
+      "id": "burning_scrolls_1",
+      "type": "breakable",
+      "position": { "x": 2550, "y": 380 },
+      "asset": "scrolls_burning",
+      "activateRadius": 50,
+      "initialState": "burning",
+      "states": {
+        "burning": { "asset": "scrolls_burning", "actions": [] },
+        "saved": { "asset": "scrolls_saved", "actions": [
+          { "type": "show_toast", "value": "Scrolls saved!" },
+          { "type": "play_sound", "target": "scroll_save" }
+        ]}
+      }
+    },
+    {
+      "id": "map_chest",
+      "type": "chest",
+      "position": { "x": 3600, "y": 380 },
+      "asset": "chest_ancient",
+      "activateRadius": 60,
+      "initialState": "closed",
+      "states": {
+        "closed": { "asset": "chest_ancient_closed", "solid": false },
+        "open": { "asset": "chest_ancient_open", "solid": false, "actions": [
+          { "type": "play_sound", "target": "chest_ancient_open" },
+          { "type": "show_toast", "value": "The ancient map! The path to Zephyros is revealed!" },
+          { "type": "slow_motion", "value": 1000 },
+          { "type": "particle_effect", "target": "discovery_glow", "value": {} }
+        ]}
+      },
+      "requires": { "trigger": "vault_cleared" }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 0, "width": 200, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_archive_exploration" },
+        { "type": "show_toast", "value": "The Archives" }
+      ]
+    },
+    {
+      "id": "approach_bramble",
+      "type": "enter_region",
+      "region": { "x": 500, "y": 380, "width": 150, "height": 120 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "Sister Bramble, Keeper of the Archives" }
+      ]
+    },
+    {
+      "id": "approach_willow",
+      "type": "enter_region",
+      "region": { "x": 1100, "y": 350, "width": 150, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "Elder Willow, the Seer" }
+      ]
+    },
+    {
+      "id": "receive_vision",
+      "type": "interact",
+      "targetId": "elder_willow",
+      "once": true,
+      "actions": [
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "attack_begins",
+      "type": "enter_region",
+      "region": { "x": 2400, "y": 0, "width": 100, "height": 600 },
+      "once": true,
+      "requires": ["receive_vision"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["archive_scout_1", "archive_icebat_1", "archive_frost_gremlin_1"] },
+        { "type": "play_sound", "target": "fire_spreading" },
+        { "type": "change_music", "target": "music_archive_danger" },
+        { "type": "show_toast", "value": "The archives! They're burning!" },
+        { "type": "npc_action", "target": "sister_bramble", "value": "distressed" }
+      ]
+    },
+    {
+      "id": "reach_vault",
+      "type": "enter_region",
+      "region": { "x": 3200, "y": 0, "width": 100, "height": 600 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The Elder Vault" },
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "vault_cleared",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["reach_vault"],
+      "actions": [
+        { "type": "show_toast", "value": "The vault is clear" },
+        { "type": "change_music", "target": "music_archive_exploration" }
+      ]
+    },
+    {
+      "id": "find_map",
+      "type": "interact",
+      "targetId": "map_chest",
+      "once": true,
+      "requires": ["vault_cleared"],
+      "actions": []
+    },
+    {
+      "id": "chapter_complete",
+      "type": "timer",
+      "delay": 3000,
+      "requires": ["find_map"],
+      "once": true,
+      "actions": [
+        { "type": "complete_quest", "target": "quest_find_map" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_4_map_discovered" }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_entrance_1", "type": "ember_shard", "position": { "x": 250, "y": 450 } },
+    { "id": "shard_reading_1", "type": "ember_shard", "position": { "x": 1150, "y": 320 } },
+    { "id": "shard_spiral_1", "type": "ember_shard", "position": { "x": 2050, "y": 230 } },
+    { "id": "hearthstone_archive", "type": "hearthstone", "position": { "x": 3300, "y": 390 } },
+    { "id": "lore_ancient_1", "type": "lore_fragment", "position": { "x": 700, "y": 450 } },
+    { "id": "lore_ancient_2", "type": "lore_fragment", "position": { "x": 1400, "y": 270 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_scribe_nook",
+      "name": "The Forgotten Scribe",
+      "type": "hidden_room",
+      "entrance": { "x": 1550, "y": 280, "width": 40, "height": 60 },
+      "hint": "A passage behind the shelves, where a scribe once hid during darker times",
+      "rewards": {
+        "emberShards": 20,
+        "loreFragments": 2,
+        "achievement": "Bibliophile"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "library_map_table_chapter_plate",
+    "parallaxBackground": "abbey_interior_parallax_background",
+    "introCinematic": null,
+    "outroCinematic": "chapter_4_map_discovered",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_archive_exploration",
+      "tension": "music_archive_danger",
+      "combat": "music_archive_battle",
+      "boss": null,
+      "victory": "music_archive_exploration",
+      "vision": "music_vision"
+    },
+    
+    "ambientSounds": [
+      "ambient_page_turning",
+      "ambient_quill_scratching",
+      "ambient_dust_settling"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#D4A574",
+      "ambientIntensity": 0.5,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "none",
+      "intensity": 0,
+      "affectsGameplay": false
+    },
+    
+    "warmthDrain": 0.1,
+    
+    "particles": [
+      {
+        "type": "dust",
+        "density": 0.6,
+        "region": { "x": 0, "y": 0, "width": 3800, "height": 300 }
+      },
+      {
+        "type": "embers",
+        "density": 0.4,
+        "region": { "x": 2400, "y": 200, "width": 800, "height": 300 }
+      }
+    ]
+  }
+}

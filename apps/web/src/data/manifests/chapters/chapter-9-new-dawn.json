@@ -1,0 +1,674 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 9,
+  "name": "New Dawn",
+  "location": "The Great Hearth",
+
+  "narrative": {
+    "theme": "Homecoming - warmth renewed, family reunited",
+    "quest": "The Everember Rekindled",
+    
+    "emotionalArc": {
+      "opening": "The storm has passed. Sunlight—real, warm sunlight—bathes Willowmere for the first time in an age. The Hearthhold stands.",
+      "midpoint": "Through halls now filled with celebration, Finn walks. Friends greet him. Those he saved bow in gratitude. But one journey remains.",
+      "climax": "At the Great Hearth, the Everember flickers—dim, but not extinguished. With the Otterblade, Finn returns the warmth stolen by winter. The eternal flame BLAZES!",
+      "resolution": "Home. Mother Riverstone waits by the cottage door. The nightmare is over. Spring will come. And wherever darkness rises, Finn—and all who stood with him—will answer."
+    },
+
+    "storyBeats": [
+      {
+        "id": "dawn_breaks",
+        "moment": "Golden light pours through shattered clouds. The ice begins to melt. Birdsong returns.",
+        "triggeredBy": "chapter_start",
+        "expression": "hope"
+      },
+      {
+        "id": "hero_walk",
+        "moment": "Creatures line the halls. Warriors salute. Children peek from behind mothers. All whisper the same word: 'Otterblade.'",
+        "triggeredBy": "procession_begins",
+        "expression": "hope"
+      },
+      {
+        "id": "reunion_friends",
+        "moment": "Colonel Clover. Captain Grimclaw. Nutkin. Sister Bramble. Foremole. All together. All alive. All grateful.",
+        "triggeredBy": "friends_gathered",
+        "expression": "hope"
+      },
+      {
+        "id": "everember_dying",
+        "moment": "The Great Hearth is cold. The Everember—heart of Willowmere—barely flickers. It needs warmth. It needs the blade.",
+        "triggeredBy": "reach_hearth",
+        "expression": "sorrow"
+      },
+      {
+        "id": "rekindling",
+        "moment": "Finn raises the Otterblade. The ember-light flows. Into the Hearth. Into the stone. Into Willowmere itself. BLAZING LIGHT!",
+        "triggeredBy": "rekindle_ember",
+        "expression": "hope"
+      },
+      {
+        "id": "mother",
+        "moment": "Home. The cottage door opens. Mother Riverstone—tears of joy streaming—opens her arms. 'Welcome home, my brave Finn.'",
+        "triggeredBy": "return_home",
+        "expression": "hope"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 8,
+    "nextChapter": null,
+    
+    "transitionIn": {
+      "type": "cinematic",
+      "cinematicId": "chapter_9_dawn_breaks",
+      "playerSpawnPoint": { "x": 100, "y": 450 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "outro_victory_sunrise",
+      "exitPoint": { "x": 3200, "y": 420 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 8 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "colonel_clover_epilogue",
+      "characterId": "colonel_clover",
+      "name": "Colonel Clover",
+      "role": "ally",
+      "position": { "x": 800, "y": 420 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "celebrating",
+        "states": {
+          "celebrating": { "animation": "salute_warm", "expression": "pride", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "salute_formal",
+          "finnResponse": "salute",
+          "actions": [
+            { "type": "show_toast", "value": "The Colonel nods with deep respect" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "captain_grimclaw_epilogue",
+      "characterId": "captain_grimclaw",
+      "name": "Captain Grimclaw",
+      "role": "ally",
+      "position": { "x": 1000, "y": 420 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "celebrating",
+        "states": {
+          "celebrating": { "animation": "arms_crossed_proud", "expression": "joy", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "nod_respect",
+          "finnResponse": "bow",
+          "actions": [
+            { "type": "show_toast", "value": "Grimclaw's rumbling laughter echoes warmly" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nutkin_epilogue",
+      "characterId": "nutkin_swift",
+      "name": "Nutkin Swift",
+      "role": "ally",
+      "position": { "x": 1200, "y": 420 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "bounce",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "celebrating",
+        "states": {
+          "celebrating": { "animation": "jumping_joy", "expression": "joy", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "wave_excited",
+          "finnResponse": "wave",
+          "actions": [
+            { "type": "show_toast", "value": "Nutkin's tail flicks with pure happiness" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sister_bramble_epilogue",
+      "characterId": "sister_bramble",
+      "name": "Sister Bramble",
+      "role": "ally",
+      "position": { "x": 1800, "y": 420 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "grateful",
+        "states": {
+          "grateful": { "animation": "hands_clasped", "expression": "gratitude", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "bow_blessing",
+          "finnResponse": "bow",
+          "actions": [
+            { "type": "show_toast", "value": "Sister Bramble whispers a blessing" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "foremole_epilogue",
+      "characterId": "foremole_diggum",
+      "name": "Foremole Diggum",
+      "role": "ally",
+      "position": { "x": 2000, "y": 420 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "celebrating",
+        "states": {
+          "celebrating": { "animation": "waving", "expression": "joy", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "tip_hat",
+          "finnResponse": "bow",
+          "actions": [
+            { "type": "show_toast", "value": "Foremole wipes a happy tear" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mother_riverstone_epilogue",
+      "characterId": "mother_riverstone",
+      "name": "Mother Riverstone",
+      "role": "family",
+      "position": { "x": 3100, "y": 420 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "waiting",
+        "interactRadius": 100
+      },
+      
+      "storyState": {
+        "initialState": "waiting",
+        "states": {
+          "waiting": { "animation": "hands_clasped_hopeful", "expression": "hope", "canInteract": true },
+          "embracing": { "animation": "embrace", "expression": "joy", "canInteract": false }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "open_arms",
+          "finnResponse": "embrace",
+          "actions": [
+            { "type": "start_sequence", "target": "mother_reunion" },
+            { "type": "npc_action", "target": "mother_riverstone_epilogue", "value": "embracing" }
+          ]
+        }
+      ],
+      
+      "isEssential": true
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_rekindle_ember",
+      "name": "The Everember Rekindled",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_procession",
+          "description": "Walk through the Great Hall",
+          "type": "reach_location",
+          "target": "procession_end"
+        },
+        {
+          "id": "obj_reach_hearth",
+          "description": "Reach the Great Hearth",
+          "type": "reach_location",
+          "target": "great_hearth"
+        },
+        {
+          "id": "obj_rekindle",
+          "description": "Rekindle the Everember",
+          "type": "interact",
+          "target": "everember_altar"
+        },
+        {
+          "id": "obj_return_home",
+          "description": "Return to Mother Riverstone",
+          "type": "interact",
+          "target": "mother_riverstone_epilogue"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 500,
+        "achievement": "Ember's Light"
+      },
+      
+      "completionTrigger": "game_complete"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 3400,
+      "minY": 0,
+      "maxY": 550
+    },
+    
+    "biome": "new_dawn",
+    "spawnPoint": { "x": 100, "y": 450 },
+    
+    "segments": [
+      {
+        "id": "victory_walk",
+        "startX": 0,
+        "endX": 1500,
+        
+        "platforms": [
+          { "x": 0, "y": 480, "width": 1500, "type": "stone", "asset": "platform_great_hall_polished" }
+        ],
+        
+        "walls": [
+          { "x": 0, "y": 150, "width": 30, "height": 330, "asset": "wall_great_hall" }
+        ]
+      },
+      {
+        "id": "great_hearth_approach",
+        "startX": 1500,
+        "endX": 2400,
+        
+        "platforms": [
+          { "x": 1500, "y": 480, "width": 900, "type": "stone", "asset": "platform_hearth_platform" },
+          { "x": 1800, "y": 400, "width": 200, "type": "stone", "asset": "platform_altar_steps" }
+        ],
+        
+        "walls": [
+          { "x": 1850, "y": 250, "width": 100, "height": 150, "asset": "wall_everember_altar" }
+        ]
+      },
+      {
+        "id": "path_home",
+        "startX": 2400,
+        "endX": 3400,
+        
+        "platforms": [
+          { "x": 2400, "y": 480, "width": 1000, "type": "earth", "asset": "platform_village_path" }
+        ],
+        
+        "walls": [
+          { "x": 3000, "y": 300, "width": 200, "height": 180, "asset": "wall_cottage" }
+        ]
+      }
+    ],
+    
+    "checkpoints": []
+  },
+
+  "encounters": [],
+
+  "boss": null,
+
+  "interactions": [
+    {
+      "id": "everember_altar",
+      "type": "shrine",
+      "position": { "x": 1900, "y": 280 },
+      "asset": "everember_altar_dim",
+      "activateRadius": 80,
+      "initialState": "dying",
+      "states": {
+        "dying": { "asset": "everember_altar_dim" },
+        "rekindling": { "asset": "everember_altar_rekindling" },
+        "blazing": { "asset": "everember_altar_blazing", "actions": [
+          { "type": "restore_warmth", "value": 100 },
+          { "type": "play_sound", "target": "fire_blaze_massive" },
+          { "type": "shake_screen", "value": 0.5 }
+        ]}
+      }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 400, "width": 200, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_new_dawn" },
+        { "type": "show_toast", "value": "A New Dawn" }
+      ]
+    },
+    {
+      "id": "procession_begins",
+      "type": "enter_region",
+      "region": { "x": 400, "y": 350, "width": 100, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "hero_procession" }
+      ]
+    },
+    {
+      "id": "procession_end",
+      "type": "enter_region",
+      "region": { "x": 1400, "y": 350, "width": 100, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The Great Hearth awaits..." }
+      ]
+    },
+    {
+      "id": "friends_gathered",
+      "type": "enter_region",
+      "region": { "x": 1100, "y": 350, "width": 100, "height": 150 },
+      "once": true,
+      "actions": []
+    },
+    {
+      "id": "reach_hearth",
+      "type": "enter_region",
+      "region": { "x": 1700, "y": 300, "width": 300, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The Everember... it flickers..." },
+        { "type": "change_music", "target": "music_everember_dying" }
+      ]
+    },
+    {
+      "id": "rekindle_ember",
+      "type": "interact",
+      "targetId": "everember_altar",
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "rekindling_ceremony" }
+      ]
+    },
+    {
+      "id": "return_home",
+      "type": "interact",
+      "targetId": "mother_riverstone_epilogue",
+      "once": true,
+      "requires": ["rekindle_ember"],
+      "actions": [
+        { "type": "start_sequence", "target": "mother_reunion" }
+      ]
+    },
+    {
+      "id": "game_complete",
+      "type": "timer",
+      "delay": 10000,
+      "requires": ["return_home"],
+      "once": true,
+      "actions": [
+        { "type": "complete_quest", "target": "quest_rekindle_ember" },
+        { "type": "unlock_achievement", "target": "Ember's Light" },
+        { "type": "unlock_achievement", "target": "Legend of Willowmere" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "outro_victory_sunrise" }
+      ]
+    }
+  ],
+
+  "sequences": [
+    {
+      "id": "hero_procession",
+      "name": "The Hero's Walk",
+      "description": "Finn walks through the Great Hall as creatures bow and cheer",
+      "playerControl": "limited",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "limited" },
+        { "type": "change_music", "target": "music_heros_return" },
+        { "type": "spawn_ambient", "target": "crowd_cheering", "value": { "positions": [[300, 430], [500, 430], [700, 430], [900, 430]] } },
+        { "type": "actor_gesture", "target": "colonel_clover_epilogue", "value": "salute_formal", "delay": 500 },
+        { "type": "play_sound", "target": "crowd_cheering", "delay": 500 },
+        { "type": "show_toast", "value": "They cheer for you, Otterblade.", "delay": 1500 },
+        { "type": "actor_gesture", "target": "captain_grimclaw_epilogue", "value": "nod_respect", "delay": 2000 },
+        { "type": "actor_gesture", "target": "nutkin_epilogue", "value": "wave_excited", "delay": 2500 }
+      ]
+    },
+    {
+      "id": "rekindling_ceremony",
+      "name": "The Rekindling",
+      "description": "Finn rekindles the Everember with the Otterblade",
+      "playerControl": "none",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "change_music", "target": "music_rekindling" },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.5, "duration": 2000 } },
+        { "type": "player_animation", "value": "raise_blade" },
+        { "type": "particle_effect", "target": "ember_transfer", "value": { "from": "player_blade", "to": { "x": 1900, "y": 280 } }, "delay": 1500 },
+        { "type": "interaction_state", "targetId": "everember_altar", "value": "rekindling", "delay": 2000 },
+        { "type": "play_sound", "target": "ember_growing", "delay": 2000 },
+        { "type": "interaction_state", "targetId": "everember_altar", "value": "blazing", "delay": 4000 },
+        { "type": "play_sound", "target": "fire_blaze_massive", "delay": 4000 },
+        { "type": "shake_screen", "value": 0.6, "delay": 4000 },
+        { "type": "lighting_change", "target": "warm_golden", "duration": 2000, "delay": 4000 },
+        { "type": "show_toast", "value": "The Everember BLAZES!", "delay": 4500 },
+        { "type": "change_music", "target": "music_triumph_full", "delay": 5000 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.0, "duration": 1500 }, "delay": 6000 },
+        { "type": "show_toast", "value": "Willowmere is saved. Now... go home.", "delay": 7000 },
+        { "type": "player_control", "value": "full", "delay": 8000 }
+      ]
+    },
+    {
+      "id": "mother_reunion",
+      "name": "Homecoming",
+      "description": "Finn returns to Mother Riverstone",
+      "playerControl": "none",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "change_music", "target": "music_homecoming" },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.3, "duration": 1500 } },
+        { "type": "actor_gesture", "target": "mother_riverstone_epilogue", "value": "open_arms" },
+        { "type": "player_animation", "value": "embrace" },
+        { "type": "play_sound", "target": "mother_sob_joy", "delay": 1000 },
+        { "type": "show_toast", "value": "'Welcome home, my brave Finn.'", "delay": 2000 },
+        { "type": "particle_effect", "target": "firefly_motes", "value": { "region": { "x": 2900, "y": 300, "width": 400, "height": 200 } }, "delay": 2500 },
+        { "type": "show_toast", "value": "The nightmare is over.", "delay": 4000 },
+        { "type": "show_toast", "value": "Spring will come.", "delay": 6000 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 0.7, "duration": 3000 }, "delay": 7000 }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_hall_1", "type": "ember_shard", "position": { "x": 500, "y": 450 } },
+    { "id": "shard_hall_2", "type": "ember_shard", "position": { "x": 900, "y": 450 } },
+    { "id": "shard_hearth_1", "type": "ember_shard", "position": { "x": 1800, "y": 370 } },
+    { "id": "shard_path_1", "type": "ember_shard", "position": { "x": 2700, "y": 450 } },
+    { "id": "hearthstone_final", "type": "hearthstone", "position": { "x": 1500, "y": 450 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_founders_legacy",
+      "name": "The Founders' Legacy",
+      "type": "hidden_room",
+      "entrance": { "x": 1950, "y": 380, "width": 30, "height": 50 },
+      "hint": "Behind the Great Hearth, where the first stones were laid, the founders left one final gift",
+      "rewards": {
+        "emberShards": 100,
+        "hearthstones": 5,
+        "achievement": "True Heir of Willowmere"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "epilogue_victory_chapter_plate",
+    "parallaxBackground": "new_dawn_hall_parallax_background",
+    "introCinematic": "chapter_9_dawn_breaks",
+    "outroCinematic": "outro_victory_sunrise",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_new_dawn",
+      "tension": null,
+      "combat": null,
+      "boss": null,
+      "victory": "music_triumph_full",
+      "everember": "music_rekindling",
+      "homecoming": "music_homecoming"
+    },
+    
+    "ambientSounds": [
+      "ambient_birds_morning",
+      "ambient_crowd_murmur",
+      "ambient_fire_crackling"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#FFE4B5",
+      "ambientIntensity": 1.0,
+      "warmthInfluence": false
+    },
+    
+    "weather": {
+      "type": "clear",
+      "intensity": 0,
+      "affectsGameplay": false
+    },
+    
+    "warmthDrain": 0,
+    
+    "particles": [
+      {
+        "type": "ember_motes",
+        "density": 0.3,
+        "region": { "x": 0, "y": 0, "width": 3400, "height": 400 }
+      },
+      {
+        "type": "sunbeams",
+        "density": 0.2,
+        "region": { "x": 0, "y": 0, "width": 3400, "height": 200 }
+      },
+      {
+        "type": "flower_petals",
+        "density": 0.1,
+        "region": { "x": 2400, "y": 200, "width": 1000, "height": 300 }
+      }
+    ]
+  },
+
+  "procedural": {
+    "backgrounds": [
+      {
+        "id": "golden_dawn_sky",
+        "layer": 0,
+        "parallaxFactor": 0.1,
+        
+        "baseColor": "#FFE4B5",
+        "gradientStops": [
+          { "color": "#FFD700", "position": 0 },
+          { "color": "#FFE4B5", "position": 0.3 },
+          { "color": "#87CEEB", "position": 1 }
+        ],
+        
+        "procedural": {
+          "sunRays": {
+            "count": 8,
+            "intensity": 0.3,
+            "angle": 45
+          }
+        }
+      }
+    ],
+    
+    "postProcess": [
+      {
+        "type": "bloom",
+        "intensity": 0.4,
+        "threshold": 0.8
+      },
+      {
+        "type": "color_grading",
+        "temperature": 0.4,
+        "contrast": 1.1,
+        "saturation": 1.2
+      }
+    ]
+  },
+
+  "credits": {
+    "showAfterCompletion": true,
+    "musicTrack": "music_credits",
+    "style": "scroll",
+    "duration": 120000
+  }
+}

@@ -1,0 +1,949 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 5,
+  "name": "Deep Cellars",
+  "location": "The Underground Passages",
+
+  "narrative": {
+    "theme": "Facing fear alone - the descent into darkness",
+    "quest": "Descend into the Depths",
+    
+    "emotionalArc": {
+      "opening": "The stairs lead down into darkness. The Great Hall's warmth fades. Cold seeps from the stones themselves.",
+      "midpoint": "Galeborn have breached the cellars. Ice spreads through ancient tunnels. Foremole Diggum knows secret ways, but time runs short.",
+      "climax": "The ceiling collapses. Water rises. Only one way out—through the ice-choked passage, alone.",
+      "resolution": "Light ahead. The Kitchen Gardens. Finn emerges, changed. You cannot unsee what lies beneath."
+    },
+
+    "storyBeats": [
+      {
+        "id": "descent_begins",
+        "moment": "Each step down takes warmth with it. The lantern light wavers. Somewhere below, ice creaks.",
+        "triggeredBy": "chapter_start",
+        "expression": "fear"
+      },
+      {
+        "id": "meeting_foremole",
+        "moment": "A shape in the darkness. Digging claws, velvet fur. Foremole Diggum. He's been waiting.",
+        "triggeredBy": "reach_foremole",
+        "expression": "relief"
+      },
+      {
+        "id": "the_breach",
+        "moment": "Ice bursts through the wall. Galeborn pour in. Diggum points to a hidden passage—go, he'll hold them!",
+        "triggeredBy": "breach_begins",
+        "expression": "determination"
+      },
+      {
+        "id": "alone_in_dark",
+        "moment": "The tunnel closes behind. Finn is alone. Only the blade's faint glow lights the way.",
+        "triggeredBy": "tunnel_sealed",
+        "expression": "fear"
+      },
+      {
+        "id": "the_collapse",
+        "moment": "The ceiling groans. Stones fall. RUN!",
+        "triggeredBy": "collapse_starts",
+        "expression": "determination"
+      },
+      {
+        "id": "rising_waters",
+        "moment": "Water floods the passage. Climb! The exit must be close—it must be!",
+        "triggeredBy": "water_rises",
+        "expression": "fear"
+      },
+      {
+        "id": "emergence",
+        "moment": "Light. Blessed light. The Kitchen Gardens. Finn pulls free of the dark, gasping, alive.",
+        "triggeredBy": "chapter_complete",
+        "expression": "relief"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 4,
+    "nextChapter": 6,
+    
+    "transitionIn": {
+      "type": "walk_in",
+      "cinematicId": null,
+      "playerSpawnPoint": { "x": 100, "y": 200 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_5_emergence",
+      "exitPoint": { "x": 4800, "y": 150 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 4 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "foremole_diggum",
+      "characterId": "foremole_diggum",
+      "name": "Foremole Diggum",
+      "role": "guide",
+      "position": { "x": 800, "y": 380 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "work",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "waiting",
+        "states": {
+          "waiting": {
+            "animation": "digging_idle",
+            "expression": "alert",
+            "canInteract": true
+          },
+          "guiding": {
+            "animation": "walking_forward",
+            "expression": "determined",
+            "canInteract": false
+          },
+          "defending": {
+            "animation": "fighting_stance",
+            "expression": "fierce",
+            "canInteract": false
+          },
+          "farewell": {
+            "animation": "salute",
+            "expression": "brave",
+            "canInteract": false
+          }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "wave_follow",
+          "finnResponse": "nod",
+          "actions": [
+            { "type": "show_toast", "value": "Diggum knows the way. Follow close." },
+            { "type": "npc_action", "target": "foremole_diggum", "value": "guiding" },
+            { "type": "start_sequence", "target": "escort_through_cellar" }
+          ]
+        }
+      ],
+      
+      "givesQuest": "quest_follow_diggum"
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_descend",
+      "name": "Descend into the Depths",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_find_diggum",
+          "description": "Find Foremole Diggum",
+          "type": "reach_location",
+          "target": "foremole_location"
+        },
+        {
+          "id": "obj_follow_diggum",
+          "description": "Follow Diggum through the cellars",
+          "type": "reach_location",
+          "target": "secret_passage"
+        },
+        {
+          "id": "obj_survive_collapse",
+          "description": "Escape the collapsing tunnel",
+          "type": "reach_location",
+          "target": "collapse_end"
+        },
+        {
+          "id": "obj_escape_water",
+          "description": "Outrun the rising water",
+          "type": "reach_location",
+          "target": "chapter_exit"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 75,
+        "achievement": "Into the Deep"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 5000,
+      "minY": 0,
+      "maxY": 500
+    },
+    
+    "biome": "dungeon",
+    "spawnPoint": { "x": 100, "y": 200 },
+    
+    "segments": [
+      {
+        "id": "entrance_stairs",
+        "startX": 0,
+        "endX": 400,
+        
+        "platforms": [
+          { "x": 0, "y": 150, "width": 100, "type": "stone", "asset": "platform_cellar_landing" },
+          { "x": 100, "y": 200, "width": 80, "type": "stone", "asset": "platform_stair" },
+          { "x": 180, "y": 250, "width": 80, "type": "stone", "asset": "platform_stair" },
+          { "x": 260, "y": 300, "width": 80, "type": "stone", "asset": "platform_stair" },
+          { "x": 340, "y": 350, "width": 60, "type": "stone", "asset": "platform_stair" },
+          { "x": 340, "y": 400, "width": 200, "type": "stone", "asset": "platform_cellar_floor" }
+        ],
+        
+        "walls": [
+          { "x": 0, "y": 0, "width": 20, "height": 150, "asset": "wall_cellar_stone" }
+        ],
+        
+        "ceilings": [
+          { "x": 0, "y": 80, "width": 400, "height": 20, "asset": "ceiling_cellar_vaulted" }
+        ]
+      },
+      {
+        "id": "wine_cellar",
+        "startX": 400,
+        "endX": 1200,
+        
+        "platforms": [
+          { "x": 400, "y": 400, "width": 800, "type": "stone", "asset": "platform_cellar_floor" },
+          { "x": 600, "y": 320, "width": 100, "type": "wood", "asset": "platform_wine_barrel_stack" },
+          { "x": 850, "y": 280, "width": 80, "type": "wood", "asset": "platform_wine_crate" },
+          { "x": 1000, "y": 350, "width": 150, "type": "stone", "asset": "platform_cellar_raised" }
+        ],
+        
+        "walls": [],
+        
+        "ceilings": [
+          { "x": 400, "y": 80, "width": 800, "height": 30, "asset": "ceiling_cellar_vaulted" }
+        ],
+        
+        "scamperZones": [
+          { "x": 600, "y": 380, "width": 100, "height": 40 }
+        ]
+      },
+      {
+        "id": "foremole_chamber",
+        "startX": 1200,
+        "endX": 1800,
+        
+        "platforms": [
+          { "x": 1200, "y": 400, "width": 600, "type": "earth", "asset": "platform_tunnel_floor" }
+        ],
+        
+        "walls": [
+          { "x": 1200, "y": 100, "width": 30, "height": 300, "asset": "wall_tunnel_support" },
+          { "x": 1770, "y": 100, "width": 30, "height": 300, "asset": "wall_tunnel_support" }
+        ],
+        
+        "ceilings": [
+          { "x": 1200, "y": 80, "width": 600, "height": 30, "asset": "ceiling_tunnel_earthen" }
+        ]
+      },
+      {
+        "id": "ice_breach_corridor",
+        "startX": 1800,
+        "endX": 2600,
+        
+        "platforms": [
+          { "x": 1800, "y": 400, "width": 800, "type": "ice", "asset": "platform_frozen_floor",
+            "properties": { "slippery": true } }
+        ],
+        
+        "walls": [
+          { "x": 2200, "y": 200, "width": 40, "height": 200, "asset": "wall_ice_breach",
+            "properties": { "breakable": true, "triggerId": "breach_begins" } }
+        ],
+        
+        "ceilings": [
+          { "x": 1800, "y": 80, "width": 800, "height": 30, "asset": "ceiling_frost_covered" }
+        ],
+        
+        "killZones": [
+          { "x": 2200, "y": 450, "width": 100 }
+        ]
+      },
+      {
+        "id": "secret_tunnel",
+        "startX": 2600,
+        "endX": 3400,
+        
+        "platforms": [
+          { "x": 2600, "y": 400, "width": 300, "type": "earth", "asset": "platform_tunnel_narrow" },
+          { "x": 2900, "y": 350, "width": 100, "type": "root", "asset": "platform_root_bridge" },
+          { "x": 3000, "y": 380, "width": 200, "type": "earth", "asset": "platform_tunnel_floor" },
+          { "x": 3200, "y": 420, "width": 200, "type": "earth", "asset": "platform_tunnel_floor" }
+        ],
+        
+        "walls": [
+          { "x": 2600, "y": 100, "width": 20, "height": 300, "asset": "wall_tunnel_narrow" }
+        ],
+        
+        "ceilings": [
+          { "x": 2600, "y": 80, "width": 800, "height": 25, "asset": "ceiling_tunnel_cramped" }
+        ],
+        
+        "scamperZones": [
+          { "x": 2700, "y": 360, "width": 150, "height": 40 },
+          { "x": 3100, "y": 400, "width": 100, "height": 30 }
+        ]
+      },
+      {
+        "id": "collapse_zone",
+        "startX": 3400,
+        "endX": 4200,
+        "tags": ["collapsing"],
+        
+        "platforms": [
+          { "x": 3400, "y": 420, "width": 800, "type": "stone", "asset": "platform_ancient_stone",
+            "properties": { "crumbling": true } }
+        ],
+        
+        "walls": [],
+        
+        "ceilings": [
+          { "x": 3400, "y": 80, "width": 800, "height": 40, "asset": "ceiling_cracking",
+            "properties": { "hazardSource": true } }
+        ]
+      },
+      {
+        "id": "rising_water_zone",
+        "startX": 4200,
+        "endX": 5000,
+        "tags": ["flooding"],
+        
+        "platforms": [
+          { "x": 4200, "y": 420, "width": 200, "type": "stone", "asset": "platform_flooded" },
+          { "x": 4400, "y": 350, "width": 100, "type": "root", "asset": "platform_root_handhold" },
+          { "x": 4500, "y": 280, "width": 120, "type": "stone", "asset": "platform_ledge" },
+          { "x": 4650, "y": 220, "width": 100, "type": "stone", "asset": "platform_ledge" },
+          { "x": 4800, "y": 160, "width": 200, "type": "stone", "asset": "platform_exit_landing" }
+        ],
+        
+        "ladders": [
+          { "x": 4550, "y": 280, "height": 70, "type": "root", "asset": "climbable_roots" }
+        ],
+        
+        "water": [
+          {
+            "region": { "x": 4200, "y": 450, "width": 800, "height": 50 },
+            "depth": "rising",
+            "current": { "direction": "up", "strength": 0.5 },
+            "warmsPlayer": false,
+            "risingRate": 2
+          }
+        ]
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_cellar", "position": { "x": 500, "y": 370 }, "type": "lantern" },
+      { "id": "checkpoint_foremole", "position": { "x": 1400, "y": 370 }, "type": "lantern", "requiresTrigger": "reach_foremole" },
+      { "id": "checkpoint_tunnel", "position": { "x": 3000, "y": 350 }, "type": "lantern", "requiresTrigger": "tunnel_sealed" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "cellar_patrol_1",
+      "enemyType": "frost_gremlin",
+      "position": { "x": 700, "y": 370 },
+      "behavior": { "type": "patrol", "patrolPath": [{ "x": 600, "y": 370 }, { "x": 900, "y": 370 }], "aggroRadius": 120 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "breach_wave_1",
+      "enemyType": "icebat",
+      "position": { "x": 2100, "y": 300 },
+      "behavior": { "type": "chase", "aggroRadius": 200 },
+      "spawnedByTrigger": "breach_begins",
+      "difficulty": "medium"
+    },
+    {
+      "id": "breach_wave_2",
+      "enemyType": "frostwolf",
+      "position": { "x": 2300, "y": 370 },
+      "behavior": { "type": "chase", "aggroRadius": 180 },
+      "spawnedByTrigger": "breach_begins",
+      "difficulty": "hard"
+    },
+    {
+      "id": "breach_wave_3",
+      "enemyType": "frostwolf",
+      "position": { "x": 2400, "y": 370 },
+      "behavior": { "type": "chase", "aggroRadius": 180 },
+      "spawnedByTrigger": "breach_begins",
+      "difficulty": "hard"
+    }
+  ],
+
+  "boss": null,
+
+  "sequences": [
+    {
+      "id": "escort_through_cellar",
+      "name": "Following Foremole",
+      "description": "Diggum leads Finn through the wine cellar to the secret passage",
+      "playerControl": "full",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "actor_gesture", "target": "foremole_diggum", "value": "wave_follow" },
+        { 
+          "type": "move_actor", 
+          "target": "foremole_diggum",
+          "value": {
+            "path": {
+              "waypoints": [
+                { "x": 800, "y": 380 },
+                { "x": 1000, "y": 380 },
+                { "x": 1200, "y": 380 },
+                { "x": 1400, "y": 380 }
+              ],
+              "navigationMode": "walk",
+              "speed": 0.7
+            },
+            "animation": "walking",
+            "usePathfinding": true
+          },
+          "async": true
+        },
+        { "type": "change_music", "target": "music_cellar_escort", "delay": 500 }
+      ]
+    },
+    {
+      "id": "breach_sequence",
+      "name": "The Ice Breach",
+      "description": "Galeborn burst through the frozen wall",
+      "playerControl": "limited",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "limited" },
+        { "type": "slow_motion", "value": 800 },
+        { "type": "camera", "value": { "type": "shake", "intensity": 0.6, "duration": 1500 } },
+        { "type": "play_sound", "target": "ice_shatter_massive" },
+        { "type": "particle_effect", "target": "ice_explosion", "value": { "x": 2200, "y": 300 } },
+        { "type": "spawn_enemies", "value": ["breach_wave_1", "breach_wave_2", "breach_wave_3"], "delay": 500 },
+        { "type": "change_music", "target": "music_combat_urgent", "delay": 200 },
+        { 
+          "type": "move_actor", 
+          "target": "foremole_diggum",
+          "value": {
+            "path": {
+              "waypoints": [{ "x": 1400, "y": 380 }, { "x": 1600, "y": 380 }],
+              "navigationMode": "run",
+              "speed": 1.2
+            },
+            "animation": "running"
+          },
+          "delay": 300
+        },
+        { "type": "actor_gesture", "target": "foremole_diggum", "value": "point_tunnel", "delay": 800 },
+        { "type": "npc_action", "target": "foremole_diggum", "value": "defending", "delay": 1000 },
+        { "type": "show_toast", "value": "Diggum points to a hidden passage—Go! He'll hold them!", "delay": 1200 },
+        { "type": "player_control", "value": "full", "delay": 1500 }
+      ]
+    },
+    {
+      "id": "tunnel_sealed_sequence",
+      "name": "Sealed In",
+      "description": "The tunnel collapses behind Finn",
+      "playerControl": "none",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "camera", "value": { "type": "shake", "intensity": 0.4, "duration": 1000 } },
+        { "type": "play_sound", "target": "tunnel_collapse" },
+        { "type": "particle_effect", "target": "dust_cloud", "value": { "x": 2600, "y": 300, "width": 100, "height": 200 } },
+        { "type": "lighting_change", "target": "very_dark", "duration": 500 },
+        { "type": "show_toast", "value": "Alone in the dark...", "delay": 1000 },
+        { "type": "particle_effect", "target": "blade_glow", "value": { "follow": "player" }, "delay": 1500 },
+        { "type": "show_toast", "value": "The Otterblade glows faintly. Forward.", "delay": 2000 },
+        { "type": "player_control", "value": "full", "delay": 2500 }
+      ]
+    },
+    {
+      "id": "collapse_chase",
+      "name": "The Collapse",
+      "type": "chase",
+      "description": "Run as the ceiling falls!",
+      
+      "trigger": { "type": "enter_region", "region": { "x": 3450, "y": 0, "width": 50, "height": 500 } },
+      
+      "hazards": [
+        {
+          "id": "falling_stones",
+          "type": "falling_debris",
+          "region": { "x": 3400, "y": 80, "width": 800, "height": 50 },
+          "spawns": [
+            { "position": { "x": 3500, "y": 100 }, "delay": 0, "damage": 20, "asset": "debris_stone_large" },
+            { "position": { "x": 3600, "y": 100 }, "delay": 300, "damage": 15, "asset": "debris_stone_medium" },
+            { "position": { "x": 3700, "y": 100 }, "delay": 500, "damage": 20, "asset": "debris_stone_large" },
+            { "position": { "x": 3750, "y": 100 }, "delay": 600, "damage": 10, "asset": "debris_stone_small" },
+            { "position": { "x": 3850, "y": 100 }, "delay": 800, "damage": 20, "asset": "debris_stone_large" },
+            { "position": { "x": 3950, "y": 100 }, "delay": 1000, "damage": 15, "asset": "debris_stone_medium" },
+            { "position": { "x": 4050, "y": 100 }, "delay": 1200, "damage": 20, "asset": "debris_stone_large" },
+            { "position": { "x": 4100, "y": 100 }, "delay": 1300, "damage": 25, "asset": "debris_stone_huge" }
+          ],
+          "pattern": "sequential",
+          "warningTime": 400,
+          "warningEffect": "dust_particles"
+        }
+      ],
+      
+      "escapePoint": { "x": 4200, "y": 400 },
+      "cameraMode": "ahead",
+      
+      "onStart": [
+        { "type": "change_music", "target": "music_chase_urgent" },
+        { "type": "show_toast", "value": "RUN!" },
+        { "type": "camera", "value": { "type": "shake", "intensity": 0.3 } }
+      ],
+      
+      "onComplete": [
+        { "type": "show_toast", "value": "Made it..." },
+        { "type": "camera", "value": { "type": "shake", "intensity": 0 } }
+      ]
+    },
+    {
+      "id": "rising_water_escape",
+      "name": "Rising Waters",
+      "type": "chase",
+      "description": "Climb before the water catches you!",
+      
+      "trigger": { "type": "enter_region", "region": { "x": 4200, "y": 350, "width": 100, "height": 100 } },
+      
+      "hazards": [
+        {
+          "id": "rising_flood",
+          "type": "rising_water",
+          "region": { "x": 4200, "y": 500, "width": 800, "height": 500 },
+          "config": {
+            "riseRate": 40,
+            "maxHeight": 400,
+            "damageOnSubmerge": 5,
+            "warmthDrainRate": 10
+          },
+          "warningTime": 1000,
+          "warningEffect": "water_rumble"
+        }
+      ],
+      
+      "escapePoint": { "x": 4850, "y": 130 },
+      "cameraMode": "wide",
+      
+      "onStart": [
+        { "type": "play_sound", "target": "water_rushing" },
+        { "type": "show_toast", "value": "Water! Climb!" },
+        { "type": "change_music", "target": "music_water_rising" }
+      ],
+      
+      "onComplete": [
+        { "type": "play_sound", "target": "gasp_relief" },
+        { "type": "change_music", "target": "music_emergence" }
+      ]
+    }
+  ],
+
+  "interactions": [
+    {
+      "id": "wall_torch_1",
+      "type": "lantern",
+      "position": { "x": 300, "y": 250 },
+      "asset": "torch_wall",
+      "activateRadius": 50,
+      "initialState": "lit",
+      "states": {
+        "lit": { "asset": "torch_wall_on", "actions": [{ "type": "restore_warmth", "value": 3 }] },
+        "extinguished": { "asset": "torch_wall_off" }
+      }
+    },
+    {
+      "id": "barrel_breakable",
+      "type": "breakable",
+      "position": { "x": 650, "y": 350 },
+      "asset": "barrel_wine",
+      "hitbox": { "width": 40, "height": 50 },
+      "health": 1,
+      "rewards": { "emberShards": 3 }
+    },
+    {
+      "id": "secret_passage_entrance",
+      "type": "door",
+      "position": { "x": 1600, "y": 350 },
+      "asset": "passage_hidden",
+      "activateRadius": 60,
+      "initialState": "hidden",
+      "states": {
+        "hidden": { "asset": "wall_tunnel", "solid": true },
+        "revealed": { "asset": "passage_entrance", "solid": false }
+      },
+      "requires": { "trigger": "diggum_reveals" }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 0, "width": 200, "height": 500 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_cellar_descent" },
+        { "type": "show_toast", "value": "The Deep Cellars" },
+        { "type": "drain_warmth", "value": 5 }
+      ]
+    },
+    {
+      "id": "reach_foremole",
+      "type": "enter_region",
+      "region": { "x": 750, "y": 300, "width": 100, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "Foremole Diggum waits in the shadows" },
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "diggum_reveals",
+      "type": "enter_region",
+      "region": { "x": 1500, "y": 300, "width": 100, "height": 150 },
+      "once": true,
+      "requires": ["reach_foremole"],
+      "actions": [
+        { "type": "actor_gesture", "target": "foremole_diggum", "value": "dig_motion" },
+        { "type": "play_sound", "target": "stone_slide" }
+      ]
+    },
+    {
+      "id": "breach_begins",
+      "type": "enter_region",
+      "region": { "x": 2000, "y": 200, "width": 100, "height": 300 },
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "breach_sequence" }
+      ]
+    },
+    {
+      "id": "enter_secret_passage",
+      "type": "enter_region",
+      "region": { "x": 2600, "y": 300, "width": 50, "height": 150 },
+      "once": true,
+      "actions": []
+    },
+    {
+      "id": "tunnel_sealed",
+      "type": "enter_region",
+      "region": { "x": 2700, "y": 300, "width": 50, "height": 150 },
+      "once": true,
+      "requires": ["enter_secret_passage"],
+      "actions": [
+        { "type": "start_sequence", "target": "tunnel_sealed_sequence" },
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "collapse_starts",
+      "type": "enter_region",
+      "region": { "x": 3450, "y": 300, "width": 50, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "collapse_chase" }
+      ]
+    },
+    {
+      "id": "water_rises",
+      "type": "enter_region",
+      "region": { "x": 4200, "y": 300, "width": 100, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "rising_water_escape" }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "enter_region",
+      "region": { "x": 4850, "y": 100, "width": 150, "height": 100 },
+      "once": true,
+      "actions": [
+        { "type": "complete_quest", "target": "quest_descend" },
+        { "type": "unlock_achievement", "target": "Out of the Dark" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_5_emergence" }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_cellar_1", "type": "ember_shard", "position": { "x": 750, "y": 290 } },
+    { "id": "shard_cellar_2", "type": "ember_shard", "position": { "x": 900, "y": 250 } },
+    { "id": "shard_tunnel_1", "type": "ember_shard", "position": { "x": 2950, "y": 320 } },
+    { "id": "shard_tunnel_2", "type": "ember_shard", "position": { "x": 3150, "y": 380 }, "hidden": true },
+    { "id": "hearthstone_cellar", "type": "hearthstone", "position": { "x": 1350, "y": 370 } },
+    { "id": "lore_mole_history", "type": "lore_fragment", "position": { "x": 1100, "y": 370 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_wine_cache",
+      "name": "The Abbot's Reserve",
+      "type": "hidden_room",
+      "entrance": { "x": 950, "y": 350, "width": 40, "height": 50 },
+      "hint": "A barrel that sounds hollow when struck",
+      "rewards": {
+        "emberShards": 20,
+        "hearthstones": 2,
+        "achievement": "Connoisseur"
+      }
+    }
+  ],
+
+  "procedural": {
+    "customBackgrounds": [
+      {
+        "id": "cellar_darkness",
+        "layer": "far",
+        "generator": "custom",
+        "config": {
+          "baseColor": "#0a0808",
+          "gradientOverlay": {
+            "type": "radial",
+            "center": "player",
+            "radius": 200,
+            "innerColor": "#1a1512",
+            "outerColor": "#050404"
+          }
+        },
+        "customInstructions": [
+          { "op": "fillRect", "args": [0, 0, "width", "height"], "style": { "fillStyle": "#0a0808" } },
+          { 
+            "op": "custom", 
+            "args": ["drawDynamicDarkness"],
+            "description": "Creates darkness that follows player, with lantern/blade light radius"
+          }
+        ]
+      }
+    ],
+    
+    "customPlatformStyles": [
+      {
+        "id": "ancient_stone_crumbling",
+        "style": "custom",
+        "baseColor": "#3d3530",
+        "accentColor": "#2a2420",
+        "weathering": 0.9,
+        "crackDensity": 0.7,
+        "customDraw": [
+          { "op": "save" },
+          { "op": "beginPath" },
+          { 
+            "op": "custom", 
+            "args": ["drawCrumblingStone"],
+            "description": "Procedural cracked stone with random fragments"
+          },
+          { "op": "fill", "style": { "fillStyle": "#3d3530" } },
+          { 
+            "op": "custom",
+            "args": ["drawCracks"],
+            "noise": {
+              "config": { "type": "simplex", "scale": 0.1, "octaves": 3 },
+              "affects": ["x", "y"],
+              "amplitude": 5
+            }
+          },
+          { "op": "stroke", "style": { "strokeStyle": "#1a1510", "lineWidth": 2 } },
+          { "op": "restore" }
+        ]
+      }
+    ],
+    
+    "customParticles": [
+      {
+        "id": "blade_glow",
+        "type": "custom",
+        "emitter": {
+          "shape": "point",
+          "position": { "x": 0, "y": -20 },
+          "attachTo": "player_weapon"
+        },
+        "particle": {
+          "count": 8,
+          "lifetime": { "min": 500, "max": 1000 },
+          "size": { "start": 3, "end": 0 },
+          "color": { "start": "#F4D03F", "end": "#8B7355" },
+          "velocity": { "x": { "min": -0.5, "max": 0.5 }, "y": { "min": -1, "max": 0 } },
+          "gravity": -0.02,
+          "fadeOut": 0.3
+        },
+        "customDraw": [
+          { "op": "beginPath" },
+          { "op": "arc", "args": ["x", "y", "size", 0, 6.28] },
+          { "op": "fill", "style": { "fillStyle": "color" } },
+          { 
+            "op": "custom",
+            "args": ["drawSoftGlow"],
+            "description": "Adds soft glow around each particle"
+          }
+        ]
+      },
+      {
+        "id": "dust_from_ceiling",
+        "type": "custom",
+        "emitter": {
+          "shape": "line",
+          "position": { "y": 80 },
+          "size": { "width": "segment_width" }
+        },
+        "particle": {
+          "count": 30,
+          "lifetime": { "min": 2000, "max": 4000 },
+          "size": { "start": 2, "end": 1 },
+          "color": { "start": "#8B7355", "end": "#5D4E37" },
+          "velocity": { "x": { "min": -0.2, "max": 0.2 }, "y": { "min": 0.3, "max": 0.8 } },
+          "gravity": 0.01
+        }
+      }
+    ],
+    
+    "customLighting": [
+      {
+        "id": "player_blade_light",
+        "type": "point",
+        "attachTo": "player",
+        "offset": { "x": 0, "y": -20 },
+        "color": "#F4D03F",
+        "intensity": 0.6,
+        "radius": 120,
+        "falloff": "quadratic",
+        "flicker": {
+          "speed": 0.05,
+          "amount": 0.15,
+          "noise": { "type": "simplex", "scale": 0.5 }
+        },
+        "castsWarmth": true,
+        "warmthRadius": 60,
+        "condition": { "flag": "tunnel_sealed", "comparison": "equals", "value": true }
+      },
+      {
+        "id": "torch_light",
+        "type": "point",
+        "color": "#FF6B35",
+        "intensity": 0.8,
+        "radius": 100,
+        "falloff": "quadratic",
+        "flicker": {
+          "speed": 0.08,
+          "amount": 0.25
+        },
+        "castsWarmth": true,
+        "warmthRadius": 80
+      }
+    ],
+    
+    "customPostProcess": [
+      {
+        "type": "vignette",
+        "intensity": 0.7,
+        "condition": { "always": true }
+      },
+      {
+        "type": "color_grade",
+        "config": {
+          "shadows": { "r": 0.1, "g": 0.05, "b": 0.15 },
+          "midtones": { "r": 0.9, "g": 0.85, "b": 0.8 },
+          "highlights": { "r": 1.0, "g": 0.95, "b": 0.85 }
+        },
+        "condition": { "always": true }
+      },
+      {
+        "type": "frost_overlay",
+        "intensity": 0.3,
+        "condition": { "warmthBelow": 30 }
+      },
+      {
+        "type": "underwater",
+        "intensity": 0.8,
+        "config": {
+          "distortion": 0.02,
+          "tint": "#1a3a4a"
+        },
+        "condition": { "inRegion": { "segment": "rising_water_zone", "belowWater": true } }
+      }
+    ]
+  },
+
+  "media": {
+    "chapterPlate": "dungeon_descent_chapter_plate",
+    "parallaxBackground": "dungeon_parallax_background",
+    "introCinematic": null,
+    "outroCinematic": "chapter_5_emergence",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_cellar_descent",
+      "tension": "music_cellar_escort",
+      "combat": "music_combat_urgent",
+      "boss": null,
+      "victory": "music_emergence",
+      "chase": "music_chase_urgent",
+      "water": "music_water_rising"
+    },
+    
+    "ambientSounds": [
+      "ambient_dripping_water",
+      "ambient_distant_rumble",
+      "ambient_wind_tunnels",
+      "ambient_ice_creaking"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#1a1510",
+      "ambientIntensity": 0.15,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "none",
+      "intensity": 0,
+      "affectsGameplay": false
+    },
+    
+    "warmthDrain": 1.0,
+    
+    "particles": [
+      {
+        "type": "dust",
+        "density": 0.5,
+        "region": { "x": 0, "y": 80, "width": 5000, "height": 350 }
+      },
+      {
+        "type": "dripping_water",
+        "density": 0.2,
+        "region": { "x": 400, "y": 80, "width": 3800, "height": 20 }
+      }
+    ]
+  }
+}

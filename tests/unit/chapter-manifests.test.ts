@@ -3,9 +3,8 @@
  * Tests comprehensive chapter manifest validation and loading
  */
 
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
-  clearChapterCache,
   getChapterBoss,
   getChapterCollectibles,
   getChapterEncounters,
@@ -18,38 +17,37 @@ import {
   getChapterSpawnPoint,
   getChapterTriggers,
   getUnlockedChapters,
-  loadAllChapterManifests,
-  loadChapterManifest,
   TOTAL_CHAPTERS,
 } from '@/game/data';
+import { getChapterManifestSync, preloadManifests } from '../../apps/web/src/ddl/loader';
 
 describe('Chapter Manifest Loaders', () => {
-  // Clear cache before each test for clean state
-  beforeEach(() => {
-    clearChapterCache();
+  // Preload all manifests before running tests
+  beforeAll(async () => {
+    await preloadManifests();
   });
 
   describe('loadChapterManifest', () => {
     it('should load chapter 0 successfully', () => {
-      const chapter = loadChapterManifest(0);
+      const chapter = getChapterManifestSync(0);
       expect(chapter).toBeDefined();
       expect(chapter.id).toBe(0);
       expect(chapter.name).toBe('The Calling');
     });
 
     it('should throw for invalid chapter ID', () => {
-      expect(() => loadChapterManifest(100)).toThrow('Chapter 100 not found');
+      expect(() => getChapterManifestSync(100)).toThrow('Invalid chapter ID');
     });
 
     it('should cache loaded chapters', () => {
-      const chapter1 = loadChapterManifest(0);
-      const chapter2 = loadChapterManifest(0);
+      const chapter1 = getChapterManifestSync(0);
+      const chapter2 = getChapterManifestSync(0);
       expect(chapter1).toBe(chapter2);
     });
 
     it('should load all 10 chapters', () => {
       for (let i = 0; i < TOTAL_CHAPTERS; i++) {
-        const chapter = loadChapterManifest(i);
+        const chapter = getChapterManifestSync(i);
         expect(chapter.id).toBe(i);
       }
     });
@@ -57,12 +55,12 @@ describe('Chapter Manifest Loaders', () => {
 
   describe('loadAllChapterManifests', () => {
     it('should return array of 10 chapters', () => {
-      const chapters = loadAllChapterManifests();
+      const chapters = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => getChapterManifestSync(i));
       expect(chapters).toHaveLength(TOTAL_CHAPTERS);
     });
 
     it('should return chapters in order', () => {
-      const chapters = loadAllChapterManifests();
+      const chapters = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => getChapterManifestSync(i));
       for (let i = 0; i < chapters.length; i++) {
         expect(chapters[i].id).toBe(i);
       }
@@ -181,8 +179,12 @@ describe('Chapter Manifest Loaders', () => {
 });
 
 describe('Chapter Manifest Structure', () => {
+  beforeAll(async () => {
+    await preloadManifests();
+  });
+
   it('should have valid narrative structure in all chapters', () => {
-    const chapters = loadAllChapterManifests();
+    const chapters = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => getChapterManifestSync(i));
     for (const chapter of chapters) {
       expect(chapter.narrative).toHaveProperty('theme');
       expect(chapter.narrative).toHaveProperty('quest');
@@ -192,7 +194,7 @@ describe('Chapter Manifest Structure', () => {
   });
 
   it('should have valid level structure in all chapters', () => {
-    const chapters = loadAllChapterManifests();
+    const chapters = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => getChapterManifestSync(i));
     for (const chapter of chapters) {
       expect(chapter.level).toHaveProperty('bounds');
       expect(chapter.level).toHaveProperty('biome');
@@ -202,7 +204,7 @@ describe('Chapter Manifest Structure', () => {
   });
 
   it('should have valid connections structure in all chapters', () => {
-    const chapters = loadAllChapterManifests();
+    const chapters = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => getChapterManifestSync(i));
     for (const chapter of chapters) {
       expect(chapter.connections).toHaveProperty('previousChapter');
       expect(chapter.connections).toHaveProperty('nextChapter');
@@ -210,7 +212,7 @@ describe('Chapter Manifest Structure', () => {
   });
 
   it('should have chapter connections form a valid chain', () => {
-    const chapters = loadAllChapterManifests();
+    const chapters = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => getChapterManifestSync(i));
 
     // Chapter 0 should have no previous
     expect(chapters[0].connections.previousChapter).toBeNull();
@@ -227,15 +229,19 @@ describe('Chapter Manifest Structure', () => {
 });
 
 describe('Chapter Content Validation', () => {
+  beforeAll(async () => {
+    await preloadManifests();
+  });
+
   it('should have first chapter as tutorial/prologue', () => {
-    const chapter0 = loadChapterManifest(0);
+    const chapter0 = getChapterManifestSync(0);
     expect(chapter0.location).toContain('Cottage');
     // Mother NPC should be present (name may vary in manifests)
     expect(chapter0.npcs?.some((npc) => npc.name.includes('Mother'))).toBe(true);
   });
 
   it('should have final chapter as victory/epilogue', () => {
-    const chapter9 = loadChapterManifest(9);
+    const chapter9 = getChapterManifestSync(9);
     expect(chapter9.name).toContain('Dawn');
     // Case-insensitive check for homecoming theme
     expect(chapter9.narrative.theme.toLowerCase()).toContain('homecoming');

@@ -1,0 +1,15 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "jsxImportSource": "solid-js",
+    "paths": {
+      "@/*": ["./*"],
+      "@game/*": ["./game/*"],
+      "@ddl/*": ["./ddl/*"],
+      "@data/*": ["./data/*"]
+    }
+  },
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}

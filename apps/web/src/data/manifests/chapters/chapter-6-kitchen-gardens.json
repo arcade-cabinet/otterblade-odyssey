@@ -1,0 +1,748 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 6,
+  "name": "Kitchen Gardens",
+  "location": "Southern Grounds",
+
+  "narrative": {
+    "theme": "Rallying the community - you are not alone",
+    "quest": "Rally the Defenders",
+    
+    "emotionalArc": {
+      "opening": "Sunlight after the cellars. The Kitchen Gardens spread before Finn—once peaceful, now a staging ground for war.",
+      "midpoint": "Colonel Clover and the Long Patrol arrive! Hares, ready for battle. But they need coordination, and the gardens must be secured.",
+      "climax": "A Galeborn counter-attack! Defending the greenhouse, protecting the food stores. Side by side with new allies.",
+      "resolution": "The gardens hold. A moment of camaraderie around a cooking fire. Tomorrow brings the final push. Tonight, we rest."
+    },
+
+    "storyBeats": [
+      {
+        "id": "emergence",
+        "moment": "Fresh air. Growing things. After the dark cellars, the gardens feel like salvation.",
+        "triggeredBy": "chapter_start",
+        "expression": "relief"
+      },
+      {
+        "id": "long_patrol_arrival",
+        "moment": "Trumpets! The Long Patrol, led by Colonel Clover. Tall, proud hares, ready for battle.",
+        "triggeredBy": "patrol_arrives",
+        "expression": "hope"
+      },
+      {
+        "id": "planning",
+        "moment": "Around the garden table, creatures gather. Mice, moles, hares, hedgehogs. All united. All looking to Finn.",
+        "triggeredBy": "war_council",
+        "expression": "determination"
+      },
+      {
+        "id": "ambush",
+        "moment": "They came through the old wall! Galeborn in the greenhouse! Protect the food stores!",
+        "triggeredBy": "ambush_begins",
+        "expression": "fear"
+      },
+      {
+        "id": "shoulder_to_shoulder",
+        "moment": "Fighting beside Colonel Clover. The hare's saber flashes. Finn's blade answers. Brothers in arms.",
+        "triggeredBy": "fighting_together",
+        "expression": "determination"
+      },
+      {
+        "id": "respite",
+        "moment": "Around the fire, stories are shared. Food is passed. Tomorrow may bring death, but tonight brings fellowship.",
+        "triggeredBy": "chapter_end",
+        "expression": "hope"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 5,
+    "nextChapter": 7,
+    
+    "transitionIn": {
+      "type": "cinematic",
+      "cinematicId": "chapter_5_emergence",
+      "playerSpawnPoint": { "x": 100, "y": 420 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_6_rally_complete",
+      "exitPoint": { "x": 4200, "y": 380 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 5 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "colonel_clover",
+      "characterId": "colonel_clover",
+      "name": "Colonel Clover",
+      "role": "ally",
+      "position": { "x": 1800, "y": 400 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 90
+      },
+      
+      "storyState": {
+        "initialState": "arriving",
+        "states": {
+          "arriving": { "animation": "salute_formal", "expression": "noble", "canInteract": false },
+          "planning": { "animation": "pointing_map", "expression": "commanding", "canInteract": true },
+          "fighting": { "animation": "saber_ready", "expression": "fierce", "canInteract": false },
+          "celebrating": { "animation": "laughing", "expression": "joy", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": "patrol_arrives",
+          "gesture": "salute_formal",
+          "finnResponse": "salute",
+          "actions": [
+            { "type": "show_toast", "value": "Colonel Clover of the Long Patrol, at your service!" },
+            { "type": "npc_action", "target": "colonel_clover", "value": "planning" }
+          ]
+        }
+      ],
+      
+      "givesQuest": "quest_secure_gardens"
+    },
+    {
+      "id": "hare_soldier_1",
+      "characterId": "npc_hare_soldier",
+      "name": "Long Patrol Soldier",
+      "role": "ally",
+      "position": { "x": 1700, "y": 400 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "patrol",
+        "patrolPath": [{ "x": 1600, "y": 400 }, { "x": 1900, "y": 400 }],
+        "interactRadius": 60
+      },
+      
+      "storyState": {
+        "initialState": "ready",
+        "states": {
+          "ready": { "animation": "standing_alert", "expression": "determined", "canInteract": true },
+          "fighting": { "animation": "combat", "expression": "fierce", "canInteract": false }
+        }
+      }
+    },
+    {
+      "id": "hare_soldier_2",
+      "characterId": "npc_hare_soldier",
+      "name": "Long Patrol Soldier",
+      "role": "ally",
+      "position": { "x": 1900, "y": 400 },
+      "facing": "left",
+      
+      "behavior": {
+        "idle": "stand",
+        "interactRadius": 60
+      },
+      
+      "storyState": {
+        "initialState": "ready",
+        "states": {
+          "ready": { "animation": "standing_alert", "expression": "determined", "canInteract": true },
+          "fighting": { "animation": "combat", "expression": "fierce", "canInteract": false }
+        }
+      }
+    },
+    {
+      "id": "gardener_mole",
+      "characterId": "npc_mole",
+      "name": "Gardener Grubble",
+      "role": "ambient",
+      "position": { "x": 600, "y": 420 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "work",
+        "interactRadius": 60
+      },
+      
+      "storyState": {
+        "initialState": "worried",
+        "states": {
+          "worried": { "animation": "wringing_paws", "expression": "concern", "canInteract": true },
+          "relieved": { "animation": "grateful", "expression": "relief", "canInteract": true }
+        }
+      },
+      
+      "interactions": [
+        {
+          "trigger": null,
+          "gesture": "point",
+          "finnResponse": "nod",
+          "actions": [
+            { "type": "show_toast", "value": "Grubble points toward the greenhouse with worry" }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_rally_defenders",
+      "name": "Rally the Defenders",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_reach_gardens",
+          "description": "Reach the Kitchen Gardens",
+          "type": "reach_location",
+          "target": "garden_center"
+        },
+        {
+          "id": "obj_meet_patrol",
+          "description": "Meet the Long Patrol",
+          "type": "interact",
+          "target": "colonel_clover"
+        },
+        {
+          "id": "obj_secure_greenhouse",
+          "description": "Secure the greenhouse",
+          "type": "defeat_enemies",
+          "count": 10
+        },
+        {
+          "id": "obj_defend_stores",
+          "description": "Defend the food stores",
+          "type": "survive_waves",
+          "count": 2
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 100,
+        "achievement": "Rally Captain"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    },
+    {
+      "id": "quest_save_seeds",
+      "name": "Save the Seeds",
+      "type": "side",
+      "giver": "gardener_mole",
+      
+      "objectives": [
+        {
+          "id": "obj_collect_seeds",
+          "description": "Collect scattered seed pouches",
+          "type": "collect_item",
+          "target": "seed_pouch",
+          "count": 5
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 25,
+        "hearthstones": 1,
+        "achievement": "Friend of the Gardens"
+      }
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 4400,
+      "minY": 0,
+      "maxY": 550
+    },
+    
+    "biome": "garden",
+    "spawnPoint": { "x": 100, "y": 420 },
+    
+    "segments": [
+      {
+        "id": "cellar_exit",
+        "startX": 0,
+        "endX": 400,
+        
+        "platforms": [
+          { "x": 0, "y": 450, "width": 400, "type": "earth", "asset": "platform_garden_path" }
+        ],
+        
+        "walls": [
+          { "x": 0, "y": 200, "width": 30, "height": 250, "asset": "wall_cellar_exit" }
+        ]
+      },
+      {
+        "id": "herb_garden",
+        "startX": 400,
+        "endX": 1200,
+        
+        "platforms": [
+          { "x": 400, "y": 450, "width": 800, "type": "earth", "asset": "platform_garden_soil" },
+          { "x": 550, "y": 380, "width": 100, "type": "wood", "asset": "platform_garden_bed" },
+          { "x": 800, "y": 350, "width": 120, "type": "wood", "asset": "platform_trellis" },
+          { "x": 1000, "y": 380, "width": 100, "type": "wood", "asset": "platform_garden_bed" }
+        ],
+        
+        "ladders": [
+          { "x": 800, "y": 350, "height": 100, "type": "vine", "asset": "climbable_trellis" }
+        ]
+      },
+      {
+        "id": "rally_point",
+        "startX": 1200,
+        "endX": 2400,
+        
+        "platforms": [
+          { "x": 1200, "y": 450, "width": 1200, "type": "cobblestone", "asset": "platform_garden_square" },
+          { "x": 1500, "y": 380, "width": 200, "type": "wood", "asset": "platform_planning_table" },
+          { "x": 2000, "y": 350, "width": 150, "type": "stone", "asset": "platform_well_base" }
+        ],
+        
+        "walls": [
+          { "x": 2100, "y": 280, "width": 50, "height": 70, "asset": "well_structure" }
+        ]
+      },
+      {
+        "id": "greenhouse",
+        "startX": 2400,
+        "endX": 3400,
+        
+        "platforms": [
+          { "x": 2400, "y": 450, "width": 1000, "type": "stone", "asset": "platform_greenhouse_floor" },
+          { "x": 2600, "y": 380, "width": 100, "type": "wood", "asset": "platform_planter" },
+          { "x": 2850, "y": 350, "width": 150, "type": "wood", "asset": "platform_shelf" },
+          { "x": 3100, "y": 380, "width": 100, "type": "wood", "asset": "platform_planter" }
+        ],
+        
+        "walls": [
+          { "x": 2400, "y": 100, "width": 30, "height": 350, "asset": "wall_greenhouse_glass" },
+          { "x": 3370, "y": 100, "width": 30, "height": 350, "asset": "wall_greenhouse_glass" }
+        ],
+        
+        "ceilings": [
+          { "x": 2400, "y": 100, "width": 1000, "height": 30, "asset": "ceiling_greenhouse_glass" }
+        ]
+      },
+      {
+        "id": "food_stores",
+        "startX": 3400,
+        "endX": 4400,
+        
+        "platforms": [
+          { "x": 3400, "y": 450, "width": 1000, "type": "stone", "asset": "platform_storage_floor" },
+          { "x": 3600, "y": 380, "width": 150, "type": "wood", "asset": "platform_barrel_stack" },
+          { "x": 3900, "y": 350, "width": 100, "type": "wood", "asset": "platform_crate_stack" },
+          { "x": 4100, "y": 400, "width": 200, "type": "stone", "asset": "platform_fire_pit" }
+        ]
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_exit", "position": { "x": 200, "y": 420 }, "type": "brazier" },
+      { "id": "checkpoint_rally", "position": { "x": 1800, "y": 420 }, "type": "brazier", "requiresTrigger": "patrol_arrives" },
+      { "id": "checkpoint_greenhouse", "position": { "x": 2900, "y": 420 }, "type": "brazier", "requiresTrigger": "greenhouse_secured" },
+      { "id": "checkpoint_fire", "position": { "x": 4100, "y": 370 }, "type": "campfire", "requiresTrigger": "stores_defended" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "garden_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 700, "y": 420 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "garden_scout_2",
+      "enemyType": "scout",
+      "position": { "x": 1000, "y": 420 },
+      "behavior": { "type": "patrol", "aggroRadius": 150 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "greenhouse_wave1_wolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 2700, "y": 420 },
+      "behavior": { "type": "chase", "aggroRadius": 180 },
+      "spawnedByTrigger": "greenhouse_ambush",
+      "difficulty": "hard"
+    },
+    {
+      "id": "greenhouse_wave1_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 2900, "y": 420 },
+      "behavior": { "type": "chase", "aggroRadius": 150 },
+      "spawnedByTrigger": "greenhouse_ambush",
+      "difficulty": "medium"
+    },
+    {
+      "id": "greenhouse_wave1_scout_2",
+      "enemyType": "scout",
+      "position": { "x": 3100, "y": 420 },
+      "behavior": { "type": "chase", "aggroRadius": 150 },
+      "spawnedByTrigger": "greenhouse_ambush",
+      "difficulty": "medium"
+    },
+    {
+      "id": "stores_wave1_wolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 3600, "y": 420 },
+      "behavior": { "type": "chase", "aggroRadius": 180 },
+      "spawnedByTrigger": "stores_attack",
+      "difficulty": "hard"
+    },
+    {
+      "id": "stores_wave1_wolf_2",
+      "enemyType": "frostwolf",
+      "position": { "x": 3800, "y": 420 },
+      "behavior": { "type": "chase", "aggroRadius": 180 },
+      "spawnedByTrigger": "stores_attack",
+      "difficulty": "hard"
+    },
+    {
+      "id": "stores_wave2_elite",
+      "enemyType": "frost_captain",
+      "position": { "x": 3700, "y": 420 },
+      "behavior": { "type": "chase", "aggroRadius": 200 },
+      "spawnedByTrigger": "stores_wave2",
+      "difficulty": "boss",
+      "isMiniboss": true
+    }
+  ],
+
+  "boss": null,
+
+  "interactions": [
+    {
+      "id": "campfire",
+      "type": "shrine",
+      "position": { "x": 4150, "y": 370 },
+      "asset": "campfire_cooking",
+      "activateRadius": 80,
+      "initialState": "unlit",
+      "states": {
+        "unlit": { "asset": "campfire_unlit" },
+        "lit": { "asset": "campfire_lit", "actions": [
+          { "type": "restore_warmth", "value": 30 },
+          { "type": "restore_health", "value": 20 }
+        ]}
+      }
+    },
+    {
+      "id": "well",
+      "type": "shrine",
+      "position": { "x": 2050, "y": 320 },
+      "asset": "well_garden",
+      "activateRadius": 60,
+      "initialState": "available",
+      "states": {
+        "available": { "asset": "well_garden", "actions": [
+          { "type": "restore_health", "value": 15 },
+          { "type": "play_sound", "target": "water_splash" }
+        ]}
+      }
+    },
+    {
+      "id": "seed_pouch_1",
+      "type": "chest",
+      "position": { "x": 600, "y": 350 },
+      "asset": "seed_pouch",
+      "activateRadius": 40,
+      "initialState": "available",
+      "states": {
+        "available": { "asset": "seed_pouch" },
+        "collected": { "asset": "empty", "actions": [{ "type": "play_sound", "target": "pickup_cloth" }] }
+      }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 0, "width": 200, "height": 550 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_garden_peaceful" },
+        { "type": "show_toast", "value": "The Kitchen Gardens" }
+      ]
+    },
+    {
+      "id": "garden_center",
+      "type": "enter_region",
+      "region": { "x": 1400, "y": 0, "width": 200, "height": 550 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The rally point" }
+      ]
+    },
+    {
+      "id": "patrol_arrives",
+      "type": "enter_region",
+      "region": { "x": 1600, "y": 300, "width": 200, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "long_patrol_arrival" },
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "war_council",
+      "type": "interact",
+      "targetId": "colonel_clover",
+      "once": true,
+      "requires": ["patrol_arrives"],
+      "actions": [
+        { "type": "show_toast", "value": "The Colonel outlines the plan" }
+      ]
+    },
+    {
+      "id": "greenhouse_ambush",
+      "type": "enter_region",
+      "region": { "x": 2600, "y": 0, "width": 100, "height": 550 },
+      "once": true,
+      "requires": ["war_council"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["greenhouse_wave1_wolf_1", "greenhouse_wave1_scout_1", "greenhouse_wave1_scout_2"] },
+        { "type": "change_music", "target": "music_garden_combat" },
+        { "type": "show_toast", "value": "Ambush in the greenhouse!" },
+        { "type": "shake_screen", "value": 0.4 }
+      ]
+    },
+    {
+      "id": "ambush_begins",
+      "type": "enter_region",
+      "region": { "x": 2600, "y": 0, "width": 100, "height": 550 },
+      "once": true,
+      "actions": []
+    },
+    {
+      "id": "greenhouse_secured",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["greenhouse_ambush"],
+      "actions": [
+        { "type": "show_toast", "value": "Greenhouse secured!" },
+        { "type": "change_music", "target": "music_garden_peaceful" },
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "stores_attack",
+      "type": "enter_region",
+      "region": { "x": 3500, "y": 0, "width": 100, "height": 550 },
+      "once": true,
+      "requires": ["greenhouse_secured"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["stores_wave1_wolf_1", "stores_wave1_wolf_2"] },
+        { "type": "change_music", "target": "music_garden_combat" },
+        { "type": "show_toast", "value": "They're after the food stores!" }
+      ]
+    },
+    {
+      "id": "stores_wave1_complete",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["stores_attack"],
+      "actions": [
+        { "type": "show_toast", "value": "Their captain approaches!" }
+      ]
+    },
+    {
+      "id": "stores_wave2",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["stores_attack"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["stores_wave2_elite"] },
+        { "type": "change_music", "target": "music_miniboss" }
+      ]
+    },
+    {
+      "id": "fighting_together",
+      "type": "enter_region",
+      "region": { "x": 3600, "y": 300, "width": 200, "height": 200 },
+      "once": true,
+      "requires": ["stores_wave2"],
+      "actions": []
+    },
+    {
+      "id": "stores_defended",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["stores_wave2"],
+      "actions": [
+        { "type": "show_toast", "value": "The stores are safe!" },
+        { "type": "change_music", "target": "music_garden_victory" },
+        { "type": "unlock_checkpoint" },
+        { "type": "npc_action", "target": "colonel_clover", "value": "celebrating" }
+      ]
+    },
+    {
+      "id": "chapter_end",
+      "type": "interact",
+      "targetId": "campfire",
+      "once": true,
+      "requires": ["stores_defended"],
+      "actions": [
+        { "type": "start_sequence", "target": "campfire_rest" }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "timer",
+      "delay": 5000,
+      "requires": ["chapter_end"],
+      "once": true,
+      "actions": [
+        { "type": "complete_quest", "target": "quest_rally_defenders" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_6_rally_complete" }
+      ]
+    }
+  ],
+
+  "sequences": [
+    {
+      "id": "long_patrol_arrival",
+      "name": "The Long Patrol Arrives",
+      "description": "Colonel Clover and the Long Patrol make their entrance",
+      "playerControl": "limited",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "limited" },
+        { "type": "play_sound", "target": "trumpet_fanfare" },
+        { "type": "change_music", "target": "music_long_patrol_theme" },
+        { "type": "camera", "value": { "type": "pan", "target": { "x": 1800, "y": 350 }, "duration": 1500 } },
+        { 
+          "type": "move_actor",
+          "target": "colonel_clover",
+          "value": {
+            "path": {
+              "waypoints": [{ "x": 2200, "y": 400 }, { "x": 1800, "y": 400 }],
+              "navigationMode": "walk",
+              "speed": 1.0
+            },
+            "animation": "marching"
+          },
+          "delay": 500
+        },
+        { "type": "actor_gesture", "target": "colonel_clover", "value": "salute_formal", "delay": 2500 },
+        { "type": "show_toast", "value": "The Long Patrol has arrived!", "delay": 3000 },
+        { "type": "camera", "value": { "type": "unlock" }, "delay": 4000 },
+        { "type": "player_control", "value": "full", "delay": 4000 }
+      ]
+    },
+    {
+      "id": "campfire_rest",
+      "name": "Rest by the Fire",
+      "description": "A moment of peace before the final push",
+      "playerControl": "none",
+      "skippable": true,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "change_music", "target": "music_campfire" },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.2, "duration": 1000 } },
+        { "type": "lighting_change", "target": "firelight", "duration": 1000 },
+        { "type": "particle_effect", "target": "ember_motes", "value": { "x": 4150, "y": 350, "density": 0.8 } },
+        { "type": "show_toast", "value": "Tomorrow, we march on the Bell Tower.", "delay": 2000 },
+        { "type": "show_toast", "value": "Tonight, we rest.", "delay": 4000 },
+        { "type": "restore_warmth", "value": 100, "delay": 3000 },
+        { "type": "restore_health", "value": 100, "delay": 3000 }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_herb_1", "type": "ember_shard", "position": { "x": 580, "y": 350 } },
+    { "id": "shard_herb_2", "type": "ember_shard", "position": { "x": 850, "y": 320 } },
+    { "id": "shard_rally_1", "type": "ember_shard", "position": { "x": 1650, "y": 350 } },
+    { "id": "shard_greenhouse_1", "type": "ember_shard", "position": { "x": 2900, "y": 320 } },
+    { "id": "shard_stores_1", "type": "ember_shard", "position": { "x": 3650, "y": 350 } },
+    { "id": "hearthstone_garden", "type": "hearthstone", "position": { "x": 2050, "y": 290 } },
+    { "id": "lore_garden_history", "type": "lore_fragment", "position": { "x": 800, "y": 420 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_seed_vault",
+      "name": "The Old Seed Vault",
+      "type": "hidden_room",
+      "entrance": { "x": 1050, "y": 400, "width": 40, "height": 50 },
+      "hint": "A trapdoor beneath the oldest trellis, hidden by generations of growth",
+      "rewards": {
+        "emberShards": 30,
+        "hearthstones": 2,
+        "achievement": "Root Finder"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "courtyard_rally_chapter_plate",
+    "parallaxBackground": "courtyard_parallax_background",
+    "introCinematic": "chapter_5_emergence",
+    "outroCinematic": "chapter_6_rally_complete",
+    "bossIntroCinematic": null,
+    
+    "musicTracks": {
+      "exploration": "music_garden_peaceful",
+      "tension": "music_garden_tension",
+      "combat": "music_garden_combat",
+      "boss": "music_miniboss",
+      "victory": "music_garden_victory",
+      "campfire": "music_campfire",
+      "patrol": "music_long_patrol_theme"
+    },
+    
+    "ambientSounds": [
+      "ambient_birds_garden",
+      "ambient_wind_gentle",
+      "ambient_leaves_rustling"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#90EE90",
+      "ambientIntensity": 0.8,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "clear",
+      "intensity": 0,
+      "affectsGameplay": false
+    },
+    
+    "warmthDrain": 0.1,
+    
+    "particles": [
+      {
+        "type": "pollen",
+        "density": 0.3,
+        "region": { "x": 400, "y": 0, "width": 800, "height": 400 }
+      },
+      {
+        "type": "leaves",
+        "density": 0.2,
+        "region": { "x": 0, "y": 0, "width": 4400, "height": 300 }
+      }
+    ]
+  }
+}

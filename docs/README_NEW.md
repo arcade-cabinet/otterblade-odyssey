@@ -34,7 +34,7 @@ The original codebase used React Three Fiber + Rapier + TypeScript + Miniplex EC
 **New architecture priorities:**
 1. **Simple** - Proven patterns from POCs, no unnecessary complexity
 2. **Fast** - Astro for static site generation, Solid.js for reactive UI
-3. **Maintainable** - JavaScript over TypeScript, clear separation of concerns
+3. **Maintainable** - TypeScript (ES2022 target), clear separation of concerns
 4. **Deployable** - GitHub Pages ready with Astro
 5. **Procedural** - Canvas-based rendering, no static assets, brand-consistent
 
@@ -50,7 +50,7 @@ The original codebase used React Three Fiber + Rapier + TypeScript + Miniplex EC
 | **Audio** | Howler.js / Tone.js | Sound playback, spatial audio, music |
 | **Touch Controls** | nipplejs / Custom | Mobile-first touch joystick |
 | **Procedural Graphics** | Canvas 2D API | Procedural character rendering, parallax |
-| **Bundler** | esbuild | Fast JavaScript bundling |
+| **Bundler** | esbuild | Fast TypeScript bundling |
 
 ### Project Structure
 
@@ -463,9 +463,8 @@ export const useGameStore = create(
 - **Package Manager:** `pnpm` ONLY (never npm/yarn)
 - **Formatting:** Biome (`pnpm format`)
 - **Linting:** Biome (`pnpm lint`)
-- **No TypeScript** - Use JavaScript for simplicity
+- **TypeScript** - ES2022 target for modern features
 - **Procedural Graphics** - Canvas 2D, no static PNG/MP4 imports
-- **ES2022 Target** - For modern JavaScript features
 
 ### Common Mistakes to Avoid
 

@@ -6,18 +6,19 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter7Manifest from '../../game/src/data/manifests/chapters/chapter-7-bell-tower.json';
+
+test.use({
+  video: 'on',
+  timeout: 300000,
+});
 
 test.describe('Chapter 7: Bell Tower - Automated Playthrough', () => {
-  test.use({
-    video: 'on',
-    timeout: 300000,
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 7: Bell Tower');
 
+    const chapter7Manifest = await loadChapterManifest(page, 'chapter-7-bell-tower.json');
     const result = await executePlaythrough(page, {
       chapter: chapter7Manifest as any,
       maxDuration: 180000,

@@ -6,18 +6,19 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { loadChapterManifest } from '../helpers/manifest-loader';
 import { executePlaythrough } from '../../tests/factories/playthrough-factory';
-import chapter9Manifest from '../../game/src/data/manifests/chapters/chapter-9-new-dawn.json';
+
+test.use({
+  video: 'on',
+  timeout: 300000,
+});
 
 test.describe('Chapter 9: New Dawn - Automated Playthrough', () => {
-  test.use({
-    video: 'on',
-    timeout: 300000,
-  });
-
   test('should complete full level playthrough with AI', async ({ page }) => {
     console.log('Starting automated playthrough of Chapter 9: New Dawn');
 
+    const chapter9Manifest = await loadChapterManifest(page, 'chapter-9-new-dawn.json');
     const result = await executePlaythrough(page, {
       chapter: chapter9Manifest as any,
       maxDuration: 180000,
@@ -38,6 +39,7 @@ test.describe('Chapter 9: New Dawn - Automated Playthrough', () => {
     
     console.log('Validating complete game journey...');
     
+    const chapter9Manifest = await loadChapterManifest(page, 'chapter-9-new-dawn.json');
     const result = await executePlaythrough(page, {
       chapter: chapter9Manifest as any,
       maxDuration: 180000,

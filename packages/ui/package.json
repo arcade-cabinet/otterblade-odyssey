@@ -1,0 +1,37 @@
+{
+  "name": "@otterblade/ui",
+  "version": "1.0.0",
+  "description": "Shared UI components and branding for Otterblade Odyssey",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./branding": "./src/branding/index.ts",
+    "./components": "./src/components/index.ts",
+    "./tokens": "./src/tokens/index.ts"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-spring/three": "^10.0.3",
+    "@react-three/fiber": "^9.5.0",
+    "@react-three/drei": "^10.7.7",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.172.0",
+    "typescript": "5.6.3"
+  },
+  "peerDependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "three": "^0.172.0"
+  }
+}

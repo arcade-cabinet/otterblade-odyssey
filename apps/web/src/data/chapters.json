@@ -1,0 +1,122 @@
+[
+  {
+    "id": 0,
+    "name": "THE CALLING",
+    "setting": "Finn's Cottage",
+    "quest": "Answer the Call",
+    "hasBoss": false,
+    "bossName": null,
+    "assets": {
+      "chapterPlate": "prologue_village_chapter_plate.png",
+      "parallaxBg": "village_morning_parallax_background.png"
+    }
+  },
+  {
+    "id": 1,
+    "name": "RIVER PATH",
+    "setting": "Willow Banks",
+    "quest": "Reach the Gatehouse",
+    "hasBoss": false,
+    "bossName": null,
+    "assets": {
+      "chapterPlate": "abbey_approach_chapter_plate.png",
+      "parallaxBg": "abbey_exterior_parallax_background.png"
+    }
+  },
+  {
+    "id": 2,
+    "name": "THE GATEHOUSE",
+    "setting": "Northern Gate",
+    "quest": "Cross the Threshold",
+    "hasBoss": true,
+    "bossName": "Gatehouse Guardian",
+    "assets": {
+      "chapterPlate": "gatehouse_bridge_chapter_plate.png",
+      "parallaxBg": "abbey_exterior_parallax_background.png"
+    }
+  },
+  {
+    "id": 3,
+    "name": "GREAT HALL",
+    "setting": "Central Hearthhold",
+    "quest": "Take the Oath",
+    "hasBoss": true,
+    "bossName": "Hall Invader",
+    "assets": {
+      "chapterPlate": "great_hall_oath_chapter_plate.png",
+      "parallaxBg": "abbey_interior_parallax_background.png"
+    }
+  },
+  {
+    "id": 4,
+    "name": "THE ARCHIVES",
+    "setting": "Library Spire",
+    "quest": "Find the Ancient Map",
+    "hasBoss": false,
+    "bossName": null,
+    "assets": {
+      "chapterPlate": "library_map_table_chapter_plate.png",
+      "parallaxBg": "abbey_interior_parallax_background.png"
+    }
+  },
+  {
+    "id": 5,
+    "name": "DEEP CELLARS",
+    "setting": "Underground Passages",
+    "quest": "Descend into the Depths",
+    "hasBoss": true,
+    "bossName": "Cellar Keeper",
+    "assets": {
+      "chapterPlate": "dungeon_descent_chapter_plate.png",
+      "parallaxBg": "dungeon_parallax_background.png"
+    }
+  },
+  {
+    "id": 6,
+    "name": "KITCHEN GARDENS",
+    "setting": "Southern Grounds",
+    "quest": "Rally the Defenders",
+    "hasBoss": false,
+    "bossName": null,
+    "assets": {
+      "chapterPlate": "courtyard_rally_chapter_plate.png",
+      "parallaxBg": "courtyard_parallax_background.png"
+    }
+  },
+  {
+    "id": 7,
+    "name": "BELL TOWER",
+    "setting": "Highest Spire",
+    "quest": "Sound the Alarm",
+    "hasBoss": true,
+    "bossName": "Bell Tower Sentinel",
+    "assets": {
+      "chapterPlate": "rooftop_wind_chapter_plate.png",
+      "parallaxBg": "rooftops_parallax_background.png"
+    }
+  },
+  {
+    "id": 8,
+    "name": "STORM'S EDGE",
+    "setting": "Outer Ramparts",
+    "quest": "Face Zephyros",
+    "hasBoss": true,
+    "bossName": "Zephyros",
+    "assets": {
+      "chapterPlate": "final_ascent_chapter_plate.png",
+      "parallaxBg": "rooftops_parallax_background.png"
+    }
+  },
+  {
+    "id": 9,
+    "name": "NEW DAWN",
+    "setting": "The Great Hearth",
+    "quest": "The Everember Rekindled",
+    "hasBoss": false,
+    "bossName": null,
+    "assets": {
+      "chapterPlate": "epilogue_victory_chapter_plate.png",
+      "parallaxBg": "new_dawn_hall_parallax_background.png"
+    }
+  }
+]

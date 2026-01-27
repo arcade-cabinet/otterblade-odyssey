@@ -1,0 +1,787 @@
+{
+  "$schema": "../schema/chapter-schema.json",
+  "id": 8,
+  "name": "Storm's Edge",
+  "location": "Outer Ramparts",
+
+  "narrative": {
+    "theme": "Confronting the storm - the final test",
+    "quest": "Face Zephyros",
+    
+    "emotionalArc": {
+      "opening": "The bells have sounded. The defenders rally. But Zephyros approaches with the full fury of winter. This is the final stand.",
+      "midpoint": "Across the frozen ramparts, through waves of Galeborn. The cold bites deeper than ever. But Finn is not alone—allies fight beside him.",
+      "climax": "Zephyros himself descends! The Storm-Bringer, wielder of the Frozen Gale. A battle not just of blades, but of will. Of warmth against the endless cold.",
+      "resolution": "With a final strike, Zephyros falls! The storm breaks. The sun's first rays pierce the clouds. The siege is ended. Willowmere is saved."
+    },
+
+    "storyBeats": [
+      {
+        "id": "rampart_approach",
+        "moment": "The ramparts stretch before us. Ice-slicked stone. Howling wind. And beyond—the storm itself.",
+        "triggeredBy": "chapter_start",
+        "expression": "fear"
+      },
+      {
+        "id": "allies_arrive",
+        "moment": "They come from every corner of the Hearthhold. Mice, moles, hares, hedgehogs. All standing together.",
+        "triggeredBy": "allies_gathered",
+        "expression": "hope"
+      },
+      {
+        "id": "through_the_storm",
+        "moment": "Wave after wave. The cold burns. But we push forward. Every step, a victory.",
+        "triggeredBy": "midway_push",
+        "expression": "determination"
+      },
+      {
+        "id": "zephyros_descends",
+        "moment": "The sky CRACKS! He descends on wings of frost—Zephyros, the Storm-Bringer. The source of all this winter.",
+        "triggeredBy": "boss_appears",
+        "expression": "fear"
+      },
+      {
+        "id": "the_duel",
+        "moment": "The Otterblade glows with ember-light. Finn's ancestors stand with him. This ends NOW.",
+        "triggeredBy": "boss_phase2",
+        "expression": "determination"
+      },
+      {
+        "id": "victory",
+        "moment": "Zephyros FALLS! The storm breaks! The first rays of dawn pierce through—warm, golden, alive!",
+        "triggeredBy": "boss_defeated",
+        "expression": "hope"
+      }
+    ]
+  },
+
+  "connections": {
+    "previousChapter": 7,
+    "nextChapter": 9,
+    
+    "transitionIn": {
+      "type": "cinematic",
+      "cinematicId": "chapter_8_battle_begins",
+      "playerSpawnPoint": { "x": 100, "y": 450 }
+    },
+    
+    "transitionOut": {
+      "type": "cinematic",
+      "cinematicId": "chapter_8_victory",
+      "exitPoint": { "x": 3800, "y": 420 }
+    },
+    
+    "unlockRequirements": [
+      { "type": "complete_chapter", "value": 7 }
+    ]
+  },
+
+  "npcs": [
+    {
+      "id": "colonel_clover_battle",
+      "characterId": "colonel_clover",
+      "name": "Colonel Clover",
+      "role": "ally",
+      "position": { "x": 800, "y": 420 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "combat",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "fighting",
+        "states": {
+          "fighting": { "animation": "saber_combat", "expression": "fierce", "canInteract": false },
+          "supporting": { "animation": "pointing", "expression": "commanding", "canInteract": true },
+          "celebrating": { "animation": "salute_formal", "expression": "pride", "canInteract": true }
+        }
+      }
+    },
+    {
+      "id": "captain_grimclaw_battle",
+      "characterId": "captain_grimclaw",
+      "name": "Captain Grimclaw",
+      "role": "ally",
+      "position": { "x": 1800, "y": 420 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "combat",
+        "interactRadius": 80
+      },
+      
+      "storyState": {
+        "initialState": "fighting",
+        "states": {
+          "fighting": { "animation": "axe_combat", "expression": "fierce", "canInteract": false },
+          "rallying": { "animation": "roar", "expression": "determined", "canInteract": false },
+          "celebrating": { "animation": "fist_pump", "expression": "joy", "canInteract": true }
+        }
+      }
+    },
+    {
+      "id": "foremole_diggum_battle",
+      "characterId": "foremole_diggum",
+      "name": "Foremole Diggum",
+      "role": "ally",
+      "position": { "x": 2400, "y": 420 },
+      "facing": "right",
+      
+      "behavior": {
+        "idle": "combat",
+        "interactRadius": 70
+      },
+      
+      "storyState": {
+        "initialState": "fighting",
+        "states": {
+          "fighting": { "animation": "pickaxe_swing", "expression": "determined", "canInteract": false },
+          "celebrating": { "animation": "waving", "expression": "joy", "canInteract": true }
+        }
+      }
+    }
+  ],
+
+  "quests": [
+    {
+      "id": "quest_defeat_zephyros",
+      "name": "Face Zephyros",
+      "type": "main",
+      "giver": "environment",
+      
+      "objectives": [
+        {
+          "id": "obj_rally_allies",
+          "description": "Rally with the defenders",
+          "type": "reach_location",
+          "target": "rally_point"
+        },
+        {
+          "id": "obj_clear_ramparts",
+          "description": "Clear the ramparts",
+          "type": "defeat_enemies",
+          "count": 20
+        },
+        {
+          "id": "obj_reach_apex",
+          "description": "Reach the Storm's Edge",
+          "type": "reach_location",
+          "target": "boss_arena"
+        },
+        {
+          "id": "obj_defeat_zephyros",
+          "description": "Defeat Zephyros",
+          "type": "defeat_boss",
+          "target": "zephyros"
+        }
+      ],
+      
+      "rewards": {
+        "emberShards": 200,
+        "achievement": "Storm Breaker"
+      },
+      
+      "completionTrigger": "chapter_complete"
+    }
+  ],
+
+  "level": {
+    "bounds": {
+      "startX": 0,
+      "endX": 4000,
+      "minY": 0,
+      "maxY": 550
+    },
+    
+    "biome": "storm",
+    "spawnPoint": { "x": 100, "y": 450 },
+    
+    "segments": [
+      {
+        "id": "rampart_start",
+        "startX": 0,
+        "endX": 600,
+        
+        "platforms": [
+          { "x": 0, "y": 480, "width": 600, "type": "stone", "asset": "platform_rampart_frozen" }
+        ],
+        
+        "walls": [
+          { "x": 0, "y": 200, "width": 30, "height": 280, "asset": "wall_rampart_inner" }
+        ]
+      },
+      {
+        "id": "first_battlefront",
+        "startX": 600,
+        "endX": 1400,
+        
+        "platforms": [
+          { "x": 600, "y": 480, "width": 800, "type": "stone", "asset": "platform_rampart_broken" },
+          { "x": 750, "y": 400, "width": 100, "type": "stone", "asset": "platform_debris" },
+          { "x": 1000, "y": 420, "width": 120, "type": "stone", "asset": "platform_collapsed_wall" },
+          { "x": 1200, "y": 380, "width": 100, "type": "stone", "asset": "platform_siege_tower" }
+        ],
+        
+        "walls": [
+          { "x": 800, "y": 380, "width": 40, "height": 100, "asset": "wall_barricade" }
+        ]
+      },
+      {
+        "id": "rally_point",
+        "startX": 1400,
+        "endX": 2000,
+        
+        "platforms": [
+          { "x": 1400, "y": 480, "width": 600, "type": "stone", "asset": "platform_rampart_reinforced" },
+          { "x": 1550, "y": 420, "width": 150, "type": "wood", "asset": "platform_command_post" }
+        ],
+        
+        "walls": [
+          { "x": 1400, "y": 350, "width": 50, "height": 130, "asset": "wall_battle_standard" }
+        ]
+      },
+      {
+        "id": "frozen_bridge",
+        "startX": 2000,
+        "endX": 2800,
+        
+        "platforms": [
+          { "x": 2000, "y": 480, "width": 200, "type": "stone", "asset": "platform_rampart_edge" },
+          { "x": 2200, "y": 460, "width": 150, "type": "ice", "asset": "platform_ice_bridge",
+            "properties": { "slippery": true, "breakable": true } },
+          { "x": 2400, "y": 450, "width": 100, "type": "ice", "asset": "platform_ice_shard",
+            "properties": { "slippery": true } },
+          { "x": 2550, "y": 460, "width": 120, "type": "ice", "asset": "platform_ice_bridge",
+            "properties": { "slippery": true } },
+          { "x": 2700, "y": 480, "width": 100, "type": "stone", "asset": "platform_rampart_far" }
+        ],
+        
+        "killZones": [
+          { "x": 2150, "y": 550, "width": 600 }
+        ]
+      },
+      {
+        "id": "boss_arena",
+        "startX": 2800,
+        "endX": 4000,
+        
+        "platforms": [
+          { "x": 2800, "y": 480, "width": 1200, "type": "stone", "asset": "platform_arena_floor" },
+          { "x": 3000, "y": 400, "width": 80, "type": "stone", "asset": "platform_pillar_broken" },
+          { "x": 3300, "y": 380, "width": 100, "type": "stone", "asset": "platform_pillar" },
+          { "x": 3600, "y": 400, "width": 80, "type": "stone", "asset": "platform_pillar_broken" }
+        ],
+        
+        "walls": [
+          { "x": 3970, "y": 200, "width": 30, "height": 280, "asset": "wall_rampart_outer" }
+        ]
+      }
+    ],
+    
+    "checkpoints": [
+      { "id": "checkpoint_start", "position": { "x": 200, "y": 450 }, "type": "brazier" },
+      { "id": "checkpoint_rally", "position": { "x": 1600, "y": 450 }, "type": "battle_standard", "requiresTrigger": "allies_gathered" },
+      { "id": "checkpoint_bridge", "position": { "x": 2750, "y": 450 }, "type": "brazier", "requiresTrigger": "bridge_crossed" }
+    ]
+  },
+
+  "encounters": [
+    {
+      "id": "rampart_wolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 400, "y": 450 },
+      "behavior": { "type": "chase", "aggroRadius": 150 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "rampart_wolf_2",
+      "enemyType": "frostwolf",
+      "position": { "x": 550, "y": 450 },
+      "behavior": { "type": "chase", "aggroRadius": 150 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "battle_wave1_scout_1",
+      "enemyType": "scout",
+      "position": { "x": 700, "y": 450 },
+      "behavior": { "type": "chase", "aggroRadius": 130 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "battle_wave1_scout_2",
+      "enemyType": "scout",
+      "position": { "x": 850, "y": 370 },
+      "behavior": { "type": "chase", "aggroRadius": 130 },
+      "difficulty": "medium"
+    },
+    {
+      "id": "battle_wave1_wolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 1000, "y": 450 },
+      "behavior": { "type": "chase", "aggroRadius": 150 },
+      "difficulty": "hard"
+    },
+    {
+      "id": "battle_wave2_captain",
+      "enemyType": "frost_captain",
+      "position": { "x": 1100, "y": 450 },
+      "behavior": { "type": "guard", "aggroRadius": 180 },
+      "spawnedByTrigger": "first_wave_cleared",
+      "difficulty": "hard"
+    },
+    {
+      "id": "battle_wave2_wolf_1",
+      "enemyType": "frostwolf",
+      "position": { "x": 950, "y": 450 },
+      "behavior": { "type": "chase", "aggroRadius": 150 },
+      "spawnedByTrigger": "first_wave_cleared",
+      "difficulty": "medium"
+    },
+    {
+      "id": "bridge_icebat_1",
+      "enemyType": "icebat",
+      "position": { "x": 2300, "y": 400 },
+      "behavior": { "type": "patrol", "aggroRadius": 180 },
+      "difficulty": "hard"
+    },
+    {
+      "id": "bridge_icebat_2",
+      "enemyType": "icebat",
+      "position": { "x": 2500, "y": 380 },
+      "behavior": { "type": "patrol", "aggroRadius": 180 },
+      "difficulty": "hard"
+    }
+  ],
+
+  "boss": {
+    "id": "zephyros",
+    "name": "Zephyros, the Storm-Bringer",
+    "type": "final_boss",
+    "species": "arctic_fox",
+    
+    "description": "Once a noble arctic fox, corrupted by the Frozen Gale. He believes only in endless winter—preservation through frost. His tragedy is that he once sought to protect his people, but the cold consumed his heart.",
+    
+    "arenaPosition": { "x": 3400, "y": 300 },
+    
+    "stats": {
+      "health": 500,
+      "damage": 35,
+      "speed": 1.2
+    },
+    
+    "phases": [
+      {
+        "name": "The Storm's Fury",
+        "healthThreshold": 1.0,
+        "description": "Zephyros fights with ice blade and frost magic",
+        "attacks": [
+          { "id": "ice_slash", "type": "melee", "damage": 30, "warmthDrain": 15, "cooldown": 1500 },
+          { "id": "frost_wave", "type": "ranged", "damage": 20, "warmthDrain": 25, "cooldown": 4000, "aoe": true },
+          { "id": "blizzard_zone", "type": "zone", "damage": 10, "warmthDrain": 20, "duration": 5000 }
+        ],
+        "behavior": "aggressive"
+      },
+      {
+        "name": "Winter's Wrath",
+        "healthThreshold": 0.6,
+        "description": "Zephyros becomes more desperate, summoning ice storms",
+        "attacks": [
+          { "id": "ice_slash_combo", "type": "melee", "damage": 35, "warmthDrain": 20, "cooldown": 1200 },
+          { "id": "frozen_gale", "type": "ultimate", "damage": 40, "warmthDrain": 40, "cooldown": 8000 },
+          { "id": "ice_pillar_spawn", "type": "summon", "count": 2, "cooldown": 10000 }
+        ],
+        "behavior": "desperate",
+        "enrageMusic": "music_zephyros_phase2"
+      },
+      {
+        "name": "The Last Winter",
+        "healthThreshold": 0.25,
+        "description": "Zephyros unleashes everything. The Otterblade's ancestral power awakens.",
+        "attacks": [
+          { "id": "ice_slash_frenzy", "type": "melee", "damage": 40, "warmthDrain": 25, "cooldown": 800 },
+          { "id": "absolute_zero", "type": "ultimate", "damage": 50, "warmthDrain": 50, "cooldown": 12000, "stun": true },
+          { "id": "frost_nova", "type": "aoe", "damage": 25, "warmthDrain": 30, "cooldown": 6000 }
+        ],
+        "behavior": "berserk",
+        "playerBuff": {
+          "name": "Ancestral Ember",
+          "description": "The Otterblade glows with ancient warmth",
+          "damageBonus": 1.5,
+          "warmthRegen": 5
+        }
+      }
+    ],
+    
+    "weaknesses": [
+      { "type": "warmth_based_attacks", "multiplier": 1.5 },
+      { "type": "combo_finishers", "multiplier": 1.25 }
+    ],
+    
+    "defeatSequence": "zephyros_defeat",
+    
+    "lore": "Zephyros was once Zephyr, guardian of the Northern Passes. When the Frozen Gale artifact corrupted him, he became the embodiment of endless winter. Only the warmth of the Everember, channeled through the Otterblade, can truly end his curse.",
+    
+    "deathAnimation": "dissolve_into_snow",
+    "deathDialogue": null
+  },
+
+  "interactions": [
+    {
+      "id": "battle_standard",
+      "type": "shrine",
+      "position": { "x": 1450, "y": 380 },
+      "asset": "battle_standard_willowmere",
+      "activateRadius": 80,
+      "initialState": "raised",
+      "states": {
+        "raised": { "asset": "battle_standard_waving", "actions": [
+          { "type": "restore_warmth", "value": 20 },
+          { "type": "buff_allies", "value": "rally" },
+          { "type": "play_sound", "target": "horn_rallying" }
+        ]}
+      }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "chapter_start",
+      "type": "enter_region",
+      "region": { "x": 0, "y": 400, "width": 200, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "change_music", "target": "music_final_battle" },
+        { "type": "show_toast", "value": "Storm's Edge" },
+        { "type": "drain_warmth", "value": 10 }
+      ]
+    },
+    {
+      "id": "first_battle",
+      "type": "enter_region",
+      "region": { "x": 600, "y": 300, "width": 200, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "They're everywhere! Fight through!" }
+      ]
+    },
+    {
+      "id": "first_wave_cleared",
+      "type": "defeat_enemies",
+      "once": true,
+      "requires": ["first_battle"],
+      "actions": [
+        { "type": "spawn_enemies", "value": ["battle_wave2_captain", "battle_wave2_wolf_1"] },
+        { "type": "show_toast", "value": "Their captain approaches!" }
+      ]
+    },
+    {
+      "id": "allies_gathered",
+      "type": "enter_region",
+      "region": { "x": 1400, "y": 400, "width": 200, "height": 150 },
+      "once": true,
+      "requires": ["first_wave_cleared"],
+      "actions": [
+        { "type": "start_sequence", "target": "allies_rally" },
+        { "type": "unlock_checkpoint" }
+      ]
+    },
+    {
+      "id": "midway_push",
+      "type": "enter_region",
+      "region": { "x": 2000, "y": 400, "width": 200, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The bridge ahead is treacherous..." },
+        { "type": "drain_warmth", "value": 15 }
+      ]
+    },
+    {
+      "id": "bridge_crossed",
+      "type": "enter_region",
+      "region": { "x": 2700, "y": 400, "width": 150, "height": 150 },
+      "once": true,
+      "actions": [
+        { "type": "unlock_checkpoint" },
+        { "type": "show_toast", "value": "The arena awaits..." }
+      ]
+    },
+    {
+      "id": "boss_arena_entered",
+      "type": "enter_region",
+      "region": { "x": 3200, "y": 300, "width": 300, "height": 200 },
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "zephyros_appears" }
+      ]
+    },
+    {
+      "id": "boss_appears",
+      "type": "timer",
+      "delay": 4000,
+      "requires": ["boss_arena_entered"],
+      "once": true,
+      "actions": []
+    },
+    {
+      "id": "boss_phase2",
+      "type": "boss_health",
+      "targetId": "zephyros",
+      "threshold": 0.6,
+      "once": true,
+      "actions": [
+        { "type": "show_toast", "value": "The storm intensifies!" },
+        { "type": "change_music", "target": "music_zephyros_phase2" }
+      ]
+    },
+    {
+      "id": "boss_phase3",
+      "type": "boss_health",
+      "targetId": "zephyros",
+      "threshold": 0.25,
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "ancestral_power" },
+        { "type": "change_music", "target": "music_zephyros_final" }
+      ]
+    },
+    {
+      "id": "boss_defeated",
+      "type": "boss_health",
+      "targetId": "zephyros",
+      "threshold": 0,
+      "once": true,
+      "actions": [
+        { "type": "start_sequence", "target": "zephyros_defeat" }
+      ]
+    },
+    {
+      "id": "chapter_complete",
+      "type": "timer",
+      "delay": 10000,
+      "requires": ["boss_defeated"],
+      "once": true,
+      "actions": [
+        { "type": "complete_quest", "target": "quest_defeat_zephyros" },
+        { "type": "unlock_achievement", "target": "Storm Breaker" },
+        { "type": "complete_chapter" },
+        { "type": "play_cinematic", "target": "chapter_8_victory" }
+      ]
+    }
+  ],
+
+  "sequences": [
+    {
+      "id": "allies_rally",
+      "name": "The Defenders Rally",
+      "description": "All allies gather for the final push",
+      "playerControl": "limited",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "limited" },
+        { "type": "change_music", "target": "music_rally_moment" },
+        { "type": "camera", "value": { "type": "pan", "target": { "x": 1600, "y": 400 }, "duration": 1000 } },
+        { "type": "actor_gesture", "target": "colonel_clover_battle", "value": "saber_raised", "delay": 500 },
+        { "type": "actor_gesture", "target": "captain_grimclaw_battle", "value": "axe_raised", "delay": 700 },
+        { "type": "play_sound", "target": "horn_rallying", "delay": 1000 },
+        { "type": "show_toast", "value": "For Willowmere!", "delay": 1500 },
+        { "type": "restore_warmth", "value": 30, "delay": 1500 },
+        { "type": "camera", "value": { "type": "unlock" }, "delay": 3000 },
+        { "type": "player_control", "value": "full", "delay": 3000 },
+        { "type": "change_music", "target": "music_final_battle", "delay": 3000 }
+      ]
+    },
+    {
+      "id": "zephyros_appears",
+      "name": "The Storm-Bringer Descends",
+      "description": "Zephyros makes his grand entrance",
+      "playerControl": "none",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "change_music", "target": "silence" },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 0.8, "duration": 1500 } },
+        { "type": "play_sound", "target": "thunder_massive", "delay": 500 },
+        { "type": "shake_screen", "value": 0.9, "delay": 500 },
+        { "type": "lighting_change", "target": "storm_dark", "duration": 1000 },
+        { "type": "spawn_boss", "target": "zephyros", "delay": 2000 },
+        { "type": "camera", "value": { "type": "pan", "target": { "x": 3400, "y": 250 }, "duration": 1500 }, "delay": 2000 },
+        { "type": "change_music", "target": "music_zephyros_theme", "delay": 3500 },
+        { "type": "show_toast", "value": "ZEPHYROS, THE STORM-BRINGER", "delay": 3500 },
+        { "type": "camera", "value": { "type": "unlock" }, "delay": 5500 },
+        { "type": "player_control", "value": "full", "delay": 5500 }
+      ]
+    },
+    {
+      "id": "ancestral_power",
+      "name": "The Otterblade Awakens",
+      "description": "Finn's ancestors lend their power",
+      "playerControl": "limited",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "limited" },
+        { "type": "slow_motion", "value": 2000 },
+        { "type": "play_sound", "target": "ancestral_whisper" },
+        { "type": "particle_effect", "target": "ember_aura", "value": { "attached": "player" } },
+        { "type": "show_toast", "value": "The blade burns with ancestral fire!", "delay": 500 },
+        { "type": "apply_buff", "target": "player", "value": "ancestral_ember", "delay": 1000 },
+        { "type": "restore_warmth", "value": 50, "delay": 1000 },
+        { "type": "restore_health", "value": 50, "delay": 1000 },
+        { "type": "player_control", "value": "full", "delay": 2500 }
+      ]
+    },
+    {
+      "id": "zephyros_defeat",
+      "name": "The Storm Breaks",
+      "description": "Zephyros falls and the eternal winter ends",
+      "playerControl": "none",
+      "skippable": false,
+      "once": true,
+      
+      "actions": [
+        { "type": "player_control", "value": "none" },
+        { "type": "change_music", "target": "music_victory_dawn" },
+        { "type": "slow_motion", "value": 3000 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.5, "duration": 2000 } },
+        { "type": "play_sound", "target": "ice_shatter_massive" },
+        { "type": "shake_screen", "value": 1.0 },
+        { "type": "show_toast", "value": "The Storm-Bringer falls!", "delay": 1500 },
+        { "type": "particle_effect", "target": "snow_dissolve", "value": { "x": 3400, "y": 300 }, "delay": 2000 },
+        { "type": "lighting_change", "target": "dawn_breaking", "duration": 4000, "delay": 3000 },
+        { "type": "show_toast", "value": "The storm breaks... dawn rises!", "delay": 5000 },
+        { "type": "restore_warmth", "value": 100, "delay": 6000 },
+        { "type": "npc_action", "target": "colonel_clover_battle", "value": "celebrating", "delay": 7000 },
+        { "type": "npc_action", "target": "captain_grimclaw_battle", "value": "celebrating", "delay": 7200 },
+        { "type": "camera", "value": { "type": "zoom", "zoom": 1.0, "duration": 2000 }, "delay": 8000 }
+      ]
+    }
+  ],
+
+  "collectibles": [
+    { "id": "shard_rampart_1", "type": "ember_shard", "position": { "x": 300, "y": 450 } },
+    { "id": "shard_battle_1", "type": "ember_shard", "position": { "x": 900, "y": 370 } },
+    { "id": "shard_rally_1", "type": "ember_shard", "position": { "x": 1550, "y": 390 } },
+    { "id": "shard_bridge_1", "type": "ember_shard", "position": { "x": 2450, "y": 420 } },
+    { "id": "shard_arena_1", "type": "ember_shard", "position": { "x": 3100, "y": 370 } },
+    { "id": "shard_arena_2", "type": "ember_shard", "position": { "x": 3600, "y": 370 } },
+    { "id": "hearthstone_final", "type": "hearthstone", "position": { "x": 1600, "y": 420 } }
+  ],
+
+  "secrets": [
+    {
+      "id": "secret_armory",
+      "name": "The Last Armory",
+      "type": "hidden_room",
+      "entrance": { "x": 1380, "y": 420, "width": 40, "height": 60 },
+      "hint": "Behind the battle standard, a hidden cache of the finest Willowmere steel",
+      "rewards": {
+        "emberShards": 50,
+        "hearthstones": 3,
+        "achievement": "Armed to the Teeth"
+      }
+    }
+  ],
+
+  "media": {
+    "chapterPlate": "final_ascent_chapter_plate",
+    "parallaxBackground": "outer_ruins_parallax_background",
+    "introCinematic": "chapter_8_battle_begins",
+    "outroCinematic": "chapter_8_victory",
+    "bossIntroCinematic": "zephyros_appears",
+    
+    "musicTracks": {
+      "exploration": "music_storm_approach",
+      "tension": "music_final_battle",
+      "combat": "music_final_battle",
+      "boss": "music_zephyros_theme",
+      "victory": "music_victory_dawn",
+      "rally": "music_rally_moment"
+    },
+    
+    "ambientSounds": [
+      "ambient_storm_howling",
+      "ambient_battle_distant",
+      "ambient_thunder_rolling"
+    ]
+  },
+
+  "environment": {
+    "lighting": {
+      "ambientColor": "#1A1A2E",
+      "ambientIntensity": 0.3,
+      "warmthInfluence": true
+    },
+    
+    "weather": {
+      "type": "blizzard",
+      "intensity": 1.0,
+      "affectsGameplay": true
+    },
+    
+    "warmthDrain": 1.5,
+    
+    "particles": [
+      {
+        "type": "blizzard",
+        "density": 0.9,
+        "region": { "x": 0, "y": 0, "width": 4000, "height": 550 }
+      },
+      {
+        "type": "lightning",
+        "density": 0.1,
+        "region": { "x": 2800, "y": 0, "width": 1200, "height": 300 }
+      }
+    ]
+  },
+
+  "procedural": {
+    "backgrounds": [
+      {
+        "id": "storm_sky",
+        "layer": 0,
+        "parallaxFactor": 0.1,
+        
+        "baseColor": "#1A1A2E",
+        "gradientStops": [
+          { "color": "#2D3748", "position": 0 },
+          { "color": "#1A1A2E", "position": 0.5 },
+          { "color": "#0D0D1A", "position": 1 }
+        ],
+        
+        "procedural": {
+          "lightning": {
+            "frequency": 0.05,
+            "brightness": 2.0,
+            "duration": 200
+          },
+          "clouds": {
+            "density": 0.8,
+            "speed": 0.3,
+            "darkness": 0.9
+          }
+        }
+      }
+    ],
+    
+    "postProcess": [
+      {
+        "type": "vignette",
+        "intensity": 0.6,
+        "color": "#000022"
+      },
+      {
+        "type": "color_grading",
+        "temperature": -0.3,
+        "contrast": 1.2,
+        "saturation": 0.8
+      }
+    ]
+  }
+}
