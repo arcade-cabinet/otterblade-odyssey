@@ -18,7 +18,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/rapier": "^2.2.0",
-    "astro": "^5.16.6",
+    "astro": "^5.18.1",
     "clsx": "^2.1.1",
     "howler": "^2.2.4",
     "nipplejs": "^0.10.2",
